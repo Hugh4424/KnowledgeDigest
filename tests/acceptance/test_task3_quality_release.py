@@ -38,6 +38,10 @@ from knowledge_digest.reader_quality import (
 
 
 FIXTURE = Path(__file__).parents[1] / "fixtures" / "task3_full_release" / "release-cases.json"
+
+
+def _current_confirmation_time() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 _FIXTURE_PAGE = """---
 description: A complete fixture page.
 sources:
@@ -452,12 +456,12 @@ def test_summary_contains_every_machine_decision_field_without_manual_content_tr
 def test_summary_confirmation_is_bound_to_run_and_hash_and_warnings_are_allowed() -> None:
     summary = _summary(warnings=["KNOWN_WARNING"])
     summary_hash = summary["summary_sha256"]
-    confirmation = SummaryConfirmation("run-task3-fixture", summary_hash, "human:test", "2026-08-13T00:00:00Z")
+    confirmation = SummaryConfirmation("run-task3-fixture", summary_hash, "human:test", _current_confirmation_time())
     assert validate_summary_confirmation(confirmation, summary=summary) is True
     assert release_decision(summary, confirmation) == "released"
-    assert release_decision(summary, SummaryConfirmation("other-run", summary_hash, "human:test", "2026-08-13T00:00:00Z")) == "not_released"
-    assert release_decision(summary, SummaryConfirmation("run-task3-fixture", "0" * 64, "human:test", "2026-08-13T00:00:00Z")) == "not_released"
-    assert release_decision(summary, SummaryConfirmation("run-task3-fixture", summary_hash, "agent:auto", "2026-08-13T00:00:00Z")) == "not_released"
+    assert release_decision(summary, SummaryConfirmation("other-run", summary_hash, "human:test", _current_confirmation_time())) == "not_released"
+    assert release_decision(summary, SummaryConfirmation("run-task3-fixture", "0" * 64, "human:test", _current_confirmation_time())) == "not_released"
+    assert release_decision(summary, SummaryConfirmation("run-task3-fixture", summary_hash, "agent:auto", _current_confirmation_time())) == "not_released"
 
 
 def test_summary_confirmation_rejects_missing_timezone_old_and_future_timestamps() -> None:
@@ -486,7 +490,7 @@ def test_summary_confirmation_rejects_missing_timezone_old_and_future_timestamps
 def test_hard_failure_unknown_incomplete_offline_or_unprotected_old_package_cannot_release(mutation) -> None:
     summary = _summary()
     mutation(summary)
-    confirmation = SummaryConfirmation("run-task3-fixture", summary["summary_sha256"], "human:test", "2026-08-13T00:00:00Z")
+    confirmation = SummaryConfirmation("run-task3-fixture", summary["summary_sha256"], "human:test", _current_confirmation_time())
     assert release_decision(summary, confirmation) == "not_released"
 
 
@@ -704,7 +708,7 @@ def _prepared_release(tmp_path: Path, *, old_package_protected: bool = True, for
         "binding": {"run_id": "run-task3-fixture", "bundle_hash": bundle_tree_hash(candidate / "bundle")},
     }
     prepared = prepare_full_release(FullReleaseEvidence("run-task3-fixture", snapshot, quality, delivery, "semantic", candidate, formal, old_package_protected, comparison, manifest))
-    confirmation = SummaryConfirmation(prepared.summary["run_id"], prepared.summary_sha256, "human:test", "2026-08-13T00:00:00Z", summary_file_sha256=prepared.summary_file_sha256)
+    confirmation = SummaryConfirmation(prepared.summary["run_id"], prepared.summary_sha256, "human:test", _current_confirmation_time(), summary_file_sha256=prepared.summary_file_sha256)
     return prepared, confirmation, candidate, formal
 
 

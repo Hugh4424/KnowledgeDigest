@@ -1,7 +1,9 @@
-"""Thin Task3 execution order and Closeout handoff.
+"""Thin Task3 execution order and raw Reader candidate handoff.
 
 This module only coordinates already-owned seams.  It does not compile pages,
 score quality, decide comparison values, or invent a second release state.
+The ``--raw-input`` adapter delegates compilation to ``reader_compiler`` and
+returns a candidate; it does not bypass the existing release confirmation.
 """
 
 from __future__ import annotations
@@ -173,11 +175,23 @@ def main() -> int:
     import argparse
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--steps-json", type=Path, required=True)
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--steps-json", type=Path)
+    mode.add_argument("--raw-input", type=Path, help="compile a reader-first candidate from raw source files")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--semantic-candidate", type=Path)
     parser.add_argument("--risk-items-json", type=Path)
     parser.add_argument("--deferred-items-json", type=Path)
     args = parser.parse_args()
+
+    if args.raw_input is not None:
+        from knowledge_digest.reader_compiler import compile_reader_bundle
+
+        result = compile_reader_bundle(args.raw_input, args.output, semantic_candidate=args.semantic_candidate)
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+        # Candidate generation is a successful execution even though the
+        # existing Task3 release boundary correctly remains not_released.
+        return 0 if result["quality"]["status"] == "passed" else 1
 
     def load_items(path: Path | None) -> list[Mapping[str, Any]]:
         if path is None:

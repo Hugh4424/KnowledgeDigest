@@ -34,6 +34,12 @@
 
 **Reader Bundle**：把 Reader Package 升级为 OKF v0.2-compatible profile 后的可读交付形态（Task 2-A 起），布局见 PRD §6.8：`README.md → Home.md → 根 index.md → 根 log.md → products/<product>/...`；`Home.md`、Reader `README.md`、`references/sources.md` 是豁免文件，不是 concept，不放 concept frontmatter；来源投影路径是 `references/sources.md`，旧 `indexes/sources.md` 属旧 Reader Package 布局，不迁移、不重写；包级 `digest_release_status` 只在 manifest，不写入 concept 页。
 
+**Raw Reader candidate**：Task 3 真实裸目录演练的候选编译模式。它把输入顶层目录映射为产品，把来源保留在 `products/<product>/modules/<module>/knowledge/`，并把指纹、映射原因和完整来源清单放进同级 `audit/`；没有可靠产品归属的来源进入 `unclassified/general`，不静默丢失。该模式只生成 `candidate/not_released`，不能替代既有机器门、汇总确认或正式发布回读；语义候选与保真整理的数量必须分开报告。
+
+Raw Reader 编译对空内容只写 Audit 失败，不生成“暂无正文”占位页；语义候选还要通过可执行代码的确定性保真检查，失败时回退保真正文并把事实损失写入 Audit，质量代理按实际通过比例扣分。表格、链接、版本历史和普通叙述允许被语义候选重新组织。
+
+**受控语义候选编译**：`scripts/task3_semantic_compile.py` 按固定小批量调用批准的 `qwen3.6`，每批只请求一次，失败不自动重放，逐批输出进度并把失败来源写入 `audit/semantic-manifest.json`。它只生成可供 Raw Reader candidate 消费的语义候选，不直接发布；凭据只能通过 `KD_LLM_API_KEY`、`KD_LLM_BASE_URL`、`KD_LLM_MODEL` 环境变量传入。
+
 **Audit/Archive Package**：用于审计、恢复和排查的交付包，包含 input manifest、source snapshot、Claim、Evidence、原文归档、失败原因、运行报告和配置/provider hash。它不作为日常阅读入口。
 
 **页级发布状态**：页级只允许 `published` 或 `degraded`。`published` 表示通过机器门，可以进入候选 Reader Package；`degraded` 表示失败、冲突、缺证据或人工修改冲突，不进入正式导航。
