@@ -8,70 +8,70 @@
       "query": "GoInsight 里怎么创建设备报告？",
       "target_topic": "创建设备报告",
       "source_file": "GoInsight/创建设备报告.md",
-      "target_slug": null
+      "target_slug": "products/goinsight/_general/chuang-jian-she-bei-bao-gao.md"
     },
     {
       "id": "QP-02",
       "query": "图表的累计计算怎么配置？",
       "target_topic": "累计计算",
       "source_file": "GoInsight/累计计算.md",
-      "target_slug": null
+      "target_slug": "products/goinsight/_general/goinsight-cumulative-calculation.md"
     },
     {
       "id": "QP-03",
       "query": "EMM 怎么通过二维码注册设备？",
       "target_topic": "创建二维码注册设备",
       "source_file": "emm for android /[AE]创建二维码注册设备.md",
-      "target_slug": null
+      "target_slug": "products/emm-for-android/_general/ae-create-qrcode-registration-device.md"
     },
     {
       "id": "QP-04",
       "query": "EMM 服务怎么定价？",
       "target_topic": "EMM服务定价",
       "source_file": "emm for android /EMM服务定价.md",
-      "target_slug": null
+      "target_slug": "products/emm-for-android/_general/emm-service-pricing.md"
     },
     {
       "id": "QP-05",
       "query": "iOS 子市场的用量在哪管理？",
       "target_topic": "子市场用量管理",
       "source_file": "emm for ios/iOS-子市场用量管理.md",
-      "target_slug": null
+      "target_slug": "products/emm-for-ios/_general/ios-zi-shi-chang-yong-liang-guan-li.md"
     },
     {
       "id": "QP-06",
       "query": "iOS 策略的安全配置有哪些项？",
       "target_topic": "策略-安全配置",
       "source_file": "emm for ios/iOS-策略-安全配置.md",
-      "target_slug": null
+      "target_slug": "products/emm-for-ios/_general/ios-policy-security-configuration.md"
     },
     {
       "id": "QP-07",
       "query": "Uptrillion 日志在哪查？",
       "target_topic": "Uptrillion日志管理",
       "source_file": "emm for ios/Uptrillion日志管理.md",
-      "target_slug": null
+      "target_slug": "products/emm-for-ios/_general/uptrillion-rizhi-guanli.md"
     },
     {
       "id": "QP-08",
       "query": "商户系统里终端怎么激活和停用？",
       "target_topic": "激活&停用终端",
       "source_file": "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md",
-      "target_slug": null
+      "target_slug": "products/merchant-system/_general/merchant-system-activate-deactivate-terminal-device-management-merchant-management-reseller-portal.md"
     },
     {
       "id": "QP-09",
       "query": "商户门户的角色权限怎么分类配置？",
       "target_topic": "权限分类",
       "source_file": "merchant system/权限分类_角色管理_MerchantPortal.md",
-      "target_slug": null
+      "target_slug": "products/merchant-system/_general/quanxian-fenlei-jiaose-guanli-merchantportal.md"
     },
     {
       "id": "QP-10",
       "query": "Apple 设备零接触注册的流程是什么？",
       "target_topic": "Apple设备零接触注册流程",
       "source_file": "merchant system/Apple设备零接触注册流程.md",
-      "target_slug": null
+      "target_slug": "products/merchant-system/_general/apple-she-bei-ling-jie-chu-zhu-ce-liu-cheng.md"
     }
   ],
   "coverage": {

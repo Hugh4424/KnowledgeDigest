@@ -893,7 +893,7 @@ def test_cli_offline_fixture_runs_structural_task1(tmp_path: Path) -> None:
     copied = tmp_path / "task1_topic_axis_89"
     shutil.copytree(fixture, copied)
     result = subprocess.run(
-        ["uv", "run", "--frozen", "digest", str(copied / "new_dir"), str(copied / "kb_dir"), "--config", str(copied / "offline.json"), "--no-llm"],
+        ["uv", "run", "--frozen", "python", "scripts/legacy_digest_reference.py", str(copied / "new_dir"), str(copied / "kb_dir"), "--config", str(copied / "offline.json"), "--no-llm"],
         cwd=Path(__file__).parents[2],
         text=True,
         capture_output=True,

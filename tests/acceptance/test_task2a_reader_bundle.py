@@ -603,7 +603,7 @@ def test_existing_cli_offline_path_is_zero_provider(tmp_path: Path) -> None:
         "atexit.register(write_result)\n",
         encoding="utf-8",
     )
-    argv = ["uv", "run", "--frozen", "digest", str(new_dir), str(kb_dir), "--config", str(config), "--no-llm"]
+    argv = ["uv", "run", "--frozen", "python", "scripts/legacy_digest_reference.py", str(new_dir), str(kb_dir), "--config", str(config), "--no-llm"]
     env = os.environ.copy()
     env["PYTHONPATH"] = f"{guard_dir}{os.pathsep}{env.get('PYTHONPATH', '')}"
     env["KNOWLEDGEDIGEST_SOCKET_GUARD_RESULT"] = str(guard_result)

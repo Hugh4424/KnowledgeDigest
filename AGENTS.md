@@ -84,6 +84,15 @@ uv run python scripts/task2_publication_comparison.py \
 
 需要语义发布时只允许使用项目配置约定的 Qwen（当前真实配置为 `qwen3.8`，`https://dashscope.in.whatspos.cn/v1`）和 `jina-embeddings`（`https://llm.paxszapp.com/v1`）；默认从用户配置 `~/.config/knowledge-digest/config.json` 读取 URL/model/key，也支持 `XDG_CONFIG_HOME`，环境变量只作兼容回退。凭据禁止写入代码、结果、报告或缓存。离线回归使用 `--no-llm` + Jaccard，不触碰任何 provider。
 
+Task9 独立验收入口：
+
+```bash
+uv run --frozen knowledge-digest-accept FROZEN_ID KB_DIR \
+  --freeze-root FREEZE_ROOT --output ACCEPTANCE_RESULT.json
+```
+
+默认验收严格按 `k3-question-generator-v1` 生成题集；当目标发布页与冻结对照页是不同物理路径时，才显式传入 `--comparison-map config/task9-comparison-mapping.v1.json`。映射必须绑定当前 freeze 的 manifest、输入/对照 tree hash 及逐文件 sha256；验收仍只读 freeze，对照活库不参与判定。映射 hash 会进入结果根记录，replay 必须再次提供同一映射。
+
 Task5 质量运行统一通过 `digest NEW_DIR KB_DIR --config ~/.config/knowledge-digest/config.json --quality-config config/task5-quality-cases-v2.json` 进入 `compiler.digest()`：同一次运行覆盖垂直切片、89 条原始资料和冻结合同中的 12 个 projection。Embedding 只做问题/场景候选路由，Qwen 负责逐源语义编译和答案页编译；缺少投影、来源、证据或页面类型时保持 `not_released`；CompanyBrain 五维比较由独立验收脚本读取已发布 Reader/Audit。
 
 正式 M402 运行必须提供质量配置，并只能由 `full` 编译路径发布；缺少质量配置仍是 `blocked`，不能退化为普通 `completed`。`source-not-documented` 的 SND certificate 和独立 verifier 不是附属审计：verifier 未 `passed` 时整包保持 `not_released`，即使五维比较暂时全部为 `KD_WIN` 也不能放行。
