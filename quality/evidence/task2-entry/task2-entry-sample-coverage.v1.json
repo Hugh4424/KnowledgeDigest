@@ -1,0 +1,86 @@
+{
+  "schema_version": "task2-entry-sample-coverage.v1",
+  "artifact_id": "task2-entry-sample-coverage-20260806",
+  "status": "verified_source_precheck",
+  "delivery_status": "not_released",
+  "provenance_mode": "recomputed_backfill",
+  "generated_by": {
+    "process": "knowledge-digest-entry-audit/1",
+    "baseline_commit": "07fcc0aa5a62af168e4ddb73cd930bb2f4abae61",
+    "source_run": "quality/evidence/task2-entry/task1-real-corpus-20260806/run-report.json"
+  },
+  "sample": {
+    "seed": "knowledge-digest-task0-v1",
+    "sample_size": 20,
+    "sample_ids": [
+      "example-merge",
+      "example-002",
+      "example-003",
+      "example-004",
+      "example-005",
+      "example-006",
+      "example-007",
+      "example-008",
+      "example-009",
+      "example-010",
+      "example-011",
+      "example-012",
+      "example-013",
+      "example-014",
+      "example-015",
+      "example-016",
+      "example-017",
+      "example-018",
+      "example-019",
+      "example-020"
+    ],
+    "source_run_sha256": "532e6ce4794beb9245b63f8d6a15617a8a8169e667814b52bc4f76ddbb063412",
+    "source_count": 89,
+    "structural_coverage": {
+      "topic_examples": 20,
+      "published_examples": 7,
+      "degraded_examples": 13,
+      "distinct_products": 2,
+      "distinct_modules": 7,
+      "multi_source_example": true,
+      "failure_or_degraded_example": true,
+      "page_type_coverage": "deferred_to_task2a_projection_and_task2b"
+    }
+  },
+  "answerability": {
+    "status": "source_evidence_precheck",
+    "derivation_rule_ref": "config/task0-question-set.v1.json#derivation_rules.sample_rule",
+    "derivation_rules_sha256": "c618baa7b537d813c6b0a6fffd275cbeab23b1636584a8c052d3e9c96a3da9e3",
+    "positive_answerable_count": null,
+    "negative_answerable_count": null,
+    "per_question_labels": "deferred_to_task2b_and_task2c",
+    "source_evidence_available": true,
+    "reader_answerability": "deferred_to_task2c",
+    "reason": "This entry gate verifies deterministic source evidence and freezes the derivation rule. It does not claim that a future Reader page answers the questions; semantic section completeness and human answerability remain Task 2-B/2-C gates."
+  },
+  "inventory_coverage": {
+    "source_inventory": "quality/evidence/task2-entry/task1-real-corpus-20260806/source-inventory.jsonl",
+    "source_inventory_sha256": "1e770ca33d865f5f3ceb0f5e8236e9daa49dda7a8f62faa97d9be7b0f1f17f52",
+    "source_count": 89,
+    "knowledge_type_counts": {"products": 89},
+    "observed_features": {
+      "table": 79,
+      "image": 61,
+      "bilingual": 88,
+      "parent_child": 89,
+      "version": 77,
+      "faq": 7,
+      "multi_source_topic": true,
+      "degraded_topic": true
+    },
+    "long_document": "not_exposed_by_current_inventory_schema"
+  },
+  "gate": {
+    "task2a_entry": "passed",
+    "task2b_body_compilation": "blocked_until_task2a_exit",
+    "blocking_reasons": [
+      "reader answerability and page-type semantic quality are intentionally deferred to Task 2-B/2-C",
+      "this artifact must not be used as a semantic reader-quality pass"
+    ]
+  }
+}

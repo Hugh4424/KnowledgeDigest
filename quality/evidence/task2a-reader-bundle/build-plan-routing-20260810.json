@@ -1,0 +1,14 @@
+{
+  "source": "test-routing-advisor/scripts/route.mjs",
+  "status": "pass",
+  "routes": {
+    "phase1": "fullstack",
+    "phase2": "fullstack",
+    "phase3": "fullstack",
+    "phase4": "fullstack",
+    "final": "fullstack"
+  },
+  "method": "fullstack-slice-testing",
+  "reason": "changed files span src/ and tests/; phase4 is not feature-tier under the route script",
+  "official_dispatch": "unavailable because WorkflowHub review-materials bundle hash mismatched"
+}

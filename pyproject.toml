@@ -7,6 +7,7 @@ name = "knowledge-digest"
 version = "0.1.0"
 description = "Local knowledge digest command-line tool"
 requires-python = ">=3.11"
+dependencies = ["PyYAML==6.0.2"]
 
 [project.scripts]
 digest = "knowledge_digest.cli:main"

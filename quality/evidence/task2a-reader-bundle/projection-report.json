@@ -1,0 +1,388 @@
+{
+  "ac08_result": "blocked",
+  "audit_ref": "audit",
+  "bundle_ref": "bundle",
+  "claim_count": 3,
+  "concept_count": 31,
+  "degraded_records": [
+    {
+      "audit_target": "audit/_digest/degraded/degraded-emm-for-android-u5168-u7ba1-u7406-u76f8-u5173-u8bbe-u5907-u914d-u7f6e-u9879-u6ce8-u91ca-u66f4-u52a8-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "df2a2dad6a90aebaef34092a548260684ab39f07ec8d88da251480cfd4142ccb",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 0,
+      "stable_id": "degraded-emm-for-android-u5168-u7ba1-u7406-u76f8-u5173-u8bbe-u5907-u914d-u7f6e-u9879-u6ce8-u91ca-u66f4-u52a8-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-emm-for-android-u96f6-u63a5-u89e6-u76f8-u5173-u6d41-u7a0b-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "6687e16e350067f9d8fce6da8563049dbf1c6e231262e4d0d26afda23a9ad6b4",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 1,
+      "stable_id": "degraded-emm-for-android-u96f6-u63a5-u89e6-u76f8-u5173-u6d41-u7a0b-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u4f4d-u7f6e-u5b57-u6bb5-u7b5b-u9009-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "32b3c01b03a44727c6a692e9b10e3ee71106abec1f90c45272cbd75c9bce32b1",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 2,
+      "stable_id": "degraded-goinsight-u4f4d-u7f6e-u5b57-u6bb5-u7b5b-u9009-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u521b-u5efa-u8bbe-u5907-u62a5-u544a-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "c1ee20845ae9abee8b130a8fe7bd3cfd7264f4a2304686fc9f9bec558e5b222e",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 3,
+      "stable_id": "degraded-goinsight-u521b-u5efa-u8bbe-u5907-u62a5-u544a-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u56fe-u8868-u7c7b-u578b-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "2fb085f12322ed8a45563aabd8172f69ca9722a99af6890f756655f9f9217ad3",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 4,
+      "stable_id": "degraded-goinsight-u56fe-u8868-u7c7b-u578b-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u5e02-u573a-u62a5-u544a-u5feb-u7167-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "fd020de7dd9ac3ea800c02723ab06089476f65257858937b713f488ec185c811",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 5,
+      "stable_id": "degraded-goinsight-u5e02-u573a-u62a5-u544a-u5feb-u7167-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u6307-u6807-u8be6-u60c5-u9875-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "1e3758853a89257fcf0b2d99c5d5f08cc95f968b7d70079c85299123a3f6fae7",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 6,
+      "stable_id": "degraded-goinsight-u6307-u6807-u8be6-u60c5-u9875-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u6536-u8d39-u5e94-u7528-u5b89-u88c5-u7edf-u8ba1-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "5234687971c2941d8de787cff01187edb9a7227e54ef7eb64608a0011908023b",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 7,
+      "stable_id": "degraded-goinsight-u6536-u8d39-u5e94-u7528-u5b89-u88c5-u7edf-u8ba1-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u6570-u636e-u5206-u6790-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "52abb4c14c9beb1f0752bb6c50a8da9bef225237fc46e76f5f9c471e87c42668",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 8,
+      "stable_id": "degraded-goinsight-u6570-u636e-u5206-u6790-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u65b0-u5efa-u8fc1-u79fb-u4efb-u52a1-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "d1e600db386a4002eee43a69fc8e94e32af8fb33ac55399bc4789da0e7f8bb28",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 9,
+      "stable_id": "degraded-goinsight-u65b0-u5efa-u8fc1-u79fb-u4efb-u52a1-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u65e5-u5fd7-u7ba1-u7406-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "370fc8f996de01d759bfc1b438992a5e5827ae57c6791b25d74aa47e524f0b1c",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 10,
+      "stable_id": "degraded-goinsight-u65e5-u5fd7-u7ba1-u7406-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u667a-u80fd-u5220-u9664-u56fe-u8868-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "80a176eb1cfb6ef10be82c7c11201ab7d39296db0d6897537ce41e07926add62",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 11,
+      "stable_id": "degraded-goinsight-u667a-u80fd-u5220-u9664-u56fe-u8868-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u667a-u80fd-u67e5-u8be2-u6587-u6863-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "23f9e16c27bf3fdd139668a3b5ea7a372f21f53dfd230bc769a77d8055b9a756",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 12,
+      "stable_id": "degraded-goinsight-u667a-u80fd-u67e5-u8be2-u6587-u6863-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u6dfb-u52a0-u5173-u8054-u6570-u636e-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "e669ce76f46b613b308ecdabf60d7ad2f96a5efc57ac4503f29e1fc553dd3ae5",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 13,
+      "stable_id": "degraded-goinsight-u6dfb-u52a0-u5173-u8054-u6570-u636e-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u6dfb-u52a0-u6307-u6807-u9875-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "66544230f10923384ed88723ab0467a86c508295597af05706b576e0241bf0d0",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 14,
+      "stable_id": "degraded-goinsight-u6dfb-u52a0-u6307-u6807-u9875-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u7d2f-u8ba1-u8ba1-u7b97-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "d30d2efca1e75c35a8e1697476e95711e6ea48810c856adc170b925150305328",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 15,
+      "stable_id": "degraded-goinsight-u7d2f-u8ba1-u8ba1-u7b97-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u8bbe-u5907-u4f4d-u7f6e-u5386-u53f2-u6570-u636e-u96c6-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "39b5bf52e177319239ebe6afb1df037163b6e567ef2ae2752bc46b3bab739cb6",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 16,
+      "stable_id": "degraded-goinsight-u8bbe-u5907-u4f4d-u7f6e-u5386-u53f2-u6570-u636e-u96c6-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-goinsight-u8fc1-u79fb-u4efb-u52a1-u5217-u8868-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "35499e746a06a158ae69b05254094decd71af6ba792a75125ee4f0ac9740871b",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 17,
+      "stable_id": "degraded-goinsight-u8fc1-u79fb-u4efb-u52a1-u5217-u8868-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-merchant-system-dashboard-merchantportal-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "61f416abeb33660ff339446ca3e54a549636c94b32a593e8890b765d02c1d54e",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 18,
+      "stable_id": "degraded-merchant-system-dashboard-merchantportal-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-merchant-system-dashboard-resellerportal-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "61f416abeb33660ff339446ca3e54a549636c94b32a593e8890b765d02c1d54e",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 19,
+      "stable_id": "degraded-merchant-system-dashboard-resellerportal-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-merchant-system-u521d-u59cb-u5316-u7b56-u7565-u9a8c-u8bc1-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "8761e96c45acffe47c170ace26bd24ec6210bc157549ff133a96b11745aa68ad",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 20,
+      "stable_id": "degraded-merchant-system-u521d-u59cb-u5316-u7b56-u7565-u9a8c-u8bc1-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-merchant-system-u5546-u6237-u7cfb-u7edf-u89c4-u8303-u8981-u6c42-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "c80c8ceef82792e3a440b195def8295c16e6be8c1ea32394e2303bb1bf498fc3",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 21,
+      "stable_id": "degraded-merchant-system-u5546-u6237-u7cfb-u7edf-u89c4-u8303-u8981-u6c42-md"
+    },
+    {
+      "audit_target": "audit/_digest/degraded/degraded-merchant-system-u5c0f-u7968-u7ade-u54c1-u5206-u6790-md.md",
+      "error_codes": [
+        "PRODUCT_ONLY_INVALID_STATUS",
+        "PRODUCT_ONLY_MISSING_OBJECT_INTENT",
+        "PRODUCT_ONLY_MISSING_PRODUCT"
+      ],
+      "input_fingerprint": "9cdaa93733041920cb09715af0feb5f62386d5931d1d178d109b79112501aeb0",
+      "reason": "PRODUCT_ONLY_INVALID_STATUS,PRODUCT_ONLY_MISSING_OBJECT_INTENT,PRODUCT_ONLY_MISSING_PRODUCT",
+      "recovery_path": "recheck TopicIndex evidence and product/module assignment",
+      "row_number": 22,
+      "stable_id": "degraded-merchant-system-u5c0f-u7968-u7ade-u54c1-u5206-u6790-md"
+    }
+  ],
+  "digest_release_status": "not_released",
+  "entry_binding": {
+    "backfill_ref": null,
+    "missing_refs": [],
+    "status": "passed"
+  },
+  "exit_manifest_ref": "reports/exit-manifest.json",
+  "input_readback": [
+    {
+      "artifact_kind": "topic-index",
+      "consumer": "reader-bundle",
+      "declared_hash": "78ab433084e782d8753d1399f5d85714a572ddaa0c1c3b7f29f535a7105b1c7c",
+      "id": "real-topic-index",
+      "observed_hash": "78ab433084e782d8753d1399f5d85714a572ddaa0c1c3b7f29f535a7105b1c7c",
+      "ref": "topic-index.json",
+      "schema_version": "2.0.0",
+      "status": "passed",
+      "version": "2.0.0"
+    },
+    {
+      "artifact_kind": "source-inventory",
+      "consumer": "reader-bundle",
+      "declared_hash": "1e770ca33d865f5f3ceb0f5e8236e9daa49dda7a8f62faa97d9be7b0f1f17f52",
+      "id": "real-source-inventory",
+      "observed_hash": "1e770ca33d865f5f3ceb0f5e8236e9daa49dda7a8f62faa97d9be7b0f1f17f52",
+      "ref": "source-inventory.jsonl",
+      "schema_version": "task1-real-corpus-verification.v1",
+      "status": "passed",
+      "version": "2026-08-06"
+    },
+    {
+      "artifact_kind": "entry-backfill",
+      "consumer": "reader-bundle",
+      "declared_hash": "567c27dd4f791a9eccfdef85b67a58e56f9b58c19b4483f5f86e5b536cb054bf",
+      "id": "entry-backfill",
+      "observed_hash": "567c27dd4f791a9eccfdef85b67a58e56f9b58c19b4483f5f86e5b536cb054bf",
+      "ref": "entry-backfill.json",
+      "schema_version": "knowledge-publication-task2-entry-backfill.v1",
+      "status": "passed",
+      "version": "2026-08-06"
+    },
+    {
+      "artifact_kind": "sample-coverage",
+      "consumer": "reader-bundle",
+      "declared_hash": "fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f",
+      "id": "sample-coverage",
+      "observed_hash": "fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f",
+      "ref": "sample-coverage.json",
+      "schema_version": "task2-entry-sample-coverage.v1",
+      "status": "passed",
+      "version": "2026-08-06"
+    },
+    {
+      "artifact_kind": "claim-history",
+      "consumer": "reader-bundle",
+      "declared_hash": "739f3d42cf5b10a6a26cefac786d60f98ec91edfcc2290af7b01a5bc95de9ca4",
+      "id": "claim-history",
+      "observed_hash": "739f3d42cf5b10a6a26cefac786d60f98ec91edfcc2290af7b01a5bc95de9ca4",
+      "ref": "claim-history.jsonl",
+      "schema_version": "task0-claim-history.v1",
+      "status": "passed",
+      "version": "2026-08-06"
+    },
+    {
+      "artifact_kind": "fixture-selection",
+      "consumer": "reader-bundle",
+      "declared_hash": "75b46692b32d562e3b9eed8fa9b4a1670e8e1aee542fa79845fb7f0f13f7a39d",
+      "id": "fixture-selection",
+      "observed_hash": "75b46692b32d562e3b9eed8fa9b4a1670e8e1aee542fa79845fb7f0f13f7a39d",
+      "ref": "fixture-selection.json",
+      "schema_version": "task2a-fixture-selection.v1",
+      "status": "passed",
+      "version": "2026-08-09"
+    }
+  ],
+  "profile": "pending-parser",
+  "projection_report_ref": "reports/projection-report.json",
+  "run_id": "run-959a3cdeb29b4043",
+  "schema_version": "reader-bundle-report.v1",
+  "source_count": 66
+}

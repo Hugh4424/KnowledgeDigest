@@ -1,0 +1,9 @@
+fixture_source: quality/evidence/task2-entry/task0-real-corpus-20260806.json
+claim_source: tests/fixtures/task2a_reader_bundle/claim-history.jsonl
+fixture_count: 3
+claim_count: 3
+oracle: ORACLE-ATTRIBUTION ORACLE-AUDIT-CLAIM-EVIDENCE ORACLE-REPLAY
+bundle_validation: passed
+footnote_to_source_fragment_to_claim_locator: closed
+source_fingerprint_and_target_path: checked
+coverage_limit: hand-selected probes; not full corpus, semantic answerability, or reader quality

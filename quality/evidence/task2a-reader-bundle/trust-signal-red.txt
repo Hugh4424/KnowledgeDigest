@@ -1,0 +1,7 @@
+Task: T009 RED
+Command: UV_CACHE_DIR=/tmp/knowledge-digest-uv-cache-task2a-trust-red uv run --frozen pytest tests/acceptance/test_task2a_reader_bundle.py -q -k 'trust_signal or status_layers'
+Exit: 1
+Result: 3 failed, 25 deselected
+Oracle: ORACLE-TRUST-SIGNAL-POSITIVE / ORACLE-TRUST-SIGNAL-NEGATIVE / ORACLE-TRUST-SIGNAL-INVALIDATION
+Target failures: generated metadata missing; machine pass remained false; mutation did not yet emit trust-signal content-hash rejection.
+Boundary: failure was in the new target assertions, not import, fixture, network, or provider setup.

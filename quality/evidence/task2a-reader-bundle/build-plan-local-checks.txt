@@ -1,0 +1,10 @@
+Check: local read-only build-plan fallback
+materials_readable=True
+task_ids_unique=True
+phase_verify_contracts=True
+trace_status=True
+plan_ref_bound=True
+spec_ref_bound=True
+plan_sha256=fe5d54ab12fcaf6b0bfee38f4f440074ddfde0670654ace1bd23333e28de8425
+tasks_sha256=047bc7045ca33d29b49804beaec3898d024e57d8cbcab9ed5de0ad7e73a9b1f1
+Note: this is a local structural check, not a WorkflowHub provider verdict.

@@ -1,0 +1,9 @@
+Task: T010 GREEN
+Focused command: UV_CACHE_DIR=/tmp/knowledge-digest-uv-cache-task2a-trust-final2 uv run --frozen pytest tests/acceptance/test_task2a_reader_bundle.py -q -k 'trust_signal or status_layers'
+Focused exit: 0
+Focused result: 7 passed, 27 deselected
+Bundle command: UV_CACHE_DIR=/tmp/knowledge-digest-uv-cache-task2a-bundle-review-fix3 uv run --frozen pytest tests/acceptance/test_task2a_reader_bundle.py -q
+Bundle exit: 0
+Bundle result: 34 passed
+Oracle: positive generated/machine-pass/two-event/audit projection; structure-only unverified/no freshness; content/event mutation fail-closed.
+Boundary: no LLM, embedding, network, CLI, release, semantic entailment, or human reader gate was added.

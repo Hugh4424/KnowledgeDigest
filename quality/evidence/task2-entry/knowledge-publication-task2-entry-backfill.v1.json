@@ -1,0 +1,112 @@
+{
+  "schema_version": "knowledge-publication-task2-entry-backfill.v1",
+  "manifest_id": "knowledge-publication-task2-entry-20260806",
+  "status": "not_released",
+  "provenance_mode": "recomputed_backfill",
+  "generated_by": {
+    "process": "knowledge-digest-entry-audit/1",
+    "baseline_commit": "07fcc0aa5a62af168e4ddb73cd930bb2f4abae61",
+    "working_tree_status_at_audit": "pre-backfill changes present; manifest is not a release receipt"
+  },
+  "input_snapshot": {
+    "source_root_id": "confluence-raw-20260806",
+    "source_count": 89,
+    "source_declarations": {
+      "path": "quality/evidence/task2-entry/task1-real-corpus-20260806/source-declarations.jsonl",
+      "sha256": "7575788c3397d3602722759c1fbe294a628633097051f56e472905420e45270f"
+    },
+    "raw_source_modified": false,
+    "baseline_reader_modified": false
+  },
+  "question_set": {
+    "path": "config/task0-question-set.v1.json",
+    "file_sha256": "8f5cb5e82c66d26d598e4aaeba71aa06db1b1cd67f9b92c122ab5ab2c70f1ac9",
+    "question_set_hash": "41080f16f2955df27b9437df72e3a95c5c437a122abc514ad3abf09e9ab9d2e7",
+    "question_set_id": "knowledge-digest-task0-v1",
+    "schema_version": "task0-question-set.v1",
+    "positive_count": 17,
+    "negative_count": 3,
+    "sample_seed": "knowledge-digest-task0-v1",
+    "derivation_rules_sha256": "c618baa7b537d813c6b0a6fffd275cbeab23b1636584a8c052d3e9c96a3da9e3",
+    "stale_reference_resolution": {
+      "status": "documented",
+      "old": "specs/task0-knowledge-publication/decision-log.md",
+      "current": "specs/archive/task0-knowledge-publication/decision-log.md"
+    }
+  },
+  "task0": {
+    "exit_manifest": {"status": "backfilled_verified_runtime", "path": "quality/evidence/task2-entry/task0-real-corpus-20260806.json"},
+    "delivery_status": "not_released",
+    "runtime_evidence": {
+      "run_id": "run-27daf44c813a474badd1cdcdebd84c47",
+      "artifact_root_id": "KnowledgeDigest-task-entry-audit-20260806/task0",
+      "report": {"path": "runs/run-27daf44c813a474badd1cdcdebd84c47/report.json", "sha256": "7ae9100cfc64b7e3975beb69ba3be3d7b2cd0150e8f98e4316a10fa33da0a98f"},
+      "source_manifest_sha256": "da4cc9c67f87f393290b99dda3006f3d0f3adba2d76afd89da19253b8c081a37",
+      "provider_calls": {"llm": 0, "embedding": 0},
+      "page_status": "published",
+      "machine_pass": true,
+      "delivery_status": "not_released",
+      "source_count": 89,
+      "formal_output_count": 125,
+      "accepted_source_count": 87,
+      "rejected_source_count": 1,
+      "duplicate_source_count": 1,
+      "wall_clock_seconds": 2.955
+    },
+    "sample_coverage": {"status": "verified_source_precheck", "path": "quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json"},
+    "missing_or_historical": [
+      "No prior repository Task0 exit manifest existed; this is a recomputed backfill.",
+      "Historical quality/tests and apply/evidence receipt paths referenced by archived Task0 records are unavailable."
+    ]
+  },
+  "task1": {
+    "exit_manifest": {"status": "backfilled_verified_control_plane", "path": "quality/evidence/task2-entry/task1-real-corpus-20260806"},
+    "verification_receipt": "quality/evidence/task2-entry/task1-real-corpus-20260806/verification-receipt.json",
+    "delivery_status": "not_released",
+    "run_id": "run-topic-axis-bd47a2e7a52700d4",
+    "source_count": 89,
+    "topic_count": 54,
+    "published_topic_count": 31,
+    "degraded_topic_count": 23,
+    "knowledge_type_registry_entry_count": 1,
+    "gazetteer_entry_count": 93,
+    "provider_boundary": "before_provider",
+    "artifacts": [
+      {"kind": "source_inventory", "path": "quality/evidence/task2-entry/task1-real-corpus-20260806/source-inventory.jsonl", "sha256": "1e770ca33d865f5f3ceb0f5e8236e9daa49dda7a8f62faa97d9be7b0f1f17f52", "available": true},
+      {"kind": "topic_plan", "path": "quality/evidence/task2-entry/task1-real-corpus-20260806/topic-plan.json", "sha256": "8b3b3ce5716751f044cf09835bd4be85956a4a77d1d8beed51491467c3db96a8", "available": true},
+      {"kind": "topic_index", "path": "quality/evidence/task2-entry/task1-real-corpus-20260806/topic-index.json", "sha256": "78ab433084e782d8753d1399f5d85714a572ddaa0c1c3b7f29f535a7105b1c7c", "available": true},
+      {"kind": "run_report", "path": "quality/evidence/task2-entry/task1-real-corpus-20260806/run-report.json", "sha256": "532e6ce4794beb9245b63f8d6a15617a8a8169e667814b52bc4f76ddbb063412", "available": true},
+      {"kind": "kb_structure", "path": "quality/evidence/task2-entry/task1-real-corpus-20260806/kb.structure.md", "sha256": "7ddaa6d58eda9cb7e1713c982938400ede4e333b017d9b5afb4a026282fe83b3", "available": true},
+      {"kind": "verification_receipt", "path": "quality/evidence/task2-entry/task1-real-corpus-20260806/verification-receipt.json", "sha256": "3a32d5a07f1a87f80e4c1bfc44432626f3391d192281e278cc45e47c340bf87a", "available": true}
+    ],
+    "historical_receipt_conflict": {
+      "status": "reconciled_by_scope",
+      "old_receipt": "quality/evidence/task1/phase-4/t28-green.json",
+      "old_claim": "candidate-only ProductGazetteer and 4 products/89 modules",
+      "fresh_observation": "93 gazetteer entries, 54 topics, 1 registry entry; current output is source-derived and not_released",
+      "reconciliation": "quality/evidence/task2-entry/task1-receipt-reconciliation.v1.json",
+      "action": "historical receipt remains immutable audit material; fresh hashed backfill is authoritative for Task 2-A control-plane projection"
+    }
+  },
+  "sample_coverage": {
+    "path": "quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json",
+    "status": "verified_source_precheck",
+    "answerability_status": "reader_quality_deferred_to_task2b_and_task2c"
+  },
+  "entry_validation": {
+    "status": "passed_for_task2a_entry",
+    "command": "uv run --frozen digest <isolated-new-dir> <isolated-kb-dir> --config <offline-config> --no-llm",
+    "exit_code": 0,
+    "rechecked_tests": {
+      "command": "uv run --frozen pytest tests/acceptance/test_task0_runtime_audit.py tests/acceptance/test_task1_topic_axis.py -q",
+      "result": "pass",
+      "semantic_reader_gate": "deferred_to_task2b_and_task2c"
+    },
+    "task2a_entry_allowed": true,
+    "task2b_body_compilation_allowed": false,
+    "blocking_reasons": [
+      "Task 2-B正文编译必须等待 Task 2-A exit。",
+      "Reader answerability is not proven by this entry precheck and remains deferred。"
+    ]
+  }
+}

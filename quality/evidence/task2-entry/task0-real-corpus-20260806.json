@@ -1,0 +1,57 @@
+{
+  "schema_version": "task0-exit-backfill.v1",
+  "artifact_id": "task0-real-corpus-20260806",
+  "status": "backfilled_not_released",
+  "provenance_mode": "recomputed_backfill",
+  "generated_by_commit": "07fcc0aa5a62af168e4ddb73cd930bb2f4abae61",
+  "artifact_root_id": "KnowledgeDigest-task-entry-audit-20260806/task0",
+  "run_id": "run-27daf44c813a474badd1cdcdebd84c47",
+  "input": {
+    "source_count": 89,
+    "source_manifest_sha256": "da4cc9c67f87f393290b99dda3006f3d0f3adba2d76afd89da19253b8c081a37",
+    "config_identity": "6734e67a9b81c98687ef9b9f9c8b5b7518732d5beeac4b84ec9775d0c8408892",
+    "raw_source_modified": false,
+    "baseline_reader_modified": false
+  },
+  "runtime_audit": {
+    "schema_version": "task0-runtime-audit.v1",
+    "backend": {"requested": "jaccard", "effective": "jaccard"},
+    "calls": {"llm": 0, "embedding": 0},
+    "fallback_used": false,
+    "budget_status": "within_budget",
+    "page_status": "published",
+    "delivery_status": "not_released",
+    "machine_pass": true,
+    "question_set": {
+      "path": "config/task0-question-set.v1.json",
+      "file_sha256": "8f5cb5e82c66d26d598e4aaeba71aa06db1b1cd67f9b92c122ab5ab2c70f1ac9",
+      "question_set_hash": "41080f16f2955df27b9437df72e3a95c5c437a122abc514ad3abf09e9ab9d2e7",
+      "positive_count": 17,
+      "negative_count": 3
+    },
+    "report_path": "runs/run-27daf44c813a474badd1cdcdebd84c47/report.json",
+    "report_sha256": "7ae9100cfc64b7e3975beb69ba3be3d7b2cd0150e8f98e4316a10fa33da0a98f"
+  },
+  "artifacts": [
+    {"path": "source-manifest.json", "sha256": "0cae72d081c1e54d1285a8f6be6117676611d642ff40838d4974d63938cf18b3"},
+    {"path": "source-snapshots.jsonl", "sha256": "378d321e0896fe613c2ed21bfcf03793b4341707847141a1b02d147c15c3723f"},
+    {"path": "source-audit-ledger.jsonl", "sha256": "d460695f8c1499b72d8df2b9d0f529a7a052112fa92bf997210ed96f6587cf33"},
+    {"path": "claim-history.jsonl", "sha256": "56440da7a9c5b2d184a650ecfe168e48bd67026ef79f1bc9e1f076d5e0feb513"},
+    {"path": "duplicates.jsonl", "sha256": "299ee8d1036aecb0899c5ab523513bbd178070ca7a4684b663898cb02105f09f"},
+    {"path": "runs/run-27daf44c813a474badd1cdcdebd84c47/structure-check.json", "sha256": "e3b5f1f98b14d2967370bb0c1d286bc20300e06ad1cfa33bbea156c626342a54"}
+  ],
+  "coverage": {
+    "source_snapshots": 89,
+    "claims": 9288,
+    "formal_outputs": 125,
+    "accepted_sources": 87,
+    "rejected_sources": 1,
+    "duplicate_sources": 1,
+    "anomaly_status": "none"
+  },
+  "limitations": [
+    "This is a new isolated no-LLM/Jaccard run, not the historical Task0 exit receipt.",
+    "It proves runtime and loss-prevention facts, not reader answerability or semantic quality.",
+    "Full evidence files are retained outside the repository under the artifact_root_id; no raw corpus is committed."
+  ]
+}
