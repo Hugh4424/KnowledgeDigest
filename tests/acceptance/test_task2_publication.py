@@ -472,8 +472,8 @@ def test_navigation_has_readme_parent_leaf_source_index_and_bounded_related_link
     assert "Home.md" in by_path
     assert "indexes/products.md" in by_path
     assert "indexes/product-capability.md" in by_path
-    assert "_digest/source-index.md" in by_path
+    assert "indexes/sources.md" in by_path
     assert "indexes/products.md" in by_path["Home.md"]["rendered_content"]
     assert "payment-api.md" in by_path["indexes/product-capability.md"]["rendered_content"]
     assert "topic-missing" not in by_path["indexes/product-capability.md"]["rendered_content"]
-    assert "## Evidence" not in by_path["_digest/source-index.md"]["rendered_content"]
+    assert "## Evidence" not in by_path["indexes/sources.md"]["rendered_content"]

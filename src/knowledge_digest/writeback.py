@@ -9,8 +9,8 @@ from pathlib import Path
 from typing import Any
 
 from .errors import ValidationError
-from .jsonl import append_jsonl, write_jsonl
-from .kb_structure import PublicationContract
+from .jsonl import append_jsonl, read_jsonl, write_jsonl
+from .kb_structure import DEFAULT_PUBLICATION_SOURCE_INDEX, PublicationContract
 from .paths import DigestPaths
 from .provenance import now_utc, retention_deadline
 
@@ -52,7 +52,7 @@ def _publication_target_kind(target: Path, publication: PublicationContract) -> 
     target_text = target.as_posix()
     if target_text == "README.md":
         return "readme", None
-    if target_text == publication.source_index_path:
+    if target_text in {publication.source_index_path, DEFAULT_PUBLICATION_SOURCE_INDEX}:
         return "source-index", None
     if target_text == publication.home_path:
         return "home", None
@@ -330,6 +330,7 @@ def _archive_page_record(
         "archive_content_path": archive_content_path.as_posix(),
         "retain_content_until": retention_deadline(timestamp),
         "content_retained": True,
+        "config_identity": page.get("config_identity"),
         "lineage": {
             "draft_id": page["draft_id"],
             "page_index": page.get("page_index", 1),
@@ -569,23 +570,10 @@ def writeback(
         aggregate["before_content"] = before or None
         aggregates.append(aggregate)
 
+    rendered_operations: list[tuple[dict[str, Any], dict[str, Any], Path, str | None]] = []
     operations: list[dict[str, Any]] = []
-    archive_records: list[dict[str, Any]] = []
-    archive_paths: list[Path] = []
     for page in aggregates:
         target = _safe_relative(str(page["target_path"]), paths.kb_dir)
-        before = page["before_content"]
-        if before is not None:
-            archive_record = _archive_page_record(
-                paths=paths,
-                archive_root=archive_root,
-                run_dir=run_dir,
-                page=page,
-                before_content=before,
-                reason=page.get("archive_reason") or "pre-write snapshot",
-            )
-            archive_records.append(archive_record)
-            archive_paths.append(paths.kb_dir / archive_record["archive_content_path"])
         operations.append(
             {
                 "draft_id": page["draft_id"],
@@ -594,28 +582,12 @@ def writeback(
                 "action": page["action"],
                 "contributors": page.get("contributors", []),
                 "status": "pending",
-                "archive_path": archive_records[-1]["archive_content_path"] if before is not None else None,
-                "archive_reason": "pre-write snapshot" if before is not None else None,
-                "archive_snapshot_sha256": sha256(before.encode("utf-8")).hexdigest() if before is not None else None,
+                "archive_path": None,
+                "archive_reason": None,
+                "archive_snapshot_sha256": None,
             }
         )
-
-    # Archive every original page, and record its lineage, before any target is
-    # overwritten. `_atomic_write` fsyncs both the file and its parent directory and
-    # `append_jsonl` fsyncs the ledger, so a failure while writing the target pages
-    # below always leaves the original content recoverable under `_archive/` *with*
-    # the record that points at it. This ordering replaces the former batch rollback.
-    for archive_path, archive_record in zip(archive_paths, archive_records):
-        if not (
-            archive_path.exists()
-            and archive_path.is_file()
-            and archive_path.read_text(encoding="utf-8") == archive_record["full_content"]
-        ):
-            _atomic_write(archive_path, str(archive_record["full_content"]))
-    write_jsonl(run_dir / "s5" / "archive-records.jsonl", archive_records)
-    append_jsonl(paths.kb_dir / archive_root / "records.jsonl", archive_records)
-    rendered_operations: list[tuple[dict[str, Any], dict[str, Any], Path, str | None]] = []
-    for page, operation in zip(aggregates, operations):
+        operation = operations[-1]
         target_path = paths.kb_dir / operation["target_path"]
         if page.get("remove_only"):
             rendered_operations.append((page, operation, target_path, None))
@@ -635,6 +607,52 @@ def writeback(
         rendered_operations.append(
             (page, operation, target_path, f"{prefix}{page['final_body']}\n\n## Provenance\n{provenance_text}\n")
         )
+
+    archive_records: list[dict[str, Any]] = []
+    archive_paths: list[Path] = []
+    existing_archive_records = read_jsonl(paths.kb_dir / archive_root / "records.jsonl")
+
+    def archive_key(record: dict[str, Any]) -> tuple[Any, ...]:
+        return (
+            record.get("page_path"),
+            record.get("content_fingerprint"),
+            record.get("config_identity"),
+            tuple(sorted(str(value) for value in record.get("source_snapshot_ref", []) if value)),
+        )
+
+    existing_archive_keys = {archive_key(record) for record in existing_archive_records}
+    for page, operation, _target_path, rendered in rendered_operations:
+        before = page["before_content"]
+        unchanged = before is not None and rendered == before
+        if before is None or (publication is not None and unchanged):
+            continue
+        archive_record = _archive_page_record(
+            paths=paths,
+            archive_root=archive_root,
+            run_dir=run_dir,
+            page=page,
+            before_content=before,
+            reason=page.get("archive_reason") or "pre-write snapshot",
+        )
+        if publication is not None and archive_key(archive_record) in existing_archive_keys:
+            continue
+        archive_records.append(archive_record)
+        archive_paths.append(paths.kb_dir / archive_record["archive_content_path"])
+        operation["archive_path"] = archive_record["archive_content_path"]
+        operation["archive_reason"] = "pre-write snapshot"
+        operation["archive_snapshot_sha256"] = archive_record["content_fingerprint"]
+        existing_archive_keys.add(archive_key(archive_record))
+
+    # Archive every changed original page before any target is overwritten.
+    for archive_path, archive_record in zip(archive_paths, archive_records):
+        if not (
+            archive_path.exists()
+            and archive_path.is_file()
+            and archive_path.read_text(encoding="utf-8") == archive_record["full_content"]
+        ):
+            _atomic_write(archive_path, str(archive_record["full_content"]))
+    write_jsonl(run_dir / "s5" / "archive-records.jsonl", archive_records)
+    append_jsonl(paths.kb_dir / archive_root / "records.jsonl", archive_records)
 
     written: list[tuple[dict[str, Any], dict[str, Any], Path]] = []
     try:

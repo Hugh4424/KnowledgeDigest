@@ -122,13 +122,9 @@ def test_ac02_missing_source_manifest_does_not_synthesize_file_uri(tmp_path: Pat
     (new_dir / "items" / "unmapped.md").write_text("No manifest source.", encoding="utf-8")
 
     result = run_digest(str(new_dir), str(kb_dir))
-    assert result.returncode == 0, result.stderr
-    run = latest_run(kb_dir)
-    snapshots = jsonl(run / "s1" / "source-snapshots.jsonl")
-    assert snapshots and snapshots[0]["validation_status"] == "failed"
-    assert snapshots[0]["source_uri"] == ""
-    assert not jsonl(run / "s1" / "raw-items.jsonl")
-    assert all(not str(row["source_uri"]).startswith("file://") for row in snapshots)
+    assert result.returncode != 0
+    assert "missing declarations" in result.stderr
+    assert not (kb_dir / "pages").exists()
 
 
 def test_ac02_failed_and_shell_sources_are_not_formal_sources(tmp_path: Path) -> None:
@@ -150,7 +146,7 @@ def test_ac02_failed_and_shell_sources_are_not_formal_sources(tmp_path: Path) ->
     assert result.returncode == 0, result.stderr
     indexed = jsonl(latest_run(kb_dir) / "s6" / "source-index.jsonl")
     assert [row["source_uri"] for row in indexed] == ["https://source.example/good"]
-    assert "https://source.example/shell" not in (kb_dir / "_digest" / "source-index.md").read_text(encoding="utf-8")
+    assert "https://source.example/shell" not in (kb_dir / "indexes" / "sources.md").read_text(encoding="utf-8")
 
 
 def _replay_fragment(source_text: str, locator: object) -> str:

@@ -537,7 +537,8 @@ def test_managed_topic_updates_in_its_declared_existing_category(tmp_path: Path)
     assert "[Existing team topic](../pages/team/team-topic.md)" in (kb_dir / "indexes" / "team.md").read_text(
         encoding="utf-8"
     )
-    assert "Existing team topic" not in (kb_dir / "indexes" / "pending.md").read_text(encoding="utf-8")
+    pending_index = kb_dir / "indexes" / "pending.md"
+    assert not pending_index.exists() or "Existing team topic" not in pending_index.read_text(encoding="utf-8")
 
 
 def test_shrink_keeps_old_part_but_removes_it_from_current_navigation(tmp_path: Path) -> None:
@@ -561,7 +562,7 @@ def test_shrink_keeps_old_part_but_removes_it_from_current_navigation(tmp_path: 
     assert old_part.name not in category
 
 
-def test_transaction_archives_topic_home_and_category_before_update(tmp_path: Path) -> None:
+def test_transaction_archives_only_changed_topic_before_update(tmp_path: Path) -> None:
     new_dir = _new_titled_input(
         tmp_path,
         name="source.md",
@@ -584,11 +585,9 @@ def test_transaction_archives_topic_home_and_category_before_update(tmp_path: Pa
         json.loads(line)
         for line in (_latest_run(kb_dir) / "s5" / "archive-records.jsonl").read_text(encoding="utf-8").splitlines()
     ]
-    assert {record["page_path"] for record in archives} >= {
-        "Home.md",
-        "indexes/pending.md",
-        topic.relative_to(kb_dir).as_posix(),
-    }
+    assert topic.relative_to(kb_dir).as_posix() in {record["page_path"] for record in archives}
+    assert "Home.md" not in {record["page_path"] for record in archives}
+    assert "indexes/pending.md" not in {record["page_path"] for record in archives}
 
 
 def test_provenance_and_history_exclude_navigation_records(tmp_path: Path) -> None:
@@ -612,7 +611,7 @@ def test_provenance_and_history_exclude_navigation_records(tmp_path: Path) -> No
     from knowledge_digest.kb_structure import parse_source_index_markdown
 
     source_index = parse_source_index_markdown(
-        (kb_dir / "_digest" / "source-index.md").read_text(encoding="utf-8")
+        (kb_dir / "indexes" / "sources.md").read_text(encoding="utf-8")
     )
     assert source_index["entries"] and all(
         path.startswith("pages/待归类/")

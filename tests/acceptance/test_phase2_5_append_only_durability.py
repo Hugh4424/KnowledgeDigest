@@ -113,6 +113,7 @@ def test_previous_pending_entry_survives_a_run_whose_sources_pass(tmp_path: Path
     )
 
     # A later run over a completely different, healthy source must not wipe it.
+    (new_dir / "items" / "keep.md").unlink()
     write_source(new_dir, "other.md", "Unrelated healthy claim.\n", "https://source.example/other")
     assert run_digest(str(new_dir), str(kb_dir)).returncode == 0
     kept = {(row["source_uri"], row["fragment_locator"]) for row in read_jsonl(pending_path)}

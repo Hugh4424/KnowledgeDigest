@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import tempfile
+import time
+from urllib.parse import urlsplit, urlunsplit
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -14,8 +17,9 @@ from .cluster import cluster
 from .config import DigestSettings, RISK_RULE_VERSION
 from .draft import draft
 from .errors import ValidationError
-from .embedding import EmbeddingError, resolve_similarity_backend
+from .embedding import EmbeddingError, normalize_endpoint_identity, resolve_similarity_backend
 from .ingest import ingest
+from .llm import PUBLICATION_LLM_BASE_URL, PUBLICATION_LLM_MODEL
 from .kb_structure import (
     DEFAULT_ROOTS,
     StructureContract,
@@ -33,6 +37,7 @@ from .paths import DigestPaths, is_new_kb_container
 from .provenance import (
     archive_claim_records,
     audit_provenance,
+    validate_prewrite_provenance,
 )
 from .page_layout import build_publication_navigation, build_topic_layouts, declared_managed_topics
 from .queues import write_queues
@@ -44,6 +49,139 @@ from .writeback import targets_for_draft, writeback
 def _formal_changes(writes: list[dict[str, object]]) -> list[dict[str, object]]:
     keys = ("target_path", "action", "status", "archive_path")
     return [{key: row[key] for key in keys} for row in writes]
+
+
+def _config_identity(settings: DigestSettings, structure: StructureContract) -> str:
+    embedding = settings.similarity.embedding
+    payload = {
+        "settings": {
+            "top_k": settings.top_k,
+            "page_match_threshold": settings.page_match_threshold,
+            "high": settings.high,
+            "medium": settings.medium,
+            "max_lines": settings.max_lines,
+            "risk_rule_version": settings.risk_rule_version,
+            "routing_rule_version": settings.routing_rule_version,
+            "llm_enabled": settings.llm_enabled,
+            "llm_format": settings.llm_format,
+            "llm_summary_enabled": settings.llm_summary_enabled,
+            "llm_batch_max_claims": settings.llm_batch_max_claims,
+            "llm_batch_max_source_chars": settings.llm_batch_max_source_chars,
+            "llm_batch_concurrency": settings.llm_batch_concurrency,
+            "similarity_backend": settings.similarity.backend,
+            "embedding_model": embedding.model if embedding else None,
+            "embedding_dimension": embedding.expected_dimension if embedding else None,
+        },
+        "publication": structure.as_dict().get("publication"),
+    }
+    canonical = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _atomic_json(path: Path, value: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp", text=True)
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            json.dump(value, handle, ensure_ascii=False, indent=2, sort_keys=True)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+
+
+def _merge_jsonl_unique(path: Path, records: list[dict[str, Any]], key_fields: tuple[str, ...]) -> None:
+    merged: dict[tuple[str, ...], dict[str, Any]] = {}
+    order: list[tuple[str, ...]] = []
+    for record in [*read_jsonl(path), *records]:
+        key = tuple(str(record.get(field, "")) for field in key_fields)
+        if key not in merged:
+            order.append(key)
+        merged[key] = record
+    replace_jsonl(path, [merged[key] for key in order])
+
+
+def _source_audit_ledger(
+    manifest: dict[str, Any],
+    snapshots: list[dict[str, Any]],
+    duplicates: list[dict[str, Any]],
+    claims: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    duplicate_by_uri = {
+        str(row.get("source_uri")): row
+        for row in duplicates
+        if row.get("source_uri")
+    }
+    claims_by_uri: dict[str, list[dict[str, Any]]] = {}
+    for claim in claims:
+        uri = str(claim.get("source_uri") or "")
+        if uri:
+            claims_by_uri.setdefault(uri, []).append(claim)
+    rows: list[dict[str, Any]] = []
+    for source in manifest["sources"]:
+        uri = str(source.get("source_uri") or "")
+        snapshot = next(
+            (row for row in snapshots if str(row.get("source_uri") or "") == uri and row.get("content_fingerprint") == source.get("content_fingerprint")),
+            None,
+        )
+        claims = claims_by_uri.get(uri, [])
+        duplicate = duplicate_by_uri.get(uri)
+        canonical_uri = str(duplicate.get("canonical_source_uri")) if duplicate else uri
+        if not claims and canonical_uri != uri:
+            claims = claims_by_uri.get(canonical_uri, [])
+        rows.append(
+            {
+                "content_path": source["content_path"],
+                "source_id": source["source_id"],
+                "source_uri": uri,
+                "content_fingerprint": source["content_fingerprint"],
+                "snapshot_id": source.get("snapshot_id"),
+                "validation_status": (snapshot or {}).get("validation_status", "failed"),
+                "validation_reason": (snapshot or {}).get("validation_reason"),
+                "duplicate_of": duplicate.get("duplicate_of") if duplicate else None,
+                "canonical_source_uri": canonical_uri,
+                "target_paths": sorted({str(claim.get("target_path") or "") for claim in claims if claim.get("target_path")}),
+                "claim_ids": sorted({str(claim.get("claim_fingerprint")) for claim in claims if claim.get("claim_fingerprint")}),
+            }
+        )
+    return rows
+
+
+def _claim_records(topic_drafts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Extract the same claim set for both prewrite validation and the ledger."""
+    merged: dict[str, dict[str, Any]] = {}
+    order: list[str] = []
+    for draft_record in topic_drafts:
+        candidates = [
+            dict(claim)
+            for claim in draft_record.get("claims", [])
+            if isinstance(claim, dict)
+        ]
+        for page in draft_record.get("split_pages", []) or []:
+            if not isinstance(page, dict):
+                continue
+            for claim in page.get("claims", []) or []:
+                if not isinstance(claim, dict):
+                    continue
+                enriched = dict(claim)
+                if page.get("target_path"):
+                    enriched.setdefault("target_path", page["target_path"])
+                candidates.append(enriched)
+        for claim in candidates:
+            key = str(
+                claim.get("claim_fingerprint")
+                or f"{claim.get('source_uri', '')}|{claim.get('fragment_locator', '')}|{claim.get('text', '')}"
+            )
+            if key not in merged:
+                order.append(key)
+                merged[key] = claim
+            else:
+                merged[key] = {**merged[key], **claim}
+    return [merged[key] for key in order]
 
 
 def _run_similarity_stages(
@@ -245,6 +383,27 @@ def _digest_metrics(
         for round_record in group.get("rounds", [])
         if isinstance(round_record, dict)
     ]
+
+    timeout_markers = {
+        "timeout",
+        "timed_out",
+        "deadline_exceeded",
+        "provider_timeout",
+    }
+
+    def is_timeout_record(record: dict[str, Any]) -> bool:
+        if record.get("timeout_exceeded") is True:
+            return True
+        for field in ("status", "timeout_status", "error_code"):
+            value = record.get(field)
+            if isinstance(value, str) and value.strip().lower().replace("-", "_") in timeout_markers:
+                return True
+        for child in record.get("batches", []) if isinstance(record.get("batches"), list) else []:
+            if isinstance(child, dict) and is_timeout_record(child):
+                return True
+        return False
+
+    timeout_exceeded = any(is_timeout_record(record) for record in all_rounds)
     if dry_run:
         quality: dict[str, object] = {
             "coverage_ratio": None,
@@ -259,6 +418,7 @@ def _digest_metrics(
             "provider_calls_observed": 0,
             "failed_calls": 0,
             "replay_calls": 0,
+            "timeout_exceeded": False,
             "elapsed_seconds": 0.0,
             "fallback_ratio": None,
             "status": "dry_run",
@@ -307,6 +467,7 @@ def _digest_metrics(
                 max(0, int(item.get("provider_attempt_count", 1)) - 1)
                 for item in all_rounds
             ),
+            "timeout_exceeded": timeout_exceeded,
             "elapsed_seconds": round(
                 sum(int(item.get("elapsed_ms", 0)) for item in all_rounds) / 1000,
                 3,
@@ -362,6 +523,329 @@ def _write_similarity_audit(
     )
 
 
+_TASK0_QUESTION_SET_PATH = Path(__file__).resolve().parents[2] / "config" / "task0-question-set.v1.json"
+_TASK0_TIMEOUT_SECONDS = 180
+_TASK0_REPLAY_LIMIT = 1
+_TASK0_PROVIDER_CALL_MULTIPLIER = 4
+_TASK0_GENERATOR_HARD_CAP = 180
+_TASK0_WALL_TARGET_SECONDS = 1800
+_TASK0_WALL_HARD_CAP_SECONDS = 3600
+
+
+def _task0_question_set_facts() -> dict[str, Any]:
+    try:
+        value = json.loads(_TASK0_QUESTION_SET_PATH.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ValidationError("runtime_audit", _TASK0_QUESTION_SET_PATH, f"question set is unreadable ({error})") from error
+    if not isinstance(value, dict) or value.get("schema_version") != "task0-question-set.v1":
+        raise ValidationError("runtime_audit", _TASK0_QUESTION_SET_PATH, "question set schema is invalid")
+    questions = value.get("questions")
+    if not isinstance(questions, list) or len(questions) != 20:
+        raise ValidationError("runtime_audit", _TASK0_QUESTION_SET_PATH, "question set must contain exactly 20 questions")
+    positive = sum(isinstance(row, dict) and row.get("polarity") == "positive" for row in questions)
+    negative = sum(isinstance(row, dict) and row.get("polarity") == "negative" for row in questions)
+    if positive != 17 or negative != 3:
+        raise ValidationError("runtime_audit", _TASK0_QUESTION_SET_PATH, "question set must contain 17 positive and 3 negative questions")
+    canonical = {
+        key: value.get(key)
+        for key in ("schema_version", "question_set_id", "questions", "derivation_rules")
+    }
+    expected_hash = hashlib.sha256(
+        json.dumps(canonical, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    if value.get("question_set_hash") != expected_hash:
+        raise ValidationError("runtime_audit", _TASK0_QUESTION_SET_PATH, "question set hash does not match canonical content")
+    return {
+        "path": _TASK0_QUESTION_SET_PATH.relative_to(_TASK0_QUESTION_SET_PATH.parents[1]).as_posix(),
+        "question_set_id": value.get("question_set_id"),
+        "question_set_hash": expected_hash,
+        "positive_count": positive,
+        "negative_count": negative,
+        "sample_seed": value.get("sample_seed"),
+        "reviewer": value.get("reviewer"),
+    }
+
+
+def _task0_canonical_endpoint(value: str) -> str:
+    try:
+        normalized = normalize_endpoint_identity(value)
+    except ValueError:
+        return value.rstrip("/")
+    parsed = urlsplit(normalized)
+    host = parsed.hostname or ""
+    netloc = host if parsed.port == 443 and parsed.scheme == "https" else parsed.netloc
+    return urlunsplit((parsed.scheme, netloc, parsed.path, "", ""))
+
+
+def _task0_budget_status(cost: dict[str, Any], *, source_count: int) -> str:
+    planned = int(cost.get("planned_generator_calls") or 0)
+    observed = int(cost.get("provider_calls_observed") or 0)
+    replay_calls = int(cost.get("replay_calls") or 0)
+    elapsed = float(cost.get("wall_clock_elapsed_seconds", cost.get("elapsed_seconds")) or 0.0)
+    if (
+        planned > _TASK0_GENERATOR_HARD_CAP
+        or observed > source_count * _TASK0_PROVIDER_CALL_MULTIPLIER
+        or replay_calls > _TASK0_REPLAY_LIMIT
+        or bool(cost.get("timeout_exceeded"))
+        or elapsed > _TASK0_WALL_HARD_CAP_SECONDS
+    ):
+        return "exceeded"
+    if elapsed > _TASK0_WALL_TARGET_SECONDS:
+        return "target_exceeded"
+    return "within_budget"
+
+
+def _task0_llm_allowlist(settings: DigestSettings) -> bool:
+    if not settings.llm_enabled:
+        return True
+    return (
+        os.environ.get("KD_LLM_MODEL") == PUBLICATION_LLM_MODEL
+        and os.environ.get("KD_LLM_BASE_URL", "").rstrip("/") == PUBLICATION_LLM_BASE_URL
+    )
+
+
+def _task0_embedding_allowlist(settings: DigestSettings) -> bool:
+    embedding = settings.similarity.embedding
+    if embedding is None:
+        return True
+    return (
+        embedding.model == "jina-embeddings"
+        and _task0_canonical_endpoint(embedding.base_url) == "https://llm.paxszapp.com/v1"
+    )
+
+
+def _task0_runtime_audit(
+    settings: DigestSettings,
+    similarity_audit: dict[str, Any],
+    *,
+    source_count: int,
+    cost: dict[str, Any],
+    page_statuses: list[str],
+    writes: bool,
+) -> dict[str, Any]:
+    requested_backend = str(similarity_audit.get("requested_backend") or settings.similarity.backend)
+    effective_backend = str(similarity_audit.get("effective_backend") or settings.similarity.backend)
+    fallback_used = requested_backend != effective_backend
+    embedding = settings.similarity.embedding
+    calibration_sha256 = None
+    if embedding and embedding.calibration_artifact.is_file():
+        calibration_sha256 = hashlib.sha256(embedding.calibration_artifact.read_bytes()).hexdigest()
+    embedding_provider = {
+        "model": embedding.model if embedding else None,
+        "endpoint": _task0_canonical_endpoint(embedding.base_url) if embedding else None,
+        "dimension": embedding.expected_dimension if embedding else None,
+        "probe_fingerprint": similarity_audit.get("probe_fingerprint") if embedding else None,
+        "calibration_sha256": calibration_sha256,
+        "credential_source": f"environment:{embedding.api_key_env}" if embedding else None,
+        "allowlist": "passed" if _task0_embedding_allowlist(settings) else "failed",
+    }
+    page_status = None if not page_statuses else "published" if all(status == "published" for status in page_statuses) else "degraded"
+    if not writes and page_status == "published":
+        page_status = "degraded"
+    provider_calls = int(cost.get("provider_calls_observed") or 0) if settings.llm_enabled else 0
+    embedding_calls = int(similarity_audit.get("provider_calls_observed") or 0)
+    budget_status = _task0_budget_status(cost, source_count=source_count)
+    if budget_status != "within_budget" and page_status == "published":
+        page_status = "degraded"
+    llm_model = os.environ.get("KD_LLM_MODEL") if settings.llm_enabled else None
+    llm_endpoint = _task0_canonical_endpoint(os.environ.get("KD_LLM_BASE_URL", "")) if settings.llm_enabled else None
+    llm_allowlist = _task0_llm_allowlist(settings)
+    return {
+        "schema_version": "task0-runtime-audit.v1",
+        "provider": {
+            "llm": {
+                "model": llm_model,
+                "endpoint": llm_endpoint,
+                "credential_source": "environment:KD_LLM_API_KEY" if settings.llm_enabled else None,
+                "allowlist": "passed" if llm_allowlist else "failed",
+            },
+            "embedding": embedding_provider,
+        },
+        "backend": {
+            "requested": requested_backend,
+            "effective": effective_backend,
+        },
+        "fallback": {
+            "used": fallback_used,
+            "from": requested_backend if fallback_used else None,
+            "to": effective_backend if fallback_used else None,
+            "reason": str(similarity_audit.get("reason_code")) if fallback_used else None,
+        },
+        "calls": {"llm": provider_calls, "embedding": embedding_calls},
+        "budget": {
+            "timeout_seconds": _TASK0_TIMEOUT_SECONDS,
+            "replay_limit": _TASK0_REPLAY_LIMIT,
+            "provider_call_budget": source_count * _TASK0_PROVIDER_CALL_MULTIPLIER,
+            "planned_generator_calls": cost.get("planned_generator_calls"),
+            "provider_calls_observed": cost.get("provider_calls_observed"),
+            "replay_calls": cost.get("replay_calls"),
+            "timeout_exceeded": bool(cost.get("timeout_exceeded")),
+            "wall_clock_elapsed_seconds": cost.get("wall_clock_elapsed_seconds"),
+            "planned_generator_hard_cap": _TASK0_GENERATOR_HARD_CAP,
+            "wall_clock_target_seconds": _TASK0_WALL_TARGET_SECONDS,
+            "wall_clock_hard_cap_seconds": _TASK0_WALL_HARD_CAP_SECONDS,
+        },
+        "budget_status": budget_status,
+        "question_set": _task0_question_set_facts(),
+        "page_status": page_status,
+        "delivery_status": "not_released",
+        "reason": (
+            "provider not allowlisted"
+            if not llm_allowlist
+            else "semantic fallback"
+            if fallback_used
+            else None
+        ),
+    }
+
+
+def _business_counts(kb_dir: Path) -> dict[str, int]:
+    def jsonl_count(relative: str) -> int:
+        path = kb_dir / relative
+        return len(read_jsonl(path)) if path.is_file() else 0
+
+    runs = kb_dir / "_digest" / "runs"
+    return {
+        "source_snapshots": jsonl_count("_digest/source-snapshots.jsonl"),
+        "claims": jsonl_count("_digest/claim-history.jsonl"),
+        "duplicates": jsonl_count("_digest/duplicates.jsonl"),
+        "archive_records": jsonl_count("_archive/records.jsonl"),
+        "run_reports": len([path for path in runs.glob("*/report.json") if path.is_file()]) if runs.is_dir() else 0,
+    }
+
+
+def _manifest_identity(kb_dir: Path) -> dict[str, str | None]:
+    path = kb_dir / "_digest" / "source-manifest.json"
+    if not path.is_file():
+        return {"manifest_sha256": None, "config_identity": None}
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return {"manifest_sha256": None, "config_identity": None}
+    return {
+        "manifest_sha256": value.get("manifest_sha256") if isinstance(value.get("manifest_sha256"), str) else None,
+        "config_identity": value.get("config_identity") if isinstance(value.get("config_identity"), str) else None,
+    }
+
+
+def _growth_records(kb_dir: Path, baseline: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+    files = {
+        "source_snapshots": "_digest/source-snapshots.jsonl",
+        "claims": "_digest/claim-history.jsonl",
+        "duplicates": "_digest/duplicates.jsonl",
+        "archive_records": "_archive/records.jsonl",
+    }
+    records: dict[str, list[dict[str, Any]]] = {}
+    for key, relative in files.items():
+        rows = read_jsonl(kb_dir / relative)
+        start = int(baseline.get(key, 0) or 0)
+        records[key] = [
+            {
+                "ref": f"{relative}#line-{index + 1}",
+                **{
+                    field: row.get(field)
+                    for field in (
+                        "source_id",
+                        "snapshot_id",
+                        "claim_fingerprint",
+                        "duplicate_of",
+                        "canonical_source_id",
+                        "archive_key",
+                        "target_path",
+                    )
+                    if row.get(field) is not None
+                },
+            }
+            for index, row in enumerate(rows[start:], start=start)
+        ]
+    return records
+
+
+def _write_task0_runtime_audit(
+    report_path: Path,
+    settings: DigestSettings,
+    similarity_audit: dict[str, Any],
+    *,
+    kb_dir: Path,
+    config_identity: str,
+    source_count: int,
+    page_statuses: list[str],
+    writes: bool,
+) -> None:
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    started_monotonic = report.pop("_task0_started_monotonic", None)
+    if started_monotonic is not None:
+        cost = dict(report.get("cost", {}))
+        cost["wall_clock_elapsed_seconds"] = round(
+            max(0.0, time.monotonic() - float(started_monotonic)), 3
+        )
+        report["cost"] = cost
+    runtime = _task0_runtime_audit(
+        settings,
+        similarity_audit,
+        source_count=source_count,
+        cost=report.get("cost", {}),
+        page_statuses=page_statuses,
+        writes=writes,
+    )
+    status = {
+        "provider_transport": "not_requested" if not settings.llm_enabled else "completed" if not report.get("cost", {}).get("failed_calls") else "failed",
+        "claim_verification": "not_run" if not page_statuses else "passed" if runtime["page_status"] == "published" and writes else "degraded",
+        "written": bool(writes),
+        "writeback": "written" if writes else "not_written",
+        "machine_pass": (
+            bool(writes)
+            and runtime["budget_status"] == "within_budget"
+            and runtime["page_status"] != "degraded"
+            and runtime["provider"]["llm"]["allowlist"] == "passed"
+            and runtime["provider"]["embedding"]["allowlist"] == "passed"
+        ),
+        "agent_assisted": False,
+        "human_reviewed": False,
+        "page_status": runtime["page_status"],
+        "delivery_status": "not_released",
+        "fallback": runtime["fallback"]["used"],
+        "reason": runtime["reason"],
+        "budget_status": runtime["budget_status"],
+    }
+    report["runtime_audit"] = runtime
+    report["status"] = status
+    growth = report.get("growth_audit", {})
+    baseline = growth.get("baseline", {})
+    after = _business_counts(kb_dir)
+    business_keys = ("source_snapshots", "claims", "duplicates", "archive_records")
+    current_identity = _manifest_identity(kb_dir)
+    current_identity["config_identity"] = config_identity
+    business_delta = {key: after[key] - int(baseline.get(key, 0)) for key in business_keys}
+    same_input = (
+        baseline.get("manifest_sha256") is not None
+        and baseline.get("manifest_sha256") == current_identity.get("manifest_sha256")
+        and baseline.get("config_identity") == current_identity.get("config_identity")
+    )
+    abnormal_growth = same_input and any(value > 0 for value in business_delta.values())
+    report["growth_audit"] = {
+        "baseline": baseline,
+        "after": after,
+        "current_identity": current_identity,
+        "same_input_snapshot_and_config": same_input,
+        "business_delta": business_delta,
+        "run_delta": after["run_reports"] - int(baseline.get("run_reports", 0)),
+        "anomaly": {
+            "status": "detected" if abnormal_growth else "none",
+            "basis": "content-level source/claim/duplicate/archive counts; run records are separate",
+            "records": _growth_records(kb_dir, baseline) if abnormal_growth else {},
+        },
+    }
+    report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    manifest_paths = [report_path.parent / "s1" / "source-manifest.json", kb_dir / "_digest" / "source-manifest.json"]
+    for manifest_path in manifest_paths:
+        if not manifest_path.is_file():
+            continue
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["runtime_audit"] = runtime
+        _atomic_json(manifest_path, manifest)
+
+
 def _initial_report(
     run_dir: Path,
     *,
@@ -370,12 +854,16 @@ def _initial_report(
     roots: tuple[str, ...],
     settings: DigestSettings,
     structure: StructureContract,
+    started_monotonic: float | None = None,
 ) -> Path:
     report_path = run_dir / "report.json"
     report_path.write_text(
         json.dumps(
             {
                 "run_id": run_dir.name,
+                "_task0_started_monotonic": (
+                    time.monotonic() if started_monotonic is None else started_monotonic
+                ),
                 "dry_run": dry_run,
                 "source_notes": source_notes,
                 "roots": list(roots),
@@ -400,6 +888,26 @@ def _initial_report(
                 "official_write": {
                     "allow_official_write": structure.allow_official_write,
                     "status": "pending",
+                },
+                "status": {
+                    "provider_transport": "pending",
+                    "claim_verification": "pending",
+                    "written": False,
+                    "writeback": "pending",
+                    "machine_pass": False,
+                    "agent_assisted": False,
+                    "human_reviewed": False,
+                    "page_status": None,
+                    "delivery_status": "not_released",
+                    "fallback": False,
+                    "reason": None,
+                    "budget_status": "pending",
+                },
+                "growth_audit": {
+                    "baseline": {
+                        **_business_counts(run_dir.parents[2]),
+                        **_manifest_identity(run_dir.parents[2]),
+                    }
                 },
                 "source_filter": {},
                 "similarity": {
@@ -459,6 +967,7 @@ def _update_claim_history(
     *,
     run_id: str,
     failed_snapshots: list[dict[str, object]],
+    config_identity: str | None = None,
 ) -> list[dict[str, object]]:
     """Append verified claims and retain old claims as pending on later failures."""
     history_path = paths.kb_dir / "_digest" / "claim-history.jsonl"
@@ -528,7 +1037,20 @@ def _update_claim_history(
                 "page_path": claim.get("target_path"),
                 "verification_status": "pending_review" if has_provider_failure else "verified",
                 "validation_status": "failed" if has_provider_failure else "passed",
+                "config_identity": config_identity,
             }
+            if (
+                previous
+                and previous.get("claim_fingerprint") == record.get("claim_fingerprint")
+                and previous.get("target_path") == record.get("target_path")
+                and previous.get("content_fingerprint") == record.get("content_fingerprint")
+                and previous.get("source_snapshot_ref") == record.get("source_snapshot_ref")
+                and previous.get("verification_status") == record.get("verification_status")
+                and previous.get("config_identity") == record.get("config_identity")
+            ):
+                if has_provider_failure:
+                    provider_pending.append(dict(previous))
+                continue
             if has_provider_failure:
                 record.update(
                     {
@@ -553,7 +1075,14 @@ def _update_claim_history(
             )
             record["retry_status"] = "retry_next_manual_run"
             pending.append(dict(record))
-            supersede_markers.append(dict(record))
+            if not any(
+                marker.get("source_uri") == record.get("source_uri")
+                and marker.get("fragment_locator") == record.get("fragment_locator")
+                and marker.get("verification_status") == "pending_review"
+                and marker.get("validation_reason") == record.get("validation_reason")
+                for marker in supersede_markers
+            ):
+                supersede_markers.append(dict(record))
 
     append_jsonl(history_path, [*supersede_markers, *new_records])
     pending.extend(provider_pending)
@@ -600,6 +1129,12 @@ def _write_source_index(paths: DigestPaths, run_dir: Path, publication: Any = No
     review_by_source: dict[str, list[str]] = {}
     for record in active_history:
         if record.get("verification_status") in {"removed", "superseded"} or record.get("superseded_by"):
+            continue
+        if record.get("verification_status") == "pending_review" or record.get("provider_failure"):
+            review_by_source.setdefault(
+                str(record.get("source_uri", "")),
+                [str(record.get("validation_reason") or "provider output requires review")],
+            )
             continue
         uri = str(record.get("source_uri", ""))
         target = str(record.get("target_path") or record.get("page_path") or "")
@@ -667,7 +1202,6 @@ def _write_source_index(paths: DigestPaths, run_dir: Path, publication: Any = No
     if all(len(entry["content_fingerprint"]) == 64 for entry in entries):
         canonical = serialize_source_index({"schema_version": "1.0.0", "entries": entries})
         (run_dir / "s6" / "source-index.md").write_text(canonical, encoding="utf-8")
-        (paths.kb_dir / "_digest" / "source-index.md").write_text(canonical, encoding="utf-8")
 
 
 def _source_index_for_navigation(
@@ -687,12 +1221,15 @@ def _source_index_for_navigation(
     paths_by_source: dict[str, set[str]] = {}
     review_sources: set[str] = set()
     for draft_record in drafts:
-        if draft_record.get("provider_failure"):
+        degraded = draft_record.get("page_status") == "degraded" or draft_record.get("provider_failure")
+        if degraded:
             review_sources.update(
                 str(claim.get("source_uri", ""))
                 for claim in draft_record.get("claims", [])
                 if claim.get("source_uri")
             )
+        if degraded:
+            continue
         for page in draft_record.get("split_pages", []):
             target = str(page.get("target_path", ""))
             for claim in page.get("claims", []):
@@ -729,6 +1266,12 @@ def _source_index_for_navigation(
         for item in snapshot_rows
         if item.get("source_uri")
     }
+    planned_targets = {
+        str(page.get("target_path"))
+        for draft in drafts
+        for page in draft.get("split_pages", [])
+        if isinstance(page, dict) and page.get("target_path")
+    }
     if raw_items and not current_snapshot_rows:
         raise ValidationError(
             "publication",
@@ -739,8 +1282,11 @@ def _source_index_for_navigation(
         if record.get("verification_status") in {"removed", "superseded"}:
             continue
         source_uri = str(record.get("source_uri", ""))
-        if record.get("verification_status") == "pending_review" or record.get("provider_failure"):
+        pending_review = record.get("verification_status") == "pending_review" or record.get("provider_failure")
+        if pending_review:
             review_sources.add(source_uri)
+        if pending_review or str(record.get("validation_status", "passed")).lower() not in {"passed", "verified", "ok"}:
+            continue
         target = str(record.get("target_path") or record.get("page_path") or "")
         if source_uri and target:
             paths_by_source.setdefault(source_uri, set()).add(target)
@@ -748,7 +1294,7 @@ def _source_index_for_navigation(
     for source_uri, fingerprint in sorted(snapshots.items()):
         canonical = duplicate_of.get(source_uri, source_uri)
         target_paths = sorted(paths_by_source.get(source_uri) or paths_by_source.get(canonical, set()))
-        if not target_paths:
+        if not target_paths and source_uri not in review_sources:
             continue
         entries.append(
             {
@@ -764,7 +1310,20 @@ def _source_index_for_navigation(
                 "target_paths": target_paths,
             }
         )
-    return validate_source_index({"schema_version": "1.0.0", "entries": entries})
+    source_index = validate_source_index({"schema_version": "1.0.0", "entries": entries})
+    if persisted_root is not None:
+        for entry in source_index["entries"]:
+            for target in entry["target_paths"]:
+                if target in planned_targets:
+                    continue
+                target_path = persisted_root / target
+                if not target_path.is_file():
+                    raise ValidationError(
+                        "publication",
+                        target,
+                        "source index target page is missing from the Reader Package",
+                    )
+    return source_index
 
 
 def _write_topic_index(paths: DigestPaths, drafts: list[dict[str, Any]], run_dir: Path) -> None:
@@ -872,8 +1431,11 @@ def _commit_outputs(
     paths: DigestPaths,
     roots: tuple[str, ...],
     run_id: str,
+    config_identity: str,
+    allowed_content_paths: set[str] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     """Write every formal side effect straight into the real knowledge base."""
+    from .batch_run import build_input_manifest
     processable_cluster_ids = {
         cluster.get("cluster_id")
         for cluster in clusters
@@ -887,11 +1449,134 @@ def _commit_outputs(
     }
     processable_items = [item for item in raw_items if item.get("raw_id") in processable_raw_ids]
     snapshots = read_jsonl(run_dir / "s1" / "source-snapshots.jsonl")
-    append_jsonl(paths.kb_dir / "_digest" / "source-snapshots.jsonl", snapshots)
-    append_jsonl(
-        paths.kb_dir / "_digest" / "duplicates.jsonl",
-        read_jsonl(run_dir / "s1" / "duplicates.jsonl"),
+    duplicates = read_jsonl(run_dir / "s1" / "duplicates.jsonl")
+    manifest_snapshots = snapshots
+    manifest_duplicates = duplicates
+    manifest_paths = allowed_content_paths
+    if allowed_content_paths is not None:
+        # A later batch may refresh a page whose claims include sources from
+        # earlier batches.  The prewrite contract must therefore bind the
+        # cumulative processed snapshot set, while never admitting an
+        # unprocessed source from the full input manifest.
+        persisted_snapshots = read_jsonl(paths.kb_dir / "_digest" / "source-snapshots.jsonl")
+        persisted_duplicates = read_jsonl(paths.kb_dir / "_digest" / "duplicates.jsonl")
+
+        def snapshot_path(row: dict[str, Any]) -> str | None:
+            raw = row.get("content_path") or row.get("input_path")
+            if not raw:
+                return None
+            candidate = Path(str(raw))
+            if not candidate.is_absolute():
+                return candidate.as_posix()
+            try:
+                return candidate.relative_to(paths.items_dir).as_posix()
+            except ValueError:
+                return None
+
+        prior_paths = {
+            path
+            for path in (snapshot_path(row) for row in persisted_snapshots)
+            if path
+        }
+        manifest_paths = set(allowed_content_paths) | prior_paths
+        snapshots_by_path: dict[str, dict[str, Any]] = {}
+        for row in [*persisted_snapshots, *snapshots]:
+            path = snapshot_path(row)
+            if path:
+                snapshots_by_path[path] = row
+        manifest_snapshots = list(snapshots_by_path.values())
+        manifest_duplicates = [*persisted_duplicates, *duplicates]
+    source_manifest = build_input_manifest(
+        paths,
+        run_id=run_id,
+        config_identity=config_identity,
+        snapshots=manifest_snapshots,
+        duplicates=manifest_duplicates,
+        allowed_content_paths=manifest_paths,
     )
+    for snapshot in snapshots:
+        input_path = Path(str(snapshot.get("input_path", "")))
+        try:
+            snapshot["content_path"] = input_path.relative_to(paths.items_dir).as_posix()
+        except ValueError as error:
+            raise ValidationError("manifest", input_path, "snapshot path is outside input items") from error
+    for record in topic_drafts:
+        record.setdefault("delivery_status", "not_released")
+        record["config_identity"] = config_identity
+        record.setdefault("page_status", "degraded" if record.get("provider_failure") else "published")
+    for record in navigation_records:
+        record.setdefault("delivery_status", "not_released")
+        record["config_identity"] = config_identity
+    # A provider/source failure remains in Audit and pending history, but its
+    # degraded topic must not enter the Reader Package or abort unrelated
+    # validated topics in the same transaction.
+    reader_topic_drafts = [
+        record for record in topic_drafts if record.get("page_status") != "degraded"
+    ]
+    reader_navigation_records = [
+        record for record in navigation_records if record.get("page_status") != "degraded"
+    ]
+    claims = _claim_records(reader_topic_drafts)
+    snapshot_by_uri = {
+        str(snapshot.get("source_uri")): snapshot
+        for snapshot in manifest_snapshots
+        if snapshot.get("source_uri")
+    }
+    failed_claim_uris = {
+        str(claim.get("source_uri"))
+        for claim in claims
+        if claim.get("source_uri")
+        and str(snapshot_by_uri.get(str(claim.get("source_uri")), {}).get("validation_status", "")).lower()
+        not in {"passed", "verified", "ok"}
+    }
+    if failed_claim_uris:
+        for record in topic_drafts:
+            record_claim_uris = {str(claim.get("source_uri")) for claim in _claim_records([record]) if claim.get("source_uri")}
+            if record_claim_uris & failed_claim_uris:
+                record["page_status"] = "degraded"
+        reader_topic_drafts = [
+            record for record in topic_drafts if record.get("page_status") != "degraded"
+        ]
+        claims = _claim_records(reader_topic_drafts)
+    historical_claims = [
+        row
+        for row in fold_claim_history(read_jsonl(paths.kb_dir / "_digest" / "claim-history.jsonl"))
+        if row.get("verification_status") not in {"removed", "superseded"}
+        and not row.get("superseded_by")
+    ]
+    source_audit_ledger = _source_audit_ledger(
+        source_manifest,
+        manifest_snapshots,
+        manifest_duplicates,
+        [*historical_claims, *claims],
+    )
+    validate_prewrite_provenance(
+        source_manifest,
+        manifest_snapshots,
+        source_audit_ledger,
+        claims,
+        [*reader_topic_drafts, *reader_navigation_records],
+    )
+    _atomic_json(run_dir / "s1" / "source-manifest.json", source_manifest)
+    _atomic_json(paths.kb_dir / "_digest" / "source-manifest.json", source_manifest)
+    write_jsonl(run_dir / "s1" / "source-audit-ledger.jsonl", source_audit_ledger)
+    _merge_jsonl_unique(
+        paths.kb_dir / "_digest" / "source-audit-ledger.jsonl",
+        source_audit_ledger,
+        ("content_path", "source_id", "content_fingerprint"),
+    )
+    _merge_jsonl_unique(paths.kb_dir / "_digest" / "source-snapshots.jsonl", snapshots, ("snapshot_id",))
+    _merge_jsonl_unique(
+        paths.kb_dir / "_digest" / "duplicates.jsonl",
+        duplicates,
+        ("path", "content_hash", "canonical_source_uri"),
+    )
+    has_audit_queue = any(
+        cluster.get("cluster_tier", cluster.get("tier")) in {"needs_review", "insufficient_signal"}
+        for cluster in clusters
+    )
+    if not topic_drafts and not navigation_records and not failed_snapshots and not has_audit_queue:
+        return [], [], []
     queue_root = roots[2] if len(roots) >= 3 else "_queues"
     write_queues(
         paths.kb_dir,
@@ -901,14 +1586,14 @@ def _commit_outputs(
     )
 
     writes = writeback(
-        [*topic_drafts, *navigation_records],
+        [*reader_topic_drafts, *reader_navigation_records],
         run_dir,
         paths,
         roots,
         publication=publication,
     )
     audit_provenance(
-        topic_drafts,
+        reader_topic_drafts,
         writes,
         processable_items,
         run_dir,
@@ -931,6 +1616,7 @@ def _commit_outputs(
             topic_drafts,
             run_id=run_id,
             failed_snapshots=failed_snapshots,
+            config_identity=config_identity,
         )
         if processable_items or failed_snapshots or topic_drafts
         else []
@@ -1003,6 +1689,13 @@ def _audit_run_locked(
     global_duplicates: dict[str, dict[str, str]] | None = None,
 ) -> tuple[Path, str]:
     """Run S1-S6 and write the formal outputs directly into the knowledge base."""
+    from .batch_run import _source_rows
+    run_started_monotonic = time.monotonic()
+
+    # Validate the frozen declaration before a new KB receives its first
+    # managed Reader files.  Batch runs still validate the complete source set;
+    # the current batch is narrowed later by ``allowed_content_paths``.
+    _source_rows(paths)
     if paths.initialize_new_kb:
         if dry_run:
             raise ValidationError("publication", paths.kb_dir, "dry-run must not initialize a new knowledge base")
@@ -1041,6 +1734,7 @@ def _audit_run_locked(
         roots=roots,
         settings=settings,
         structure=structure,
+        started_monotonic=run_started_monotonic,
     )
 
     if not dry_run and not structure.allow_official_write:
@@ -1096,6 +1790,16 @@ def _audit_run_locked(
             report_path, drafts, decisions, clusters, dry_run=True, llm_enabled=settings.llm_enabled
         )
         _write_similarity_audit(report_path, similarity_audit)
+        _write_task0_runtime_audit(
+            report_path,
+            settings,
+            similarity_audit,
+            kb_dir=paths.kb_dir,
+            config_identity=_config_identity(settings, structure),
+            source_count=source_notes,
+            page_statuses=[],
+            writes=False,
+        )
         effective_thresholds = similarity_audit["effective_thresholds"]
         summary = (
             f"dry-run: audited {source_notes} source note(s); roots={', '.join(roots)}; "
@@ -1181,6 +1885,28 @@ def _audit_run_locked(
         if record.get("topic_id")
     }
     topic_universe.update(str(draft_record.get("topic_id")) for draft_record in drafts if draft_record.get("topic_id"))
+    failed_uris = {
+        str(snapshot.get("source_uri"))
+        for snapshot in failed_snapshots
+        if snapshot.get("source_uri")
+    }
+    for draft_record in drafts:
+        claim_uris = {
+            str(claim.get("source_uri"))
+            for claim in draft_record.get("claims", [])
+            if claim.get("source_uri")
+        }
+        if draft_record.get("provider_failure") or claim_uris & failed_uris:
+            draft_record["page_status"] = "degraded"
+    reader_drafts = [
+        draft_record for draft_record in drafts if draft_record.get("page_status") != "degraded"
+    ]
+    reader_topic_universe = set(topic_universe)
+    reader_topic_universe.update(
+        str(draft_record.get("topic_id"))
+        for draft_record in reader_drafts
+        if draft_record.get("topic_id")
+    )
     source_index = _source_index_for_navigation(
         drafts,
         raw_items,
@@ -1189,13 +1915,13 @@ def _audit_run_locked(
     )
     publication_navigation = (
         build_publication_navigation(
-            drafts,
+            reader_drafts,
             paths,
             structure.publication,
-            topic_universe=topic_universe,
+            topic_universe=reader_topic_universe,
             source_index=source_index,
         )
-        if drafts
+        if reader_drafts or source_index.get("entries")
         else []
     )
     _write_layout_artifacts(run_dir, drafts, publication_navigation)
@@ -1221,7 +1947,80 @@ def _audit_run_locked(
             report_path, drafts, decisions, clusters, dry_run=False, llm_enabled=settings.llm_enabled
         )
         _write_similarity_audit(report_path, similarity_audit)
+        _write_task0_runtime_audit(
+            report_path,
+            settings,
+            similarity_audit,
+            kb_dir=paths.kb_dir,
+            config_identity=_config_identity(settings, structure),
+            source_count=source_notes,
+            page_statuses=[str(draft_record.get("page_status", "published")) for draft_record in drafts],
+            writes=False,
+        )
         return report_path, "audit blocked: coverage mapping is incomplete; no formal knowledge-base files written"
+
+    prospective_cost = _digest_metrics(
+        drafts,
+        decisions,
+        clusters,
+        dry_run=False,
+        llm_enabled=settings.llm_enabled,
+    )["cost"]
+    prospective_cost["wall_clock_elapsed_seconds"] = round(
+        max(0.0, time.monotonic() - run_started_monotonic), 3
+    )
+    prospective_budget = _task0_budget_status(prospective_cost, source_count=source_notes)
+    if prospective_budget != "within_budget":
+        _finalize_report(
+            report_path,
+            writes=[],
+            pending=[],
+            cleanup=[],
+            raw_items=raw_items,
+            failed_snapshots=failed_snapshots,
+            official_status="blocked_budget",
+        )
+        _update_digest_report(
+            report_path, drafts, decisions, clusters, dry_run=False, llm_enabled=settings.llm_enabled
+        )
+        _write_similarity_audit(report_path, similarity_audit)
+        _write_task0_runtime_audit(
+            report_path,
+            settings,
+            similarity_audit,
+            kb_dir=paths.kb_dir,
+            config_identity=_config_identity(settings, structure),
+            source_count=source_notes,
+            page_statuses=[str(draft_record.get("page_status", "published")) for draft_record in drafts],
+            writes=False,
+        )
+        return report_path, f"audit blocked: Task0 budget status={prospective_budget}; no formal knowledge-base files written"
+
+    if not _task0_llm_allowlist(settings) or not _task0_embedding_allowlist(settings):
+        _finalize_report(
+            report_path,
+            writes=[],
+            pending=[],
+            cleanup=[],
+            raw_items=raw_items,
+            failed_snapshots=failed_snapshots,
+            official_status="blocked_provider",
+        )
+        _update_digest_report(
+            report_path, drafts, decisions, clusters, dry_run=False, llm_enabled=settings.llm_enabled
+        )
+        _write_similarity_audit(report_path, similarity_audit)
+        _write_task0_runtime_audit(
+            report_path,
+            settings,
+            similarity_audit,
+            kb_dir=paths.kb_dir,
+            config_identity=_config_identity(settings, structure),
+            source_count=source_notes,
+            page_statuses=[str(draft_record.get("page_status", "published")) for draft_record in drafts],
+            writes=False,
+        )
+        return report_path, "audit blocked: provider is not allowlisted; no formal knowledge-base files written"
 
     writes, pending, cleanup = _commit_outputs(
         topic_drafts=drafts,
@@ -1234,6 +2033,8 @@ def _audit_run_locked(
         paths=paths,
         roots=roots,
         run_id=run_id,
+        config_identity=_config_identity(settings, structure),
+        allowed_content_paths=allowed_content_paths,
     )
     plan = {"formal_kb_changes": _formal_changes(writes)}
     _finalize_report(
@@ -1250,6 +2051,16 @@ def _audit_run_locked(
         report_path, drafts, decisions, clusters, dry_run=False, llm_enabled=settings.llm_enabled
     )
     _write_similarity_audit(report_path, similarity_audit)
+    _write_task0_runtime_audit(
+        report_path,
+        settings,
+        similarity_audit,
+        kb_dir=paths.kb_dir,
+        config_identity=_config_identity(settings, structure),
+        source_count=source_notes,
+        page_statuses=[str(draft_record.get("page_status", "published")) for draft_record in drafts],
+        writes=bool(writes),
+    )
     effective_thresholds = similarity_audit["effective_thresholds"]
     summary = (
         f"audit committed: audited {source_notes} source note(s); roots={', '.join(roots)}; "

@@ -143,6 +143,16 @@ def _expanded_navigation(
     )
     records.append(_record("README.md", "readme", readme))
 
+    visible_categories = {
+        category.category_id
+        for category in publication.categories
+        if rows.get(category.category_id)
+    }
+    visible_parents = {
+        category.parent_id
+        for category in publication.categories
+        if category.category_id in visible_categories
+    }
     home_lines = [
         "---",
         "managed_by: KnowledgeDigest",
@@ -154,13 +164,20 @@ def _expanded_navigation(
         "## 按领域浏览",
     ]
     for parent_id in publication.parent_ids:
+        if parent_id not in visible_parents:
+            continue
         parent_path = f"{publication.index_root}/{parent_id}.md"
         parent_title = publication.parent_titles[parent_id]
         home_lines.append(f"- [{parent_title}]({parent_path})")
-    home_lines.extend(["", "## 待复核", f"- [{publication.pending_category.title}]({publication.category_index_path(publication.pending_category.category_id)})", ""])
+    if publication.pending_category.category_id in visible_categories:
+        home_lines.extend(["", "## 待复核", f"- [{publication.pending_category.title}]({publication.category_index_path(publication.pending_category.category_id)})", ""])
+    else:
+        home_lines.append("")
     records.append(_record(publication.home_path, "home", "\n".join(home_lines)))
 
     for parent_id in publication.parent_ids:
+        if parent_id not in visible_parents:
+            continue
         parent_path = f"{publication.index_root}/{parent_id}.md"
         lines = [
             "---",
@@ -173,7 +190,13 @@ def _expanded_navigation(
             "",
             "## 子分类",
         ]
-        children = [category for category in publication.categories if category.parent_id == parent_id]
+        children = [
+            category
+            for category in publication.categories
+            if category.parent_id == parent_id and category.category_id in visible_categories
+        ]
+        if not children:
+            continue
         for category in children:
             target = publication.category_index_path(category.category_id)
             relative = Path(
@@ -184,6 +207,8 @@ def _expanded_navigation(
 
     known_topics = set(topic_universe or {row["topic_id"] for values in rows.values() for row in values})
     for category in publication.categories:
+        if category.category_id not in visible_categories:
+            continue
         target = publication.category_index_path(category.category_id)
         lines = [
             "---",
@@ -217,7 +242,14 @@ def _expanded_navigation(
     if source_index is not None:
         if not isinstance(source_index, dict):
             raise ValidationError("publication", "source-index", "source index must be an object")
-        records.append(_record(publication.source_index_path, "source-index", serialize_source_index(source_index)))
+        if source_index.get("entries"):
+            records.append(
+                _record(
+                    publication.source_index_path,
+                    "source-index",
+                    serialize_source_index(source_index, source_index_path=publication.source_index_path),
+                )
+            )
     return records
 
 
@@ -248,14 +280,21 @@ def build_publication_navigation(
     # and the same staged record shape.  New default KBs always use hierarchy.
     _validate_existing_navigation(paths, publication)
     rows = _topic_rows(layouts, publication, paths)
+    visible_categories = {category.category_id for category in publication.categories if rows.get(category.category_id)}
     home_lines = [
         "---", "managed_by: KnowledgeDigest", "digest_kind: home", "---", "",
         "# Knowledge Digest", "", "## 分类",
-        *[f"- [{category.title}]({publication.category_index_path(category.category_id)})" for category in publication.categories],
+        *[
+            f"- [{category.title}]({publication.category_index_path(category.category_id)})"
+            for category in publication.categories
+            if category.category_id in visible_categories
+        ],
         "",
     ]
     records = [_record(publication.home_path, "home", "\n".join(home_lines))]
     for category in publication.categories:
+        if category.category_id not in visible_categories:
+            continue
         target = publication.category_index_path(category.category_id)
         lines = [
             "---", "managed_by: KnowledgeDigest", "digest_kind: category",
@@ -266,5 +305,12 @@ def build_publication_navigation(
     if source_index is not None:
         if not isinstance(source_index, dict):
             raise ValidationError("publication", "source-index", "source index must be an object")
-        records.append(_record(publication.source_index_path, "source-index", serialize_source_index(source_index)))
+        if source_index.get("entries"):
+            records.append(
+                _record(
+                    publication.source_index_path,
+                    "source-index",
+                    serialize_source_index(source_index, source_index_path=publication.source_index_path),
+                )
+            )
     return records
