@@ -1,0 +1,32 @@
+{
+  "schema_version": "task5-provider-config.v1",
+  "canonical_bytes": "UTF-8 JSON, recursively sort object keys by Unicode code point, arrays keep order, separators=(',', ':'), ensure_ascii=false, trailing LF",
+  "top_level": {
+    "required": ["schema_version", "mode", "llm", "embedding", "budget", "prompt", "routing"],
+    "additional_properties": false,
+    "mode": {"const": "provider_required"},
+    "secret_fields_forbidden": ["api_key", "apikey", "authorization", "token", "password", "secret"]
+  },
+  "llm": {
+    "required": ["api_format", "base_url", "model", "api_key_env", "retry_attempts", "timeout_seconds", "max_tokens", "max_input_chars"],
+    "additional_properties": false,
+    "const": {"api_format": "openai", "base_url": "https://dashscope.in.whatspos.cn/v1", "model": "qwen3.8", "retry_attempts": 0},
+    "types": {"api_format": "string", "base_url": "string", "model": "string", "api_key_env": "ENV_NAME", "retry_attempts": "integer", "timeout_seconds": "positive_integer", "max_tokens": "positive_integer", "max_input_chars": "positive_integer"},
+    "defaults": {"timeout_seconds": 180, "max_tokens": 8192, "max_input_chars": 120000},
+    "limits": {"timeout_seconds": [1, 600], "max_tokens": [1, 32768], "max_input_chars": [1, 120000]}
+  },
+  "embedding": {
+    "required": ["base_url", "model", "expected_dimension", "api_key_env", "retry_attempts", "timeout_seconds", "calibration_artifact", "calibration_sha256"],
+    "additional_properties": false,
+    "const": {"base_url": "https://llm.paxszapp.com/v1", "model": "jina-embeddings", "expected_dimension": 1024, "retry_attempts": 0, "calibration_sha256": "c31b1f8c78a889dff4cdbbab0fb695871c513844b5c8392d52dbbd8ad33e4c06"},
+    "types": {"base_url": "string", "model": "string", "expected_dimension": "positive_integer", "api_key_env": "ENV_NAME", "retry_attempts": "integer", "timeout_seconds": "positive_number", "calibration_artifact": "path_string", "calibration_sha256": "lowercase_sha256"},
+    "defaults": {"timeout_seconds": 180},
+    "limits": {"timeout_seconds": [1, 600]}
+  },
+  "budget": {"required": ["max_provider_calls"], "additional_properties": false, "const": {"max_provider_calls": 180}},
+  "prompt": {"required": ["schema_version"], "additional_properties": false, "const": {"schema_version": "task5-semantic-output.v2"}},
+  "routing": {"required": ["top_k"], "additional_properties": false, "const": {"top_k": 8}},
+  "identity": {"config_hash": "SHA-256 of canonical selected config bytes", "receipt_binding": ["config_path", "config_hash", "provider_identity", "prompt_schema_version", "calibration_manifest_ref", "calibration_manifest_sha256", "calibration_artifact_sha256"], "secret_policy": "only environment variable names may be recorded; secret values never enter receipts/output"},
+  "precedence": ["explicit --provider-config", "~/.config/knowledge-digest/config.json"],
+  "failure": "missing file, parse error, unknown field, secret field, type/limit/const mismatch, calibration mismatch or missing environment key blocks before the first provider request"
+}

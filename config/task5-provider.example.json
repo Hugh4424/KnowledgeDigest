@@ -1,0 +1,27 @@
+{
+  "schema_version": "task5-provider-config.v2",
+  "mode": "provider_required",
+  "llm": {
+    "api_format": "openai",
+    "base_url": "https://dashscope.in.whatspos.cn/v1",
+    "model": "qwen3.8",
+    "api_key": "<your-local-llm-key>",
+    "retry_attempts": 0,
+    "timeout_seconds": 180,
+    "max_tokens": 8192,
+    "max_input_chars": 120000
+  },
+  "embedding": {
+    "base_url": "https://llm.paxszapp.com/v1",
+    "model": "jina-embeddings",
+    "expected_dimension": 1024,
+    "api_key": "<your-local-embedding-key>",
+    "retry_attempts": 0,
+    "timeout_seconds": 180,
+    "calibration_artifact": "evidence/phase4/calibration-artifact.json",
+    "calibration_sha256": "c31b1f8c78a889dff4cdbbab0fb695871c513844b5c8392d52dbbd8ad33e4c06"
+  },
+  "budget": {"max_provider_calls": 180},
+  "prompt": {"schema_version": "task5-semantic-output.v2"},
+  "routing": {"top_k": 8}
+}

@@ -168,6 +168,19 @@ def test_openai_json_mode_requests_json_for_non_qwen_reader_provider() -> None:
     assert "enable_thinking" not in body
 
 
+def test_qwen38_openai_payload_requests_no_thinking_controls() -> None:
+    body = llm._request_payload(
+        "openai",
+        "qwen3.8",
+        "prompt text",
+        max_tokens=1024,
+    )
+
+    assert body["response_format"] == {"type": "json_object"}
+    assert body["enable_thinking"] is False
+    assert body["chat_template_kwargs"] == {"enable_thinking": False}
+
+
 def test_four_concurrent_real_requests_cross_the_transport_boundary() -> None:
     server = ThreadingHTTPServer(("127.0.0.1", 0), _LocalOpenAIHandler)
     server_thread = threading.Thread(target=server.serve_forever, daemon=True)

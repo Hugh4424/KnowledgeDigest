@@ -1,0 +1,112 @@
+{
+  "schema_version": "task5-run-result.v1",
+  "purpose": "唯一的运行级状态、退出码和产物绑定结果；不承载逐 projection 五维 verdict",
+  "required": [
+    "task_id",
+    "run_id",
+    "workflowhub_identity",
+    "input_identity",
+    "provider_identity",
+    "lifecycle",
+    "publication_status",
+    "outcome",
+    "reason_code",
+    "exit_code",
+    "observed_calls",
+    "phase_results",
+    "artifact_manifest",
+    "canonical_sha256"
+  ],
+  "path_contract": {
+    "run_result": "_audit/run-result.json",
+    "reader_root": "products/",
+    "audit_root": "_audit/",
+    "unique_consumer": "CLI and acceptance tests must read this file before interpreting process success"
+  },
+  "workflowhub_identity": {
+    "required": [
+      "task_id",
+      "stage",
+      "review_kind",
+      "review_attempt_ref",
+      "review_result_ref",
+      "review_result_sha256",
+      "review_report_ref",
+      "review_outcome",
+      "terminal_status",
+      "terminal_clean",
+      "contract_id",
+      "contract_hash",
+      "semantic_hash",
+      "snapshot_tree",
+      "material_id"
+    ],
+    "const": {
+      "stage": "build-code",
+      "review_kind": "mini_task.implementation",
+      "review_outcome": "available",
+      "terminal_status": "semantic",
+      "terminal_clean": true
+    },
+      "binding": "implementation refs, hashes, contract identity, snapshot_tree and material_id must be from the same terminal implementation review; any design review is advisory only"
+  },
+  "input_identity": {
+    "required": [
+      "raw_root_realpath",
+      "companybrain_root_realpath",
+      "source_manifest_ref",
+      "source_manifest_sha256",
+      "source_manifest_canonical_sha256",
+      "source_count",
+      "quality_cases_ref",
+      "quality_cases_sha256",
+      "slice_cases_ref",
+      "slice_cases_sha256"
+    ],
+    "const": {
+      "source_count": 89
+    }
+  },
+  "provider_identity": {
+    "required": [
+      "config_path",
+      "config_sha256",
+      "config_canonical_sha256",
+      "llm_endpoint",
+      "llm_model",
+      "embedding_endpoint",
+      "embedding_model",
+      "embedding_dimension",
+      "calibration_manifest_ref",
+      "calibration_manifest_sha256",
+      "calibration_artifact_ref",
+      "calibration_artifact_sha256",
+      "retry_attempts"
+    ],
+    "const": {
+      "llm_model": "qwen3.8",
+      "llm_endpoint": "https://dashscope.in.whatspos.cn/v1",
+      "retry_attempts": 0
+    }
+  },
+  "lifecycle": {
+    "required": ["state", "slice_status", "full_status", "failure_evidence_path"],
+    "state": ["preflight", "candidate", "released", "not_released", "blocked", "unavailable", "failed", "cancelled"],
+    "failure_evidence_rule": "S0/S1 failure has null failure_evidence_path; S2-S4 failure points to retained Downloads failure sink or retained staging"
+  },
+  "enums": {
+    "publication_status": ["candidate", "released", "not_released"],
+    "outcome": ["success", "blocked", "unavailable", "failed", "overrun", "cancelled"],
+    "reason_code": "non-empty stable machine code",
+    "exit_code": {"released": 0, "not_released": 1, "blocked": 2, "unavailable": 2, "failed": 3, "cancelled": 4},
+    "phase_status": ["not_started", "passed", "failed", "not_evaluable", "known_empty", "blocked", "unavailable"]
+  },
+  "integrity_contract": {
+    "observed_calls": "actual HTTP attempts, not logical calls or transport retries",
+    "exit_code_must_match": true,
+    "missing_or_malformed_result": "failed=3",
+    "canonical_bytes": "UTF-8, recursively Unicode-code-point-sorted object keys, arrays preserved, separators=(',', ':'), ensure_ascii=false, allow_nan=false, trailing LF",
+    "self_hash_excluded": true,
+    "reader_cannot_be_inferred_from": ["process exit code", "quality result score", "provider transport completion"]
+  }
+}

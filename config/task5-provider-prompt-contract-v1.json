@@ -1,0 +1,47 @@
+{
+  "schema_version": "task5-provider-prompt-contract.v1",
+  "contract_id": "task5-provider-prompt-v1",
+  "builder": "src/knowledge_digest/task5_provider.py::_prompt",
+  "prompt_template_version": "task5-provider-prompt.v2",
+  "request_kinds": [
+    "quality_case",
+    "source-digest",
+    "source-direct-audit"
+  ],
+  "route_kinds": [
+    "quality-reader",
+    "source-digest",
+    "source-direct-audit"
+  ],
+  "input_fields": [
+    "evaluation_mode",
+    "question",
+    "page_type",
+    "expected_title",
+    "selected_source_paths",
+    "selected_source_closure_sha256",
+    "declared_axis",
+    "claims",
+    "claim_semantic_frames",
+    "required_evidence",
+    "required_atoms",
+    "approved_atom_forms"
+  ],
+  "serialization": {
+    "encoding": "utf-8",
+    "json": "ensure_ascii=false,separators=(',',':'),sort_keys=false",
+    "newline": "lf",
+    "claim_refs": "c001,c002,... in source-claim order; every claim carries its compiler-derived semantic frame",
+    "no_raw_prompt_or_response_persistence": true
+  },
+  "output_contract": {
+    "schema_ref": "config/task5-provider-semantic-output-v2.json",
+    "schema_version": "task5-semantic-output.v2",
+    "title_binding": "title must equal expected_title; path uses expected_title; no model-invented title",
+    "markdown_forbidden": true,
+    "external_facts_forbidden": true,
+    "raw_full_source_fallback_forbidden": true,
+    "source_direct_audit_rule": "source-direct-audit may produce only typed Audit/coverage evidence; reader_eligible=false and no KD_WIN"
+  },
+  "identity_rule": "prompt_contract_sha256 is part of contract identity, request identity, provider receipt and semantic-response-ledger; changing this file or the builder requires a new contract version and design review"
+}

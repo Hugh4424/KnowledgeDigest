@@ -1,0 +1,56 @@
+{
+  "schema_version": "task5-provider-contract-handshake.v3",
+  "contract_id": "task5-provider-handshake-v3",
+  "purpose": "在设计/实现门禁验证全部 Task5 provider route；所有 handshake 调用均 fake/local，不授权真实运行。",
+  "route_kinds": {
+    "llm": ["source-digest", "quality-reader", "source-direct-audit"],
+    "embedding": ["quality-reader"],
+    "eligibility": {
+      "source-digest": "Reader eligible only after typed semantic and source closure gates",
+      "quality-reader": "Reader and five-dimensional quality eligible after route/semantic gates",
+      "source-direct-audit": "Audit/coverage only; reader_eligible=false and never KD_WIN"
+    }
+  },
+  "source_identity": {
+    "schema": "selected-source-identity.v1",
+    "canonical_row_fields": ["source_id", "canonical_relative_path", "snapshot_id", "raw_content_hash", "byte_count", "line_count", "block_refs"],
+    "block_ref_fields": ["block_id", "block_content_hash", "raw_start_byte", "raw_end_byte", "locator"],
+    "canonical_json": "utf8_recursive_key_sort_no_spaces_no_nan_trailing_lf",
+    "source_sort": ["canonical_relative_path", "source_id"],
+    "block_sort": ["raw_start_byte", "raw_end_byte", "block_id"]
+  },
+  "llm_handshake": {
+    "route_kinds": ["source-digest", "quality-reader", "source-direct-audit"],
+    "route_case_matrix": {
+      "source-digest": {"success_case": "source_digest_compiled_output", "negative_case": "reader_ineligible_route_rejected", "reader_eligible": true},
+      "quality-reader": {"success_case": "quality_reader_compiled_output", "negative_case": "route_branch_mismatch_rejected", "reader_eligible": true},
+      "source-direct-audit": {"success_case": "source_direct_audit_output", "negative_case": "reader_ineligible_route_rejected", "reader_eligible": false}
+    },
+    "request_identity_fields": ["evaluation_mode", "route_kind", "source_id_or_projection_key", "source_hash", "selected_source_paths_sha256", "selected_source_closure_sha256", "input_snapshot_sha256", "prompt_sha256", "provider_identity"],
+    "success_receipt_fields": ["request_identity", "route_kind", "source_hash", "selected_source_closure_sha256", "schema_ref", "schema_sha256", "response_sha256", "normalized_output_sha256", "semantic_status", "lineage_check", "raw_copy_check", "reader_eligible", "failure_reason"],
+    "required_fake_cases": ["source_digest_compiled_output", "quality_reader_compiled_output", "source_direct_audit_output", "malformed_json_rejected", "route_branch_mismatch_rejected", "reader_ineligible_route_rejected", "multi_source_closure_reorder_changes_identity", "multi_source_block_hash_drift_changes_identity"],
+    "coverage_rule": "for every route_kind, execute and hash the named success_case and negative_case from route_case_matrix; success receipt must carry the same route_kind and eligibility, negative receipt must be rejected. An untested or unmapped route cannot promote R1",
+    "must_not_call_network": true
+  },
+  "embedding_handshake": {
+    "route_kinds": ["quality-reader"],
+    "request_identity_fields": ["evaluation_mode", "projection_key", "query_sha256", "candidate_set_sha256", "descriptor_sha256", "selected_source_paths_sha256", "selected_source_closure_sha256", "provider_identity", "calibration_sha256", "calibration_manifest_ref", "calibration_manifest_sha256"],
+    "success_receipt_fields": ["request_identity", "source_hash", "selected_source_closure_sha256", "vector_dimension", "query_vector_sha256", "candidate_vector_sha256s", "top_k", "selected_source_paths", "route_only_source_paths", "selected_paths_consumed_by_qwen", "calibration_manifest_ref", "calibration_manifest_sha256"],
+    "required_fake_cases": ["full_candidate_route", "slice_candidate_route", "extra_selected_path_rejected", "selected_vector_not_consumed_rejected", "multi_source_closure_reorder_changes_identity", "multi_source_block_hash_drift_changes_identity"],
+    "must_not_call_network": true
+  },
+  "gate_requirements": {
+    "R1": "produce_and_hash_one_success_and_negative_receipt_for_each_llm_route_before_any_real_provider_call",
+    "R3": "produce_and_hash_embedding handshake receipts before any real provider call",
+    "M302": "reject_if_route_coverage_or_either_handshake_missing_or_contract_hash_mismatched",
+    "M401_R": "review all route receipts and their negative-case oracles",
+    "M402": "must_not_use_handshake_as_real_provider_result"
+  },
+  "canonical_bytes": {
+    "encoding": "utf-8",
+    "sort_keys": true,
+    "separators": [",", ":"],
+    "ensure_ascii": false,
+    "trailing_newline": true
+  }
+}

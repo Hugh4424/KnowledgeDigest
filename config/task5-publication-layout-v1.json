@@ -1,0 +1,41 @@
+{
+  "schema_version": "task5-publication-layout.v1",
+  "contract_id": "task5-public-reader-layout-v1",
+  "purpose": "固定用户实际打开的短路径、可读目录和集中审计入口；staging 只属于内部运行证据。",
+  "public_root": "bundle",
+  "reader_entry": "Home.md",
+  "audit_entry": "Audit.md",
+  "machine_audit_root": "_audit",
+  "reader_page_pattern": "products/<product>/<page_type>/<readable-title>.md",
+  "page_types": [
+    "positioning",
+    "concept",
+    "operation",
+    "diagnosis",
+    "experience"
+  ],
+  "forbidden_reader_path_segments": [
+    "modules",
+    "boundaries",
+    "knowledge",
+    "staging",
+    "attempt",
+    "candidate-bundle"
+  ],
+  "forbidden_reader_filename_patterns": [
+    "-[0-9a-f]{8,}\\.md$",
+    "^(cluster|draft)-[0-9a-f]+\\.md$"
+  ],
+  "audit_layout": {
+    "human_entry_is_central": true,
+    "per_projection_machine_index": "_audit/audit-pages.json",
+    "source_status": "_audit/source-status.json",
+    "machine_ledgers": [
+      "_audit/semantic-compile-ledger.jsonl",
+      "_audit/semantic-response-ledger.jsonl",
+      "_audit/route-ledger.jsonl",
+      "_audit/directory-manifest.json"
+    ],
+    "raw_source_excerpt_is_audit_only": true
+  }
+}

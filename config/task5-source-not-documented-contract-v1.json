@@ -1,0 +1,47 @@
+{
+  "schema_version": "task5-source-not-documented-contract.v1",
+  "contract_id": "task5-source-not-documented-reader-v1",
+  "guard_case": "G-SOURCE-ND",
+  "source_path": "GoInsight/17  智能搭建.md",
+  "route_kind": "source-not-documented",
+  "evaluation_mode": "full",
+  "page_type": "diagnosis",
+  "public_title": "异常规则记录状态",
+  "route_axes_from": "Q-DIA-01",
+  "home_route_required": true,
+  "reader_eligible": true,
+  "answerability": "not_answerable",
+  "publication_effect": "projection_not_evaluable",
+  "package_release_policy": "allowed_when_snd_guard_passes_and_all_other_hard_gates_pass",
+  "generation": "deterministic_template_from_audit",
+  "preconditions": {
+    "rule_set": "SND-RULE-001",
+    "scan_scope": ["all_blocks", "tables", "code", "configuration", "links"],
+    "explicit_rule_match": [],
+    "ambiguous_match": [],
+    "scan_complete": true
+  },
+  "reader_slots": {
+    "symptom": "当前资料未记录可验证的异常规则。",
+    "check": "已扫描本资料的全部内容、表格、代码/配置和链接；未找到明确异常规则，也未发现含糊匹配。",
+    "cause": "这是资料记录状态，不是系统行为结论。",
+    "action": "如需诊断具体异常，请补充触发条件、现象、检查步骤和处理动作。",
+    "escalation": "不能仅凭本资料判断系统不存在异常。"
+  },
+  "audit_required": [
+    "source_snapshot_id",
+    "source_hash",
+    "selected_source_closure_sha256",
+    "scanner_contract_sha256",
+    "scanned_block_count",
+    "explicit_rule_match",
+    "ambiguous_match",
+    "audit_locator"
+  ],
+  "quality": {
+    "dimension_verdict": "not_evaluable",
+    "produces_kd_win": false,
+    "reader_text_must_equal_template": true
+  },
+  "forbidden": ["system_has_no_exception", "cross_source_rule", "model_inference", "raw_source_copy"]
+}

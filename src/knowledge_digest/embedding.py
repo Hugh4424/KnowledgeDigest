@@ -77,6 +77,11 @@ class OpenAIEmbeddingClient:
         if timeout <= 0:
             raise EmbeddingError("KD_EMBEDDING_TIMEOUT_SECONDS must be greater than zero")
         self._timeout = timeout
+        # Task5 records this counter in its provider ledger so a successful
+        # route cannot be mistaken for a locally injected/fake embedding.
+        # It counts successful HTTP embedding responses only; no secret or
+        # source text is retained here.
+        self._transport_call_count = 0
         context = ssl.create_default_context()
         self._opener = build_opener(ProxyHandler({}), _RejectRedirects(), HTTPSHandler(context=context))
 
@@ -116,9 +121,22 @@ class OpenAIEmbeddingClient:
                 if response.geturl() != request.full_url:
                     raise EmbeddingError("embedding redirect rejected")
                 payload = json.loads(response.read().decode("utf-8"))
-        except (HTTPError, URLError, OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        except HTTPError as error:
+            # Preserve the provider's status code for diagnosis, but never
+            # include the response body: some gateways echo request details.
+            reason = str(error.reason).strip() if str(error.reason).strip() else type(error).__name__
+            raise EmbeddingError(f"embedding request failed (HTTP {error.code} {reason})") from error
+        except (URLError, OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
             raise EmbeddingError(f"embedding request failed ({type(error).__name__})") from error
-        return self.validate_response(payload, count=len(texts), dimension=self.dimension)
+        vectors = self.validate_response(payload, count=len(texts), dimension=self.dimension)
+        self._transport_call_count += 1
+        return vectors
+
+    @property
+    def transport_call_count(self) -> int:
+        """Number of successful HTTP embedding batches made by this client."""
+
+        return self._transport_call_count
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         """Embed every input in bounded batches; publish nothing on partial failure."""

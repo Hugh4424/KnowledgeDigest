@@ -237,7 +237,7 @@ def main() -> int:
         args.output,
         api_key=provider_env.get("KD_LLM_API_KEY", ""),
         base_url=provider_env.get("KD_LLM_BASE_URL", "https://dashscope.in.whatspos.cn/v1"),
-        model=provider_env.get("KD_LLM_MODEL", "qwen3.6"),
+        model=provider_env.get("KD_LLM_MODEL", "qwen3.8"),
         batch_size=args.batch_size,
         max_chars_per_source=args.max_chars_per_source,
         timeout=args.timeout,

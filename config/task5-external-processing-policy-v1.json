@@ -1,0 +1,60 @@
+{
+  "schema_version": "task5-external-processing-policy.v1",
+  "policy_id": "task5-internal-business-content-approved-endpoints-v1",
+  "scope": "internal_business_content",
+  "approved_endpoints": {
+    "llm": "https://dashscope.in.whatspos.cn/v1",
+    "embedding": "https://llm.paxszapp.com/v1"
+  },
+  "allowed_outbound": {
+    "llm": "selected canonical source blocks only",
+    "embedding": "route descriptor metadata only"
+  },
+  "forbidden_outbound": ["raw_directory", "CompanyBrain", "api_key", "authorization", "absolute_local_path", "unselected_source"],
+  "runtime_transport_guard": {
+    "owner": ["src/knowledge_digest/task5_provider.py", "src/knowledge_digest/task5_provider_config.py"],
+    "scope": "Task5 provider-required transport seam only; legacy clients outside Task5 are not this contract",
+    "mode": "approved_endpoint_pre_socket_allowlist",
+    "unknown_endpoint": "blocked_calls_0",
+    "must_reject_before_socket": true,
+    "allowed_hosts": ["dashscope.in.whatspos.cn", "llm.paxszapp.com"]
+  },
+  "test_network_guard": {
+    "owner": "M401 test launcher",
+    "program": "/usr/bin/sandbox-exec",
+    "profile": "(version 1)(deny network*)",
+    "required": true,
+    "active_negative_probe": ["socket.create_connection", "socket.getaddrinfo", "urllib.request.urlopen"],
+    "unavailable_action": "blocked_calls_0"
+  },
+  "source_payload_scan": {
+    "schema": "source-sensitive-content-scan.v1",
+    "authority_path": "config/task5-source-sensitive-content-scan-v1.json",
+    "authority_sha256": "4cf6ef894da90501fa6487fbb32cad3c8885ec4baafaff292581ef7860d28d22",
+    "scope": "each_selected_block_and_all_text_bearing_route_descriptor_or_query_fields_before_serialization",
+    "outbound_scopes": [
+      "llm_selected_block",
+      "embedding_route_descriptor",
+      "embedding_query"
+    ],
+    "blocked_categories": ["private_key", "bearer_or_jwt", "cookie_or_session", "password_or_secret_assignment", "api_key_assignment", "email", "phone", "government_id", "bank_card", "unknown_high_entropy_credential"],
+    "action": "block_without_redaction",
+    "reason": "SOURCE_SENSITIVE_CONTENT",
+    "receipt_fields": ["source_id", "block_id", "locator", "content_hash", "category", "match_digest"],
+    "raw_match_persistence": false,
+    "algorithm": "delegate_exactly_to_authority_path; scan every declared text field in every outbound scope using raw_and_CRLF_CR_to_LF_NFKC_views; validate identity_fields before serialization; all_rules; no_redaction; scanner failure blocks calls_0"
+  },
+  "retention_no_log_proof_required_for_this_run": false,
+  "retention_no_log_claim": "not_asserted",
+  "conditional_policy_evidence": {
+    "when_required": "retention_no_log_proof_required_for_this_run=true",
+    "required_fields": ["evidence_path", "schema", "sha256", "validated_at"],
+    "missing_reason": "SOURCE_POLICY_UNVERIFIED"
+  },
+  "validation": {
+    "before_provider_calls": true,
+    "inputs": ["policy_file_sha256", "provider_config_sha256", "requested_endpoints", "payload_scope", "retention_no_log_proof_required_for_this_run"],
+    "failure_exit_code": 2,
+    "failure_calls": 0
+  }
+}

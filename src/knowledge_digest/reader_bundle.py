@@ -908,10 +908,22 @@ def _required_text(value: Any, label: str) -> str:
     return value
 
 
-def _generated_record() -> dict[str, str]:
+def _projection_generated_at(inputs: ReaderBundleStructureInputs | ReaderBundleInputs | SemanticReaderBundleInputs) -> str:
+    """Use the input snapshot version so replayed projections stay byte-stable."""
+
+    for version in (inputs.source_inventory_ref.version, inputs.topic_index_ref.version):
+        if isinstance(version, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", version):
+            return f"{version}T00:00:00Z"
+    # The input contracts require a version, but older callers may provide a
+    # non-date label.  Keep the projection deterministic instead of smuggling
+    # wall-clock time into a reader index.
+    return "1970-01-01T00:00:00Z"
+
+
+def _generated_record(at: str) -> dict[str, str]:
     return {
         "by": _TRUST_GENERATOR,
-        "at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "at": at,
     }
 
 
@@ -1441,6 +1453,7 @@ def project_reader_bundle(
     )
     try:
         raw_index, source_inventory, input_readback, entry_check, loaded = _load_inputs(inputs)
+        generated_at = _projection_generated_at(inputs)
         if raw_index.get("schema_version") != TOPIC_INDEX_SCHEMA or not isinstance(raw_index.get("topics"), list):
             raise ValidationError("reader-bundle", "topic-index", "unsupported TopicIndex envelope")
         semantic_mode = isinstance(inputs, SemanticReaderBundleInputs)
@@ -1545,7 +1558,7 @@ def project_reader_bundle(
                 degraded.append(record)
                 _write_degraded(staged, record)
                 continue
-            frontmatter["generated"] = _generated_record()
+            frontmatter["generated"] = _generated_record(generated_at)
             events = _trust_events(frontmatter, body, selection, content_hash="0" * 64, evidence_ref=_trust_audit_ref(rel))
             if semantic_mode and set(event.get("event") for event in events) != set(_TRUST_EVENTS):
                 record = _degraded_record(

@@ -1,0 +1,55 @@
+{
+  "schema_version": "task5-root-cause-evidence.v1",
+  "contract_id": "task5-root-cause-evidence-v1",
+  "purpose": "把旧方案/实现/产物的可观察失败事实绑定到合同缺口和本轮修复，不以研究摘要或结论代替证据",
+  "canonical_bytes": {
+    "encoding": "utf-8",
+    "json": "recursive_unicode_code_point_sorted_keys_no_spaces_ensure_ascii_false_allow_nan_false",
+    "arrays": "preserve_order",
+    "trailing_newline": true,
+    "self_hash_field": "canonical_sha256"
+  },
+  "artifact_contract": {
+    "attempt_path": "quality/evidence/task5/root-cause/attempts/<attempt_id>/root-cause-evidence.json",
+    "promotion_path": "quality/evidence/task5/root-cause/root-cause-evidence.json",
+    "owner": "R1/M101",
+    "writer": "scripts/task5_reader_quality.py",
+    "consumers": ["R1/R2/R3/R4", "M401", "M401-R", "M402"],
+    "promotion_rule": "only passed current attempt may update promotion view; failures remain immutable",
+    "host_only_fields": ["canonical_ref", "host_snapshot_locator"],
+    "public_forbidden": ["raw_source", "prompt", "response", "api_key", "Authorization", "absolute_host_paths", "free_text_secret"]
+  },
+  "required_top_level": [
+    "schema_version",
+    "contract_id",
+    "attempt_id",
+    "status",
+    "outcome",
+    "input_manifest_ref",
+    "input_manifest_sha256",
+    "current_task_snapshot",
+    "input_snapshots",
+    "observations",
+    "causal_mapping",
+    "coverage",
+    "canonical_sha256"
+  ],
+  "observation_schema": {
+    "required": ["failure_id", "input_key", "artifact_ref", "artifact_sha256", "locator", "observed_fact", "user_symptom", "evidence_refs"],
+    "locator_rule": "relative path plus line/JSON pointer/status field; host path only in host-only evidence",
+    "fact_rule": "must state an observed file/code/runtime fact; conclusion-only prose is invalid"
+  },
+  "causal_mapping_schema": {
+    "required": ["failure_id", "contract_gap_ref", "gap_kind", "repair_ref", "owner", "status", "evidence_refs"],
+    "gap_kind_enum": ["missing_contract", "bypassed_capability", "unsafe_publication", "unreadable_surface", "unclosed_lineage", "false_quality_proof", "missing_failure_receipt"],
+    "status_enum": ["identified", "repaired_by_current_design", "implemented", "blocked", "not_applicable"],
+    "one_to_one_rule": "every blocking/major observation has exactly one primary mapping and at least one evidence ref"
+  },
+  "coverage_rule": {
+    "required_input_keys": ["RC-OLD-TASK4", "RC-USER-V50", "RC-CURRENT-BASELINE", "RC-RAW-89", "RC-COMPANYBRAIN"],
+    "required_family_keys": ["provider_and_embedding_bypassed", "full_source_or_raw_fallback", "question_scene_route_and_business_answer_missing", "unreadable_or_hash_named_public_paths", "temporary_candidate_not_downloads_delivery", "static_or_unclosed_quality_proof", "source_89_empty_duplicate_audit_closure"],
+    "missing_or_drift": "blocked_calls_0",
+    "research_doc_substitution": "forbidden"
+  },
+  "canonical_sha256": "ea09950e54979fe064b3e7207e083e4d285404c4b4a23ebc2bc95a82234a5580"
+}

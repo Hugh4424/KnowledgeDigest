@@ -1,0 +1,15 @@
+{
+  "schema_version": "task5-calibration-manifest.v1",
+  "calibration_id": "phase4-jina-embeddings-adopted-v1",
+  "artifact_path": "evidence/phase4/calibration-artifact.json",
+  "artifact_schema": "calibration-artifact.v1",
+  "artifact_sha256": "c31b1f8c78a889dff4cdbbab0fb695871c513844b5c8392d52dbbd8ad33e4c06",
+  "embedding": {
+    "endpoint": "https://llm.paxszapp.com/v1",
+    "model": "jina-embeddings",
+    "dimension": 1024
+  },
+  "binding_rule": "artifact path, schema, SHA, endpoint, model and dimension must all match before any embedding or LLM request",
+  "missing_or_mismatch": "blocked",
+  "secret_policy": "no credentials in manifest or artifact"
+}

@@ -1,0 +1,52 @@
+{
+  "schema_version": "task5-runtime-config.v2",
+  "config_id": "task5-reader-quality-provider-v2",
+  "provider_mode": "provider_required",
+  "inventory_version": "task5-corpus-v1",
+  "expected_source_count": 89,
+  "quality_contract": {
+    "schema_version": "task5-quality-contract.v1",
+    "quality_cases_sha256": "487deeb6c7d4b62d8893004ad5ef9220fe8f23df6c3fb09a6a3c7ba17d64e5ae",
+    "baseline_sha256": "9d838ea5578a6d67d45f5cb96f218d23ad0da3e148a8e7e248ba3b214be307e5",
+    "quality_result_schema_sha256": "6d5a68653dbf46012237e5c72776ecd6441acd01f303f14f4bb3ba6ef9a41227",
+    "companybrain_observation_schema_sha256": "93481220f483f42fa65269a181f63db7c3506ff8672a800f6f0f6b76c7c929d3",
+    "source_block_claim_contract_sha256": "4baa67603f01aa1e1f114b08cf352a03d51d67035071feb3894f499af6983639",
+    "reader_path_relation_contract_sha256": "16de1b3cc481d88443961e0b5d8e54fbc3338cfc8b54bb36ece7a53a609452c5",
+    "provider_handshake_schema_sha256": "fc821c355525e6e7efb3889140da4688087e08a26d664b9e4de04e8f217ee978",
+    "machine_evidence_contract_sha256": "7dd8026bc341fac918c493e4c1f296ffedcc2a109776ea7a0ced570b931025dc",
+    "root_cause_input_manifest_sha256": "32119ff0ce97874889c76191a70979350a353c65c65b8d14cf4e53a69a937d3f",
+    "root_cause_evidence_schema_sha256": "cd4751b98da5f743faf4a8a81624ac335c219e6df803c3a44dd7e962b3d5e971",
+    "semantic_frame_field_closure_sha256": "a3c7bd6b7c4757f9a4d38599768889b85fc66dbab4d8f5ed574dd9ba74d24262",
+    "publication_layout_contract_sha256": "4b69e256c11afab703c09ac8206a29b3c1ccd4fe580b838459f7480e842239b6"
+  },
+  "output_state": "candidate",
+  "publish_only_if": [
+    "all_quality_dimensions_kd_win",
+    "all_guards_pass",
+    "baseline_valid",
+    "rendered_reader_complete",
+    "rendered_quality_complete",
+    "source_closure_complete",
+    "independent_review_passed",
+    "task5_machine_evidence_complete"
+  ],
+  "state_order": [
+    "declared",
+    "snapshotted",
+    "inventoried",
+    "modeled",
+    "compiled",
+    "evidence_checked",
+    "route_checked",
+    "candidate",
+    "released"
+  ],
+  "exit_codes": {
+    "released": 0,
+    "not_released": 1,
+    "blocked": 2,
+    "failed": 3,
+    "cancelled": 4,
+    "unavailable": 2
+  }
+}

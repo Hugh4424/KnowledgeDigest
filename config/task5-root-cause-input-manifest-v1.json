@@ -1,0 +1,88 @@
+{
+  "schema_version": "task5-root-cause-input-manifest.v1",
+  "manifest_id": "task5-reader-quality-root-cause-inputs-v1",
+  "canonical_bytes": {
+    "encoding": "utf-8",
+    "json": "recursive_unicode_code_point_sorted_keys_no_spaces_ensure_ascii_false_allow_nan_false",
+    "arrays": "preserve_order",
+    "trailing_newline": true,
+    "self_hash_field": "canonical_sha256"
+  },
+  "read_policy": {
+    "mode": "host_only_read_only",
+    "owner": "R1/M101",
+    "before_provider_calls": true,
+    "missing_or_drift": "blocked_calls_0",
+    "public_projection": "labels_hashes_relative_locators_only"
+  },
+  "inputs": [
+    {
+      "key": "RC-OLD-TASK4",
+      "role": "prior_task4_delivered_artifact",
+      "canonical_ref": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v37-88",
+      "identity_kind": "directory_manifest_sha256",
+      "snapshot_sha256": "b9aeff17981597c7584c0a545f258ef5c959e5d7c98e20fa626af50623a18f1d",
+      "file_count": 344,
+      "byte_count": 26360618,
+      "read_scope": "read_only_historical_output"
+    },
+    {
+      "key": "RC-USER-V50",
+      "role": "user_viewed_task5_candidate_artifact",
+      "canonical_ref": "/private/tmp/task5-reader-quality-real-v50/staging/run-c176c1a764c9616742f302e9/attempt-2d149140466c408ba6271ab7f53854de/candidate-bundle",
+      "identity_kind": "directory_manifest_sha256",
+      "snapshot_sha256": "e376886d6f6fff114c875908b5cca4fc195311fb4b38848d1bb858c66d7e5895",
+      "file_count": 652,
+      "byte_count": 111865500,
+      "read_scope": "read_only_user_observed_candidate"
+    },
+    {
+      "key": "RC-CURRENT-BASELINE",
+      "role": "task5_pre_repair_implementation_and_rollback_baseline",
+      "canonical_ref": "quality/evidence/task5-repair-baseline-v2.json",
+      "identity_kind": "file_sha256_plus_git_snapshot",
+      "snapshot_sha256": "6d9098d4ae01fe038a8a1c9e59ac740d35e57fd39e257375f82202f455716bc3",
+      "baseline_schema": "task5-repair-baseline.v2",
+      "baseline_actual_sha256": "6d9098d4ae01fe038a8a1c9e59ac740d35e57fd39e257375f82202f455716bc3",
+      "baseline_canonical_sha256": "410182a9c6da0feea90e8546150472faf75f0d15ab5f510c8ad3603c6ba80b2d",
+      "git_commit": "b69e72985338d966ddc0706ffe9e9e56779fd753",
+      "git_tree": "9f55cd64b3b055647d923a9208d802c60a724d78",
+      "context_blob": "ed16e5751188e617087a252b33430dbd71b60f06",
+      "read_scope": "read_only_baseline_and_named_before_hashes"
+    },
+    {
+      "key": "RC-RAW-89",
+      "role": "declared_original_source_corpus",
+      "canonical_ref": "/Users/Hugh/Downloads/confluence 原始数据",
+      "identity_kind": "directory_manifest_sha256",
+      "snapshot_sha256": "757562bfe83af2e23ae00d20596664dc84a26d2e747cef25a7a7034b7cb2e7ff",
+      "file_count": 91,
+      "byte_count": 1306911,
+      "declared_source_manifest_ref": "config/task5-source-page-manifest-v2.json",
+      "declared_source_manifest_sha256": "b7d6e3f59c0c6ccc6fd04a059007c7a320fd40e85af1d090686a6a0d8272107f",
+      "declared_source_manifest_canonical_sha256": "46d65dc22e3b822efa3dc7c965264378b054556e807620837e4b25e2643ab0b1",
+      "declared_source_count": 89,
+      "read_scope": "read_only_source_and_snapshot_facts"
+    },
+    {
+      "key": "RC-COMPANYBRAIN",
+      "role": "companybrain_read_only_comparison_baseline",
+      "canonical_ref": "/Users/Hugh/Hugh/Knowledge/CompanyBrain",
+      "identity_kind": "directory_manifest_sha256",
+      "snapshot_sha256": "5a0bb2da86b08257116b6d8cadf9eaa49097a9ec3cd9a3a94a939f16e61b0f18",
+      "file_count": 1417,
+      "byte_count": 11883852,
+      "read_scope": "read_only_structure_and_observed_surface"
+    }
+  ],
+  "required_root_cause_families": [
+    "provider_and_embedding_bypassed",
+    "full_source_or_raw_fallback",
+    "question_scene_route_and_business_answer_missing",
+    "unreadable_or_hash_named_public_paths",
+    "temporary_candidate_not_downloads_delivery",
+    "static_or_unclosed_quality_proof",
+    "source_89_empty_duplicate_audit_closure"
+  ],
+  "canonical_sha256": "52e86dd5bf9cfa44b7b9a5124dd040f34ffa97802a5ec9818333f09b110a2300"
+}

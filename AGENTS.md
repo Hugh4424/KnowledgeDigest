@@ -47,7 +47,7 @@ uv run --frozen digest NEW_DIR KB_DIR --batch-state KB_DIR/_digest/batch-state.j
 
 状态文件会锁定来源相对路径、URI、内容指纹和首次生成的主题/重复来源计划；来源变了必须新建状态文件，不能强行续跑。
 
-发布结果目录的阅读顺序：先读 `README.md`，再从 `Home.md` 进入 `indexes/<parent>.md` 和叶分类页，最后打开 `pages/<领域>/<分类>/<主题>.md`。`_digest/source-index.md` 只保存来源、指纹、状态和主题页链接；`_digest/runs/` 是运行审计；`_archive/` 是历史快照，不是当前阅读入口。
+发布结果目录的阅读顺序：先读 Downloads run root 下的 `bundle/README.md`，再从 `bundle/Home.md` 进入 `bundle/products/<product>/<page-type>/...`，最后在 `bundle/Audit.md` 和 `bundle/_audit/` 回查。`bundle/_audit/sources.jsonl` 只保存来源、指纹、状态和主题页链接；`bundle/_audit/run-result.json` 是本次运行审计；`_archive/` 是历史快照，不是当前阅读入口。
 
 生成固定对比报告（只读，不调用模型）：
 
@@ -59,7 +59,11 @@ uv run python scripts/task2_publication_comparison.py \
   --output /path/to/task2-comparison
 ```
 
-需要语义发布时只允许使用项目配置约定的 `qwen3.6`（`https://dashscope.in.whatspos.cn/v1`）和 `jina-embeddings`（`https://llm.paxszapp.com/v1`）；默认从用户配置 `~/.config/knowledge-digest/config.json` 读取 URL/model/key，也支持 `XDG_CONFIG_HOME`，环境变量只作兼容回退。凭据禁止写入代码、结果、报告或缓存。离线回归使用 `--no-llm` + Jaccard，不触碰任何 provider。
+需要语义发布时只允许使用项目配置约定的 Qwen（当前真实配置为 `qwen3.8`，`https://dashscope.in.whatspos.cn/v1`）和 `jina-embeddings`（`https://llm.paxszapp.com/v1`）；默认从用户配置 `~/.config/knowledge-digest/config.json` 读取 URL/model/key，也支持 `XDG_CONFIG_HOME`，环境变量只作兼容回退。凭据禁止写入代码、结果、报告或缓存。离线回归使用 `--no-llm` + Jaccard，不触碰任何 provider。
+
+Task5 质量运行统一通过 `digest NEW_DIR KB_DIR --config ~/.config/knowledge-digest/config.json --quality-config config/task5-quality-cases-v2.json` 进入 `compiler.digest()`：同一次运行覆盖垂直切片、89 条原始资料和冻结合同中的 12 个 projection。Embedding 只做问题/场景候选路由，Qwen 负责逐源语义编译和答案页编译；缺少投影、来源、证据或页面类型时保持 `not_released`；CompanyBrain 五维比较由独立验收脚本读取已发布 Reader/Audit。
+
+正式 M402 运行必须提供质量配置，并只能由 `full` 编译路径发布；缺少质量配置仍是 `blocked`，不能退化为普通 `completed`。`source-not-documented` 的 SND certificate 和独立 verifier 不是附属审计：verifier 未 `passed` 时整包保持 `not_released`，即使五维比较暂时全部为 `KD_WIN` 也不能放行。
 
 每次运行都会先做 preflight，并在 `_digest/runs/<run_id>/plan.json` 写入来源数、逻辑批次、预计 provider calls 和显式限制；运行中可读状态在同目录 `progress.json`，每 10 秒更新一次。`completed` 才返回退出码 0；`blocked`、`failed`、`cancelled` 都返回非零。运行执行状态只描述本次执行，不等同于知识文件或 `released/not_released` 状态。
 
@@ -82,7 +86,7 @@ src/knowledge_digest/
   pipeline.py      # 串联 S1–S6 和单写者边界
   cli.py           # digest 命令入口
 tests/acceptance/  # 可运行的行为与回归测试
-config/            # 默认配置；真实密钥只放环境变量
+config/            # 默认配置；用户密钥从 ~/.config/knowledge-digest/config.json 直接读取，环境变量仅兼容回退
 docs/              # 设计、决策、历史报告
 scripts/task2_publication_comparison.py # 只读生成 Task1/Task2/CompanyBrain 对比报告
 ```

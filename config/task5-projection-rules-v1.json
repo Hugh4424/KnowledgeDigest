@@ -1,0 +1,479 @@
+{
+  "schema_version": "task5-projection-rules.v1",
+  "contract_id": "task5-reader-projection-rules-v1",
+  "purpose": "统一维护 Reader 投影的提示、禁止扩展和确定性可读性修复；Prompt、编译器和 Reader hygiene 读取同一份规则。",
+  "aliases": {
+    "positioning": "Q-POS-01.positioning",
+    "concept": "Q-CON-01.concept",
+    "qr.operation": "Q-OPR-01.qr.operation",
+    "zero-touch.operation": "Q-OPR-01.zero-touch.operation"
+  },
+  "projections": {
+    "Q-POS-01.positioning": {
+      "reader_guidance": "区分 EMM for iOS、EMM for Android、MAXSTORE 原生和 Android Enterprise 的关系；原始资料明确 MAXSTORE 与 Android Enterprise 集成，未把 EMM 写成 MAXSTORE 的组成；AirViewer 只按资料说明为 EMM 设备使用的能力，不额外推断产品归属；只用当前原始资料支持的产品关系，不把宽泛介绍扩成所有 Android 设备结论。定位页必须先给定位结论，再给选择路径和下一入口，明确本页不覆盖的操作；订阅状态、企业注册页面和 UI 入口清单不应挤占业务结论，也不要重复同一 AirViewer 条件。事实槽位固定为：definition 只写产品族和概念，audience 只写服务对象和依赖，difference 只写定位结论、选择路径和核心入口，boundary 只写相邻产品关系、AirViewer 条件和资料缺口；同一选择事实不得跨槽位重述。",
+      "repair_guidance": "修复时保留 iOS Estate List 的已分配/可分配边界、产品对比表的 MAXSTORE 原生与 EMM for Android 设备矩阵、MAXSTORE 与 Android Enterprise 的原文关系，以及 AirViewer 的厂商适配/插件包/策略条件；原始资料未明确的产品归属必须写成未记录。",
+      "forbidden_literals": [
+        ["保护和管理整个企业的 Android 移动设备", "未限定的 Android 产品边界"],
+        ["管理整个企业的 Android 移动设备", "未限定的 Android 产品边界"],
+        ["EMM for Android 是谷歌的 Android 企业管理", "把 Android Enterprise 与产品线混为一谈"],
+        ["EMM for Android 的目标设备包括支付设备", "扩大支付设备范围"],
+        ["Android 目标设备包括支付设备", "扩大支付设备范围"],
+        ["EMM 设备使用 AirViewer", "AirViewer 缺少 Android 产品范围"],
+        ["远程控制开关是 AirViewer 分页显示前提", "AirViewer 缺少 Android 产品范围"],
+        ["厂商签名与插件包配置决定能力边界", "AirViewer 缺少 Android 产品范围"],
+        ["对应厂商设备需要进行额外适配", "AirViewer 缺少 Android 产品范围"]
+      ],
+      "layout_rewrites": [
+        ["literal", "EMM for Android 的EMM for Android 中", "EMM for Android 中"],
+        ["literal", "EMM 是集成于 MAXSTORE 的企业移动管理产品线", "原始资料说明 MAXSTORE 与 Android Enterprise 无缝集成；EMM for Android、EMM for iOS 与 MAXSTORE 原生能力的边界见下文"],
+        ["literal", "AirViewer 是 EMM for Android 的远程功能，依赖策略开启及厂商签名", "原始资料描述 EMM 设备使用 AirViewer；厂商适配、插件包配置和策略开关决定其显示与能力边界"],
+        ["literal", "EMM for Android 中，AirViewer 分页显示前提是远程控制开关开启，EMM for Android 中，能力边界由厂商签名与插件包配置决定。", "AirViewer 分页显示前提是设备策略开启远程控制；能力边界由厂商签名与插件包配置决定。"],
+        ["literal", "EMM for Android 是谷歌的 Android 企业管理", "原始资料分别描述 Android Enterprise（谷歌的 Android 企业管理）与 EMM for Android；本页不将二者写成同一概念"]
+      ],
+      "reader_markers": [
+        {
+          "marker": "产品关系需分开",
+          "text": "产品关系边界：原始资料说明 MAXSTORE 与 Android Enterprise 无缝集成；产品对比表将 MAXSTORE 原生/已集成设备与其他品牌 GMS 认证 Android 设备分开归类；AirViewer 只确认与 EMM 设备的使用和适配有关，未额外记录其产品归属。",
+          "claim_term_groups": [
+            ["MAXSTORE", "Android Enterprise"],
+            ["产品对比", "GMS 认证"],
+            ["EMM设备", "AirViewer"]
+          ],
+          "target_slots": ["relationship", "boundary"]
+        },
+        {
+          "marker": "AirViewer 使用前提补充",
+          "text": "AirViewer 使用前提补充：资料要求设备已安装 AirViewer；无厂商签名设备还需用户开启‘显示在其他应用的上层’权限，授权后管理员再次发起连接。",
+          "claim_term_groups": [
+            ["已安装AirViewer", "已安装 AirViewer"],
+            ["显示在其他应用的上层", "悬浮窗权限"],
+            ["授权成功后", "再次发起远程连接"]
+          ],
+          "target_slots": ["boundary"]
+        }
+      ]
+    },
+    "Q-CON-01.concept": {
+      "reader_guidance": "这是概念页，不是操作步骤页。先说明配置组→配置项→作用对象/条件→生效效果，再给紧凑字段字典和边界；保留概念关系、配置组、配置项、作用对象/条件、生效效果和排查入口；把配置表列出、暂时去掉、移除三种状态分开；原文只把配置组归入“生效配置项”时，不能把组级标题升级成每个配置项都已生效，单项状态未说明就明确写出；把 Wi-Fi State、Wi-Fi Configuration Permission、Disable Wi-Fi Direct 的“暂时去掉”状态与配置项字典分开；不要把 Wi-Fi Configuration Permission 整体扩大成 Android 13 及以上，必须按具体选项分别写适用范围；Config Recommended Global Proxy 的“移除”备注与配置表列出状态要标为冲突，字段约束只能标作历史/冲突记录，不能写成当前可用项；APN 字段字典只保留一份，且只说明原始资料未给出先后依赖和一般排查顺序，未记录 APN vendor-implementation difference；Disable SMS 的收发范围若来源没有明确，必须标为资料未说明；不要添加 bluetoothConfigDisabled 旧配置绕过规则，也不要输出裸的 Markdown `**` 标记。Wi-Fi、APN 每个配置项按原始适用范围和完整字段表达。事实槽位固定为：terms 只放完整字段字典，object 只放作用对象和未澄清对象，relationship 只放配置层级/保存规则/代理字段约束，boundary 只放版本、托管模式和状态冲突；APN 字段表不得在 object 或 boundary 重复。",
+      "repair_guidance": "恢复 Config Recommended Global Proxy、Phone Calls & Bluetooth、Wi-Fi Settings、Phone Network、VPN Settings、Tethering Settings 的入口和配置组；逐项列出 APN 列表与配置弹窗字段，包含 MMS、MTU、MVNO、用户名/密码、数字运营商 ID、协议和代理字段；按来源分别标记 Wi-Fi 暂时去掉项与全局代理移除冲突；不把 APN 并列项改写成先后依赖，不把 Disable SMS 扩写成收发短信；保留 Bluetooth、Wi-Fi/VPN 的资料缺口。",
+      "forbidden_literals": [
+        ["APN 核查顺序", "原始资料未给出 APN 依赖顺序"],
+        ["先确认 Enable Custom APN", "原始资料未给出 APN 依赖顺序"],
+        ["各配置项受 Android 版本、全托管模式及厂商实现边界约束", "厂商实现边界未在当前原始资料中闭合"],
+        ["厂商实现是主要边界", "厂商实现边界未在当前原始资料中闭合"],
+        ["Wi-Fi State、Wi-Fi Configuration Permission、Disable Wi-Fi Direct、Minimum Wifi Security Level 适用于运行 Android 13 及以上版本的全托管设备", "Wi-Fi 配置项适用范围被合并扩大"]
+      ],
+      "layout_rewrites": [
+        ["regex", "(?m)^(\\|[^\\n]*\\bWi-Fi State\\b[^\\n]*\\|[^\\n]*)生效([^\\n]*\\|\\s*)$", "\\1原文状态冲突：备注标注‘暂时去掉’，不列为当前生效项\\2"],
+        ["regex", "(?m)^(\\|[^\\n]*\\bWi-Fi Configuration Permission\\b[^\\n]*\\|[^\\n]*)生效([^\\n]*\\|\\s*)$", "\\1原文状态冲突：备注标注‘暂时去掉’，不列为当前生效项\\2"],
+        ["regex", "(?m)^(\\|[^\\n]*\\bDisable Wi-Fi Direct\\b[^\\n]*\\|[^\\n]*)生效([^\\n]*\\|\\s*)$", "\\1原文状态冲突：备注标注‘暂时去掉’，不列为当前生效项\\2"],
+        ["regex", "(?m)^(\\|[^\\n]*\\bConfig Recommended Global Proxy\\b[^\\n]*\\|[^\\n]*)生效([^\\n]*\\|\\s*)$", "\\1原文备注标注‘移除’，状态与配置表列出不一致，不列为已确认生效项\\2"]
+      ],
+      "reader_markers": [
+        {
+          "marker": "概念关系",
+          "text": "概念关系：配置组→配置项→作用对象/条件→生效效果。",
+          "target_slots": ["relationship", "boundary"]
+        },
+        {
+          "marker": "蓝牙旧配置绕过规则资料未记录",
+          "text": "蓝牙边界：原始资料只确认 Disable Bluetooth 为当前配置项；蓝牙旧配置绕过规则资料未记录。",
+          "claim_terms": ["Disable Bluetooth"],
+          "target_slots": ["relationship", "boundary"]
+        },
+        {
+          "marker": "配置状态冲突",
+          "text": "配置状态冲突：Wi-Fi State、Wi-Fi Configuration Permission、Disable Wi-Fi Direct 在配置表中列出，但原文备注均写“暂时去掉，避免设备失控”，因此不列为当前生效项；Config Recommended Global Proxy 的配置按钮备注写“移除”，与配置项表的列出状态冲突，不能当作已确认的生效配置。",
+          "claim_term_groups": [
+            ["Wi-Fi State", "暂时去掉"],
+            ["Wi-Fi Configuration Permission", "暂时去掉"],
+            ["Disable Wi-Fi Direct", "暂时去掉"],
+            ["Config Recommended Global Proxy", "移除"]
+          ],
+          "target_slots": ["relationship", "boundary"]
+        },
+        {
+          "marker": "完整 APN 字段",
+          "text": "APN 字段：资料列出 APN Type、APN、APN Display Name、Always on、Auth Type、Carrier ID、MMS Proxy Address、MMS Proxy Port、MMSC、MTU V4、MTU V6、MVNO Type、Network Types、Username、Password、Numeric Operator Id、Protocol、Roaming Protocol、Proxy Address、Proxy Port，并支持 Edit/Delete；示例值不作为业务结论。",
+          "claim_term_groups": [
+            ["MMS代理地址", "MMS Proxy Port"],
+            ["MMSC", "MTU V4", "MTU V6"],
+            ["MVNO类型", "MVNO Type"],
+            ["APN用户名", "Username"],
+            ["APN密码", "Password"],
+            ["数字运营商ID", "Numeric Operator Id"],
+            ["漫游协议", "Roaming Protocol"],
+            ["代理地址", "Proxy Address"],
+            ["代理端口", "Proxy Port"]
+          ],
+          "target_slots": ["terms", "relationship"]
+        },
+        {
+          "marker": "通信和网络入口",
+          "text": "配置入口：新增配置项菜单可进入 Phone Calls & Bluetooth、Wi-Fi Settings、Phone Network、VPN Settings、Tethering Settings；各组的入口和生效项按原始资料分别记录。",
+          "claim_term_groups": [
+            ["Phone Calls & Bluetooth"],
+            ["Wi-Fi Settings"],
+            ["Phone Network"],
+            ["VPN Settings"],
+            ["Tethering Settings"]
+          ],
+          "target_slots": ["relationship", "object"]
+        },
+        {
+          "marker": "APN 依赖未记录",
+          "text": "APN 边界：Phone Network 同时列出 Enable Custom APN 与 APN Config；原始资料未说明两者的先后依赖，也未给出一般排查顺序。APN 列表处将对象写作 Wi-Fi 配置，与 APN 页面标题冲突，列表对象未被资料澄清。",
+          "claim_term_groups": [
+            ["Enable Custom APN", "APN Config"],
+            ["列表对象未被资料澄清", "Wi-Fi配置列表"]
+          ],
+          "target_slots": ["relationship", "boundary"]
+        },
+        {
+          "marker": "全局代理字段约束",
+          "text": "全局代理字段约束：选择 Manual 时 Host 必填，格式为 host IP/http/https，最长 64 个字符；Port 必填、仅允许数字、范围为 1-65535、最长 5 个字符；Excluded Hosts 最长 255 个字符；选择 Proxy Auto-Config 时 PAC URI 必填、最长 255 个字符。",
+          "claim_term_groups": [
+            ["Config Recommended Global Proxy"],
+            ["Host"],
+            ["Port"],
+            ["65535"],
+            ["Excluded Hosts"],
+            ["PAC URI"]
+          ],
+          "target_slots": ["relationship", "terms"]
+        },
+        {
+          "marker": "Wi-Fi/VPN 排查边界",
+          "text": "Wi-Fi/VPN 排查边界：资料列出对应配置项、版本/托管范围和暂时去掉或移除状态，但未给出统一故障排查顺序；本页的配置字典不等同于通用故障处理步骤。",
+          "target_slots": ["relationship", "boundary"]
+        }
+      ]
+    },
+  "Q-OPR-01.qr.operation": {
+      "reader_guidance": "这是单一流程操作页，只覆盖二维码入网。页面必须按前置条件→有序步骤→预期结果→验证→失败边界组织，不能只写一个 operation 标签。字段表列出当前字段 Reseller/代理商、Merchant/商户和 Expire Time/过期时间；原文概括另写‘注册类型’，必须把两处口径差异说清楚，不能把注册类型无条件写成字段。旧设备类型只能作为删除边界，不能作为当前配置项。不要写 Zero Touch 门户、Configuration 分配或门户设备分配。",
+      "repair_guidance": "修复二维码页时保持二维码单流程；保留字段表的 Reseller、Merchant、Expire Time、商户条件默认值和过期时间；把原文‘注册类型’标为概括口径差异；去掉 Zero Touch 门户/设备分配内容，清理重复的设备端步骤和重复边界句。",
+      "forbidden_literals": [
+        ["组织、网络、门户和设备分配边界", "Zero Touch 边界泄漏到二维码页"],
+        ["商户和代理商必须处于启用状态", "原始资料只说明停用或删除后二维码失效，不能扩写为统一启用前置"],
+        ["所选商户和代理商必须处于启用状态", "原始资料只说明停用或删除后二维码失效，不能扩写为统一启用前置"],
+        ["TERMINAL_STATUS", "原始资料没有该内部字段，不能凭空加入验证步骤"]
+      ],
+      "layout_rewrites": [
+        ["literal", "第一步：恢复出厂设置将设备恢复出厂设置", "第一步：将设备恢复出厂设置"],
+        ["literal", "第二步：轻点六次在欢迎页面的任一位置轻点六次", "第二步：在欢迎页面任一位置轻点六次"],
+        ["literal", "第三步：扫描二维码扫描右边的二维码", "第三步：扫描右侧二维码"],
+        ["literal", "第四步：完成配置授予权限", "第四步：完成配置，授予权限"],
+        ["regex", "\\n权限、商户、代理商、网络和设备状态边界。\\s*$", ""]
+      ],
+      "dedupe_exact_lines": true,
+      "renumber_numbered_lists": true,
+      "reader_markers": [
+        {
+          "marker": "单一流程操作页",
+          "text": "这是单一流程操作页：只覆盖二维码入网。",
+          "target_slots": ["preconditions", "steps", "failure_boundary"]
+        },
+        {
+          "marker": "二维码生成规则",
+          "text": "二维码规则：一个商户只生成一个二维码，过期时间可以更新；页面提供取消、下载二维码和发送二维码按钮，但发送二维码的接收对象与邮件流程资料未补充。",
+          "claim_term_groups": [
+            ["一个商户", "过期时间可更新"],
+            ["发送二维码", "其他按钮交互请查看下方内容"]
+          ],
+          "target_slots": ["steps", "failure_boundary"]
+        },
+        {
+          "marker": "发送二维码的接收对象与邮件流程",
+          "text": "发送二维码的接收对象与邮件流程待补充；按钮存在不等于发送流程已说明。",
+          "target_slots": ["steps", "failure_boundary"]
+        },
+        {
+          "marker": "二维码当前字段口径",
+          "text": "二维码字段口径：字段表列出 Reseller/代理商、Merchant/商户、Expire Time/过期时间；原文概括另写“注册类型”，两处表述存在差异；旧设备类型字段已删除，不是当前配置项。选择代理商时商户默认为空，过期时间默认选择 7 天之后。",
+          "claim_term_groups": [
+            ["Reseller", "代理商"],
+            ["Merchant", "商户"],
+            ["Expire Time", "过期时间"],
+            ["注册类型"],
+            ["Device Type", "设备类型"],
+            ["默认为空", "7天"]
+          ],
+          "target_slots": ["preconditions", "steps", "failure_boundary"]
+        }
+      ]
+    },
+    "Q-OPR-01.zero-touch.operation": {
+      "reader_guidance": "这是独立流程操作页，只覆盖 Zero Touch 入网。页面必须按前置条件→有序步骤→预期结果→验证→失败边界组织，不能只写一个 operation 标签。分开非兆珑设备、无零接触门户账号和兆珑设备三条分支；保留基本操作权限和代理商管理员开关；保留非兆珑设备开机后自动下载 Android Device Policy 的步骤；预期结果编号必须从 1 开始；不要把二维码欢迎页步骤混入本页。",
+      "repair_guidance": "修复时保留门户 Configuration、厂商分配、Global/ZTE 开通和下游设备注册事实；无门户账号只写资料未记录的边界；必须保留初始化无网络时先按普通设备启动、后续联网再进入 Android for Work 并自动恢复出厂/重启的延迟路径；兆珑设备先用根代理商策略注册、成功后切换商户策略，商户或代理商停用/移除后自动删除并恢复出厂；清理重复边界、错别字、编号和粘连的分支标题。",
+      "forbidden_literals": [],
+      "layout_rewrites": [
+        ["literal", "回复出厂", "恢复出厂"],
+        ["literal", "。**非兆珑设备分支**", "。\\n\\n**非兆珑设备分支**"],
+        ["literal", "。**兆珑设备分支**", "。\\n\\n**兆珑设备分支**"],
+        ["literal", "**非兆珑设备分支**1.", "**非兆珑设备分支**\\n1."],
+        ["literal", "**兆珑设备分支**1.", "**兆珑设备分支**\\n1."],
+        ["literal", "5. **权限边界**", "4. **权限边界**"],
+        ["regex", "(?m)^\\s*\\d+\\.\\s*网络依赖：设备初始化时必须联网，否则无法完成\\s*Zero Touch\\s*注册流程，需重启并联网后重试。\\s*$", ""],
+        ["regex", "\\n组织、网络、门户和设备分配边界。\\s*", "\\n"],
+        ["regex", "\\n要区分 MAXSTORE 初始状态不支持上传文件注册设备，与零接触门户可以用手动或 CSV 文件把设备分配到 Configuration；前者不是后者的否定。兆珑设备的 Zero Touch 还需要 Global 管理员完成客户、协议、API 和 ZOLON ZTE 开通流程，初始限制不等于永久不支持。\\s*$", ""]
+      ],
+      "dedupe_exact_lines": true,
+      "renumber_numbered_lists": true,
+      "reader_markers": [
+        {
+          "marker": "独立流程操作页",
+          "text": "这是独立流程操作页：只覆盖 Zero Touch 入网。",
+          "target_slots": ["preconditions", "failure_boundary"]
+        },
+        {
+          "marker": "无零接触门户账号",
+          "text": "无零接触门户账号：当前资料只说明可以帮助客户创建门户并指向下一步流程，具体创建流程未记录。",
+          "target_slots": ["preconditions", "failure_boundary"]
+        },
+        {
+          "marker": "Zero Touch 入口权限",
+          "text": "入口权限：零接触注册要求用户拥有【管理中心】-【终端管理】-【终端】-【基本操作】权限；代理商管理员默认不可使用，需要市场管理员打开配置开关后才可使用。",
+          "claim_term_groups": [
+            ["管理中心", "基本操作"],
+            ["代理商管理员", "配置开关"]
+          ],
+          "target_slots": ["preconditions", "failure_boundary"]
+        },
+        {
+          "marker": "Android Device Policy 自动下载",
+        "text": "设备注册：非兆珑设备打开且已配置 Zero Touch 配置后，会自动下载 Android Device Policy 客户端并注册到平台；这不等于用户无需操作，资料另要求用户授予一些必要的权限并安装一些必要的应用。",
+          "claim_term_groups": [
+            ["自动下载Android Device Policy", "Android Device Policy 客户端"],
+            ["授予一些必要的权限", "安装一些必要的应用"]
+          ],
+          "target_slots": ["steps", "preconditions"]
+        }
+      ]
+    },
+    "Q-DIA-01.diagnosis": {
+      "reader_guidance": "诊断页必须先按现象把“指标异常”“迁移异常”“AI 功能异常”分流，并在 Reader 显示一张把每条分支的模块、对象、场景、边界放在同一行的分类表，再分别给出现象、检查顺序、可能原因或排查对象、处理动作和升级边界；不能把三类问题揉成一段，也不能把检查项写成未经来源确认的根因。迁移限制要保留原始状态全集、六项完成条件、入口权限及禁止操作清单，不能缩写成仅迁移期间；问数和智能删除要保留数据集/API/确认/结果分支；历史 Root Cause 只能作为历史快照。事实槽位固定为：symptom 只写现象和分支分类，checks 只写分流和检查顺序，possible_causes 只写排查对象或历史快照，actions 只写处理动作，escalation_boundary 只写升级条件与资料缺口；同一迁移限制不得在 actions 重复成两段。",
+      "repair_guidance": "恢复指标阈值、σ=0 规则、迁移状态/入口权限/六项完成条件/重试/数据校验/集群验证/S3 顺序；恢复问数接口和会话边界、智能删除的 API 与删除后结果；不要把未记录的名称不匹配、权限不足或知识库缺失写成确定根因。",
+      "forbidden_literals": [
+        ["设备分布变化", "原始资料未证明指标根因"],
+        ["数据波动引起", "原始资料未证明指标根因"],
+        ["由设备分布变化或数据波动", "原始资料未证明指标根因"],
+        ["名称不匹配或权限不足", "原始资料未证明智能删除根因"],
+        ["因为名称不匹配", "原始资料未证明智能删除根因"],
+        ["因为权限不足", "原始资料未证明智能删除根因"],
+        ["知识库中无相关内容", "原始资料未证明文档代理根因"]
+      ],
+      "layout_rewrites": [
+        ["literal", "失败可重试但需防重复", "迁移失败或 S3 同步失败可按对应状态重试；集群切换失败不自动重试。"],
+        ["regex", "智能删除未找到(?:工作表|图表)?[^。\\n]{0,100}(?:因为|由于)?名称不匹配或权限不足[^。\\n]*[。.]?", "智能删除未找到工作表时，资料只要求提示补充工作表名称并检查可见组；具体根因未说明。"],
+        ["literal", "知识库中无对应答案，或链接被丢弃", "文档查询只能基于知识库，链接需保留；找不到答案时按资料返回“我不知道，请升级我的能力”。"],
+        ["regex", "(修改结构。)[’'”\\\"`]?\\s*-\\s*(\\*\\*S3 重复风险)", "\\1\\n\\n- \\2"],
+        ["regex", "智能删除[^。\\n]*(?:名称识别失败|名称不匹配|权限不足)[^。\\n]*[。.]?", "智能删除未找到工作表时，资料只要求提示补充工作表名称并检查可见组；具体原因资料未说明。"]
+      ],
+      "ordered_item_repairs": [
+        {
+          "repair_id": "migration-check-order",
+          "first_terms": ["数据校验"],
+          "second_terms": ["集群验证"]
+        }
+      ],
+      "reader_markers": [
+        {
+          "marker": "具体原因资料未说明",
+          "text": "具体原因资料未说明；应回查智能洞察集中维度和可能因素字段。",
+          "target_slots": ["actions", "checks", "escalation_boundary"]
+        },
+        {
+          "marker": "文档代理流程",
+          "text": "文档代理流程：/Document 意图查询知识库；结果按提问语言展示；知识库链接保留并自动打开，视频自动并循环播放；找不到答案时返回“我不知道，请升级我的能力”。",
+          "claim_term_groups": [
+            ["/Document", "文档代理"],
+            ["知识库"],
+            ["提问语言", "用户语言"],
+            ["链接"],
+            ["自动"],
+            ["循环播放", "循环"],
+            ["我不知道"]
+          ],
+          "target_slots": ["actions", "checks", "escalation_boundary"]
+        },
+        {
+          "marker": "迁移任务完成条件",
+          "text": "任务完成必须同时满足六项条件：全量迁移完成、全量数据校验通过、目标集群验证通过、集群切换成功、S3 回补完成、S3 回补校验通过。",
+          "claim_term_groups": [
+            ["必须满足", "全量迁移完成"],
+            ["S3 回补校验通过", "目标集群验证通过"]
+          ],
+          "target_slots": ["checks", "escalation_boundary"]
+        },
+        {
+          "marker": "迁移入口权限",
+          "text": "迁移入口权限：只有拥有 main global 数据验证权限的角色能看到并操作数据迁移分页，其他角色不可见；该操作不生成 log。",
+          "claim_term_groups": [
+            ["main global", "数据验证权限"],
+            ["其他角色不会看到", "不会生成log"]
+          ],
+          "target_slots": ["checks", "escalation_boundary"]
+        },
+        {
+          "marker": "问数数据集与会话边界",
+          "text": "问数边界：数据集先按字段/同义词匹配，再按字段值寻找可能字段或表，最后验证表描述与提问意图；资料还记录新增接口提供当前用户可见且开启问数的数据集，弹窗打开时请求一次，切换会话不再请求，点击数据集后重新回答；未识别时内容为空并进入点赞点踩。",
+          "claim_term_groups": [
+            ["字段优先匹配", "schema"],
+            ["字段值匹配"],
+            ["表描述验证"],
+            ["新增接口"],
+            ["每次弹窗打开", "切换会话"],
+            ["点击数据集后重新回答"],
+            ["未识别到数据集"]
+          ],
+          "target_slots": ["checks", "actions"]
+        },
+        {
+          "marker": "智能删除完整流程",
+          "text": "智能删除边界：删除指令解析为 API 并传入数据集、工作表参数；数据集来源包括当前详情/分析页、最近使用和手动选择；多条工作表匹配默认全部返回，未找到时提示补充名称并检查私有组和有数据分析权限的共享组；删除前预览列表供人工确认，Delete 后隐藏原问题、自动提交新的删除指令并显示完成，Cancel 保留列表但禁用操作；删除完成后生成日志并记录工作表全部配置。",
+          "claim_term_groups": [
+            ["解析指令", "API"],
+            ["数据集名称", "工作表名称"],
+            ["当前详情", "分析页"],
+            ["最近使用", "手动选择"],
+            ["多条匹配", "全部返回"],
+            ["预览删除列表", "手动确认"],
+            ["自动提交", "删除所有选中"],
+            ["取消显示", "已取消"],
+            ["日志", "所有配置内容"]
+          ],
+          "target_slots": ["actions", "checks"]
+        },
+        {
+          "marker": "历史根因范围",
+          "text": "历史根因范围：2022-07-11 的 V2.2.0 回归 bug 统计中，Root Cause 包含代码逻辑错误 101 和环境问题 16；这些数字只反映该历史快照，当前根因未在资料中记录。",
+          "claim_term_groups": [
+            ["代码逻辑错误", "环境问题"],
+            ["Root Cause", "回归测试"]
+          ],
+          "target_slots": ["causes", "escalation_boundary"]
+        }
+      ],
+      "dedupe_exact_lines": true
+      ,"renumber_numbered_lists": true
+    },
+    "Q-DIA-01.diagnosis.metric": {
+      "reader_guidance": "指标诊断只回答指标详情、历史样本、命中设备和分析维度；样本不足、数据量过大或没有上期对比时，只按原文说明展示限制。",
+      "repair_guidance": "保留指标异常识别、集中度定位、设备下钻和展示限制；没有原文支持的根因写未明确。",
+      "forbidden_literals": [
+        ["历史样本不足时，图表不显示平均值", "原始资料只说明辅助线会显示，未记录样本不足时隐藏"],
+        ["样本不足时不显示平均值", "原始资料只说明辅助线会显示，未记录样本不足时隐藏"]
+      ],
+      "layout_rewrites": []
+    },
+    "Q-EXP-01.experience": {
+      "reader_guidance": "经验页分开方案取舍、问数数据集识别、文档代理和智能删除图表四条业务流；摘要最多两句，只给主题和关键结论，完整流程只出现一次；保留接口、弹窗/会话、字段优先匹配、字段值匹配、表描述验证、预览删除列表、手动确认、Delete 后新问题与完成文案、Cancel 和删除完成后生成日志，并保留版本/日期和 `资料未说明当前适用版本` 的明确当前适用边界。事实槽位固定为：context 只写背景和目标，tradeoffs 只写方案选项与取舍，version 只写版本/日期，lessons 只写完整业务流和经验，applicability_boundary 只写当前适用性与资料缺口；历史背景和业务流不得重复到适用边界。",
+      "repair_guidance": "不要把所有材料笼统标为历史证据；保留具体版本、日期、流程步骤和未记录结论。`/Document` 请求查询文档知识库，预览删除列表供手动确认；不要丢失 Delete、Cancel 和删除完成后生成日志。",
+      "forbidden_literals": [
+        ["所有历史方案与版本资料", "把不同来源错误归为同一历史状态"],
+        ["均标注为历史证据", "把不同来源错误归为同一历史状态"]
+      ],
+      "layout_rewrites": [
+        ["literal", "智能搭建方案涉及数据集、图表及智能问数，旨在优化版本演进。", "智能搭建方案资料只记录数据集、图表、智能问数及方案选项；最终采用方案未记录。"]
+      ],
+      "reader_markers": [
+        {
+          "marker": "问数数据集与会话细节",
+          "text": "问数数据集识别：字段优先匹配→字段值匹配→表描述验证；可不使用大模型上下文对话以减少 token、避免识别错误并提升速度，但不会保留选择数据集的对话；新增接口提供当前用户可见且开启问数的数据集，弹窗打开时请求一次，切换会话不再请求接口，点击数据集后重新回答；只影响问数，未识别时大模型回答为空并进入点赞点踩。",
+          "claim_term_groups": [
+            ["字段优先匹配"],
+            ["字段值匹配"],
+            ["表描述验证"],
+            ["减少token", "token 消耗"],
+            ["不会保留选择数据集", "选择数据集这一对话"],
+            ["新增接口"],
+            ["每次弹窗打开", "切换会话"],
+            ["点击数据集后重新回答"],
+            ["只影响问数"],
+            ["未识别到数据集"]
+          ],
+          "target_slots": ["tradeoffs", "lessons"]
+        },
+        {
+          "marker": "智能删除完整业务流",
+          "text": "智能删除图表：删除指令解析为 API 并传入数据集、工作表参数；数据集可来自当前详情/分析页、最近使用或手动选择；多条工作表匹配默认全部返回，未找到时提示补充名称并检查可见组；先展示预览列表供人工确认，Delete 后隐藏原问题、自动提交新的删除指令并显示“删除工作表”已完成，Cancel 保留列表但禁用操作；完成后生成日志并记录工作表全部配置。",
+          "claim_term_groups": [
+            ["解析指令", "API"],
+            ["数据集名称", "工作表名称"],
+            ["当前详情", "分析页"],
+            ["最近使用", "手动选择"],
+            ["多条匹配", "全部返回"],
+            ["预览删除列表", "手动确认"],
+            ["自动提交", "删除所有选中"],
+            ["取消显示", "已取消"],
+            ["日志", "所有配置内容"]
+          ],
+          "target_slots": ["lessons", "applicability_boundary"]
+        }
+      ]
+    },
+    "Q-BND-01.operation": {
+      "reader_guidance": "操作页只回答 Merchant System 原始分类下的角色配置、Terminal 激活停用和字段规范可执行流程；原始资料未确认产品归属，不得把本页改写成 MAXSTORE/EMM 产品选择页，也不得添加产品选择链接；权限上限只适用于新建/编辑用户选择角色，创建角色本身的上限若未记录要明确写未说明。金额规则保留除特殊情况外。",
+      "repair_guidance": "保留 Merchant Management→Merchant→Terminal 入口、权限门槛、终端状态和金额限定；路由只写 Merchant System 原始分类与角色/终端操作边界；不要输出 MAXSTORE/EMM 产品选择段或链接，也不要凭空补高权限管理员升级动作。",
+      "forbidden_literals": [
+        ["无法通过配置绕过", "原始资料未支持配置绕过结论"],
+        ["不可通过配置绕过", "原始资料未支持配置绕过结论"],
+        ["管理员可自定义角色但权限不能超过操作者上限", "权限上限被扩大到创建角色"],
+        ["新建角色时权限不能超过操作者权限", "权限上限被扩大到创建角色"],
+        ["新建角色本身的权限不能超过操作者权限", "权限上限被扩大到创建角色"],
+        ["金额字段需保留两位小数并千分位分隔", "金额规则丢失除特殊情况外"],
+        ["金额保留两位小数并千分位分隔", "金额规则丢失除特殊情况外"],
+        ["如果问题是在 MAXSTORE、EMM 与商户系统之间选择产品", "原始资料未确认产品归属，不能在本页做产品选择"],
+        ["EMM 是什么、服务谁", "原始资料未确认产品归属，不能在本页做产品选择"]
+      ],
+      "layout_rewrites": [
+        ["literal", "新建角色时，用户可选角色权限不能超过操作者权限", "角色权限边界：原始资料只明确新建用户、编辑用户时，所选角色拥有的权限不能超过操作者权限；新建角色本身的权限上限未在原始资料说明。"],
+        ["literal", "新建角色本身的权限上限未在原始资料说明。，但创建角色本身的权限上限资料未说明。", "新建角色本身的权限上限资料未说明。"]
+      ],
+      "reader_markers": [
+        {
+          "marker": "Reseller权限明细资料缺口",
+          "text": "Reseller 权限明细：当前原始语料只提供外部引用，未收录引用页面正文；本页不使用其他知识库补齐。",
+          "target_slots": ["failure_boundary", "boundary"]
+        }
+      ]
+    },
+    "Q-BND-01.diagnosis": {
+      "reader_guidance": "诊断页只回答 Merchant System 原始分类下的角色权限、Terminal 状态和日志冲突；原始资料未确认产品归属，不得把本页改写成 MAXSTORE/EMM 产品选择页，也不得添加产品选择链接；可能原因中必须给出来源明确的 Activate Terminal/Disable Terminal 权限检查，不能只把权限写到升级边界；权限上限只适用于新建/编辑用户选择角色，创建角色本身的上限若未记录要明确写未说明。金额规则保留除特殊情况外。",
+      "repair_guidance": "保留权限/状态/日志的诊断边界和资料未记录项；路由只写 Merchant System 原始分类与角色/终端诊断边界；不要输出 MAXSTORE/EMM 产品选择段或链接，也不要补高权限管理员升级动作或配置绕过结论。",
+      "forbidden_literals": [
+        ["无法通过配置绕过", "原始资料未支持配置绕过结论"],
+        ["不可通过配置绕过", "原始资料未支持配置绕过结论"],
+        ["管理员可自定义角色但权限不能超过操作者上限", "权限上限被扩大到创建角色"],
+        ["新建角色时权限不能超过操作者权限", "权限上限被扩大到创建角色"],
+        ["新建角色本身的权限不能超过操作者权限", "权限上限被扩大到创建角色"],
+        ["金额字段需保留两位小数并千分位分隔", "金额规则丢失除特殊情况外"],
+        ["金额保留两位小数并千分位分隔", "金额规则丢失除特殊情况外"],
+        ["如果问题是在 MAXSTORE、EMM 与商户系统之间选择产品", "原始资料未确认产品归属，不能在本页做产品选择"],
+        ["EMM 是什么、服务谁", "原始资料未确认产品归属，不能在本页做产品选择"]
+      ],
+      "layout_rewrites": [
+        ["literal", "新建角色时，用户可选角色权限不能超过操作者权限", "角色权限边界：原始资料只明确新建用户、编辑用户时，所选角色拥有的权限不能超过操作者权限；新建角色本身的权限上限未在原始资料说明。"],
+        ["literal", "新建角色本身的权限上限未在原始资料说明。，但创建角色本身的权限上限资料未说明。", "新建角色本身的权限上限资料未说明。"]
+      ],
+      "reader_markers": [
+        {
+          "marker": "Reseller权限明细资料缺口",
+          "text": "Reseller 权限明细：当前原始语料只提供外部引用，未收录引用页面正文；本页不使用其他知识库补齐。",
+          "target_slots": ["escalation_boundary", "boundary"]
+        }
+      ]
+    }
+  },
+  "source_digest": {
+    "conditional_rules": [
+      {
+        "id": "role_permission_scope",
+        "claim_all": ["新建用户、编辑用户时", "不能超过操作者"],
+        "unsafe_regex": "(?:新建角色|管理员可自定义角色)[^。\\n；;]{0,80}不能超过操作者[^。\\n；;]*[。.]?",
+        "safe_text": "角色权限边界：原始资料只明确新建用户、编辑用户时，所选角色拥有的权限不能超过操作者权限；新建角色本身的权限上限未在原始资料说明。",
+        "target_slots": ["preconditions", "boundary", "failure_boundary", "escalation_boundary"]
+      }
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": "task5-publication-layout.v2",
+  "contract_id": "task5-public-reader-layout-v2",
+  "purpose": "固定用户实际打开的短路径、可读目录和集中审计入口；staging 只属于内部运行证据。",
+  "public_root": "bundle",
+  "reader_entry": "Home.md",
+  "audit_entry": "Audit.md",
+  "machine_audit_root": "_audit",
+  "reader_max_lines": 300,
+  "reader_page_pattern": "products/<product>/<page_type>/<readable-title>.md",
+  "page_types": ["positioning", "concept", "operation", "diagnosis", "experience"],
+  "forbidden_reader_path_segments": ["modules", "boundaries", "knowledge", "staging", "attempt", "candidate-bundle"],
+  "forbidden_reader_filename_patterns": ["-[0-9a-f]{8,}\\.md$", "^(cluster|draft)-[0-9a-f]+\\.md$"],
+  "audit_layout": {
+    "human_entry_is_central": true,
+    "public_companybrain_snapshot": "_audit/companybrain-route-snapshot.json",
+    "machine_indexes": ["_audit/audit-pages.json", "_audit/source-status.json", "_audit/companybrain-route-snapshot.json"],
+    "machine_ledgers": ["_audit/semantic-compile-ledger.jsonl", "_audit/semantic-response-ledger.jsonl", "_audit/route-ledger.jsonl", "_audit/raw-coordinate-map.json", "_audit/source-not-documented-zero-match.json", "_audit/source-not-documented-verifier.json", "_audit/run-result.json", "_audit/directory-manifest.json"],
+    "expected_machine_audit_files": ["_audit/audit-pages.json", "_audit/source-status.json", "_audit/companybrain-route-snapshot.json", "_audit/semantic-compile-ledger.jsonl", "_audit/semantic-response-ledger.jsonl", "_audit/route-ledger.jsonl", "_audit/raw-coordinate-map.json", "_audit/source-not-documented-zero-match.json", "_audit/source-not-documented-verifier.json", "_audit/run-result.json", "_audit/directory-manifest.json"],
+    "evidence_write_order": ["_audit/raw-coordinate-map.json", "_audit/source-not-documented-zero-match.json", "_audit/source-not-documented-verifier.json", "_audit/semantic-compile-ledger.jsonl", "_audit/semantic-response-ledger.jsonl", "_audit/route-ledger.jsonl", "_audit/audit-pages.json", "_audit/source-status.json", "_audit/companybrain-route-snapshot.json", "_audit/run-result.json", "_audit/directory-manifest.json"],
+    "raw_source_excerpt_is_audit_only": true
+  }
+}

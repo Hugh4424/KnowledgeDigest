@@ -1,0 +1,18 @@
+{
+  "schema_version": "task5-slice-cases.v1",
+  "slice_id": "task5-risk-slice-v1",
+  "required_risk_tags": ["source-closure", "empty", "route", "taxonomy", "business-answer", "page-type", "reader-audit", "media", "duplicate", "conflict", "cross-source-lineage", "source-not-documented", "atomic-publish"],
+  "cases": [
+    {"case_id":"Q-POS-01","source_paths":["emm for android /EMM介绍文档.md","emm for android /[AE] EMM服务订阅及企业注册.md","emm for ios/iOS-终端管理.md","emm for android /EMM-AirViewer插件包设置.md","emm for android /AE - 设备详情页远程控制.md","emm for ios/iOS-资产列表.md"],"risk_tags":["route","taxonomy","business-answer","page-type","reader-audit"]},
+    {"case_id":"Q-CON-01","source_paths":["emm for android /AE-通信和网络配置.md","emm for android /全管理相关设备配置项注释更动.md"],"risk_tags":["taxonomy","media","cross-source-lineage"]},
+    {"case_id":"Q-OPR-01","source_paths":["emm for android /[AE]创建二维码注册设备.md","emm for android /零接触相关流程.md","emm for android /[AE] 弹窗输入标识符注册设备.md","emm for android /[AE] EMM服务订阅及企业注册.md"],"risk_tags":["route","page-type","media"]},
+    {"case_id":"Q-DIA-01","source_paths":["GoInsight/GoInsight V2.2.0 bug analysis.md","GoInsight/指标详情页.md","GoInsight/迁移任务列表.md","GoInsight/新建迁移任务.md","GoInsight/16 问数自动识别数据集.md","GoInsight/智能删除图表.md","GoInsight/智能查询文档.md","GoInsight/17  智能搭建.md"],"risk_tags":["conflict","source-not-documented","reader-audit"]},
+    {"case_id":"Q-EXP-01","source_paths":["GoInsight/Sprint 116 Retrospective meeting.md","GoInsight/17  智能搭建.md","GoInsight/16 问数自动识别数据集.md","GoInsight/智能删除图表.md","GoInsight/智能查询文档.md"],"risk_tags":["business-answer","page-type","cross-source-lineage"]},
+    {"case_id":"Q-BND-01","source_paths":["merchant system/新建角色_角色管理_ResellerPortal.md","merchant system/商户系统规范要求.md","merchant system/终端列表_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md","merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md"],"risk_tags":["route","taxonomy","conflict","atomic-publish"]},
+    {"case_id":"G-EMPTY-89","source_paths":["emm for android /AE - AirViewer厂商管理.md"],"risk_tags":["source-closure","empty"]},
+    {"case_id":"G-DUP-CONFLICT","source_paths":["merchant system/Dashboard_MerchantPortal.md","merchant system/Dashboard_ResellerPortal.md"],"risk_tags":["duplicate","conflict"]},
+    {"case_id":"G-MEDIA-CLAIM","source_paths":["emm for android /AE-通信和网络配置.md","emm for android /零接触相关流程.md"],"risk_tags":["media","reader-audit"]},
+    {"case_id":"G-LINEAGE-MERGE","source_paths":["emm for android /AE-通信和网络配置.md","emm for android /全管理相关设备配置项注释更动.md"],"risk_tags":["cross-source-lineage"]},
+    {"case_id":"G-SOURCE-ND","source_paths":["GoInsight/17  智能搭建.md"],"risk_tags":["source-not-documented"]}
+  ]
+}

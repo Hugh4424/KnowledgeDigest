@@ -1,0 +1,26 @@
+{
+  "schema_version": "task5-provider-config.v2",
+  "canonical_bytes": "UTF-8 JSON, recursively sort object keys by Unicode code point, arrays keep order, separators=(',', ':'), ensure_ascii=false, trailing LF",
+  "top_level": {
+    "required": ["schema_version", "mode", "llm", "embedding", "budget", "prompt", "routing"],
+    "additional_properties": false,
+    "mode": {"const": "provider_required"}
+  },
+  "credentials": {
+    "allowed_fields": ["api_key", "api_key_env"],
+    "precedence": ["api_key", "api_key_env"],
+    "api_key": "optional non-empty string; used only in process memory",
+    "api_key_env": "optional environment variable name; compatibility fallback",
+    "receipt_policy": "record neither api_key nor its value; record only redacted provider identity"
+  },
+  "llm": {
+    "allowed": ["api_format", "base_url", "model", "api_key", "api_key_env", "retry_attempts", "timeout_seconds", "max_tokens", "max_input_chars"],
+    "const": {"api_format": "openai", "base_url": "https://dashscope.in.whatspos.cn/v1", "model": "qwen3.8", "allowed_models": ["qwen3.8"], "retry_attempts": 0},
+    "max_input_chars_semantics": "count Python len(prompt) Unicode code points; request and receipt record input_chars and input_length_unit=unicode_code_points"
+  },
+  "embedding": {
+    "allowed": ["base_url", "model", "expected_dimension", "api_key", "api_key_env", "retry_attempts", "timeout_seconds", "calibration_artifact", "calibration_sha256"],
+    "const": {"base_url": "https://llm.paxszapp.com/v1", "model": "jina-embeddings", "expected_dimension": 1024, "retry_attempts": 0}
+  },
+  "failure": "missing credential, parse error, unknown field, type/limit/const mismatch or calibration mismatch blocks before the first provider request"
+}

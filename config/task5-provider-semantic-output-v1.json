@@ -1,0 +1,53 @@
+{
+  "schema_version": "task5-provider-semantic-output.v1",
+  "canonical_bytes": "UTF-8 canonical JSON with recursively Unicode-code-point-sorted object keys, arrays preserved, no spaces, trailing LF, ensure_ascii=false, allow_nan=false",
+  "top_level": {
+    "required": ["schema_version", "route_kind", "status", "input_identity", "page_type", "knowledge_units", "source_claim_ids"],
+    "route_kind": ["quality-reader", "source-direct-audit"],
+    "status": ["compiled", "rejected", "provider_failed"]
+  },
+  "common": {
+    "input_identity": {
+      "required": ["evaluation_mode", "source_paths", "source_snapshot_ids", "source_content_hashes", "prompt_schema_hash"]
+    },
+    "page_type": ["positioning", "concept", "operation", "diagnosis", "experience"],
+    "knowledge_unit": {
+      "required": ["unit_id", "statement", "claim_ids", "support_spans", "scope", "semantic_status", "polarity", "conflict_status", "raw_copy_status", "verification_method", "relation_sensitivity", "relation_facts"],
+      "semantic_status": ["supported", "unknown", "rejected"],
+      "polarity": ["affirmed", "negated", "conditional", "unknown"],
+      "conflict_status": ["none", "resolved", "unresolved"],
+      "raw_copy_status": ["rewritten", "normalized", "blocked"],
+      "verification_method": ["bounded-lexical-v1", "claim-lineage-v1"],
+      "relation_sensitivity": ["none", "subject", "object", "action", "ordered", "quantified", "conditional", "polarity"],
+      "support_span": {
+        "required": ["claim_id", "start_char", "end_char", "text", "span_kind"],
+        "span_kind": ["source_fragment", "claim_full"]
+      },
+      "relation_fact": {
+        "required": ["subject", "predicate", "object", "evidence_spans"],
+        "optional_but_required_when_detected": ["order", "quantity", "condition", "polarity"]
+      }
+    }
+  },
+  "quality-reader": {
+    "required": ["projection_key", "axes", "summary", "slots", "related_claim_ids", "task_path", "required_atom_evidence"],
+    "axes": {"required": ["product", "module", "object", "scene", "boundary"]},
+    "summary": {"required": ["body", "knowledge_unit_ids", "claim_ids"]},
+    "slot": {"required": ["body", "knowledge_unit_ids", "claim_ids"]},
+    "task_path": {"required": ["contract_id", "stages"], "stage_required": ["stage_id", "order", "statement", "knowledge_unit_ids", "claim_ids", "support_spans", "surfaces"]},
+    "required_atom_evidence": {"value_required": ["knowledge_unit_ids", "claim_ids", "support_spans", "surfaces", "scope"], "scope": ["selected-source-closure"]},
+    "forbidden": ["reader_eligible", "verdict", "score", "strict_advantage", "answer_lede", "slot_ledes"]
+  },
+  "source-direct-audit": {
+    "required": ["source_id", "source_path", "summary", "coverage_conclusion", "audit_reason"],
+    "reader_eligible": false,
+    "forbidden": ["projection_key", "slots", "task_path", "required_atom_evidence", "reader_body", "home_link", "verdict", "score", "strict_advantage"]
+  },
+  "failure": {
+    "required": ["failure"],
+    "failure_required": ["code", "reason", "audit_only"],
+    "audit_only": true,
+    "reader_forbidden": true,
+    "codes": ["schema_invalid", "lineage_incomplete", "semantic_unknown", "relation_invalid", "conflict_unresolved", "raw_copy", "provider_timeout", "provider_error", "input_overflow"]
+  }
+}

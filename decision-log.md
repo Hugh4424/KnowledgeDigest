@@ -1,3 +1,230 @@
+# Task5 当前生效决策记录 v4.7（2026-09-04）
+
+<!-- ACTIVE-DECISIONS: 从文件开头到唯一归档分隔标题之前为当前可消费决策；标题之后仅作历史回查。 -->
+
+## 当前状态
+
+`real_run_quality_passed` / `release_pending`。本记录不把当前代码、绿色测试、旧候选、旧 review 或 raw preflight 当成完成证据；本次真实 bundle 的质量通过也不替代实现审查和正式 M401/M401-R/M402 闭环。
+
+## D-167：处理最新实现审查的真实发现（2026-09-04）
+
+### 关键事实
+
+最新 authenticated `mini_task.implementation` 结果发现：active spec 的机器可读修订标记仍为 v4.6；送审 AC trace 的临时输入使用了旧式 `AC-001…AC-013` 且 AC-002 锚点覆盖了 AC-009；user result 把尚未完成的实现审查写入 oracle。
+
+### 选择与理由
+
+已把 active spec 标记同步为 v4.7。下一次实现审查输入统一使用合同规定的 `AC-v4-01…AC-v4-13`，每条只引用不重叠的函数级锚点，并把 user result 的 oracle 限定为已存在的 canonical receipt/trace 校验；这修复的是审查证据身份，不把审查结果误写成 M401-R 或 M402 通过。
+
+### 状态
+
+本次结果保留为 `actionable` 记录；修复后必须重新生成当前 snapshot/material 证据。当前仍是 `release_pending/not_released`。
+
+本记录以最新决策为准：D-163 已取代此前关于旧模型和“设计审查 terminal-clean 才能继续”的冲突表述；旧模型和旧阻断条件只保留为历史事实，不再作为当前执行条件。
+
+## 原始需求
+
+- 只使用 `/Users/Hugh/Downloads/confluence 原始数据` 做知识消化，不凭空补充外部知识；保留全部 89 条原始资料和四个产品的正确归属。
+- 必须先做垂直切片，再做 89 条全量；真实知识生成要调用用户配置中的 LLM 和 embedding，LLM 固定为 `https://dashscope.in.whatspos.cn/v1` 的 `qwen3.8`，配置从 `/Users/Hugh/.config/knowledge-digest/config.json` 读取。
+- 读者入口按问题和场景路由；分类按产品、模块、对象、场景、边界；正文按业务答案组织；页面类型覆盖定位、概念、操作、诊断、经验。
+- 产物必须放在 `/Users/Hugh/Downloads` 的可识别目录，路径、文件名、文件夹和正文都要简洁可读；Reader 可直接阅读，Audit 能回查到原始来源、证据和定位。
+- 五项质量必须逐项、逐场景严格高于 CompanyBrain，不能用平均分、文件数量或机械打分替代；任何缺失、未知、失败或无法回查都不能伪装成通过。
+- 只有来源闭包、真实 provider 消费、Reader/Audit、五项严格胜出和必要实现证据全部成立，才允许宣布 `released` 或 `close`。
+
+## 核心需求
+
+把 89 条 Confluence 原始资料消化成一个简洁、可读、可回查的知识包：不添外部知识、不漏原始资料、不串产品；读者先按问题和场景进入，再按产品、模块、对象、场景、边界和五类页面类型找到业务答案。
+
+## 目标
+
+实现一个能由真实 qwen3.8 与 jina-embeddings 参与生成的 Reader/Audit 闭环，并证明五项质量逐场景严格高于 CompanyBrain；只有当前实现、来源、质量和发布证据都闭合，才允许完成发布。
+
+## 范围
+
+本次必须覆盖垂直切片和 89 条全量，包含四个产品：GoInsight、EMM for Android、EMM for iOS、Merchant System。用户流程是：读取原始目录 → 固定来源与产品归属 → 垂直切片验证 → 89 条全量消化 → 写入 `/Users/Hugh/Downloads` 可识别目录 → 从 `Home.md` 按问题/场景阅读 → 从 `Audit.md` 回查来源、证据和定位 → 五项逐格对比 → 通过全部门禁后再发布。
+
+## 用户流程与边界
+
+- 成功：89 条都在来源审计闭包中，四个产品归属正确，Reader 页面可读，Audit 可回查，真实 provider 调用可核验，五项每个适用场景均为 `KD_WIN`。
+- 失败：任何来源缺失、产品串线、正文无法阅读、证据无法回查、provider 未调用或失败、五项出现非 `KD_WIN`/未知/缺行，都只能保留 `not_released` 或 `blocked`。
+- 空白原始页只能保留在 Audit，不凭空补正文；它不能掩盖其它来源的失败。
+
+## 非目标
+
+不读取或补充外部知识；不改 raw 或 CompanyBrain；不新增任务、不拆成后续需求；不把复杂的 `modules`、`boundaries`、`knowledge`、`audit` 公共目录重新引入；不把 embedding、数据库、向量库、调度器或 agentmemory 变成正式产品功能；不以文件数量、平均分、旧候选、旧 review 或绿色测试冒充质量通过。
+
+## 决定
+
+采用一条生产链：`digest CLI → compiler.digest → providers(qwen3.8/jina-embeddings) → quality.py → publisher.commit`。公开结果只保留 `bundle/README.md`、`Home.md`、`products/<product>/<page_type>/*.md`、`Audit.md` 和 `_audit` 机器证据；五项质量按问题路由、五轴分类、业务答案、五类页面、Reader/Audit 五个维度逐场景比较 CompanyBrain。设计审查 terminal-clean 是可选记录；实现审查、M401/M401-R/M402 和真实质量结果仍是硬门。
+
+## 需求→决定
+
+| 原始需求类别 | 当前决定与证据 | 状态 |
+| --- | --- | --- |
+| goal | 全量 89 条、四产品、五项逐场景严格胜出；见本记录「目标」和 `spec.md` | covered |
+| flow_or_surface | 垂直切片→全量→Downloads bundle→Home 路由→Reader/Audit；见「用户流程与边界」 | covered |
+| data_or_state | 只读 raw，保留 89 条来源闭包、产品归属、provider 与发布状态；见 `plan.md` | covered |
+| success_failure_acceptance | 五项适用行全为 `KD_WIN`；缺失/未知/失败 fail-closed；见「验收标准」 | covered |
+| constraint_non_goal_defer | qwen3.8、config.json、无外部知识、无新增任务、未完成前不 released；见「非目标」和「风险与延期交接」 | covered |
+
+## 验收标准
+
+可验证条件：场景为当前 raw-only 的垂直切片和 89 条全量；数据来源为 `/Users/Hugh/Downloads/confluence 原始数据`、当前 CompanyBrain 快照、`/Users/Hugh/.config/knowledge-digest/config.json`；通过条件是来源闭包、四产品归属、真实 qwen3.8/Jina、Reader/Audit 和五项逐格全部成立且每个适用行 `KD_WIN`；失败条件是任一来源、定位、provider、审查、矩阵或发布身份不闭合，结果必须是 `not_released`/`blocked`。
+
+## 风险与延期交接
+
+当前未决项是：官方当前 implementation review 尚未返回可用语义结果；因此 M401-R、M402 和正式 released 尚未成立。交接给下一步：不再重复设计审查，先重新生成当前 snapshot/material 绑定的实现证据，再依次闭合 M401、M401-R、M402；若 review/provider 不可用，原样记录并保持 `not_released`。
+
+## 三轮 talk
+
+第一轮选择：直接沿用旧复杂目录，后果是读者入口和产品归属继续混乱，拒绝。第二轮选择：只做脚本整理或离线规则，后果是没有真实语义生成和质量保证，拒绝。第三轮选择：保留单一生产链、真实 provider、简洁 Reader 和可回查 Audit，代价是门禁更严格、provider 不可用时不能假装成功，采用。
+
+## 调研
+
+已核对当前工作树、WorkflowHub 根材料、原始 89 条、CompanyBrain、当前 qwen3.8/Jina 配置约定和真实候选；事实与方案以当前四份材料的 active section 为准，历史内容只用于回查。
+
+## grill
+
+已识别的反对意见：五项全胜不能由平均分推导；真实运行不能替代实现审查；89 条闭包不能用 Reader 文件数推导；简洁目录不能牺牲 Audit。当前方案逐项保留这些限制。
+
+## 审查处置
+
+设计 terminal-clean 按用户决定降为 advisory；当前 implementation review 请求在无语义结果后终止，未把超时、旧 review 或静态 JSON 当作通过。下一轮只接受绑定当前材料的 authenticated 结果。
+
+## 最终确认
+
+用户最近的“继续”只确认继续执行，不等于五项质量发布确认；在实现审查、M401-R、M402 和五项真实逐格结果闭合前，最终发布确认保持未完成。
+
+## 拒绝方案
+
+拒绝旧 V37/V50 临时目录、无 LLM 的离线整理、复杂公共目录、跨产品猜测、静态 CompanyBrain 对照和任何用平均分替代逐场景比较的方案。
+
+## 未决项
+
+implementation review 的当前 authenticated 结果、M401 packet、M401-R receipt、M402 真实 run receipt 及最终发布状态仍未闭合；这些是当前阻塞，不通过伪造解决。
+
+## Supersedes
+
+本 active section 取代 archive 之前的旧 Task2/Task3/Task4 根材料；D-163 取代旧 qwen3.6 和设计 terminal-clean 硬阻断；D-164 至 D-167 取代此前实现、血缘和证据身份口径。
+
+## 文档结果
+
+本文件、`spec.md`、`plan.md`、`tasks.md` 根材料已对齐 Task5 v4.7；旧内容保留在 `ARCHIVE-NON-ACTIVE` 后，仅作历史回查，不参与当前判断。
+
+## Exit checks
+
+当前只通过了材料对齐和部分真实质量事实；`quality_status=in_progress`、`product_release_status=not_released`。未完成项保持显式缺失，不能宣布 `released` 或 `close`。
+
+## UI applicability
+
+```json
+{
+  "result": "non_ui",
+  "sources": {
+    "raw_requirement": {"result": "non_ui", "description": "本任务交付本地 Markdown 知识包和 CLI 运行结果，不改页面或前端交互"},
+    "project_inventory": {"result": "non_ui", "description": "当前项目是本地知识消化与发布工具，范围是编译、质量和文件发布"},
+    "planned_or_changed_frontend_fact": {"result": "non_ui", "description": "没有计划或变更 frontend component、page、interaction 或 browser surface"}
+  },
+  "reason": "当前请求只改变知识消化管线和 Markdown 产物，不改变 UI",
+  "handoff": "make-decision 已记录；不适用浏览器页面验收"
+}
+```
+
+## 收敛检查
+
+| 维度 | 用户答案 | 事实/材料 | 可执行验收 |
+| --- | --- | --- | --- |
+| 目标 | 用户已确认继续当前目标；取舍：质量优先于快速 close；被拒方案：只整理文件；未决项：正式门禁尚未闭合 | `decision-log.md`「原始需求」「目标」 | 场景：89 条全量；数据来源：raw；通过：四产品与五项闭合；失败：任一缺失即不发布 |
+| 范围 | 用户已确认必须做垂直切片和 89 条全量；取舍：一次闭合全量；被拒方案：拆后续任务；未决项：无范围新增 | `decision-log.md`「范围」「用户流程与边界」 | 场景：四产品；数据来源：raw；通过：89 条进入闭包；失败：漏条或串产品 |
+| 方案 | 用户已确认继续单一生产链；取舍：真实 provider 换取质量可证；被拒方案：离线规则冒充 LLM；未决项：implementation review/M401-R/M402 | `spec.md` 当前修订 v4.7、`plan.md` 当前 M401/M402 | 场景：真实运行；数据来源：config.json；通过：qwen3.8/Jina、Reader/Audit、五项全胜；失败：任何身份或调用不可证 |
+| 验收 | 用户已确认五项必须全部高于 CompanyBrain；取舍：不接受平均分；被拒方案：机械总分；未决项：正式 M402 尚未闭合 | `decision-log.md`「验收标准」、`tasks.md` M402 | 场景：每个 projection×dimension；数据来源：当前 raw/CompanyBrain；通过：适用行全 `KD_WIN`；失败：缺行、未知、非胜出 |
+
+## D-163：统一 qwen3.8，取消设计 terminal-clean 硬阻断（2026-09-03）
+
+### 原始需求
+
+用户明确要求以后统一使用 `https://dashscope.in.whatspos.cn/v1` 的 `qwen3.8`，并确认没有必要等待或产出可认证的 `mini_task.design` `terminal-clean` 结果；只要当前实现和真实质量链能继续，就继续推进。
+
+### 关键事实
+
+- 当前代码、用户配置约定、provider authority 和真实候选都已经使用 qwen3.8；旧模型只存在于历史归档或旧回归材料，不是当前 Task5 的允许模型。
+- 当前 successor 校验已经允许 `parent_design_review=null`；真正仍需要的是 authenticated `mini_task.implementation`、当前 snapshot/material、M401/M401-R、真实 qwen3.8/Jina 运行、Reader/Audit 闭包和五项逐格胜出。
+- 缺失设计审查结果不会证明质量通过，也不会替代实现审查；它只是 advisory 缺口。
+
+### 选择与理由
+
+把 active spec、plan、tasks 的模型合同统一为 qwen3.8；把 DESIGN-ADVISORY 明确为可选、非阻断记录，保留实现审查和全部真实质量硬门。这样去掉无价值的设计审查等待，但不把 provider 调用、绿色测试或旧结果当成 released。
+
+### 延期交接
+
+不再运行设计 terminal-clean review。继续从当前实现审查/M401-R 的真实身份闭合推进；若实现审查或后续真实运行缺证据，仍保持 `release_pending/not_released`，直到五项全部严格高于 CompanyBrain。
+
+## D-164：修复当前实现审计发现的三个真实断点（2026-09-03）
+
+### 关键事实
+
+当前只读审计发现：formal Task5 若指定自定义 source manifest，compiler 和 formal Audit 仍可能各自读取仓库默认 manifest；formal Audit 会链接到随后被移除的临时 ledger；provider 预算不足在 formal runtime 外层会被归类成失败并返回 3，掩盖“暂时不可用/未执行”的事实。
+
+### 选择与理由
+
+增加 `DigestRequest.source_manifest_path` 并让 formal run、compiler、Audit 共用同一输入；正式 Audit 去掉已不发布的 `_audit/sources.jsonl`/`_audit/evidence.jsonl` 死链接；provider/config 不可用统一记录为 `blocked`、exit 2，保留真正的 `failed`、exit 3 给实现或发布错误。以上只修复身份、可读回查和失败语义，不改变 raw 内容、四产品归属或五项质量规则。
+
+### 验证与延期交接
+
+新增两项回归测试；Task5 相关 targeted tests 为 `124 passed`，完整回归为 `860 passed, 3 skipped`。实现审查曾因 provider 超时未产生可用结果，不能算通过；设计 terminal-clean 已按 D-163 放弃等待。M401-R/M402 和五项真实严格胜出仍未完成，因此当前仍为 `release_pending/not_released`。
+
+## D-165：修正实现审查暴露的证据伪覆盖与占位行歧义（2026-09-04）
+
+### 关键事实
+
+当前快照完整回归为 `860 passed, 3 skipped`，但实现审查发现：不能用一张未区分责任的全量 pytest receipt 给 `AC-v4-01…13` 逐项填“已证明”；另外，active spec 原先同时写了“缺口占一行 RenderLedger”和“每个 section 生成两行”，导致 `unknown_units`、`rendered_units` 与 Reader 可见标题/正文的口径不一致。
+
+### 选择与理由
+
+AC trace 改为只接受当前快照、逐 AC 有明确 owner 的聚焦 receipt；没有直接证据的 AC 保持 unknown，不再用总回归数量冒充。占位 section 明确生成 `Reader.section` 与 `Reader.answer_body` 两行 Audit ledger，二者只计 `unknown_units`，不进入事实 lineage 分母；非占位 section 的两行才共享首个 raw binding。同步更新 spec/plan/tasks 和回归测试，避免实现、质量计算和审查包各自解释。
+
+### 验证与延期交接
+
+修正后相关血缘/语义/合同测试为 `22 passed`。本轮实现审查仍不能作为 M401-R 通过证据：旧 C3/M401 仍绑定旧 snapshot/material，新的逐 AC receipt 和当前 M401 fixture 尚待 authenticated gate 生成；M402 仍必须重新绑定当前 raw、CompanyBrain、qwen3.8/Jina 和五项逐格结果。状态保持 `release_pending/not_released`。
+
+## D-166：让 AC trace 的测试归属与实际 owner 一致（2026-09-04）
+
+### 关键事实
+
+当前快照实现审查确认逐 AC receipt 已存在，但部分 implementation anchor 只是宽泛地落在 `tests/test_simple_digest.py`，而任务卡把四个 gate owner 规定在 acceptance 文件中；这会让 reviewer 无法区分“gate 必须覆盖的 owner”和“某一 AC 的具体行为测试”。此外，spec/plan/tasks 的修订标题仍停在 v4.6，和 D-165 不一致。
+
+### 选择与理由
+
+保留四个 gate owner 不变，同时明确：逐 AC anchor 必须指向实际覆盖该 AC 的具体测试函数；必要时可引用相邻回归文件，但不替代 gate owner。将三份 active 合同统一升为 v4.7，避免审查包按旧 revision 解释当前内容。后续 AC trace 使用不重叠的函数级 anchor，不再用同文件大段范围复用归属。
+
+### 延期交接
+
+当前实现审查的上一份结果仍需由这次身份一致的材料重新生成并由 authenticated adapter 记录；实现审查通过也只解锁 M401，不代表 M401-R、M402 或五项真实胜出已完成。
+
+## D-162：真实候选的独立五维复核（2026-09-03）
+
+### 关键事实
+
+对 `/Users/Hugh/Downloads/KnowledgeDigest-task5-qwen38-real-20260903-v3` 做了独立黑盒复核：只使用当前 89 条 raw、当前 CompanyBrain 和固定 12 个质量投影；候选实际包含 89 条来源闭包、99 个 Reader 页，真实运行记录为 qwen3.8 与 jina-embeddings。首次复核发现评估器把合同允许的 `known_empty` 误判为失败，且定位页的一轮 qwen 输出因理由过长而截断；这不是候选知识内容通过的证据。
+
+### 选择与理由
+
+评估器已修正为：精确闭合的 `known_empty` 只要求没有 Reader 页、保留 Audit，不作为失败；独立评审提示将每个理由限制为短句并固定五个键，模型输出不完整仍保持 `not_released`。修复后重新执行独立复核，12 个投影的两轮、五个维度全部为 `KD_WIN`，无 judge error、无 hard blocker；新增回归测试验证 `known_empty` 的 Audit-only 闭包。
+
+### 当前结论
+
+当前真实候选满足“质量复核通过”这一项，但这不等于正式发布：完整回归为 `858 passed, 3 skipped`；authenticated implementation successor、M401-R 和 M402 仍未形成当前身份一致的正式证据，因此总状态仍为 `release_pending`，不得 close/released。
+
+### 当前证据身份
+
+最新全量回归、AC trace、用户结果和独立质量证据都必须由 WorkflowHub canonical record 自身绑定当次 snapshot/material；本记录不重复抄写会随补充记录变化的 hash，避免“记录证据引用又改变被引用快照”的循环。当前这些记录只证明当前回归和真实候选质量结论，不宣称实现审查、M401-R 或 M402 已完成。
+
+### 延期交接
+
+不再重复设计审查，也不把缺少 `terminal-clean` 的 DESIGN-ADVISORY 当阻断。下一步只处理当前实现审查/M401-R 的身份闭合；若无法取得当前 authenticated review，必须明确保持 `not_released`，不能用旧 review、静态质量 JSON 或独立黑盒结果替代。
+
+## ARCHIVE-NON-ACTIVE: previous root material
+
 # Decision Log
 
 ## 原始需求

@@ -211,7 +211,7 @@ def test_provider_failure_is_not_reported_as_completed(tmp_path: Path, monkeypat
     new_dir = _input(tmp_path)
     kb_dir = tmp_path / "provider-failure-kb"
     paths = validate_paths(new_dir, kb_dir, allow_new_kb=True)
-    monkeypatch.setenv("KD_LLM_MODEL", "qwen3.6")
+    monkeypatch.setenv("KD_LLM_MODEL", "qwen3.8")
     monkeypatch.setenv("KD_LLM_BASE_URL", "https://dashscope.in.whatspos.cn/v1")
     monkeypatch.setenv("KD_LLM_API_KEY", "test-key")
 
@@ -243,7 +243,7 @@ def test_integrated_provider_heartbeat_updates_before_fifteen_seconds(tmp_path: 
     new_dir = _input(tmp_path)
     kb_dir = tmp_path / "slow-provider-kb"
     paths = validate_paths(new_dir, kb_dir, allow_new_kb=True)
-    monkeypatch.setenv("KD_LLM_MODEL", "qwen3.6")
+    monkeypatch.setenv("KD_LLM_MODEL", "qwen3.8")
     monkeypatch.setenv("KD_LLM_BASE_URL", "https://dashscope.in.whatspos.cn/v1")
     monkeypatch.setenv("KD_LLM_API_KEY", "test-key")
     result: dict[str, object] = {}
@@ -291,7 +291,7 @@ def test_keyboard_interrupt_finishes_as_cancelled(tmp_path: Path, monkeypatch) -
     new_dir = _input(tmp_path)
     kb_dir = tmp_path / "cancelled-kb"
     paths = validate_paths(new_dir, kb_dir, allow_new_kb=True)
-    monkeypatch.setenv("KD_LLM_MODEL", "qwen3.6")
+    monkeypatch.setenv("KD_LLM_MODEL", "qwen3.8")
     monkeypatch.setenv("KD_LLM_BASE_URL", "https://dashscope.in.whatspos.cn/v1")
     monkeypatch.setenv("KD_LLM_API_KEY", "test-key")
 

@@ -1,0 +1,148 @@
+{
+  "schema_version": "task5-machine-evidence-contract.v1",
+  "contract_id": "task5-machine-evidence-v1",
+  "purpose": "冻结在输出安全、来源零匹配、CompanyBrain 回放、WorkflowHub 认证和运行状态中被消费的机器证据；每个条目独立绑定输入快照、canonical bytes、禁止字段和 owner。",
+  "canonical_bytes": {
+    "encoding": "utf-8",
+    "json": "recursive_unicode_code_point_sorted_keys_no_spaces_ensure_ascii_false_allow_nan_false",
+    "arrays": "preserve_order",
+    "trailing_newline": true,
+    "self_hash_field": "canonical_sha256"
+  },
+  "artifact_schemas": {
+    "workflowhub-authenticated-parent-projection.v1": {
+      "path": "bundle/canonical-evidence.json",
+      "owner": "WorkflowHub host",
+      "required": ["task_id", "stage", "status", "run_id", "attempt_id", "snapshot_tree", "material_revision", "result_ref", "result_sha256", "attempt_ref", "attempt_sha256", "original_requirement", "talk", "risk_authorization", "writer_attestation"],
+      "bindings": ["make-decision parent receipt/result/attempt ref+SHA", "current snapshot/material", "raw requirement ref+SHA", "each Talk choice and selection SHA", "accepted_risk authorization", "writer attestation"],
+      "forbidden": ["raw_source", "prompt", "response", "api_key", "Authorization", "host_secret"]
+    },
+    "task5-preflight-result.v1": {
+      "path": "quality/evidence/task5/run-preflight/attempts/<attempt_id>/preflight-result.json",
+      "owner": "Task5 runtime host",
+      "required": ["run_id", "attempt_id", "status", "outcome", "reason_code", "exit_code", "observed_calls", "input_identity", "output_safety", "canonical_sha256"],
+      "bindings": ["raw/CompanyBrain/output path identity", "runtime contract", "M401-R gate when applicable"],
+      "forbidden": ["raw_source", "prompt", "response", "api_key", "Authorization", "absolute_host_paths"]
+    },
+    "knowledge-digest-host-run-receipt.v1": {
+      "path": "quality/evidence/task5/actual-run/attempts/<attempt_id>/host-run-receipt.json",
+      "owner": "authenticated M402 runner",
+      "required": ["run_id", "raw_root_identity", "companybrain_root_identity", "downloads_run_root", "source_manifest_sha256", "public_receipt_ref", "public_receipt_sha256", "terminal_status"],
+      "bindings": ["authenticated raw root", "authenticated CompanyBrain root", "Downloads run root", "public run-result receipt"],
+      "forbidden": ["api_key", "Authorization", "prompt", "raw_source"]
+    },
+    "knowledge-digest-companybrain-route-snapshot.v1": {
+      "path": "bundle/_audit/companybrain-route-snapshot.json",
+      "owner": "Task5 publication",
+      "required": ["schema_version", "status", "run_id", "source_manifest_sha256", "companybrain_snapshot_id", "companybrain_tree_sha256", "observation_sha256", "regular_markdown_files", "entry_files", "observation_ref", "failure"],
+      "bindings": ["host snapshot", "actual-run CompanyBrain tree", "canonical relative paths"],
+      "forbidden": ["root_realpath", "absolute_paths", "staging_paths", "workflowhub_paths", "verdict", "score"]
+    },
+    "semantic_zero_match_certificate.v1": {
+      "path": "bundle/_audit/source-not-documented-zero-match.json",
+      "owner": "Task5 deterministic source analyzer",
+      "write_phase": "S2 source analysis, before source-not-documented Reader promotion",
+      "manifest_entry": "source-not-documented-zero-match",
+      "visibility": "public sanitized Audit evidence",
+      "consumers": ["source-not-documented Reader gate", "task5-directory-manifest.v1", "task5-run-result.v1", "M401/M402 release predicate"],
+      "required": ["source_id", "source_snapshot_id", "source_content_hash", "analyzer_id", "analyzer_sha256", "blocks", "coverage", "zero_match", "canonical_sha256"],
+      "bindings": ["every SourceBlock", "block hash/locator", "source snapshot/content hash", "complete coverage"],
+      "forbidden": ["semantic_verdict_without_block_coverage", "raw_source", "api_key"]
+    },
+    "semantic_zero_match_verifier_receipt.v1": {
+      "path": "bundle/_audit/source-not-documented-verifier.json",
+      "host_attempt_path": "quality/evidence/task5/snd-verifier/attempts/<attempt_id>/verifier-receipt.json",
+      "promotion_path": "quality/evidence/task5/snd-verifier/verifier-receipt.json",
+      "owner": "Task5 independent deterministic verifier",
+      "write_phase": "S2 after producer certificate and before source-not-documented Reader promotion",
+      "manifest_entry": "source-not-documented-verifier",
+      "visibility": "public sanitized Audit evidence",
+      "consumers": ["source-not-documented Reader gate", "task5-directory-manifest.v1", "task5-run-result.v1", "M401 finalize", "M402 release predicate"],
+      "required": ["schema_version", "attempt_id", "verifier_id", "source_snapshot_id", "source_hash", "certificate_ref", "certificate_sha256", "recomputed_result_digest", "comparison_digest", "block_count", "compared_block_count", "status", "failure_code", "current_material_id", "canonical_sha256"],
+      "bindings": ["current source snapshot/content hash", "producer certificate ref/actual SHA-256", "recomputed per-Block result digest", "certificate comparison digest", "current Task5 material_id", "promoted attempt identity"],
+      "forbidden": ["raw_source", "prompt", "response", "api_key", "Authorization", "absolute_host_paths", "quality_verdict"]
+    },
+    "raw-coordinate-map.v1": {
+      "path": "bundle/_audit/raw-coordinate-map.json",
+      "owner": "Task5 source ledger",
+      "write_phase": "S1 source snapshot/Block ledger, before Claim and Reader compilation",
+      "manifest_entry": "raw-coordinate-map",
+      "visibility": "public Audit evidence without host paths or raw bytes",
+      "consumers": ["ClaimSemanticFrame", "Reader/Audit replay", "task5-directory-manifest.v1", "M401/M402 release predicate"],
+      "required": ["source_snapshot_id", "source_content_hash", "blocks", "coverage", "canonical_sha256"],
+      "bindings": ["raw byte/line offsets", "SourceBlock identity", "complete non-overlap coverage"],
+      "forbidden": ["host_path", "raw_bytes"]
+    },
+    "task5-output-lock.v1": {
+      "path": "<output>.task5.lock",
+      "owner": "Task5 runtime writer",
+      "required": ["task_id", "run_id", "material_id", "owner_nonce", "pid", "created_at", "output_realpath", "staging_path", "failure_evidence_path", "state"],
+      "state_values": ["held", "rename_committed", "finalizing", "published", "failed", "cancelled", "publication_ambiguous"],
+      "transitions": [
+        "held->rename_committed|failed|cancelled",
+        "rename_committed->finalizing|failed|publication_ambiguous",
+        "finalizing->published|failed|publication_ambiguous"
+      ],
+      "bindings": ["current output", "same-filesystem staging", "single writer", "candidate tree and manifest digest", "rename receipt", "finalize receipt", "failure-sink compensation or publication_ambiguous evidence"],
+      "forbidden": ["api_key", "Authorization", "prompt", "raw_source"]
+    },
+    "task5-directory-manifest.v1": {
+      "path": "bundle/_audit/directory-manifest.json",
+      "owner": "Task5 publication",
+      "required_paths": ["bundle/_audit/audit-pages.json", "bundle/_audit/source-status.json", "bundle/_audit/companybrain-route-snapshot.json", "bundle/_audit/semantic-compile-ledger.jsonl", "bundle/_audit/semantic-response-ledger.jsonl", "bundle/_audit/route-ledger.jsonl", "bundle/_audit/raw-coordinate-map.json", "bundle/_audit/source-not-documented-zero-match.json", "bundle/_audit/source-not-documented-verifier.json", "bundle/_audit/run-result.json", "bundle/_audit/directory-manifest.json"],
+      "required": ["layout_contract_sha256", "files", "forbidden_path_scan", "canonical_sha256"],
+      "bindings": ["publication layout v2", "actual published bytes", "reader/audit paths"],
+      "forbidden": ["staging_path", "host_path", "api_key"]
+    },
+    "task5-failure-evidence.v1": {
+      "path": "<output>.failure-evidence/<run_id>/failure-evidence.json",
+      "owner": "Task5 failure sink",
+      "required": ["run_id", "status", "reason_code", "input_identity", "provider_identity", "observed_calls", "exit_code", "audit_ref", "cleanup_result", "canonical_sha256"],
+      "bindings": ["run/material/request identity", "source/block hash and relative locator when applicable", "ledger/Audit ref"],
+      "forbidden": ["raw_source", "prompt", "response", "api_key", "Authorization", "absolute_host_paths", "free_text_secret"]
+    },
+    "task5-run-result.v1": {
+      "path": "bundle/_audit/run-result.json",
+      "owner": "Task5 runtime",
+      "write_phase": "S2-S4 after output/staging exists; never created to satisfy an S0/S1 failure",
+      "manifest_entry": "run-result",
+      "visibility": "public machine evidence",
+      "consumers": ["CLI", "acceptance tests", "M401/M402 release predicate"],
+      "required": ["publication_status", "outcome", "reason_code", "exit_code", "observed_calls", "input_identity", "artifact_manifest", "canonical_sha256"],
+      "bindings": ["actual run identity", "phase status", "published artifact manifest", "failure evidence when output exists"],
+      "forbidden": ["api_key", "Authorization", "prompt", "raw_source"]
+    },
+    "task5-root-cause-input-manifest.v1": {
+      "path": "config/task5-root-cause-input-manifest-v1.json",
+      "owner": "R1/M101 design authority",
+      "required": ["schema_version", "manifest_id", "inputs", "required_root_cause_families", "canonical_sha256"],
+      "bindings": ["five fixed historical/raw/CompanyBrain input labels", "directory/file snapshot hashes", "current repair baseline and source manifest identity"],
+      "forbidden": ["api_key", "Authorization", "raw_source_bytes", "prompt", "response"]
+    },
+    "task5-root-cause-evidence.v2": {
+      "path": "quality/evidence/task5/root-cause/attempts/<attempt_id>/root-cause-evidence.json",
+      "promotion_path": "quality/evidence/task5/root-cause/root-cause-evidence.json",
+      "owner": "R1/M101",
+      "write_phase": "baseline preflight before RED/provider/embedding",
+      "visibility": "host evidence with sanitized public projection only",
+      "consumers": ["R1-R4", "M401", "M401-R", "M402 preflight"],
+      "required": ["attempt_id", "status", "outcome", "input_manifest_ref", "input_manifest_sha256", "current_task_snapshot", "input_snapshots", "observations", "causal_mapping", "coverage", "canonical_sha256"],
+      "bindings": ["each RC input snapshot/hash", "observed artifact/ref/sha/locator", "old-result to CompanyBrain case/projection/dimension comparison", "contract gap", "repair ref/owner/status", "current material/snapshot"],
+      "forbidden": ["raw_source", "prompt", "response", "api_key", "Authorization", "absolute_host_paths_in_public_projection", "free_text_secret"]
+    },
+    "workflowhub-implementation-successor.v1": {
+      "path": "quality/evidence/task5/workflowhub-implementation-handoff.json",
+      "owner": "WorkflowHub authenticated implementation adapter",
+      "visibility": "host machine evidence; Task5 runtime consumes read-only",
+      "required": ["schema_version", "handoff_kind", "task_id", "project_name", "stage", "review_kind", "handoff_ref", "handoff_sha256", "parent_design_review", "implementation_review", "current", "runtime_contract", "writer_attestation"],
+      "const": {"handoff_kind": "implementation", "stage": "build-code", "review_kind": "mini_task.implementation", "implementation_review_outcome": "available", "terminal_status": "semantic", "terminal_clean": true},
+      "parent_design_review_when_present": ["review_kind", "result_ref", "result_sha256", "attempt_ref", "attempt_sha256", "report_ref", "report_sha256", "contract_id", "contract_hash", "semantic_hash", "snapshot_tree", "material_id", "writer_attestation"],
+      "parent_design_review_null_rule": "null is valid when the user has explicitly chosen to continue without a certifiable terminal-clean mini_task.design result; it is advisory-only and never blocks M401/M402",
+      "implementation_review_required": ["review_kind", "result_ref", "result_sha256", "attempt_ref", "attempt_sha256", "report_ref", "report_sha256", "outcome", "terminal_status", "terminal_clean", "finding_dispositions_ref", "finding_dispositions_sha256", "all_findings_disposed"],
+      "bindings": ["current TaskKernel snapshot/material/worktree", "optional advisory mini_task.design parent", "terminal mini_task.implementation result/attempt/report", "all finding dispositions", "Task5 runtime and semantic contract identity"],
+      "forbidden": ["api_key", "Authorization", "raw_source", "prompt", "response"]
+    }
+  },
+  "preflight_rule": "S0/S1 failures write task5-preflight-result.v1 to the repository evidence root before any output/staging/lock; they do not require bundle/_audit/run-result.json. Once output/staging exists, task5-run-result.v1 is mandatory at bundle/_audit/run-result.json and missing/corrupt bytes mean failed/3.",
+  "missing_or_drift_rule": "unknown schema, missing binding, forbidden field, hash drift or unavailable writer is blocked with observed_calls=0; no artifact is promoted."
+}

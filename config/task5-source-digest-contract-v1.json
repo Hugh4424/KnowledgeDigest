@@ -1,0 +1,43 @@
+{
+  "schema_version": "task5-source-digest-contract.v1",
+  "contract_id": "task5-source-digest-reader-v1",
+  "purpose": "将每条非空原始来源交给 Qwen 做单来源知识消化，形成可读 Reader 页面；它不是原文复制，也不是质量案例的替代物。",
+  "source_manifest": {
+    "path": "config/task5-source-page-manifest-v2.json",
+    "sha256": "54f54bb2b6d589f403862d4049ee0cfec5973121c4de757e4b327d2f51448973",
+    "expected_count": 89,
+    "one_source_per_request": true
+  },
+  "semantic_output_contract": {
+    "path": "config/task5-provider-semantic-output-v2.json",
+    "sha256": "2ad7f2645f19fc2b2742e3ce709a1e17f32b8804c44bc107af7ddf64d5e45c56",
+    "schema_version": "task5-semantic-output.v2"
+  },
+  "provider_route": {
+    "request_kind": "source-digest",
+    "route_kind": "source-digest",
+    "model_must_generate": true,
+    "page_type_must_be_one_of": [
+      "positioning",
+      "concept",
+      "operation",
+      "diagnosis",
+      "experience"
+    ],
+    "reader_eligible_on_success": true,
+    "cross_source_claims": false,
+    "raw_full_source_fallback": false
+  },
+  "semantic_closure": {
+    "claim_scope": "only_supported_claims_from_the_single_source",
+    "summary_and_sections_must_have_claim_lineage": true,
+    "unsupported_sentence": "drop_or_fail_to_audit",
+    "empty_or_no_supported_claims": "audit_only",
+    "provider_failure": "audit_only_and_not_released"
+  },
+  "explicit_audit_route": {
+    "request_kind": "source-direct-audit",
+    "reader_eligible": false,
+    "must_not_be_used_for_normal_89_source_digest": true
+  }
+}

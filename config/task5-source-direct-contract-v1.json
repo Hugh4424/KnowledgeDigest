@@ -1,0 +1,70 @@
+{
+  "schema_version": "task5-source-direct-contract.v1",
+  "route_kind": "source-direct-audit",
+  "purpose": "Compile one manifest source into a source-backed semantic audit projection without using QualityCase atom_forms or creating a Reader page.",
+  "input_closure": {
+    "source_paths": "exactly_one_manifest_source_path",
+    "claim_ids": "only_supported_claims_from_the_source_path",
+    "allow_cross_source_claims": false
+  },
+  "semantic_mode": "claim-fragment-audit",
+  "knowledge_unit_contract": {
+    "required": [
+      "unit_id",
+      "statement",
+      "claim_ids",
+      "support_spans",
+      "scope",
+      "semantic_status",
+      "polarity",
+      "conflict_status",
+      "raw_copy_status",
+      "verification_method",
+      "relation_sensitivity",
+      "relation_facts"
+    ],
+    "statement_support": "every_statement_sentence_must_be_deterministically_supported_by_its_claim_fragments",
+    "allowed_rewrite_operations": [
+      "unicode_nfkc",
+      "whitespace_normalization",
+      "punctuation_normalization",
+      "sentence_boundary_preserving_compaction",
+      "claim_fragment_join_with_explicit_source_locators"
+    ],
+    "forbidden_operations": [
+      "quality_case_atom_expansion",
+      "unstated_synonym_invention",
+      "cross_source_fact_join",
+      "scope_widening",
+      "condition_or_negation_change",
+      "raw_full_source_copy"
+    ],
+    "verification_method": "claim-fragment-lineage-v1",
+    "unverifiable_result": "audit_only_rejected"
+  },
+  "summary_contract": {
+    "required": true,
+    "mode": "bounded_claim_fragment_summary",
+    "every_sentence_must_reference_knowledge_units": true,
+    "must_not_introduce_new_fact": true,
+    "empty_or_unverifiable": "audit_only_rejected"
+  },
+  "publication_contract": {
+    "reader_eligible": false,
+    "reader_task_path": false,
+    "reader": false,
+    "home": false,
+    "audit": true,
+    "coverage": true,
+    "render_ledger": true,
+    "release_surface": "none"
+  },
+  "negative_cases": [
+    "claim_from_another_source",
+    "unsupported_synonym_or_inference",
+    "changed_relation_or_condition",
+    "full_source_copy",
+    "summary_sentence_without_unit",
+    "unit_without_nonempty_support_span"
+  ]
+}
