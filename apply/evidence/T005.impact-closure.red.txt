@@ -1,0 +1,5 @@
+Task: T005 RED — impact closure and stale section protection
+Command: uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k impact_closure
+Expected RED: exit 1
+Observed: exit 1; 3 target assertions failed; 19 tests deselected.
+Interpretation: the focused oracle was established before the production impact seam existed. This was a target behavior failure, not a setup/import failure.

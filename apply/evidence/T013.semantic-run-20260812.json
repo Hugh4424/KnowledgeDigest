@@ -1,0 +1,222 @@
+{
+  "ac_bindings": {
+    "AC-01": "structure-evidence",
+    "AC-03": "claim-backtrace",
+    "AC-05": "impact-closure",
+    "AC-07": "status-navigation",
+    "AC-09": "sample-coverage",
+    "AC-10": "run-identity",
+    "AC-11": "machine-bottom-line",
+    "AC-12": "revision-ledger",
+    "AC-13": "source-gap-section-state"
+  },
+  "answerability_source": "task0-question-set.v1",
+  "answerability_subset": {
+    "content_hash": "8f5cb5e82c66d26d598e4aaeba71aa06db1b1cd67f9b92c122ab5ab2c70f1ac9",
+    "id": "knowledge-digest-task0-v1",
+    "method": "section-presence-v1",
+    "questions": [
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-01"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-02"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-03"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-04"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-05"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-06"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-07"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-08"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-09"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-10"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-11"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-12"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-13"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-14"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-15"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-16"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-17"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-01"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-02"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-03"
+      }
+    ],
+    "reason": "machine first-hit from typed sections; this is not human reader review"
+  },
+  "budget": {
+    "max_tokens": 8192,
+    "provider_calls": null,
+    "provider_calls_planned": null,
+    "source": "DigestSettings/current environment"
+  },
+  "concepts": [],
+  "contract_revision": 1,
+  "delivery_status": "not_released",
+  "detector": {
+    "name": "task2b-publication-gate.v1",
+    "version": "jaccard-5gram.v1"
+  },
+  "evidence_backtrace": [],
+  "execution_mode": "real_semantic",
+  "failure_reasons": [
+    "semantic evidence backtrace is unavailable",
+    "validate: stage=manifest; failed input /var/folders/27/fkx5yqf96c13pfkc1w75xy840000gp/T/kd-task2b-live-xvq9bpfy/sample-input/sources.jsonl: missing declarations: GoInsight/12. GoInsight DC部署方案.md, GoInsight/16 问数自动识别数据集.md, GoInsight/17  智能搭建.md, GoInsight/2021 Annual Leave Plan.md, GoInsight/GoInsight V2.2.0 bug analysis.md, GoInsight/Sprint 116 Retrospective meeting.md, GoInsight/位置字段筛选.md, GoInsight/创建设备报告.md, GoInsight/图表类型.md, GoInsight/市场报告快照.md, GoInsight/指标详情页.md, GoInsight/收费应用安装统计.md, GoInsight/数据分析.md, GoInsight/新建迁移任务.md, GoInsight/日志管理.md, GoInsight/智能删除图表.md, GoInsight/智能查询文档.md, GoInsight/添加关联数据.md, GoInsight/添加指标页.md, emm for android /AE - 应用定向发布.md, emm for android /AE - 应用详情.md, emm for android /AE - 设备详情页远程控制.md, emm for android /AE-分组管理.md, emm for android /AE-参数推送.md, emm for android /AE-应用参数配置.md, emm for android /AE-开发者上传应用.md, emm for android /AE-通信和网络配置.md, emm for android /[AE] 市场列表及操作.md, emm for android /[AE] 弹窗输入标识符注册设备.md, emm for android /[AE]创建二维码注册设备.md. Rerun after correcting the input."
+  ],
+  "output_path": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task2b-knowledge-publication-body-compiler/apply/evidence/T013.semantic-run-20260812.json",
+  "provider": {
+    "base_url": "https://dashscope.in.whatspos.cn/v1",
+    "credential": "environment-only",
+    "model": "qwen3.6",
+    "provider": "qwen3.6"
+  },
+  "revision_ledger": [
+    {
+      "reason": "initial accepted body contract",
+      "revision": 0
+    },
+    {
+      "id": "SR-20260811-task2b-procedure-source-gap",
+      "reason": "procedure_or_rule.exceptions source_not_documented section state",
+      "revision": 1
+    }
+  ],
+  "run_id": "run-unavailable-319d0033792f4cc0b6d7e11df06ce4dd",
+  "run_identity": {
+    "input_fingerprint": "6a97f8f0e6afd73ce1a8975ba1a5b324a1823fd8ee1ba17b6510c170b72211b8",
+    "kb_fingerprint": "6be09b187ba7ad6b7179ef13a59e090043afa5dc7104f8d1b92546fd38063fd1",
+    "manifest_path": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task2b-knowledge-publication-body-compiler/quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json",
+    "run_id": "run-unavailable-319d0033792f4cc0b6d7e11df06ce4dd",
+    "sample_fingerprint": "fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f",
+    "source_run_hash": "532e6ce4794beb9245b63f8d6a15617a8a8169e667814b52bc4f76ddbb063412"
+  },
+  "run_status": "incomplete",
+  "sample_manifest": {
+    "content_hash": "fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f",
+    "covered_categories": [
+      "table_image",
+      "bilingual",
+      "multi_source"
+    ],
+    "excluded_categories": [
+      {
+        "category": "long_text",
+        "reason": "source manifest does not expose a long-document feature; no semantic coverage is claimed"
+      }
+    ],
+    "path": "quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json",
+    "required_categories": [
+      "long_text",
+      "table_image",
+      "bilingual",
+      "multi_source"
+    ],
+    "sample_count": 20,
+    "sampling_seed": 4026961625,
+    "sampling_seed_label": "knowledge-digest-task0-v1",
+    "source_count": 89
+  },
+  "schema_version": "task2b-semantic-evidence.v1",
+  "section_completeness": [],
+  "threshold": {
+    "answerability": 1.0,
+    "max_body_lines": 120,
+    "max_page_lines": 300,
+    "section_completeness": 1.0
+  }
+}

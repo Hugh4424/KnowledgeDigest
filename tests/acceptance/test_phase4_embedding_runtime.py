@@ -298,6 +298,36 @@ def test_embedding_requires_matching_adopted_artifact(
     assert "super-secret" not in repr(resolved)
 
 
+def test_adopted_embedding_without_api_key_falls_back_without_probe(
+    tmp_path: Path,
+) -> None:
+    endpoint = "http://127.0.0.1:7777/v1"
+    artifact_path = tmp_path / "artifact.json"
+    artifact_path.write_text(json.dumps(_valid_artifact(endpoint)), encoding="utf-8")
+    settings = _settings(
+        tmp_path / "config.json",
+        {
+            "similarity": {
+                "backend": "embedding",
+                "embedding": {
+                    "base_url": endpoint,
+                    "model": "embed-model",
+                    "expected_dimension": 3,
+                    "calibration_artifact": str(artifact_path),
+                    "api_key_env": "KD_EMBEDDING_KEY",
+                },
+            }
+        },
+    )
+    resolved = resolve_similarity_backend(
+        settings,
+        env={},
+        client_factory=lambda *_args, **_kwargs: pytest.fail("must not probe without API key"),
+    )
+    assert resolved.effective_backend == "jaccard"
+    assert resolved.reason_code == "embedding_api_key_missing"
+
+
 def test_not_adopted_artifact_falls_back_without_client(tmp_path: Path) -> None:
     endpoint = "http://127.0.0.1:7777/v1"
     artifact_path = tmp_path / "artifact.json"
@@ -417,6 +447,7 @@ def test_probe_fingerprint_mismatch_is_explicit(tmp_path: Path) -> None:
     )
     resolved = resolve_similarity_backend(
         settings,
+        env={"KD_EMBEDDING_KEY": "super-secret"},
         probe_fingerprint="f" * 64,
         client_factory=lambda *_args, **_kwargs: object(),
     )

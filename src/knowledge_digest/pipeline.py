@@ -10,7 +10,7 @@ import time
 from urllib.parse import urlsplit, urlunsplit
 from dataclasses import replace
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 from uuid import uuid4
 
 from .cluster import cluster
@@ -19,7 +19,11 @@ from .draft import draft
 from .errors import ValidationError
 from .embedding import EmbeddingError, normalize_endpoint_identity, resolve_similarity_backend
 from .ingest import ingest
-from .llm import PUBLICATION_LLM_BASE_URL, PUBLICATION_LLM_MODEL
+from .llm import (
+    PUBLICATION_LLM_BASE_URL,
+    PUBLICATION_LLM_MODEL,
+    validate_section_response,
+)
 from .kb_structure import (
     DEFAULT_ROOTS,
     StructureContract,
@@ -30,7 +34,7 @@ from .kb_structure import (
     validate_topic_index,
 )
 from .jsonl import append_jsonl, read_jsonl, replace_jsonl, write_jsonl
-from .identity import source_id
+from .identity import source_id, topic_id
 from .faithfulness import claim_entity_key
 from .lock import kb_lock
 from .paths import DigestPaths, is_new_kb_container
@@ -39,7 +43,17 @@ from .provenance import (
     audit_provenance,
     validate_prewrite_provenance,
 )
-from .page_layout import build_publication_navigation, build_topic_layouts, declared_managed_topics
+from .page_layout import (
+    build_publication_navigation,
+    build_semantic_parts,
+    build_topic_layouts,
+    declared_managed_topics,
+    evaluate_section_impact,
+    protect_old_page_on_failure,
+    validate_semantic_parts,
+)
+from .navigation import build_topic_part_navigation
+from .publication import validate_body_gate
 from .queues import write_queues
 from .retrieve import retrieve
 from .text_similarity import EmbeddingScorer, JaccardScorer
@@ -93,6 +107,58 @@ def _atomic_json(path: Path, value: dict[str, Any]) -> None:
     except BaseException:
         temporary.unlink(missing_ok=True)
         raise
+
+
+def _existing_reader_page(
+    paths: DigestPaths,
+    draft_record: Mapping[str, Any],
+) -> dict[str, Any] | None:
+    """Return the current managed Reader page for compiler failure protection.
+
+    The compiler must receive the last formal page before attempting a new
+    body.  Only paths already attached to the draft are considered; no page
+    is discovered by scanning arbitrary KB files.
+    """
+    candidates: list[str] = []
+    for value in [
+        draft_record.get("published_path"),
+        *(draft_record.get("target_paths") or []),
+    ]:
+        if isinstance(value, str) and value and value not in candidates:
+            candidates.append(value)
+    for raw_path in candidates:
+        path = Path(raw_path)
+        if path.is_absolute():
+            try:
+                path = path.relative_to(paths.kb_dir)
+            except ValueError:
+                continue
+        if not path.parts or ".." in path.parts:
+            continue
+        candidate = paths.kb_dir / path
+        if not candidate.is_file() or candidate.is_symlink():
+            continue
+        try:
+            body = candidate.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        return {
+            "status": "published",
+            "reader_eligible": True,
+            "body": body,
+            "target_path": path.as_posix(),
+        }
+    return None
+
+
+def _reader_record_is_eligible(record: Mapping[str, Any]) -> bool:
+    """Allow writeback only when the compiler's Reader projection is safe."""
+    if record.get("page_status") == "degraded" or record.get("provider_failure"):
+        return False
+    projection = record.get("reader_projection")
+    if isinstance(projection, Mapping):
+        return bool(projection.get("reader_eligible"))
+    return bool(record.get("reader_eligible", True))
 
 
 def _merge_jsonl_unique(path: Path, records: list[dict[str, Any]], key_fields: tuple[str, ...]) -> None:
@@ -1416,6 +1482,20 @@ def _write_layout_artifacts(
         run_dir / "s4" / "coverage-mapping.jsonl",
         [row for draft_record in drafts for row in draft_record.get("coverage_mapping", [])],
     )
+    write_jsonl(
+        run_dir / "s4" / "section-dependency-records.jsonl",
+        [
+            {
+                "topic_id": draft_record.get("topic_id"),
+                "section_id": section_id,
+                "dependency_record": record,
+                "impact_result": draft_record.get("impact_result"),
+            }
+            for draft_record in drafts
+            for section_id, record in (draft_record.get("section_dependency_records") or {}).items()
+            if isinstance(record, Mapping)
+        ],
+    )
     # Keep the exact records used by the owned-file, archive-before-write
     # publication transaction for replay and audit.
     write_jsonl(run_dir / "s4" / "publication-navigation.jsonl", publication_navigation)
@@ -1543,9 +1623,7 @@ def _commit_outputs(
     # A provider/source failure remains in Audit and pending history, but its
     # degraded topic must not enter the Reader Package or abort unrelated
     # validated topics in the same transaction.
-    reader_topic_drafts = [
-        record for record in topic_drafts if record.get("page_status") != "degraded"
-    ]
+    reader_topic_drafts = [record for record in topic_drafts if _reader_record_is_eligible(record)]
     reader_navigation_records = [
         record for record in navigation_records if record.get("page_status") != "degraded"
     ]
@@ -1567,9 +1645,7 @@ def _commit_outputs(
             record_claim_uris = {str(claim.get("source_uri")) for claim in _claim_records([record]) if claim.get("source_uri")}
             if record_claim_uris & failed_claim_uris:
                 record["page_status"] = "degraded"
-        reader_topic_drafts = [
-            record for record in topic_drafts if record.get("page_status") != "degraded"
-        ]
+        reader_topic_drafts = [record for record in topic_drafts if _reader_record_is_eligible(record)]
         claims = _claim_records(reader_topic_drafts)
     historical_claims = [
         row
@@ -1685,6 +1761,853 @@ def _commit_outputs(
     return writes, pending, []
 
 
+def _typed_body_gate_payload(
+    draft_record: Mapping[str, Any],
+    typed_response: Mapping[str, Any],
+    *,
+    duplicate_context: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Render a deterministic gate input from typed sections and trusted claims."""
+    evidence_claims = [
+        dict(claim)
+        for claim in draft_record.get("claims", [])
+        if isinstance(claim, Mapping)
+    ]
+    claim_ids: dict[str, dict[str, Any]] = {}
+    for claim in evidence_claims:
+        claim_id = str(claim.get("claim_id") or claim.get("claim_fingerprint"))
+        # Preserve the first source occurrence as the deterministic Reader
+        # footnote representative; the full evidence list remains lossless.
+        claim_ids.setdefault(claim_id, claim)
+    sections = typed_response.get("sections", {})
+    body_lines: list[str] = []
+    section_states: list[dict[str, Any]] = []
+    referenced: set[str] = set()
+    typed_claim_ids: set[str] = set()
+    if isinstance(sections, Mapping):
+        for section_id, raw_section in sections.items():
+            if not isinstance(raw_section, Mapping):
+                continue
+            body_lines.append(f"## {section_id}")
+            body = str(raw_section.get("body", "")).strip()
+            section_states.append(
+                {
+                    "section_id": str(section_id),
+                    "page_type": str(draft_record.get("typed_page_draft", {}).get("page_type") or "")
+                    if isinstance(draft_record.get("typed_page_draft"), Mapping)
+                    else "",
+                    "status": str(raw_section.get("status") or "documented"),
+                    "body": body,
+                    "claim_ids": list(raw_section.get("claim_ids", []))
+                    if isinstance(raw_section.get("claim_ids", []), list)
+                    else raw_section.get("claim_ids"),
+                    "source_audit": dict(raw_section.get("source_audit"))
+                    if isinstance(raw_section.get("source_audit"), Mapping)
+                    else None,
+                }
+            )
+            if body:
+                body_lines.append(body)
+            raw_ids = raw_section.get("claim_ids", [])
+            if isinstance(raw_ids, list):
+                for raw_id in raw_ids:
+                    claim_id = str(raw_id)
+                    claim = claim_ids.get(claim_id)
+                    if claim is None:
+                        continue
+                    canonical_id = str(claim.get("claim_id") or claim.get("claim_fingerprint"))
+                    referenced.add(canonical_id)
+                    typed_claim_ids.add(canonical_id)
+                    if f"[^{canonical_id}]" not in body:
+                        body_lines.append(f"[^{canonical_id}]")
+    for claim_id in sorted(referenced):
+        claim = claim_ids[claim_id]
+        body_lines.append(
+            f"[^{claim_id}]: {claim.get('source_uri', '')}#{claim.get('fragment_locator', '')}"
+        )
+    # The complete evidence ledger intentionally keeps repeated identical
+    # source occurrences (their fragment locators differ).  The Reader body
+    # gate, however, addresses claims by the stable fingerprint because one
+    # footnote cannot distinguish repeated occurrences.  Project each
+    # referenced fingerprint once for that gate while leaving
+    # ``evidence_claims`` untouched.
+    body_claims = [claim_ids[claim_id] for claim_id in sorted(referenced)]
+    source_fragments = (draft_record.get("typed_page_draft") or {}).get("source_fragments", [])
+    evidence_body = "\n".join(
+        str(fragment.get("text", ""))
+        for fragment in source_fragments
+        if isinstance(fragment, Mapping) and fragment.get("text")
+    )
+    payload = {
+        "body": "\n".join(body_lines).strip(),
+        "evidence_body": evidence_body,
+        # Only claims that the reader-facing body actually states belong to
+        # the body gate.  The complete source Claim ledger remains available
+        # as evidence and on the draft record; forcing every source Claim into
+        # the provider response made large, otherwise valid topics impossible
+        # to compile without turning the Reader page back into an Evidence dump.
+        "claims": body_claims,
+        "evidence_claims": evidence_claims,
+        "typed_claim_ids": sorted(typed_claim_ids),
+        "section_states": section_states,
+        "source_fragments": [
+            dict(fragment)
+            for fragment in source_fragments
+            if isinstance(fragment, Mapping)
+        ],
+        "provider_status": "ok" if not draft_record.get("provider_failure") else "failed",
+    }
+    if isinstance(duplicate_context, Mapping):
+        payload["duplicate_context"] = {
+            "same_page": [
+                str(value)
+                for value in duplicate_context.get("same_page", [])
+                if str(value).strip()
+            ],
+            "cross_page": [
+                str(value)
+                for value in duplicate_context.get("cross_page", [])
+                if str(value).strip()
+            ],
+            "denominator": int(duplicate_context.get("denominator", 0)),
+            "detector_version": str(
+                duplicate_context.get("detector_version", "jaccard-5gram.v1")
+            ),
+            "seed": duplicate_context.get("seed"),
+        }
+    return payload
+
+
+def _semantic_section_claim_owners(
+    sections: list[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Assign each reader claim to one semantic part owner.
+
+    A provider may legitimately cite one fact in more than one section.  The
+    reader body keeps those references, while the semantic-part ledger needs a
+    single owner so a claim is not counted as entering multiple parts.
+    Preserve section order as the deterministic ownership rule.
+    """
+    owned_claim_ids: set[str] = set()
+    normalized: list[dict[str, Any]] = []
+    for section in sections:
+        item = dict(section)
+        claim_ids: list[str] = []
+        for raw_claim_id in section.get("claim_ids", []):
+            claim_id = str(raw_claim_id)
+            if claim_id in owned_claim_ids:
+                continue
+            owned_claim_ids.add(claim_id)
+            claim_ids.append(claim_id)
+        item["claim_ids"] = claim_ids
+        normalized.append(item)
+    return normalized
+
+
+def _previous_section_dependency_records(
+    paths: DigestPaths,
+    topic_id: str,
+) -> list[dict[str, Any]]:
+    runs = paths.kb_dir / "_digest" / "runs"
+    if not runs.is_dir():
+        return []
+    candidates = sorted(
+        (path for path in runs.glob("*/s4/final-layouts.jsonl") if path.is_file()),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    for path in candidates:
+        for record in read_jsonl(path):
+            if str(record.get("topic_id", "")) != topic_id:
+                continue
+            rows = record.get("section_dependency_records")
+            if isinstance(rows, Mapping):
+                content_hashes = record.get("section_content_hashes", {})
+                target_paths = record.get("section_target_paths", {})
+                typed_sections: dict[str, Mapping[str, Any]] = {}
+                for response in record.get("typed_responses", []) if isinstance(record.get("typed_responses"), list) else []:
+                    if not isinstance(response, Mapping):
+                        continue
+                    for section_id, section in (response.get("sections") or {}).items():
+                        if isinstance(section, Mapping):
+                            typed_sections[str(section_id)] = section
+                return [
+                    {
+                        "section_id": str(section_id),
+                        "dependency_record": dict(value),
+                        "signal_status": "verified",
+                        **(
+                            {"body": str(typed_sections[section_id].get("body", ""))}
+                            if section_id in typed_sections
+                            else {}
+                        ),
+                        **(
+                            {"claim_ids": list(typed_sections[section_id].get("claim_ids", []))}
+                            if section_id in typed_sections and isinstance(typed_sections[section_id].get("claim_ids"), list)
+                            else {}
+                        ),
+                        **(
+                            {"content_hash": str(content_hashes[section_id])}
+                            if isinstance(content_hashes, Mapping) and content_hashes.get(section_id)
+                            else {}
+                        ),
+                        **(
+                            {"target_path": str(target_paths[section_id])}
+                            if isinstance(target_paths, Mapping) and target_paths.get(section_id)
+                            else {}
+                        ),
+                    }
+                    for section_id, value in rows.items()
+                    if isinstance(value, Mapping) and value.get("schema_version") == "section-dependency-record.v1"
+                ]
+    return []
+
+
+def _reuse_unchanged_typed_sections(
+    typed_response: Mapping[str, Any],
+    old_sections: list[Mapping[str, Any]],
+    reused_sections: list[str],
+) -> dict[str, Any]:
+    """Keep only proven unchanged section bodies from the prior Reader run."""
+    old_by_id = {
+        str(section.get("section_id")): section
+        for section in old_sections
+        if isinstance(section, Mapping) and section.get("section_id")
+    }
+    sections = {
+        str(section_id): dict(section)
+        for section_id, section in (typed_response.get("sections") or {}).items()
+        if isinstance(section, Mapping)
+    }
+    for section_id in reused_sections:
+        old = old_by_id.get(str(section_id))
+        current = sections.get(str(section_id))
+        if not old or not current or not str(old.get("body", "")).strip():
+            continue
+        current["body"] = str(old["body"])
+        if isinstance(old.get("claim_ids"), list) and old["claim_ids"]:
+            current["claim_ids"] = [str(value) for value in old["claim_ids"] if str(value).strip()]
+        sections[str(section_id)] = current
+    return {**dict(typed_response), "sections": sections}
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _sha256_tree(root: Path) -> str:
+    digest = hashlib.sha256()
+    if not root.is_dir():
+        return digest.hexdigest()
+    for path in sorted(path for path in root.rglob("*") if path.is_file() and not path.is_symlink()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        digest.update(relative)
+        digest.update(_sha256_file(path).encode("ascii"))
+    return digest.hexdigest()
+
+
+def _task2b_sample_manifest() -> tuple[dict[str, Any], str | None, str | None]:
+    relative = Path("quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json")
+    candidates = [Path.cwd() / relative]
+    manifest_path = next((candidate for candidate in candidates if candidate.is_file()), None)
+    if manifest_path is None:
+        return {
+            "path": relative.as_posix(),
+            "sample_count": None,
+            "sampling_seed": None,
+            "required_categories": ["long_text", "table_image", "bilingual", "multi_source"],
+            "covered_categories": [],
+            "excluded_categories": [],
+        }, None, None
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return {
+            "path": relative.as_posix(),
+            "sample_count": None,
+            "sampling_seed": None,
+            "required_categories": ["long_text", "table_image", "bilingual", "multi_source"],
+            "covered_categories": [],
+            "excluded_categories": [],
+        }, manifest_path.as_posix(), None
+    sample = manifest.get("sample", {}) if isinstance(manifest, Mapping) else {}
+    inventory = manifest.get("inventory_coverage", {}) if isinstance(manifest, Mapping) else {}
+    features = inventory.get("observed_features", {}) if isinstance(inventory, Mapping) else {}
+    seed_label = str(sample.get("seed", ""))
+    seed_value = int(hashlib.sha256(seed_label.encode("utf-8")).hexdigest()[:8], 16) if seed_label else None
+    covered = ["table_image", "bilingual", "multi_source"]
+    excluded = [
+        {
+            "category": "long_text",
+            "reason": "source manifest does not expose a long-document feature; no semantic coverage is claimed",
+        }
+    ]
+    if features.get("long_document") not in {None, "not_exposed_by_current_inventory_schema"}:
+        covered.append("long_text")
+        excluded = []
+    return {
+        "path": relative.as_posix(),
+        "content_hash": _sha256_file(manifest_path),
+        "sample_count": sample.get("sample_size"),
+        "sampling_seed": seed_value,
+        "sampling_seed_label": seed_label,
+        "required_categories": ["long_text", "table_image", "bilingual", "multi_source"],
+        "covered_categories": covered,
+        "excluded_categories": excluded,
+        "source_count": sample.get("source_count", inventory.get("source_count")),
+    }, manifest_path.as_posix(), manifest.get("sample", {}).get("source_run_sha256") if isinstance(manifest, Mapping) else None
+
+
+_TASK2B_PAGE_TYPES = frozenset(
+    {"product_overview", "module_or_capability", "procedure_or_rule"}
+)
+
+
+def _attach_task2b_topic_mapping(
+    *,
+    decisions: list[dict[str, Any]],
+    clusters: list[dict[str, Any]],
+    raw_items: list[dict[str, Any]],
+    paths: DigestPaths,
+) -> None:
+    """Bind existing TopicIndex rows to the typed body compiler.
+
+    Task 1 owns the persisted topic rows.  This adapter only projects the
+    already-frozen row into the Task 2-B PageDraft seam; it never infers a
+    procedure page from prose.  An explicit ``page_type`` is required for
+    that third type, while the two Task 2-A branches keep their fixed mapping.
+    """
+    topic_index_path = paths.kb_dir / "_digest" / "topic-index.json"
+    if not topic_index_path.is_file():
+        return
+    try:
+        raw_index = json.loads(topic_index_path.read_text(encoding="utf-8"))
+        topic_index = validate_topic_index(raw_index)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ValidationError("publication", topic_index_path, f"topic-index cannot be read ({error})") from error
+
+    rows = [row for row in topic_index.get("topics", []) if isinstance(row, Mapping)]
+    by_cluster = {
+        str(cluster.get("cluster_id")): cluster
+        for cluster in clusters
+        if isinstance(cluster, Mapping) and cluster.get("cluster_id")
+    }
+    by_raw_id = {str(item.get("raw_id")): item for item in raw_items if item.get("raw_id")}
+
+    for decision in decisions:
+        cluster = by_cluster.get(str(decision.get("cluster_id")))
+        if cluster is None:
+            continue
+        member_ids = [str(member) for member in cluster.get("members", [])]
+        source_ids = {
+            str(by_raw_id[member].get("source_id") or source_id(str(by_raw_id[member].get("source_uri", ""))))
+            for member in member_ids
+            if member in by_raw_id
+        }
+        matches = [
+            row for row in rows
+            if source_ids and source_ids.issubset({str(value) for value in row.get("source_members", [])})
+        ]
+        if len(matches) != 1:
+            continue
+        row = dict(matches[0])
+        explicit_page_type = str(row.get("page_type") or "").strip()
+        if explicit_page_type:
+            page_type = explicit_page_type if explicit_page_type in _TASK2B_PAGE_TYPES else None
+            mapping_status = "mapped" if page_type else "unmapped"
+        elif row.get("status") != "published":
+            page_type = None
+            mapping_status = "degraded"
+        elif row.get("knowledge_type") == "products" and (
+            row.get("module") is None
+            or str(row.get("object_intent") or "").strip().casefold() in {"overview", "product overview"}
+        ):
+            page_type = "product_overview"
+            mapping_status = "mapped"
+        elif row.get("knowledge_type") == "products" and row.get("module") and row.get("object_intent"):
+            page_type = "module_or_capability"
+            mapping_status = "mapped"
+        else:
+            page_type = None
+            mapping_status = "unmapped"
+
+        topic_index_id = str(row.get("digest_topic_id") or row.get("topic_id") or row.get("topic_key") or "")
+        stable_topic_id = str(decision.get("topic_id") or "")
+        if not stable_topic_id and source_ids:
+            stable_topic_id = topic_id(source_ids)
+        if not stable_topic_id:
+            mapping_status = "unmapped"
+        title = str(row.get("title") or row.get("topic_key") or topic_index_id or stable_topic_id or "Untitled")
+        decision["topic_id"] = stable_topic_id or topic_index_id or decision.get("topic_id")
+        decision["topic_index"] = {
+            **row,
+            "topic_id": stable_topic_id or topic_index_id,
+            "topic_index_id": topic_index_id or None,
+            "title": title,
+            "page_type": page_type,
+            "mapping_status": mapping_status,
+        }
+
+
+_TASK2B_ANSWERABILITY_SUPPORT: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
+    "positive-01": (("product_overview",), ("positioning", "use_cases")),
+    "positive-02": (("product_overview",), ("positioning", "use_cases")),
+    "positive-03": (
+        ("product_overview", "module_or_capability", "procedure_or_rule"),
+        ("entry", "entry_prerequisites", "prerequisites"),
+    ),
+    "positive-04": (("procedure_or_rule",), ("steps_rules",)),
+    "positive-05": (("module_or_capability",), ("capabilities", "limitations")),
+    "positive-06": (("procedure_or_rule",), ("exceptions",)),
+    "positive-07": (
+        ("product_overview", "module_or_capability", "procedure_or_rule"),
+        ("sources",),
+    ),
+    "positive-08": (
+        ("product_overview", "module_or_capability", "procedure_or_rule"),
+        ("version",),
+    ),
+    "positive-09": (("module_or_capability",), ("relationships",)),
+    "positive-10": (("module_or_capability",), ("capabilities", "limitations")),
+    "positive-11": (
+        ("module_or_capability", "procedure_or_rule"),
+        ("entry_prerequisites", "prerequisites", "steps_rules"),
+    ),
+    "positive-12": (("module_or_capability",), ("capabilities", "limitations")),
+    "positive-13": (
+        ("product_overview", "module_or_capability", "procedure_or_rule"),
+        ("version",),
+    ),
+    "positive-14": (("product_overview", "module_or_capability", "procedure_or_rule"), ()),
+    "positive-15": (
+        ("product_overview", "module_or_capability", "procedure_or_rule"),
+        ("sources",),
+    ),
+    "positive-16": (("product_overview", "module_or_capability", "procedure_or_rule"), ()),
+    "positive-17": (("product_overview", "module_or_capability", "procedure_or_rule"), ()),
+}
+
+
+def _task2b_answerability_subset(
+    *,
+    question_set: Mapping[str, Any],
+    concepts: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Derive machine first-hit facts from published typed sections.
+
+    This is deliberately a structural machine oracle, not a reader-quality
+    claim.  Human answerability remains outside Task 2-B and is disclosed in
+    the evidence reason.
+    """
+    passing = [
+        concept
+        for concept in concepts
+        if concept.get("status") == "machine-passing"
+    ]
+    questions: list[dict[str, Any]] = []
+    for question in question_set.get("questions", []):
+        if not isinstance(question, Mapping):
+            continue
+        question_id = str(question.get("question_id") or "")
+        if str(question.get("polarity")) == "negative":
+            questions.append(
+                {
+                    "question_id": question_id,
+                    "polarity": "negative",
+                    "answerable": False,
+                    "first_hit": None,
+                }
+            )
+            continue
+        page_types, sections = _TASK2B_ANSWERABILITY_SUPPORT.get(
+            question_id,
+            (("product_overview", "module_or_capability", "procedure_or_rule"), ()),
+        )
+        first_hit = None
+        for concept in passing:
+            if concept.get("page_type") not in page_types:
+                continue
+            if sections and not set(sections).intersection(set(concept.get("section_ids", []))):
+                continue
+            if question_id == "positive-06" and concept.get("section_statuses", {}).get("exceptions") == "source_not_documented":
+                # The fixed section exists, but the source did not document an
+                # exception rule.  Do not turn that structural state into an
+                # answer to the exception-specific question.
+                continue
+            first_hit = str(concept.get("concept_id") or "") or None
+            if first_hit:
+                break
+        questions.append(
+            {
+                "question_id": question_id,
+                "polarity": "positive",
+                "answerable": first_hit is not None,
+                "first_hit": first_hit,
+            }
+        )
+    return {
+        "id": str(question_set.get("question_set_id") or "task0-question-set-v1"),
+        "content_hash": str(question_set.get("question_set_hash") or ""),
+        "questions": questions,
+        "method": "section-presence-v1",
+        "reason": "machine first-hit from typed sections; this is not human reader review",
+    }
+
+
+def write_semantic_evidence_file(
+    *,
+    paths: DigestPaths,
+    settings: DigestSettings,
+    result: tuple[Path, str] | None,
+    error: str | None = None,
+) -> Path | None:
+    """Persist a truthful, run-bound semantic evidence record when requested."""
+    raw_path = os.environ.get("KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE", "").strip()
+    if not raw_path:
+        return None
+    # The evidence path is an explicit output of the frozen sample run, not a
+    # global switch for every library-level audit_run call.  T014 reuses the
+    # same process environment for regression tests; bind the writer to the
+    # declared sample input/KB so unrelated fixtures cannot try to overwrite
+    # the one-shot evidence target.
+    sample_input = os.environ.get("KNOWLEDGEDIGEST_TASK2B_SAMPLE_INPUT", "").strip()
+    sample_kb = os.environ.get("KNOWLEDGEDIGEST_TASK2B_SAMPLE_KB", "").strip()
+    if not sample_input or not sample_kb:
+        return None
+    if (
+        Path(sample_input).expanduser().resolve() != paths.new_dir.resolve()
+        or Path(sample_kb).expanduser().resolve() != paths.kb_dir.resolve()
+    ):
+        return None
+    output_path = Path(raw_path).expanduser().resolve()
+    if output_path.exists():
+        reason = "semantic evidence target must not be a symlink" if output_path.is_symlink() else "semantic evidence target must not already exist"
+        raise ValidationError("semantic", output_path, reason)
+    report_path = result[0].resolve() if result else None
+    run_id = report_path.parent.name if report_path else f"run-unavailable-{uuid4().hex}"
+    sample_manifest, manifest_path, source_run_hash = _task2b_sample_manifest()
+    input_fingerprint = _sha256_tree(paths.new_dir)
+    kb_fingerprint = _sha256_tree(paths.kb_dir)
+    run_dir = report_path.parent if report_path else None
+    drafts = read_jsonl(run_dir / "s4" / "drafts.jsonl") if run_dir and (run_dir / "s4" / "drafts.jsonl").is_file() else []
+    concepts: list[dict[str, Any]] = []
+    evidence_backtrace: list[dict[str, Any]] = []
+    section_completeness: list[dict[str, Any]] = []
+    failure_reasons: list[str] = []
+    for record in drafts:
+        compiler_results = record.get("compiler_results")
+        if isinstance(compiler_results, list):
+            compiler_candidates = [item for item in compiler_results if isinstance(item, Mapping)]
+        else:
+            compiler_candidates = [record.get("compiler_result")]
+        compiler = next(
+            (
+                item
+                for item in compiler_candidates
+                if isinstance(item, Mapping) and item.get("status") == "published"
+            ),
+            None,
+        )
+        if isinstance(compiler, Mapping) and compiler.get("status") == "published":
+            topic_id = str(record.get("topic_id") or compiler.get("stable_topic_id") or "")
+            candidate = compiler.get("candidate") or {}
+            page_type = str(candidate.get("page_type") or "")
+            concept_id = topic_id or str(record.get("draft_id", ""))
+            sections = candidate.get("sections") or {}
+            section_statuses = {
+                str(section_id): str(section.get("status"))
+                for section_id, section in sections.items()
+                if isinstance(section, Mapping) and section.get("status")
+            }
+            concepts.append(
+                {
+                    "concept_id": concept_id,
+                    "page_type": page_type,
+                    "status": "machine-passing",
+                    "section_ids": sorted(str(section_id) for section_id in sections),
+                    "section_statuses": section_statuses,
+                }
+            )
+            for claim in record.get("claims", []):
+                if isinstance(claim, Mapping):
+                    evidence_backtrace.append(
+                        {
+                            "concept_id": concept_id,
+                            "claim_id": claim.get("claim_id") or claim.get("claim_fingerprint"),
+                            "fragment_locator": claim.get("fragment_locator"),
+                        }
+                    )
+            section_completeness.append(
+                {
+                    "concept_id": concept_id,
+                    "sections": sorted(str(section_id) for section_id in sections),
+                    "complete": bool(sections),
+                }
+            )
+        elif record.get("provider_failure") or record.get("page_status") == "degraded":
+            for failure in record.get("provider_failures", []):
+                if isinstance(failure, Mapping) and failure.get("reason"):
+                    failure_reasons.append(str(failure["reason"]))
+    if error:
+        failure_reasons.append(error)
+    if not settings.llm_enabled:
+        failure_reasons.append("semantic run did not use a provider; offline/Jaccard-only output is not semantic evidence")
+    if not evidence_backtrace:
+        failure_reasons.append("semantic evidence backtrace is unavailable")
+    question_set_path = Path.cwd() / "config" / "task0-question-set.v1.json"
+    question_set_hash = _sha256_file(question_set_path) if question_set_path.is_file() else None
+    question_set: dict[str, Any] = {}
+    if question_set_path.is_file():
+        try:
+            loaded_question_set = json.loads(question_set_path.read_text(encoding="utf-8"))
+            if isinstance(loaded_question_set, Mapping):
+                question_set = dict(loaded_question_set)
+                question_set["question_set_hash"] = question_set_hash
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+            question_set = {}
+    cost = {}
+    if run_dir is not None and (run_dir / "report.json").is_file():
+        try:
+            report = json.loads((run_dir / "report.json").read_text(encoding="utf-8"))
+            if isinstance(report, Mapping) and isinstance(report.get("cost"), Mapping):
+                cost = dict(report["cost"])
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+            cost = {}
+    execution_mode = "real_semantic" if settings.llm_enabled else "jaccard_only"
+    provider = {
+        "provider": "qwen3.6" if settings.llm_enabled else "none",
+        "model": os.environ.get("KD_LLM_MODEL") if settings.llm_enabled else None,
+        "base_url": os.environ.get("KD_LLM_BASE_URL") if settings.llm_enabled else None,
+        "credential": "environment-only",
+    }
+    evidence = {
+        "schema_version": "task2b-semantic-evidence.v1",
+        "run_id": run_id,
+        "run_status": "completed" if not error and result else "incomplete",
+        "execution_mode": execution_mode,
+        "run_identity": {
+            "run_id": run_id,
+            "sample_fingerprint": sample_manifest.get("content_hash") or "missing",
+            "kb_fingerprint": kb_fingerprint,
+            "input_fingerprint": input_fingerprint,
+            "source_run_hash": source_run_hash,
+            "manifest_path": manifest_path,
+        },
+        "output_path": str(output_path),
+        "delivery_status": "not_released",
+        "sample_manifest": sample_manifest,
+        "provider": provider,
+        "detector": {
+            "name": "task2b-publication-gate.v1",
+            "version": "jaccard-5gram.v1",
+        },
+        "budget": {
+            "provider_calls": cost.get("provider_calls_observed"),
+            "provider_calls_planned": cost.get("provider_calls_planned"),
+            "max_tokens": 8192,
+            "source": "DigestSettings/current environment",
+        },
+        "threshold": {
+            "answerability": 1.0,
+            "section_completeness": 1.0,
+            "max_body_lines": 120,
+            "max_page_lines": 300,
+        },
+        "answerability_source": "task0-question-set.v1" if question_set_hash else "missing",
+        "answerability_subset": _task2b_answerability_subset(
+            question_set=question_set,
+            concepts=concepts,
+        ) if question_set else {
+            "id": "not-computed",
+            "content_hash": question_set_hash,
+            "questions": [],
+            "reason": "task0 question set is unavailable",
+        },
+        "concepts": concepts,
+        "evidence_backtrace": evidence_backtrace,
+        "section_completeness": section_completeness,
+        "failure_reasons": sorted(set(failure_reasons)),
+        "contract_revision": 1,
+        "revision_ledger": [
+            {"revision": 0, "reason": "initial accepted body contract"},
+            {
+                "revision": 1,
+                "id": "SR-20260811-task2b-procedure-source-gap",
+                "reason": "procedure_or_rule.exceptions source_not_documented section state",
+            },
+        ],
+        "ac_bindings": {
+            "AC-01": "structure-evidence",
+            "AC-03": "claim-backtrace",
+            "AC-05": "impact-closure",
+            "AC-07": "status-navigation",
+            "AC-09": "sample-coverage",
+            "AC-10": "run-identity",
+            "AC-11": "machine-bottom-line",
+            "AC-12": "revision-ledger",
+            "AC-13": "source-gap-section-state",
+        },
+    }
+    _atomic_json(output_path, evidence)
+    return output_path
+
+
+def _compiler_failure(
+    page_draft: Mapping[str, Any],
+    reason: str,
+    *,
+    old_page: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    candidate = {
+        "status": "degraded",
+        "reader_eligible": False,
+        "topic_id": page_draft.get("topic_id"),
+        "page_type": page_draft.get("page_type"),
+        "sections": {},
+        "body": "",
+        "reason": reason,
+        "audit_record": {"destination": "Audit", "reason": reason},
+    }
+    if old_page is not None:
+        protected = protect_old_page_on_failure(old_page, candidate)
+        reader_projection = dict(protected["reader_projection"])
+    else:
+        reader_projection = {
+            "status": "degraded",
+            "reader_eligible": False,
+            "body": "",
+            "target_path": None,
+        }
+    return {
+        "status": "degraded",
+        "stable_topic_id": page_draft.get("topic_id"),
+        "candidate": candidate,
+        "reader_projection": reader_projection,
+        "navigation_records": [],
+        "audit_record": candidate["audit_record"],
+    }
+
+
+def compile_publication_candidate(
+    *,
+    page_draft: Mapping[str, Any],
+    provider_payload: Any,
+    body_gate_payload: Mapping[str, Any] | None = None,
+    old_page: Mapping[str, Any] | None = None,
+    frozen_input: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Apply the Task 2-B compiler gates at the formal pipeline boundary.
+
+    This adapter is deliberately pure: it returns Reader/Audit projections for
+    the existing single writer.  It never writes a page and never splices a
+    failed candidate into an old Reader page.
+    """
+    if frozen_input is not None:
+        if frozen_input.get("required") and not frozen_input.get("available"):
+            return _compiler_failure(
+                page_draft,
+                "frozen input is missing",
+                old_page=old_page,
+            )
+        expected = frozen_input.get("expected_fingerprint")
+        actual = frozen_input.get("actual_fingerprint")
+        if expected is not None and actual is not None and expected != actual:
+            return _compiler_failure(
+                page_draft,
+                "frozen input fingerprint mismatch",
+                old_page=old_page,
+            )
+
+    if page_draft.get("status") != "draft":
+        audit = page_draft.get("audit_record")
+        reason = str(audit.get("reason") if isinstance(audit, Mapping) else "page draft is not publishable")
+        return _compiler_failure(page_draft, reason, old_page=old_page)
+
+    validation_payload: Any = provider_payload
+    if isinstance(provider_payload, Mapping) and provider_payload.get("_validated_typed_response") is True:
+        # draft.py already validated this object. Strip only trusted internal
+        # lineage fields before the second contract check; provider-originated
+        # payloads never receive this marker because it is rejected above.
+        validation_payload = {
+            "page_type": provider_payload.get("page_type"),
+            "sections": {
+                str(section_id): {
+                    "body": section.get("body", ""),
+                    "claim_ids": list(section.get("claim_ids", [])),
+                }
+                for section_id, section in (provider_payload.get("sections") or {}).items()
+                if isinstance(section, Mapping)
+            },
+        }
+    typed = validate_section_response(page_draft, validation_payload)
+    if typed.get("status") != "draft":
+        return _compiler_failure(page_draft, str(typed.get("reason") or "typed section validation failed"), old_page=old_page)
+
+    if body_gate_payload is None:
+        return _compiler_failure(page_draft, "publication body gate input is missing", old_page=old_page)
+    body_gate = validate_body_gate(body_gate_payload)
+    if not body_gate.get("reader_eligible"):
+        reason = "; ".join(str(item) for item in body_gate.get("reasons", [])) or "publication body gate rejected candidate"
+        return _compiler_failure(page_draft, reason, old_page=old_page)
+
+    sections = [
+        dict(section, section_id=section_id)
+        for section_id, section in typed.get("sections", {}).items()
+        if isinstance(section, Mapping)
+    ]
+    sections = _semantic_section_claim_owners(sections)
+    claims = [
+        dict(claim)
+        for claim in body_gate_payload.get("claims", [])
+        if isinstance(claim, Mapping)
+    ]
+    semantic = build_semantic_parts(
+        topic_id=str(page_draft.get("topic_id") or ""),
+        title=str(page_draft.get("title") or page_draft.get("topic_id") or "Untitled"),
+        page_type=str(page_draft.get("page_type") or ""),
+        sections=sections,
+        claims=claims,
+    )
+    semantic_check = validate_semantic_parts(semantic)
+    if not semantic_check.get("valid"):
+        reason = "; ".join(str(item) for item in semantic_check.get("reasons", [])) or "semantic parts failed validation"
+        return _compiler_failure(page_draft, reason, old_page=old_page)
+
+    navigation_records = build_topic_part_navigation(
+        semantic["parts"],
+        overview_path=str(semantic["overview"]["target_path"]),
+        related_key=str(semantic["related_key"]),
+    )
+    candidate = {
+        **typed,
+        "status": "published",
+        "reader_eligible": True,
+        "body": body_gate["body"],
+        "evidence_body": body_gate["evidence_body"],
+        "claims": claims,
+        "evidence": body_gate["evidence"],
+        "semantic": semantic,
+        "audit_record": None,
+    }
+    return {
+        "status": "published",
+        "stable_topic_id": page_draft.get("topic_id"),
+        "candidate": candidate,
+        "reader_projection": {
+            "status": "published",
+            "reader_eligible": True,
+            "body": body_gate["body"],
+            "target_path": semantic["overview"]["target_path"],
+        },
+        "navigation_records": navigation_records,
+        "audit_record": None,
+    }
+
+
 def audit_run(
     paths: DigestPaths,
     settings: DigestSettings,
@@ -1698,16 +2621,27 @@ def audit_run(
 ) -> tuple[Path, str]:
     """Run S1-S6 under a single-writer lock on the knowledge base."""
     with kb_lock(paths.kb_dir):
-        return _audit_run_locked(
-            paths,
-            settings,
-            roots,
-            dry_run=dry_run,
-            generator=generator,
-            allowed_content_paths=allowed_content_paths,
-            cluster_plan=cluster_plan,
-            global_duplicates=global_duplicates,
-        )
+        try:
+            result = _audit_run_locked(
+                paths,
+                settings,
+                roots,
+                dry_run=dry_run,
+                generator=generator,
+                allowed_content_paths=allowed_content_paths,
+                cluster_plan=cluster_plan,
+                global_duplicates=global_duplicates,
+            )
+        except Exception as error:
+            write_semantic_evidence_file(
+                paths=paths,
+                settings=settings,
+                result=None,
+                error=str(error),
+            )
+            raise
+        write_semantic_evidence_file(paths=paths, settings=settings, result=result)
+        return result
 
 
 def _audit_run_locked(
@@ -1894,6 +2828,12 @@ def _audit_run_locked(
         )
     for decision in decisions:
         decision["page_root"] = roots[0]
+    _attach_task2b_topic_mapping(
+        decisions=decisions,
+        clusters=clusters,
+        raw_items=raw_items,
+        paths=paths,
+    )
     topic_universe = {
         str(record.get("topic_id"))
         for record in declared_managed_topics(paths, structure.publication)
@@ -1909,6 +2849,177 @@ def _audit_run_locked(
         publication=structure.publication,
         topic_universe=topic_universe,
     )
+    typed_duplicate_contexts: list[dict[str, Any]] = []
+    for draft_record in drafts:
+        typed_response = draft_record.get("typed_response")
+        if not isinstance(typed_response, Mapping) or typed_response.get("status") != "draft":
+            continue
+        sections = typed_response.get("sections")
+        if not isinstance(sections, Mapping):
+            continue
+        section_bodies = [
+            str(section.get("body", ""))
+            for section in sections.values()
+            if isinstance(section, Mapping) and str(section.get("body", "")).strip()
+        ]
+        typed_duplicate_contexts.append(
+            {
+                "topic_id": str(draft_record.get("topic_id") or ""),
+                "same_page": section_bodies,
+                "body": "\n".join(section_bodies),
+            }
+        )
+    for draft_record in drafts:
+        typed_page_draft = draft_record.get("typed_page_draft")
+        typed_response = draft_record.get("typed_response")
+        if (
+            not isinstance(typed_page_draft, Mapping)
+            or not isinstance(typed_response, Mapping)
+            or typed_response.get("status") != "draft"
+        ):
+            continue
+        topic_id = str(draft_record.get("topic_id") or "")
+        current_duplicate = next(
+            (
+                item
+                for item in typed_duplicate_contexts
+                if item.get("topic_id") == topic_id
+            ),
+            {"same_page": [], "body": ""},
+        )
+        body_gate_payload = _typed_body_gate_payload(
+            draft_record,
+            typed_response,
+            duplicate_context={
+                "same_page": current_duplicate.get("same_page", []),
+                "cross_page": [
+                    str(item.get("body", ""))
+                    for item in typed_duplicate_contexts
+                    if item is not current_duplicate and str(item.get("body", "")).strip()
+                ],
+                "denominator": sum(
+                    len(item.get("same_page", []))
+                    + (1 if str(item.get("body", "")).strip() else 0)
+                    for item in typed_duplicate_contexts
+                ),
+                "detector_version": "jaccard-5gram.v1",
+                "seed": 0,
+            },
+        )
+        target_path = str(
+            draft_record.get("published_path")
+            or (draft_record.get("target_paths") or [""])[0]
+        )
+        new_dependency_sections = [
+            {
+                "section_id": str(section_id),
+                "dependency_record": dict(section.get("dependency_record")),
+                "signal_status": "verified",
+                "body": str(section.get("body", "")),
+                "content_hash": hashlib.sha256(str(section.get("body", "")).encode("utf-8")).hexdigest(),
+                **({"target_path": target_path} if target_path else {}),
+            }
+            for section_id, section in (typed_response.get("sections") or {}).items()
+            if isinstance(section, Mapping) and isinstance(section.get("dependency_record"), Mapping)
+        ]
+        old_dependency_sections = _previous_section_dependency_records(
+            paths,
+            str(draft_record.get("topic_id") or typed_page_draft.get("topic_id") or ""),
+        )
+        impact_result = (
+            evaluate_section_impact(old_dependency_sections, new_dependency_sections)
+            if old_dependency_sections
+            else {
+                "status": "initial",
+                "uncertain": False,
+                "recompile_scope": "page",
+                "affected_sections": sorted(row["section_id"] for row in new_dependency_sections),
+                "reused_sections": [],
+                "safe_reuse_proof": {},
+                "old_signal_invalidated": [],
+                "reason": "no prior section dependency record",
+            }
+        )
+        if not impact_result.get("uncertain") and impact_result.get("reused_sections"):
+            typed_response = _reuse_unchanged_typed_sections(
+                typed_response,
+                old_dependency_sections,
+                [str(section_id) for section_id in impact_result["reused_sections"]],
+            )
+            body_gate_payload = _typed_body_gate_payload(
+                draft_record,
+                typed_response,
+                duplicate_context=body_gate_payload.get("duplicate_context"),
+            )
+        old_page = _existing_reader_page(paths, draft_record)
+        compiler_result = compile_publication_candidate(
+            page_draft=typed_page_draft,
+            provider_payload=typed_response,
+            body_gate_payload=body_gate_payload,
+            old_page=old_page,
+        )
+        draft_record["typed_response"] = dict(typed_response)
+        draft_record["compiler_result"] = compiler_result
+        draft_record["reader_projection"] = dict(compiler_result.get("reader_projection") or {})
+        draft_record["page_status"] = compiler_result["status"]
+        draft_record["reader_eligible"] = bool(compiler_result["candidate"].get("reader_eligible"))
+        draft_record["section_dependency_records"] = {
+            str(section_id): dict(section.get("dependency_record"))
+            for section_id, section in (typed_response.get("sections") or {}).items()
+            if isinstance(section, Mapping) and isinstance(section.get("dependency_record"), Mapping)
+        }
+        draft_record["section_content_hashes"] = {
+            str(section_id): hashlib.sha256(str(section.get("body", "")).encode("utf-8")).hexdigest()
+            for section_id, section in (typed_response.get("sections") or {}).items()
+            if isinstance(section, Mapping)
+        }
+        target_path = str(
+            draft_record.get("published_path")
+            or (draft_record.get("target_paths") or [""])[0]
+        )
+        draft_record["section_target_paths"] = {
+            str(section_id): target_path
+            for section_id in draft_record["section_dependency_records"]
+            if target_path
+        }
+        new_dependency_sections = [
+            {
+                "section_id": str(section_id),
+                "dependency_record": dict(record),
+                "signal_status": "verified",
+                "content_hash": draft_record["section_content_hashes"].get(str(section_id)),
+                **({"target_path": target_path} if target_path else {}),
+            }
+            for section_id, record in draft_record["section_dependency_records"].items()
+        ]
+        old_dependency_sections = _previous_section_dependency_records(
+            paths,
+            str(draft_record.get("topic_id") or typed_page_draft.get("topic_id") or ""),
+        )
+        draft_record["impact_result"] = (
+            evaluate_section_impact(old_dependency_sections, new_dependency_sections)
+            if old_dependency_sections
+            else {
+                "status": "initial",
+                "uncertain": False,
+                "recompile_scope": "page",
+                "affected_sections": sorted(row["section_id"] for row in new_dependency_sections),
+                "reused_sections": [],
+                "safe_reuse_proof": {},
+                "old_signal_invalidated": [],
+                "reason": "no prior section dependency record",
+            }
+        )
+        if compiler_result["status"] == "published":
+            draft_record["final_body"] = str(compiler_result["candidate"].get("body", draft_record.get("final_body", "")))
+        else:
+            draft_record["provider_failure"] = True
+            failure = {
+                "kind": "publication_compiler",
+                "stage": "publication",
+                "reason": str(compiler_result["audit_record"].get("reason", "publication compiler rejected candidate")),
+            }
+            draft_record.setdefault("provider_failures", []).append(failure)
     if structure.publication is None:
         raise ValidationError("publication", paths.structure_path, "publication contract is unavailable")
     drafts = build_topic_layouts(

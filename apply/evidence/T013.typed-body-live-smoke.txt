@@ -1,0 +1,6 @@
+Task: T013 typed-body provider smoke (diagnostic, not the frozen semantic exit)
+Command: uv run --frozen python /tmp/kd_task2b_provider_probe.py
+Provider: qwen3.6 at https://dashscope.in.whatspos.cn/v1; credential supplied through an environment variable only.
+Input: one small typed product_overview contract with positioning, capabilities, limitations, and one source claim.
+Result: exit 0; provider returned page_type=product_overview and sections=capabilities, limitations, positioning. No publication-only object was returned.
+Conclusion: the approved provider can answer the Task 2-B typed-body contract after the prompt separation fix. This is only a live contract smoke; it does not prove the frozen sample coverage, answerability, six-concept threshold, or formal semantic release.

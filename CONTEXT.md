@@ -38,6 +38,8 @@
 
 **页级发布状态**：页级只允许 `published` 或 `degraded`。`published` 表示通过机器门，可以进入候选 Reader Package；`degraded` 表示失败、冲突、缺证据或人工修改冲突，不进入正式导航。
 
+**来源未说明（`source_not_documented`）**：仅用于 `procedure_or_rule` 页的 `exceptions` section，表示确定性来源审计确认当前冻结来源没有明确的异常触发、处理、分支或恢复规则。它不是“没有异常”的判断，不生成领域 Claim；异常专属问题仍为 `not_answerable`。该 section 仍存在并绑定来源指纹与审计记录；其他缺证据、含糊或映射失败不得使用此状态。
+
 **交付级发布状态**：交付级只允许 `released` 或 `not_released`。Task 0–2 只能是 `not_released`；只有 Task 3 同时通过机器门、读者门和交付门，才能是 `released`。
 
 **业务结果幂等**：同一输入快照和配置重跑时，Reader/Audit 中的来源、Claim、页面、duplicate 和 archive 内容不能重复增长；运行记录可以追加，用于保留审计历史。

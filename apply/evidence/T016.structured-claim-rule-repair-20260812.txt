@@ -1,0 +1,19 @@
+T016 structured Claim prompt repair
+date=2026-08-12
+scope=src/knowledge_digest/llm.py and tests/acceptance/test_task2b_body_compiler.py
+
+RED
+command=uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k 'structured_claim_kind or typed_prompt_compacts_source_context or provider_claim_refs_are_short'
+result=1 failed target assertion, 2 passed, 72 deselected
+failure=missing payload.claims[0].structured_claim_rule
+
+GREEN
+focused=3 passed, 72 deselected
+task2b=75 passed
+consumer=187 passed, 2 skipped
+full=514 passed, 3 skipped
+diff_check=passed
+
+semantic_status=incomplete/not_released
+semantic_rerun=not performed; current shell lacked provider environment variables
+review=not repeated; Phase 2 one-time review remains unavailable

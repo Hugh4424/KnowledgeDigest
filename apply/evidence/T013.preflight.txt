@@ -1,0 +1,11 @@
+Task: T013 preflight — real semantic run
+Worktree: /Users/Hugh/Hugh/Project/KnowledgeDigest-task2b-knowledge-publication-body-compiler
+Observed CLI: `digest --help` exposes `--config`, `--llm-format {openai,anthropic}`, and `--no-llm`.
+Frozen sample manifest: `quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json`
+Frozen sample manifest sha256: `fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f`
+Sample manifest facts: sample_size=20; seed label=`knowledge-digest-task0-v1`; page_type_coverage=`deferred_to_task2a_projection_and_task2b`.
+Inventory facts: table=79, image=61, bilingual=88, parent_child=89, version=77, faq=7, multi_source_topic=true; long-document category is not exposed by the current inventory schema.
+Task 0 question set sha256: `8f5cb5e82c66d26d598e4aaeba71aa06db1b1cd67f9b92c122ab5ab2c70f1ac9`.
+TopicIndex fact: current frozen Task 1 `topic-index.json` has 54 rows and `page_type` is `[null]`; no deterministic three-page-type mapping is available.
+Missing run inputs: `KNOWLEDGEDIGEST_TASK2B_SAMPLE_INPUT`, `KNOWLEDGEDIGEST_TASK2B_SAMPLE_KB`, `KNOWLEDGEDIGEST_TASK2B_SEMANTIC_CONFIG`, `KNOWLEDGEDIGEST_TASK2B_LLM_FORMAT`, `KD_LLM_API_KEY`, `KD_LLM_BASE_URL`, `KD_LLM_MODEL`.
+Decision: do not select a replacement sample, provider, config, page type, or threshold. Do not create `T013.semantic-run.json` from a non-semantic/offline run. T013 remains `incomplete/not_released` until the frozen inputs and provider identity are supplied.

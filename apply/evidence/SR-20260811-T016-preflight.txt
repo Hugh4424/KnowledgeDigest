@@ -1,0 +1,23 @@
+SR-20260811-task2b-procedure-source-gap
+execution: T016 preflight / incomplete handoff
+date: 2026-08-11
+
+Current code/material regression:
+- uv run --frozen pytest -q => exit 0, 511 passed, 3 skipped
+- git diff --check => exit 0
+
+Existing semantic evidence check:
+- input: apply/evidence/T013.semantic-run-v23.json
+- validator exit: 0
+- valid: false
+- machine_exit_passed: false
+- delivery_status: not_released
+- page_type_counts: module_or_capability=2
+- reasons: machine-passing concept count below 6; product_overview coverage missing; procedure_or_rule coverage missing; semantic AC bindings incomplete
+
+Frozen T013 preflight:
+- required environment variables are missing in this process: KD_LLM_API_KEY, KD_LLM_BASE_URL, KD_LLM_MODEL, KNOWLEDGEDIGEST_TASK2B_LLM_FORMAT, KNOWLEDGEDIGEST_TASK2B_SAMPLE_INPUT, KNOWLEDGEDIGEST_TASK2B_SAMPLE_KB, KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE, KNOWLEDGEDIGEST_TASK2B_SEMANTIC_CONFIG
+- no new T013 semantic evidence was generated
+
+Disposition:
+T016 remains incomplete/not_released. The previous v23 evidence is retained as historical failure evidence and is not reused as current semantic acceptance. Do not substitute a fixture, provider, sample, threshold, or offline run. Handoff returns to verify-code after fresh frozen inputs are available.

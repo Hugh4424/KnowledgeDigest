@@ -1,0 +1,8 @@
+Task: T013 real semantic rerun after typed claim faithfulness repair
+Worktree: /Users/Hugh/Hugh/Project/KnowledgeDigest-task2b-knowledge-publication-body-compiler
+Input: frozen 20-example sample input and isolated Task 2-B KB
+Execution: ordinary digest CLI with the approved qwen3.6 and jina-embeddings identities supplied only through process environment
+Timeout: 300 seconds
+Exit code: 124
+Output evidence: no new semantic evidence file was written
+Disposition: unknown/incomplete; retain T013 v16 as the latest completed semantic run and do not infer a semantic pass

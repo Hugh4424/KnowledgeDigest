@@ -11,16 +11,18 @@ from __future__ import annotations
 import json
 import multiprocessing
 import os
+import re
 import signal
 import threading
 import time
 import urllib.error
 import urllib.request
 from contextlib import contextmanager
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterator, Mapping
 
 from .errors import ValidationError
 from .faithfulness import normalize_claim
+from .publication import PAGE_TYPE_OPTIONAL_SECTIONS, PAGE_TYPE_SECTION_MATRIX
 
 
 OPENAI_FORMAT = "openai"
@@ -151,11 +153,13 @@ def _request_payload(
         }
         if model == PUBLICATION_LLM_MODEL:
             # The approved qwen OpenAI bridge understands JSON mode.  It does
-            # not expose reasoning_content to the client, but the explicit
-            # contract prevents an empty content field when thinking consumes
-            # the entire completion budget.
+            # not expose reasoning_content to the client.  The bridge only
+            # honors the no-thinking switch through chat_template_kwargs;
+            # sending enable_thinking alone still burns the completion budget
+            # on hidden reasoning and can truncate the JSON body.
             payload["response_format"] = {"type": "json_object"}
             payload["enable_thinking"] = False
+            payload["chat_template_kwargs"] = {"enable_thinking": False}
         return payload
     return {"model": model, "max_tokens": max_tokens, "messages": messages}
 
@@ -322,6 +326,167 @@ _PUBLICATION_OUTPUT_SCHEMA = """{
   }
 }"""
 
+_TABLE_SEPARATOR_RE = re.compile(r"^\s*\|(?:\s*:?-{3,}:?\s*\|)+\s*$")
+_TABLE_ROW_RE = re.compile(r"^\s*\|.*\|\s*$")
+_STRUCTURED_SOURCE_KINDS = frozenset({"table", "bilingual", "image", "code", "version"})
+
+
+def _typed_source_outline(
+    source_text: str, claims: list[Mapping[str, Any]]
+) -> list[dict[str, Any]]:
+    """Keep only non-claim structure in the typed provider context.
+
+    Typed claims already carry the complete trusted source text and lineage.
+    Sending the raw source again can duplicate a long page inside the prompt
+    and make the provider truncate its JSON response. Headings, code fences,
+    table separators, and unclaimed table headers preserve enough layout to
+    map claims without sending a second copy of the evidence.
+    """
+    claim_texts = {
+        str(claim.get("text", "")).strip()
+        for claim in claims
+        if str(claim.get("text", "")).strip()
+    }
+    outline: list[dict[str, Any]] = []
+    for line_number, line in enumerate(str(source_text or "").splitlines(), 1):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("#"):
+            kind = "heading"
+        elif stripped.startswith(("```", "~~~")):
+            kind = "code_fence"
+        elif _TABLE_SEPARATOR_RE.fullmatch(stripped):
+            kind = "table_separator"
+        elif _TABLE_ROW_RE.fullmatch(stripped) and stripped not in claim_texts:
+            kind = "table_row"
+        else:
+            continue
+        outline.append({"line": line_number, "kind": kind, "text": stripped})
+    return outline
+
+
+def _is_format_only_claim(claim: Mapping[str, Any]) -> bool:
+    """Identify Markdown table delimiter claims with no reader fact."""
+    return bool(_TABLE_SEPARATOR_RE.fullmatch(str(claim.get("text", ""))))
+
+
+def _source_not_documented_audit(
+    page_draft: Mapping[str, Any],
+    section_id: str,
+) -> Mapping[str, Any] | None:
+    audits = page_draft.get("section_audits")
+    if not isinstance(audits, Mapping):
+        return None
+    audit = audits.get(section_id)
+    if not isinstance(audit, Mapping) or audit.get("status") != "source_not_documented":
+        return None
+    return audit
+
+_TYPED_BODY_RULES = """You compile one typed knowledge-base page. Return ONLY one JSON object.
+
+Typed body schema:
+{"page_type":"<supplied page type>",
+ "sections":{"<required section>":{"body":"<reader-facing text>","claim_ids":["<supplied provider claim ref>"]}},
+ "publication": {<optional semantic publication metadata>},
+ "summary": {<optional validated summary object>}}
+
+Typed body rules:
+1. Copy page_type exactly from the supplied typed page contract.
+2. Return every required section exactly once; optional sections are allowed only when the source supports them.
+3. Do not add sections, page types, source fields, claims, paths, permissions, or unsupported facts.
+4. Every section body must be supported by the supplied trusted claims. The source_outline is only a structural hint; it is not evidence. claim_ids may only reference supplied provider claim refs. The pipeline maps those short refs back to trusted claim identities.
+   Use a claim_id only when that claim supports a fact actually stated in that
+   section; not every source claim must be repeated in the reader body because
+   the complete Claim/Evidence ledger is preserved separately.
+5. Keep commands, numbers, versions, identifiers, tables, code, images, bilingual text, limits, and conditions faithful to the source.
+6. Do not return final_body, claims, or coverage_mapping. Those are deterministic pipeline fields.
+7. Choose claim_ids conservatively. A claim_id must support a fact actually
+   stated in that same section body; never attach the whole Claim/Evidence
+   ledger to a section as a completeness checklist. If a claim is not stated,
+   leave its claim_id out.
+8. Before adding a claim_id, check the body against that exact claim. If the
+   claim contains a URL, path, command, identifier, number, version, table
+   value, or other exact token, copy that material into the body or leave the
+   claim_id out. Do not cite a claim merely because it is related to the
+   section.
+9. Do not invent a required section, fill it with a placeholder, or claim that
+   the source says something it does not say. If the supplied source cannot
+   support a required section, the safe result is for the page to be rejected
+   by the deterministic gate; never manufacture an answer to make the JSON
+   complete.
+   If the trusted typed page contract marks `procedure_or_rule.exceptions` as
+   `source_not_documented`, return that required section with an empty body and
+   an empty claim_ids list. The deterministic pipeline records the auditable
+   section state; do not write a sentence such as "no exceptions".
+10. The `sources` section is for traceable source-identifying content, not a
+    summary of every revision-history row. Do not cite neighboring table rows,
+    Markdown separator lines, URLs, or links unless the exact material is
+    present in that section body. A compact paraphrase must cite only the
+    specific claims it actually preserves; never use claim_ids as a source
+    checklist.
+11. `source_kind` is a deterministic handling hint, not evidence. For `table`,
+    `bilingual`, `image`, `code`, and `version` claims, preserve the exact
+    protected values, paired text, link, path, command, or version when citing
+    them; otherwise leave the claim_id out. A shortened version/date sentence
+    must not cite neighboring revision-table rows.
+12. Keep section bodies concise and reader-facing. Do not copy the complete
+    source, Claim ledger, or long evidence blocks into every section; the
+    deterministic Evidence output preserves the full source content.
+13. A supplied claim marked `structured_claim_rule=copy_verbatim_or_omit` has
+    only two valid uses: copy that claim's complete text into the same section
+    body and cite it, or omit both the claim_id and the fact. Never paraphrase
+    a marked claim and then cite it. This rule is especially important for
+    tables, URLs, paths, images, code, bilingual pairs, and revision rows.
+"""
+
+
+_TYPED_SECTION_GUIDANCE: dict[str, dict[str, str]] = {
+    "product_overview": {
+        "positioning": "what the product is and the reader-level conclusion",
+        "use_cases": "who uses it or which supported scenarios it serves",
+        "capability_boundaries": "supported capabilities and explicit limits or exclusions",
+        "entry": "how to enter, access, subscribe to, or start using it",
+        "version": "an explicitly stated version, release label, or date version",
+        "sources": "source-identifying facts that help the reader trace this page",
+    },
+    "module_or_capability": {
+        "purpose": "what this module or capability is for",
+        "capabilities": "what it can do, including supported behavior",
+        "entry_prerequisites": "required access, setup, permissions, or prerequisites",
+        "relationships": "explicit relationships to products, modules, APIs, or other components",
+        "limitations": "explicit limits, exclusions, or trade-offs",
+        "version": "an explicitly stated version, release label, or date version",
+        "sources": "source-identifying facts that help the reader trace this page",
+    },
+    "procedure_or_rule": {
+        "prerequisites": "what must be true or ready before the procedure",
+        "steps_rules": "the documented steps, order, commands, or operating rules",
+        "exceptions": "explicit failure handling, alternate branches, or edge cases",
+        "limitations": "explicit limits, exclusions, or trade-offs of the procedure",
+        "version": "an explicitly stated version, release label, or date version",
+        "sources": "source-identifying facts that help the reader trace this page",
+    },
+}
+
+
+def _typed_section_guidance(contract: Mapping[str, Any]) -> str:
+    """Render source-derived section meanings without changing the contract."""
+    page_type = str(contract.get("page_type") or "")
+    guidance = _TYPED_SECTION_GUIDANCE.get(page_type, {})
+    section_ids = [
+        *[str(value) for value in contract.get("required_sections", [])],
+        *[str(value) for value in contract.get("optional_sections", [])],
+    ]
+    rows = [
+        f"- {section_id}: {guidance[section_id]}"
+        for section_id in section_ids
+        if section_id in guidance
+    ]
+    if not rows:
+        return ""
+    return "SECTION MEANINGS (use only as labels; source evidence remains authoritative):\n" + "\n".join(rows)
+
 
 def validate_publication_provider_identity(*, model: str, base_url: str) -> None:
     """Reject providers outside the user-approved Task2 publication seam."""
@@ -358,6 +523,21 @@ def publication_prompt_sections(context: dict[str, Any]) -> str:
 
 
 
+def typed_publication_prompt_sections(context: dict[str, Any]) -> str:
+    """Describe optional publication metadata without changing the body role."""
+    return "\n\n".join(
+        (
+            "OPTIONAL NESTED PUBLICATION METADATA:\n"
+            "Keep the typed body response as the top-level contract. If you return "
+            "publication metadata, put it under the top-level `publication` key; "
+            "never return publication metadata as the only result. Use this shape:\n"
+            + _PUBLICATION_OUTPUT_SCHEMA,
+            "ALLOWED TAXONOMY:\n"
+            + json.dumps(context.get("allowed_taxonomy", []), ensure_ascii=False, separators=(",", ":")),
+        )
+    )
+
+
 def call_llm(
     prompt: str,
     *,
@@ -391,7 +571,10 @@ def call_llm(
         headers=headers,
         method="POST",
     )
-    if urllib.request.urlopen is _ORIGINAL_URLOPEN and hasattr(os, "fork"):
+    if (
+        urllib.request.urlopen is _ORIGINAL_URLOPEN
+        and hasattr(os, "fork")
+    ):
         raw = _request_in_child(request, timeout=timeout)
     else:
         try:
@@ -425,13 +608,78 @@ def build_prompt(context: dict[str, Any], *, target_page: str) -> str:
         }
         for claim in context.get("claims", [])
     ]
-    payload = {
-        "target_page": target_page,
-        "initial_body": context.get("initial_body", ""),
-        "source_text": context.get("source_text", ""),
-        "existing_target_body": context.get("old_target_body", ""),
-        "claims": claims,
-    }
+    typed_contract = context.get("typed_section_contract")
+    if isinstance(typed_contract, Mapping):
+        # Typed compilation must use one current source context.  The legacy
+        # initial_body/source_text pair is usually identical, and
+        # existing_target_body can contain stale Reader wording; neither is
+        # part of the trusted typed PageDraft input. Claims carry the complete
+        # source evidence; only structural source hints are sent separately so
+        # a long page is not duplicated in the provider prompt.
+        source_text = context.get("source_text") or context.get("initial_body", "")
+        source_kinds: dict[tuple[str, str], str] = {}
+        page_draft = context.get("page_draft")
+        if isinstance(page_draft, Mapping):
+            source_fragments = page_draft.get("source_fragments", [])
+            if isinstance(source_fragments, list):
+                for fragment in source_fragments:
+                    if not isinstance(fragment, Mapping):
+                        continue
+                    content_type = str(fragment.get("content_type", "")).strip()
+                    raw_id = str(fragment.get("raw_id", "")).strip()
+                    locator = str(fragment.get("fragment_locator", "")).strip()
+                    if content_type and raw_id and locator:
+                        source_kinds[(raw_id, locator)] = content_type
+        typed_claims = []
+        for index, claim in enumerate(claims, start=1):
+            typed_claim = dict(claim)
+            # Long fingerprints are trusted identities, not a good model-facing
+            # handle.  Give the provider a short deterministic reference while
+            # retaining the fingerprint in the prompt for optional publication
+            # metadata and mapping it back before any gate consumes the result.
+            typed_claim["provider_claim_ref"] = f"c{index:03d}"
+            source_kind = source_kinds.get(
+                (
+                    str(claim.get("raw_id", "")).strip(),
+                    str(claim.get("fragment_locator", "")).strip(),
+                )
+            )
+            if source_kind:
+                # This is an instruction hint only. The source claim text and
+                # deterministic gate remain the authority for evidence.
+                typed_claim["source_kind"] = source_kind
+                if source_kind in _STRUCTURED_SOURCE_KINDS:
+                    # Make the existing copy-verbatim-or-omit contract
+                    # machine-visible per claim without adding evidence.
+                    typed_claim["structured_claim_rule"] = "copy_verbatim_or_omit"
+            typed_claims.append(typed_claim)
+        payload = {
+            "target_page": target_page,
+            "source_outline": _typed_source_outline(str(source_text), claims),
+            "claims": typed_claims,
+        }
+    else:
+        payload = {
+            "target_page": target_page,
+            "initial_body": context.get("initial_body", ""),
+            "source_text": context.get("source_text", ""),
+            "existing_target_body": context.get("old_target_body", ""),
+            "claims": claims,
+        }
+    if isinstance(typed_contract, Mapping):
+        payload["typed_page_contract"] = {
+            "page_type": typed_contract.get("page_type"),
+            "required_sections": list(typed_contract.get("required_sections", [])),
+            "optional_sections": list(typed_contract.get("optional_sections", [])),
+            "section_audits": {
+                str(section_id): {
+                    "status": str(audit.get("status")),
+                    "audit_version": str(audit.get("audit_version")),
+                }
+                for section_id, audit in (typed_contract.get("section_audits") or {}).items()
+                if isinstance(audit, Mapping)
+            },
+        }
     if context.get("publication_enabled") and context.get("publication_only"):
         publication = publication_prompt_sections(context)
         summary_contract = (
@@ -457,10 +705,45 @@ def build_prompt(context: dict[str, Any], *, target_page: str) -> str:
                 ensure_ascii=False,
                 separators=(",", ":"),
             )
+            )
+    if isinstance(typed_contract, Mapping) and not context.get("publication_only"):
+        publication = typed_publication_prompt_sections(context) if context.get("publication_enabled") else ""
+        section_guidance = _typed_section_guidance(typed_contract)
+        summary_requirement = (
+            "\n\nIf summary is returned, use the validated shape "
+            "{\"status\":\"validated\",\"segments\":[{\"summary_id\":\"summary-1\",\"text\":\"...\",\"supports\":[{\"claim_fingerprint\":\"...\"}]}]} "
+            "and reference every supplied claim fingerprint."
+            if context.get("summary_enabled")
+            else ""
+        )
+        publication_requirement = (
+            "\n\nThe top-level publication object is optional for the body gate. "
+            "If returned, it must use only the supplied claim fingerprints and allowed taxonomy."
+            if publication
+            else ""
+        )
+        return (
+            f"{_TYPED_BODY_RULES}\n"
+            f"{section_guidance}\n"
+            f"{publication}\n"
+            f"{publication_requirement}{summary_requirement}\n\n"
+            "INPUT:\n"
+            + json.dumps(payload, ensure_ascii=False, indent=2)
         )
     summary_enabled = bool(context.get("summary_enabled", False))
     payload["summary_enabled"] = summary_enabled
     rules = _SUMMARY_PROMPT_RULES if summary_enabled else _PROMPT_RULES
+    if isinstance(typed_contract, Mapping):
+        rules += (
+            "\n\nTASK 2-B TYPED BODY CONTRACT:\n"
+            "Return the supplied page_type unchanged and add a top-level `sections` object. "
+            "The section keys must be exactly the supplied required_sections plus any optional "
+            "section supported by source evidence; each value must "
+            "be {\"body\":\"...\",\"claim_ids\":[\"claim_fingerprint\"]}. "
+            "Do not add sections, page types, source fields, or claims. Every claim_id must "
+            "refer to a supplied claim fingerprint, and every section fact must be supported "
+            "by the supplied source text."
+        )
     publication = publication_prompt_sections(context) if context.get("publication_enabled") else ""
     publication_requirement = (
         "\n\nMANDATORY OUTPUT CONTRACT: The top-level JSON object MUST include the "
@@ -495,6 +778,196 @@ def parse_response(text: str, *, require_final_body: bool = True) -> dict[str, A
     if not isinstance(parsed, dict) or (require_final_body and "final_body" not in parsed):
         raise ValidationError("llm", "response", "provider output must be an object with final_body")
     return parsed
+
+
+def _typed_section_failure(page_draft: Mapping[str, Any], reason: str) -> dict[str, Any]:
+    return {
+        "status": "degraded",
+        "reader_eligible": False,
+        "page_type": page_draft.get("page_type"),
+        "sections": {},
+        "reason": reason,
+        "audit_record": {"destination": "Audit", "reason": reason},
+    }
+
+
+def _decode_typed_section_payload(payload: Any) -> tuple[dict[str, Any] | None, str | None]:
+    if isinstance(payload, Mapping):
+        return dict(payload), None
+    if not isinstance(payload, str) or not payload.strip():
+        return None, "provider result is empty"
+    stripped = payload.strip()
+    fence = chr(96) * 3
+    if stripped.startswith(fence):
+        stripped = stripped.split("\n", 1)[-1]
+        if stripped.rstrip().endswith(fence):
+            stripped = stripped.rstrip()[:-len(fence)]
+    try:
+        parsed = json.loads(stripped)
+    except json.JSONDecodeError as error:
+        return None, f"provider output parse failed ({error})"
+    if not isinstance(parsed, dict):
+        return None, "provider output must be an object"
+    return parsed, None
+
+
+def validate_section_response(
+    page_draft: Mapping[str, Any],
+    payload: Any,
+) -> dict[str, Any]:
+    """Validate provider output against the trusted page/section contract."""
+    parsed, parse_reason = _decode_typed_section_payload(payload)
+    if parse_reason:
+        return _typed_section_failure(page_draft, parse_reason)
+    assert parsed is not None
+    unknown_top_level = sorted(set(parsed) - {"page_type", "sections", "publication", "summary"})
+    if unknown_top_level:
+        return _typed_section_failure(
+            page_draft,
+            "provider top-level fields are not allowed: " + ", ".join(unknown_top_level),
+        )
+    page_type = parsed.get("page_type")
+    expected_page_type = page_draft.get("page_type")
+    if page_type != expected_page_type or page_type not in PAGE_TYPE_SECTION_MATRIX:
+        return _typed_section_failure(page_draft, f"provider page type is invalid: {page_type}")
+    sections = parsed.get("sections")
+    if not isinstance(sections, Mapping):
+        return _typed_section_failure(page_draft, "provider sections object is missing")
+    required = tuple(page_draft.get("required_sections") or PAGE_TYPE_SECTION_MATRIX[page_type])
+    optional = tuple(page_draft.get("optional_sections") or PAGE_TYPE_OPTIONAL_SECTIONS.get(page_type, ()))
+    allowed_sections = set(required) | set(optional)
+    unknown_sections = sorted(set(sections) - allowed_sections)
+    if unknown_sections:
+        return _typed_section_failure(page_draft, f"unknown section: {', '.join(unknown_sections)}")
+    trusted_claim_ids = {
+        str(claim.get("claim_id") or claim.get("claim_fingerprint"))
+        for claim in page_draft.get("claims", [])
+        if isinstance(claim, Mapping) and (claim.get("claim_id") or claim.get("claim_fingerprint"))
+    }
+    if not trusted_claim_ids:
+        trusted_claim_ids = {str(value) for value in page_draft.get("claim_ids", []) if str(value).strip()}
+    trusted_claims_by_id = {
+        str(claim.get("claim_id") or claim.get("claim_fingerprint")): claim
+        for claim in page_draft.get("claims", [])
+        if isinstance(claim, Mapping)
+        and (claim.get("claim_id") or claim.get("claim_fingerprint"))
+    }
+    provider_claim_ref_to_id = {
+        str(claim.get("provider_claim_ref") or f"c{index:03d}"): claim_id
+        for index, claim in enumerate(page_draft.get("claims", []), start=1)
+        if isinstance(claim, Mapping)
+        for claim_id in [str(claim.get("claim_id") or claim.get("claim_fingerprint") or "").strip()]
+        if claim_id
+    }
+    missing_sections = sorted(set(required) - set(sections))
+    if missing_sections:
+        for section_id, raw in sections.items():
+            if isinstance(raw, Mapping):
+                unknown_fields = sorted(set(raw) - {"body", "claim_ids"})
+                if unknown_fields:
+                    return _typed_section_failure(
+                        page_draft,
+                        "provider source/claim fields are not allowed: " + ", ".join(unknown_fields),
+                    )
+        return _typed_section_failure(page_draft, f"required section missing: {', '.join(missing_sections)}")
+    normalized: dict[str, dict[str, Any]] = {}
+    section_ids = [*required, *[section_id for section_id in optional if section_id in sections]]
+    for section_id in section_ids:
+        raw = sections[section_id]
+        source_audit = _source_not_documented_audit(page_draft, str(section_id))
+        claim_ids: list[str] = []
+        if isinstance(raw, str):
+            body = raw.strip()
+        elif isinstance(raw, Mapping):
+            unknown_fields = sorted(set(raw) - {"body", "claim_ids"})
+            if unknown_fields:
+                return _typed_section_failure(
+                    page_draft,
+                    "provider source/claim fields are not allowed: " + ", ".join(unknown_fields),
+                )
+            body = str(raw.get("body", "")).strip()
+            raw_claim_ids = raw.get("claim_ids", [])
+            if not isinstance(raw_claim_ids, list) or not all(isinstance(value, str) and value.strip() for value in raw_claim_ids):
+                return _typed_section_failure(page_draft, f"section {section_id} claim mapping is invalid")
+            claim_ids = [
+                provider_claim_ref_to_id.get(value.strip(), value.strip())
+                for value in raw_claim_ids
+            ]
+            if trusted_claim_ids:
+                unknown_claims = sorted(set(claim_ids) - trusted_claim_ids)
+                if unknown_claims:
+                    return _typed_section_failure(
+                        page_draft,
+                        "provider claim ids are not supplied by the trusted input: " + ", ".join(unknown_claims),
+                    )
+            # A Markdown delimiter is structure, not a reader-facing fact.
+            # Keep it in the complete source/evidence ledger, but do not make
+            # the provider reproduce a formatting-only line as a semantic
+            # claim just because it was extracted as a Claim.
+            claim_ids = [
+                claim_id
+                for claim_id in claim_ids
+                if not _is_format_only_claim(trusted_claims_by_id.get(claim_id, {}))
+            ]
+        else:
+            return _typed_section_failure(page_draft, f"section {section_id} is not an object or string")
+        if source_audit is not None:
+            if body or claim_ids:
+                return _typed_section_failure(
+                    page_draft,
+                    f"section {section_id} must stay empty when source is not documented",
+                )
+            normalized[section_id] = {
+                "section_id": section_id,
+                "body": "",
+                "claim_ids": [],
+                "status": "source_not_documented",
+                "source_audit": dict(source_audit),
+            }
+            trusted_section = page_draft.get("sections", {}).get(section_id) if isinstance(page_draft.get("sections"), Mapping) else None
+            if isinstance(trusted_section, Mapping) and isinstance(trusted_section.get("dependency_record"), Mapping):
+                normalized[section_id]["dependency_record"] = dict(trusted_section["dependency_record"])
+            continue
+        if not body:
+            return _typed_section_failure(page_draft, f"section {section_id} is empty")
+        if not claim_ids:
+            return _typed_section_failure(
+                page_draft,
+                f"section {section_id} claim mapping is missing",
+            )
+        normalized[section_id] = {
+            "section_id": section_id,
+            "body": body,
+            "claim_ids": claim_ids,
+            "status": "candidate",
+        }
+        trusted_section = page_draft.get("sections", {}).get(section_id) if isinstance(page_draft.get("sections"), Mapping) else None
+        if isinstance(trusted_section, Mapping) and isinstance(trusted_section.get("dependency_record"), Mapping):
+            normalized[section_id]["dependency_record"] = dict(trusted_section["dependency_record"])
+    normalized_response = {
+        "status": "draft",
+        "reader_eligible": False,
+        "page_type": page_type,
+        "sections": normalized,
+        "reason": None,
+        "audit_record": None,
+        "_validated_typed_response": True,
+    }
+    if isinstance(page_draft.get("section_audits"), Mapping):
+        normalized_response["section_audits"] = {
+            str(section_id): dict(audit)
+            for section_id, audit in page_draft["section_audits"].items()
+            if isinstance(audit, Mapping)
+        }
+    if "publication" in parsed:
+        if not isinstance(parsed["publication"], Mapping):
+            return _typed_section_failure(page_draft, "provider publication metadata is not an object")
+        normalized_response["publication"] = dict(parsed["publication"])
+    if "summary" in parsed:
+        if not isinstance(parsed["summary"], Mapping):
+            return _typed_section_failure(page_draft, "provider summary is not an object")
+        normalized_response["summary"] = dict(parsed["summary"])
+    return normalized_response
 
 
 def _restore_source_lineage(
@@ -606,7 +1079,9 @@ def build_generator(
                                 else DEFAULT_MAX_TOKENS
                             ),
                         ),
-                        require_final_body=not bool(context.get("publication_only")),
+                        require_final_body=not bool(
+                            context.get("publication_only") or context.get("typed_section_contract")
+                        ),
                     ),
                     context,
                 )

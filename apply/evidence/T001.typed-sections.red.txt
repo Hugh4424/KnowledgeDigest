@@ -1,0 +1,6 @@
+command: uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k typed_sections
+exit: 1
+oracle: ORACLE-T2B-TYPED-SECTIONS
+result: target RED; 3 failed, 10 deselected
+failure: test collection succeeded; the first target assertion reports that the planned normalize_structure seam is not present in the current implementation. No dependency, import, fixture-path or command setup error.
+scope: tests/acceptance/test_task2b_body_compiler.py; tests/fixtures/task2b_publication_body/cases.json

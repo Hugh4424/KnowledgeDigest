@@ -1,0 +1,450 @@
+{
+  "schema_version": "task2b-publication-body-fixtures.v1",
+  "page_types": [
+    {
+      "id": "overview",
+      "page_type": "product_overview",
+      "topic_index": {
+        "topic_id": "topic-alpha",
+        "title": "Alpha Platform",
+        "page_type": "product_overview",
+        "mapping_status": "mapped"
+      },
+      "source": {
+        "raw_id": "raw-alpha-overview",
+        "source_uri": "https://docs.example.test/alpha/overview",
+        "text": "# Alpha Platform\nParent: Alpha Suite\n\nAlpha is the managed platform for internal teams.\n\nFAQ: How do I enter?\nUse the Alpha Console.\n\n| version | v2.1 |\n| --- | --- |\n\n![architecture](images/alpha.png)\nEnglish / 中文\nVersion: v2.1\nNOISE: generated footer"
+      },
+      "expected_required_sections": [
+        "positioning",
+        "use_cases",
+        "capability_boundaries",
+        "entry",
+        "sources"
+      ],
+      "expected_optional_sections": ["version"],
+      "expected_sections": [
+        "positioning",
+        "use_cases",
+        "capability_boundaries",
+        "entry",
+        "sources",
+        "version"
+      ]
+    },
+    {
+      "id": "module",
+      "page_type": "module_or_capability",
+      "topic_index": {
+        "topic_id": "topic-beta-module",
+        "title": "Beta Module",
+        "page_type": "module_or_capability",
+        "mapping_status": "mapped"
+      },
+      "source": {
+        "raw_id": "raw-beta-module",
+        "source_uri": "https://docs.example.test/beta/module",
+        "text": "# Beta Module\nParent: Beta Product\n\nThe module handles device enrollment.\n\nFAQ: What is required?\nAn administrator account is required.\n\n| limit | 50 devices |\n| --- | --- |\n\nVersion: 3.0.0"
+      },
+      "expected_required_sections": [
+        "purpose",
+        "capabilities",
+        "entry_prerequisites",
+        "relationships",
+        "limitations",
+        "version",
+        "sources"
+      ],
+      "expected_optional_sections": [],
+      "expected_sections": [
+        "purpose",
+        "capabilities",
+        "entry_prerequisites",
+        "relationships",
+        "limitations",
+        "version",
+        "sources"
+      ]
+    },
+    {
+      "id": "procedure",
+      "page_type": "procedure_or_rule",
+      "topic_index": {
+        "topic_id": "topic-gamma-procedure",
+        "title": "Gamma Release Procedure",
+        "page_type": "procedure_or_rule",
+        "mapping_status": "mapped"
+      },
+      "source": {
+        "raw_id": "raw-gamma-procedure",
+        "source_uri": "https://docs.example.test/gamma/release",
+        "text": "# Gamma Release Procedure\nParent: Gamma Product\n\nPrerequisite: access to the release project.\n\n1. Run `digest --no-llm`.\n2. Check port 5174.\nConfig: PROFILE=prod\n\nFAQ: What if it fails?\nKeep the previous release and record the error.\n\nVersion: 2026-08-10\nEnglish / 中文"
+      },
+      "expected_required_sections": [
+        "prerequisites",
+        "steps_rules",
+        "exceptions",
+        "limitations",
+        "version",
+        "sources"
+      ],
+      "expected_optional_sections": [],
+      "expected_sections": [
+        "prerequisites",
+        "steps_rules",
+        "exceptions",
+        "limitations",
+        "version",
+        "sources"
+      ]
+    }
+  ],
+  "version_cases": [
+    {
+      "id": "conflicting",
+      "topic_index": {
+        "topic_id": "topic-version-conflict",
+        "title": "Version Conflict",
+        "page_type": "product_overview",
+        "mapping_status": "mapped"
+      },
+      "sources": [
+        {"raw_id": "raw-version-a", "source_uri": "https://docs.example.test/version/a", "text": "# Version Conflict\nVersion: 2.1.0"},
+        {"raw_id": "raw-version-b", "source_uri": "https://docs.example.test/version/b", "text": "# Version Conflict\nVersion: 2.2.0"}
+      ],
+      "expected_status": "degraded",
+      "reason_contains": "conflicting version"
+    },
+    {
+      "id": "invalid",
+      "topic_index": {
+        "topic_id": "topic-version-invalid",
+        "title": "Invalid Version",
+        "page_type": "product_overview",
+        "mapping_status": "mapped"
+      },
+      "sources": [
+        {"raw_id": "raw-version-invalid", "source_uri": "https://docs.example.test/version/invalid", "text": "# Invalid Version\nVersion: build-42"}
+      ],
+      "expected_status": "degraded",
+      "reason_contains": "not a semver"
+    },
+    {
+      "id": "missing-product-version",
+      "topic_index": {
+        "topic_id": "topic-version-missing",
+        "title": "No Version Product",
+        "page_type": "product_overview",
+        "mapping_status": "mapped"
+      },
+      "sources": [
+        {"raw_id": "raw-version-missing", "source_uri": "https://docs.example.test/version/missing", "text": "# No Version Product\nThe source has no version fact."}
+      ],
+      "expected_status": "draft",
+      "expected_optional_sections": []
+    },
+    {
+      "id": "release-label",
+      "topic_index": {
+        "topic_id": "topic-release-label",
+        "title": "Release Label",
+        "page_type": "product_overview",
+        "mapping_status": "mapped"
+      },
+      "sources": [
+        {"raw_id": "raw-release-label", "source_uri": "https://docs.example.test/version/release", "text": "# Release Label\nRelease: stable"}
+      ],
+      "expected_status": "draft",
+      "expected_optional_sections": ["version"]
+    },
+    {
+      "id": "missing-module-version",
+      "topic_index": {
+        "topic_id": "topic-module-version-missing",
+        "title": "Module Without Version",
+        "page_type": "module_or_capability",
+        "mapping_status": "mapped"
+      },
+      "sources": [
+        {"raw_id": "raw-module-version-missing", "source_uri": "https://docs.example.test/version/module-missing", "text": "# Module Without Version\nThe module has no declared version fact."}
+      ],
+      "expected_status": "draft",
+      "expected_optional_sections": []
+    },
+    {
+      "id": "missing-procedure-version",
+      "topic_index": {
+        "topic_id": "topic-procedure-version-missing",
+        "title": "Procedure Without Version",
+        "page_type": "procedure_or_rule",
+        "mapping_status": "mapped"
+      },
+      "sources": [
+        {"raw_id": "raw-procedure-version-missing", "source_uri": "https://docs.example.test/version/procedure-missing", "text": "# Procedure Without Version\n1. Run the documented step.\nNo version fact is declared."}
+      ],
+      "expected_status": "draft",
+      "expected_optional_sections": []
+    }
+  ],
+  "negative_provider_outputs": [
+    {
+      "id": "unknown-section",
+      "payload": {
+        "page_type": "product_overview",
+        "sections": {
+          "positioning": "Alpha is a platform.",
+          "made_up_section": "This expands the contract."
+        }
+      },
+      "reason_contains": "unknown section"
+    },
+    {
+      "id": "unknown-page-type",
+      "payload": {
+        "page_type": "knowledge_graph",
+        "sections": {}
+      },
+      "reason_contains": "page type"
+    },
+    {
+      "id": "unknown-source-field",
+      "payload": {
+        "page_type": "product_overview",
+        "sections": {
+          "positioning": {
+            "body": "Alpha is a platform.",
+            "source_uri": "https://attacker.example/fabricated",
+            "claim_id": "invented"
+          }
+        }
+      },
+      "reason_contains": "source"
+    },
+    {
+      "id": "missing-required-section",
+      "payload": {
+        "page_type": "product_overview",
+        "sections": {
+          "positioning": "Alpha is a platform."
+        }
+      },
+      "reason_contains": "required section"
+    },
+    {
+      "id": "truncated-json",
+      "payload": "{\"page_type\":\"product_overview\",\"sections\":{",
+      "reason_contains": "parse"
+    },
+    {
+      "id": "empty-result",
+      "payload": "",
+      "reason_contains": "empty"
+    }
+  ],
+  "topic_index_failures": [
+    {
+      "id": "unmapped",
+      "topic_id": "topic-unmapped",
+      "title": "Unmapped topic",
+      "page_type": null,
+      "mapping_status": "unmapped"
+    },
+    {
+      "id": "conflict",
+      "topic_id": "topic-conflict",
+      "title": "Conflicting topic",
+      "page_type": "product_overview",
+      "mapping_status": "conflict",
+      "candidate_page_types": ["product_overview", "procedure_or_rule"]
+    }
+  ],
+  "provenance_cases": {
+    "claims": [
+      {
+        "claim_id": "claim-alpha-1",
+        "raw_id": "raw-alpha-overview",
+        "source_uri": "https://docs.example.test/alpha/overview",
+        "fragment_locator": "lines:3-3",
+        "text": "Alpha supports 99% of internal cases.",
+        "content_fingerprint": "a111111111111111111111111111111111111111111111111111111111111111"
+      }
+    ],
+    "supported_body": "Alpha supports 99% of internal cases. [^claim-alpha-1]\n\n[^claim-alpha-1]: https://docs.example.test/alpha/overview#lines:3-3",
+    "evidence_body": "Alpha supports 99% of internal cases.",
+    "token_tampered_body": "Alpha supports 100% of internal cases. [^claim-alpha-1]\n\n[^claim-alpha-1]: https://docs.example.test/alpha/overview#lines:3-3",
+    "missing_attribution_body": "Alpha supports 99% of internal cases.",
+    "near_duplicate_body": "Alpha supports 99% of internal cases. Alpha supports 99% of internal cases. Alpha supports 99% of internal cases. [^claim-alpha-1]",
+    "duplicate_context": {
+      "same_page": [
+        "Alpha supports 99% of internal cases. Alpha supports 99% of internal cases."
+      ],
+      "cross_page": [
+        "Alpha supports 99% of internal cases. Alpha supports 99% of internal cases."
+      ],
+      "denominator": 2,
+      "detector_version": "jaccard-5gram.v1",
+      "seed": 17
+    }
+  },
+  "impact_cases": {
+    "topic_id": "topic-alpha",
+    "page_type": "product_overview",
+    "old": {
+      "positioning_body": "Alpha is the managed platform.",
+      "limitations_body": "Alpha has a documented boundary."
+    },
+    "changed": {
+      "positioning_body": "Alpha is the managed platform for new teams.",
+      "limitations_body": "Alpha has a documented boundary."
+    },
+    "old_reader_page": {
+      "status": "published",
+      "reader_eligible": true,
+      "body": "Alpha is the managed platform.\n\nAlpha has a documented boundary.",
+      "target_path": "pages/alpha.md"
+    },
+    "failed_candidate_page": {
+      "status": "degraded",
+      "reader_eligible": false,
+      "body": "Alpha is a broken replacement.",
+      "reason": "provider failed"
+    }
+  },
+  "semantic_split": {
+    "topic_id": "topic-long-alpha",
+    "title": "Long Alpha Topic",
+    "page_type": "product_overview",
+    "sections": [
+      {
+        "section_id": "positioning",
+        "heading": "## 定位",
+        "body_line_count": 40,
+        "claim_ids": ["claim-long-1", "claim-long-2"]
+      },
+      {
+        "section_id": "use_cases",
+        "heading": "## 适用场景",
+        "body_line_count": 40,
+        "claim_ids": ["claim-long-3", "claim-long-4"]
+      },
+      {
+        "section_id": "capability_boundaries",
+        "heading": "## 能力边界",
+        "body_line_count": 40,
+        "claim_ids": ["claim-long-5", "claim-long-6"]
+      },
+      {
+        "section_id": "entry",
+        "heading": "## 入口",
+        "body_line_count": 20,
+        "claim_ids": ["claim-long-7"]
+      }
+    ],
+    "claims": [
+      {"claim_id": "claim-long-1", "text": "Alpha claim 1."},
+      {"claim_id": "claim-long-2", "text": "Alpha claim 2."},
+      {"claim_id": "claim-long-3", "text": "Alpha claim 3."},
+      {"claim_id": "claim-long-4", "text": "Alpha claim 4."},
+      {"claim_id": "claim-long-5", "text": "Alpha claim 5."},
+      {"claim_id": "claim-long-6", "text": "Alpha claim 6."},
+      {"claim_id": "claim-long-7", "text": "Alpha claim 7."}
+    ]
+  },
+  "semantic_evidence_file": {
+    "valid_machine_fixture": {
+      "schema_version": "task2b-semantic-evidence.v1",
+      "run_id": "run-semantic-fixture-1",
+      "run_status": "completed",
+      "execution_mode": "offline_fixture",
+      "run_identity": {
+        "run_id": "run-semantic-fixture-1",
+        "sample_fingerprint": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
+        "kb_fingerprint": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+        "input_fingerprint": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
+      },
+      "output_path": "/tmp/task2b-semantic-fixture.json",
+      "delivery_status": "not_released",
+      "sample_manifest": {
+        "path": "quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json",
+        "content_hash": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
+        "sample_count": 12,
+        "sampling_seed": 17,
+        "required_categories": ["long_text", "table_image", "bilingual", "multi_source"],
+        "covered_categories": ["long_text", "table_image", "bilingual", "multi_source"],
+        "excluded_categories": []
+      },
+      "provider": {
+        "provider": "fixture",
+        "model": "fixture-semantic-model",
+        "base_url": "https://fixture.invalid/v1",
+        "credential": "environment-only"
+      },
+      "detector": {
+        "version": "answerability-fixture.v1",
+        "name": "deterministic-fixture-detector"
+      },
+      "budget": {"provider_calls": 12, "max_tokens": 8192},
+      "threshold": {"answerability": 0.8, "section_completeness": 1.0},
+      "answerability_source": "task0-17-plus-3-question-set.v1",
+      "answerability_subset": {
+        "id": "answerable-subset-fixture-1",
+        "content_hash": "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",
+        "questions": [
+          {"question_id": "q1", "answerable": true, "first_hit": "concept-1"},
+          {"question_id": "q2", "answerable": true, "first_hit": "concept-2"}
+        ]
+      },
+      "concepts": [
+        {"concept_id": "concept-1", "page_type": "product_overview", "status": "machine-passing"},
+        {"concept_id": "concept-2", "page_type": "product_overview", "status": "machine-passing"},
+        {"concept_id": "concept-3", "page_type": "module_or_capability", "status": "machine-passing"},
+        {"concept_id": "concept-4", "page_type": "module_or_capability", "status": "machine-passing"},
+        {"concept_id": "concept-5", "page_type": "procedure_or_rule", "status": "machine-passing"},
+        {"concept_id": "concept-6", "page_type": "procedure_or_rule", "status": "machine-passing"}
+      ],
+      "evidence_backtrace": [
+        {"concept_id": "concept-1", "claim_id": "claim-1", "fragment_locator": "lines:1-1"},
+        {"concept_id": "concept-2", "claim_id": "claim-2", "fragment_locator": "lines:2-2"},
+        {"concept_id": "concept-3", "claim_id": "claim-3", "fragment_locator": "lines:3-3"},
+        {"concept_id": "concept-4", "claim_id": "claim-4", "fragment_locator": "lines:4-4"},
+        {"concept_id": "concept-5", "claim_id": "claim-5", "fragment_locator": "lines:5-5"},
+        {"concept_id": "concept-6", "claim_id": "claim-6", "fragment_locator": "lines:6-6"}
+      ],
+      "section_completeness": [
+        {"concept_id": "concept-1", "sections": ["positioning", "sources"], "complete": true},
+        {"concept_id": "concept-2", "sections": ["positioning", "sources"], "complete": true},
+        {"concept_id": "concept-3", "sections": ["purpose", "sources"], "complete": true},
+        {"concept_id": "concept-4", "sections": ["purpose", "sources"], "complete": true},
+        {"concept_id": "concept-5", "sections": ["steps_rules", "sources"], "complete": true},
+        {"concept_id": "concept-6", "sections": ["steps_rules", "sources"], "complete": true}
+      ],
+      "failure_reasons": [],
+      "contract_revision": 1,
+      "revision_ledger": [
+        {"revision": 0, "reason": "initial accepted body contract"},
+        {"revision": 1, "id": "SR-20260811-task2b-procedure-source-gap", "reason": "procedure_or_rule.exceptions source_not_documented section state"}
+      ],
+      "ac_bindings": {
+        "AC-01": "structure-evidence",
+        "AC-03": "claim-backtrace",
+        "AC-05": "impact-closure",
+        "AC-07": "status-navigation",
+        "AC-09": "sample-coverage",
+        "AC-10": "run-identity",
+        "AC-11": "machine-bottom-line",
+        "AC-12": "revision-ledger",
+        "AC-13": "source-gap-section-state"
+      }
+    },
+    "invalid_fallback": {
+      "schema_version": "task2b-semantic-evidence.v1",
+      "run_id": "run-fallback-1",
+      "run_status": "completed",
+      "execution_mode": "jaccard-only",
+      "delivery_status": "published",
+      "sample_manifest": {"sample_count": 12, "sampling_seed": 17},
+      "concepts": [],
+      "failure_reasons": ["provider failure; fallback used"]
+    }
+  }
+}

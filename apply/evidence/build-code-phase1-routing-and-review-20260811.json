@@ -1,0 +1,35 @@
+{
+  "schema_version": "knowledge-digest-build-code-phase1-fact.v1",
+  "phase_id": "phase-1",
+  "snapshot_tree": "f33d0fe8911978bc7840b91f9d3922d3a3579258",
+  "test_routing": {
+    "advisor": "test-routing-advisor",
+    "routing_tier": "feature",
+    "selected_skill": "backend-testing",
+    "reason": "实际变更集中在本地 Python publication pipeline；没有 frontend、外部 API、数据库、认证、部署或并发服务 seam。"
+  },
+  "tests": {
+    "command": "uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py tests/acceptance/test_task2_publication.py tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_corpus_regression.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task2a_reader_frontmatter.py tests/acceptance/test_task2a_okf_smoke.py tests/acceptance/test_phase25_llm.py tests/acceptance/test_phase4_embedding_runtime.py -q",
+    "exit_code": 0,
+    "result": "259 passed, 2 skipped",
+    "receipt_ref": "quality/tests/build-code-phase1-feature-20260811.json",
+    "receipt_hash": "bca6966ee98e2ead1293a7dbcc8b4ad2bad4a83fdfaab8f4f16a3c844bdcb4b9",
+    "output_hash": "84b7cc7e27bf154fa7b12700c79d55fe3bfbddabfeb1459cf9745407e7d057c",
+    "receipt_snapshot_tree": "f33d0fe8911978bc7840b91f9d3922d3a3579258",
+    "diff_check": "git diff --check exit 0"
+  },
+  "review": {
+    "required_once": true,
+    "attempt_ref": "quality/reviews/attempts/ba26ee80-1ce8-4bc9-8973-881c34a5960b/attempt.json",
+    "report_ref": "quality/reviews/reports/ba26ee80-1ce8-4bc9-8973-881c34a5960b.md",
+    "material_id": "0d6fff9f18580f51bc52357543e4049146bb50af52a8547a3f5bbaf879add39b",
+    "status": "unavailable",
+    "finding_status": "unknown",
+    "reason": "异源 provider 没有形成有效 reviewer JSON：opencode/v4flash 超时，kimi/coding 进程无进度后终止，codex/luna 为同源排除。不能把无 findings 改写成没有严重 findings。"
+  },
+  "scope": {
+    "browser_qa": "not_applicable",
+    "semantic_live_run": "unknown",
+    "release": "not_released"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "command": "uv run --frozen pytest -q && git diff --check",
+  "receipt_ref": "quality/tests/verify-code-final-full-20260811-v37.json",
+  "output_ref": "quality/tests/output/verify-code-final-full-20260811-v37.output"
+}

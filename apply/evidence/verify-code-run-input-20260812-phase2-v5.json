@@ -1,0 +1,83 @@
+{
+  "receipts": {
+    "tests": "quality/tests/verify-code-final-full-20260812-phase2-v7.json",
+    "review": "quality/reviews/attempts/46a34cd0-c5e6-4e65-ae06-575310644579/attempt.json",
+    "quality_review": "quality/reviews/attempts/b9f7cdad-cb35-4b79-8b1d-12a9bd2b9acf/attempt.json",
+    "evidence": "quality/evidence/verify-evidence-v6.json",
+    "verification": "quality/evidence/verification-v9.json"
+  },
+  "finding_dispositions": [
+    {
+      "finding_id": "PHASE1-REVIEW-UNAVAILABLE",
+      "original_fact": "phase-1 build-code 异源审查没有形成有效 reviewer JSON",
+      "source": "WorkflowHub phase review",
+      "consequence": "独立审查和严重 finding 状态保持 unknown/incomplete，不声称通过",
+      "status": "accepted_risk",
+      "next_action": "保留 unavailable 事实，在 close 前不作 released 声明",
+      "evidence_ref": "apply/evidence/build-code-phase1-routing-and-review-20260811.json",
+      "owner": "Task 2-B",
+      "consumer": "verify-code close decision",
+      "retain_or_delete": "retain"
+    },
+    {
+      "finding_id": "PHASE2-REVIEW-UNAVAILABLE",
+      "original_fact": "phase-2 build-code 异源审查最终没有有效 reviewer JSON",
+      "source": "WorkflowHub bounded phase review",
+      "consequence": "不能把本阶段写成无严重 finding 或审查通过",
+      "status": "accepted_risk",
+      "next_action": "保留 OUTPUT_INVALID、PROCESS_EXIT_NONZERO 和 SAME_SOURCE 事实；不循环重审",
+      "evidence_ref": "quality/reviews/attempts/46a34cd0-c5e6-4e65-ae06-575310644579/attempt.json",
+      "owner": "Task 2-B",
+      "consumer": "verify-code close decision",
+      "retain_or_delete": "retain"
+    },
+    {
+      "finding_id": "T013-SEMANTIC-INCOMPLETE",
+      "original_fact": "真实 qwen3.6 语义运行可完成 transport，但 provider 输出仍有非法 JSON、未受信 Claim ID 和多项保真失败",
+      "source": "T013 real semantic run",
+      "consequence": "machine-passing concepts=0，delivery 保持 not_released",
+      "status": "accepted_risk",
+      "next_action": "保留真实失败，不降低语义门、不伪造发布通过",
+      "evidence_ref": "apply/evidence/T013.semantic-run-20260812-compact.json",
+      "owner": "Task 2-B",
+      "consumer": "verify-code semantic exit",
+      "retain_or_delete": "retain"
+    },
+    {
+      "finding_id": "F-a3484cf00ad5",
+      "original_fact": "AC-04 缺少当前分母、detector version、seed 和失败样本记录",
+      "source": "verify-code architecture review",
+      "consequence": "AC-04 保持 unknown",
+      "status": "fixed",
+      "next_action": "继续保留 unknown，直到测量记录完整",
+      "evidence_ref": "apply/evidence/verify-code-architect-assessment-20260811.json",
+      "owner": "Task 2-B",
+      "consumer": "verify-code close decision",
+      "retain_or_delete": "retain"
+    },
+    {
+      "finding_id": "F-887d33bac044",
+      "original_fact": "证据型 AC 不能只靠回归摘要判定 pass",
+      "source": "verify-code architecture review",
+      "consequence": "相关 AC 保持 unknown/incomplete",
+      "status": "fixed",
+      "next_action": "继续等待独立证据锚点",
+      "evidence_ref": "apply/evidence/verify-code-architect-assessment-20260811.json",
+      "owner": "Task 2-B",
+      "consumer": "verify-code close decision",
+      "retain_or_delete": "retain"
+    },
+    {
+      "finding_id": "F-9cb127a17ac0",
+      "original_fact": "旧测试摘要只写 skipped 数量，没有写具体身份和原因",
+      "source": "verify-code architecture review",
+      "consequence": "已补齐 skip 事实，语义 AC 仍不因 skip 而通过",
+      "status": "fixed",
+      "next_action": "保留命名 skip 原因",
+      "evidence_ref": "apply/evidence/verify-code-final-test-summary-20260811.json",
+      "owner": "Task 2-B",
+      "consumer": "verify-code close decision",
+      "retain_or_delete": "retain"
+    }
+  ]
+}

@@ -185,6 +185,29 @@ def test_publication_only_prompt_is_compact_and_does_not_require_body_echo() -> 
     assert '"supports":[{"claim_fingerprint":"..."}]' in prompt
 
 
+def test_typed_body_prompt_keeps_publication_nested_under_body_contract() -> None:
+    prompt = llm.build_prompt(
+        {
+            "publication_enabled": True,
+            "publication_only": False,
+            "typed_section_contract": {
+                "page_type": "product_overview",
+                "required_sections": ["positioning", "capabilities", "limitations"],
+                "optional_sections": ["version"],
+            },
+            "claims": [{"claim_fingerprint": "a" * 64, "text": "API v2", "source_uri": "u", "fragment_locator": "lines:1-1"}],
+            "source_text": "API v2",
+            "target_page": "pages/products/api.md",
+            "allowed_taxonomy": [{"id": "product-overview", "title": "产品概览"}],
+        },
+        target_page="pages/products/api.md",
+    )
+    assert prompt.startswith("You compile one typed knowledge-base page")
+    assert "OPTIONAL NESTED PUBLICATION METADATA" in prompt
+    assert "never return publication metadata as the only result" in prompt
+    assert "ROLE:\nYou provide semantic publication suggestions only" not in prompt
+
+
 def test_draft_passes_allowed_taxonomy_as_a_plain_category_list(tmp_path) -> None:
     seen: list[dict[str, object]] = []
 
@@ -247,8 +270,8 @@ def test_draft_keeps_publication_suggestion_when_claim_batches_are_merged(tmp_pa
 
 
 def test_layout_removes_generated_summary_shell_from_evidence() -> None:
-    page_layout = __import__("knowledge_digest.page_layout", fromlist=["_evidence_lines"])
-    assert page_layout._evidence_lines("## Summary\n- concise\n\n## Evidence\nAPI v2\n") == ["API v2"]
+    page_layout = __import__("knowledge_digest.page_layout", fromlist=["evidence_lines"])
+    assert page_layout.evidence_lines("## Summary\n- concise\n\n## Evidence\nAPI v2\n") == ["API v2"]
 
 
 def test_all_live_topics_use_publication_only_prompt_after_provider_resolution(monkeypatch, tmp_path) -> None:
@@ -275,6 +298,45 @@ def test_all_live_topics_use_publication_only_prompt_after_provider_resolution(m
     ]
     draft(decisions, clusters, raw_items, tmp_path, DigestSettings(llm_enabled=True), publication=_publication_contract())
     assert seen == [True, True]
+
+
+def test_degraded_mapping_does_not_request_publication_only_metadata(monkeypatch, tmp_path) -> None:
+    calls: list[dict[str, object]] = []
+
+    def generator(context: dict[str, object]) -> dict[str, object]:
+        calls.append(context)
+        raise AssertionError("degraded page mappings must not call the provider")
+
+    draft_module = __import__("knowledge_digest.draft", fromlist=["resolve_generator"])
+    monkeypatch.setattr(draft_module, "resolve_generator", lambda _settings: generator)
+    result = draft(
+        [
+            {
+                "cluster_id": "cluster-1",
+                "action": "new",
+                "topic_id": "topic-api",
+                "topic_index": {
+                    "topic_id": "topic-api",
+                    "title": "API capability",
+                    "page_type": "product_overview",
+                    "mapping_status": "degraded",
+                },
+                "target_paths": [],
+                "source_count": 1,
+                "target_page_count": 0,
+            }
+        ],
+        [{"cluster_id": "cluster-1", "tier": "auto", "cluster_tier": "auto", "members": ["raw-1"], "decision_reason": "test"}],
+        [{"raw_id": "raw-1", "text": "API v2 is available.", "source_uri": "u1", "validation_status": "passed"}],
+        tmp_path,
+        DigestSettings(llm_enabled=True),
+        publication=_publication_contract(),
+    )
+
+    assert calls == []
+    assert result[0]["typed_response"]["status"] == "degraded"
+    assert result[0]["provider_failure"] is True
+    assert result[0]["provider_failures"][0]["provider_call_skipped"] is True
 
 
 def test_topic_identity_uses_ascii_slug_and_locks_first_path() -> None:

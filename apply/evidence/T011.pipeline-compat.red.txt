@@ -1,0 +1,5 @@
+Task: T011 RED — formal pipeline, navigation, and Task 2-A compatibility seam
+Command: uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k pipeline_compat
+Expected RED: exit 1
+Observed: exit 1; 5 target assertions failed; 27 tests deselected.
+Interpretation: the formal compiler seam, failure projection, frozen-input guard, stable navigation projection, and typed draft handoff were not present before implementation. This was a target behavior failure, not a setup/import failure.

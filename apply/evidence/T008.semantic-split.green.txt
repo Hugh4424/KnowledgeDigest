@@ -1,0 +1,5 @@
+Task: T008 GREEN — semantic split, pagination, and unified navigation projection
+Command: uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_split
+Observed: exit 0; 2 passed; 25 deselected.
+Covered: semantic section grouping, 120/300 line limits, overview and part paths, prev/next/entry navigation, and Claim exactly-once placement.
+Limitation: this is a deterministic focused seam test; it does not claim a real provider run or formal WorkflowHub acceptance.

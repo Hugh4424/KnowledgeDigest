@@ -1,0 +1,234 @@
+{
+  "ac_bindings": {
+    "AC-01": "structure-evidence",
+    "AC-03": "claim-backtrace",
+    "AC-05": "impact-closure",
+    "AC-07": "status-navigation",
+    "AC-09": "sample-coverage",
+    "AC-10": "run-identity",
+    "AC-11": "machine-bottom-line",
+    "AC-12": "revision-ledger",
+    "AC-13": "source-gap-section-state"
+  },
+  "answerability_source": "task0-question-set.v1",
+  "answerability_subset": {
+    "content_hash": "8f5cb5e82c66d26d598e4aaeba71aa06db1b1cd67f9b92c122ab5ab2c70f1ac9",
+    "id": "knowledge-digest-task0-v1",
+    "method": "section-presence-v1",
+    "questions": [
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-01"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-02"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-03"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-04"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-05"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-06"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-07"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-08"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-09"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-10"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-11"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-12"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-13"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-14"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-15"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-16"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-17"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-01"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-02"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-03"
+      }
+    ],
+    "reason": "machine first-hit from typed sections; this is not human reader review"
+  },
+  "budget": {
+    "max_tokens": 8192,
+    "provider_calls": 14,
+    "provider_calls_planned": 14,
+    "source": "DigestSettings/current environment"
+  },
+  "concepts": [],
+  "contract_revision": 1,
+  "delivery_status": "not_released",
+  "detector": {
+    "name": "task2b-publication-gate.v1",
+    "version": "jaccard-5gram.v1"
+  },
+  "evidence_backtrace": [],
+  "execution_mode": "real_semantic",
+  "failure_reasons": [
+    "provider claim ids are not supplied by the trusted input: 0528d3483e9ee6ed273541f7e696663d9d9840d32291da378493d2112b9397a",
+    "provider output is not JSON (Unterminated string starting at: line 98 column 9 (char 15028))",
+    "section entry_prerequisites is empty",
+    "section limitations is empty",
+    "section purpose is empty",
+    "semantic evidence backtrace is unavailable",
+    "token or faithfulness mismatch: 00c02e21f21af1899327ed77f327e04ac12134b46fcb66c1ac4265f88ea18acc; token or faithfulness mismatch: 26de0767ac56ebc98a68f0f15537edbfc5e679fef31db80c1f3a8c6c738e6723; token or faithfulness mismatch: e516d7d7d297942c9dcfe10326cbe8d280805694ff851f6cf883ee29ba4a2f79; token or faithfulness mismatch: e6705810220c0c33b1f43f0b2870016fbf54cf90d947d8b9dde1380d2125f3a4",
+    "token or faithfulness mismatch: 0144077d675c855fceb26837da3ad793a79bf355f5c7f1964b1a501c0f30fd7f; token or faithfulness mismatch: 0a46d64086b2f9442d745e65fff71d426c372e9f83bdb566e94a285d265f5453; token or faithfulness mismatch: 5c49229442077ca3edb53faaa49c0d65d1f6b248ac05ce437cc7520ab44cbf08; token or faithfulness mismatch: aab6b29059df8fcdecd7813bfcdddc7ee3ba4e0d97202e1eccc0ce4fa54c285b",
+    "token or faithfulness mismatch: 06acc3e7c9e6372f25b15bd44f7dc71e2910949d6403d8ec2c4eaaa1fa1599a8; token or faithfulness mismatch: 0bf1976509815cf4546bed90144190ade07f4a000520465bdc89b076ae30c9bc; token or faithfulness mismatch: 3349913ecd517bfe3866cefa03b488841d0231c4fa8978169e638e4fe1b1dbd8; token or faithfulness mismatch: 56091796cb00f9d29ea432fc7ed50a04190ccc03085d61b5bb02955510129ed6; token or faithfulness mismatch: b689fb632ecd0b4f3ef2ae413981bc81b06942741c73d7961f257da9ef4e3592; token or faithfulness mismatch: c6b218335721e6c024172f960b7ccc25cb06eb8a65cf1489e7037e2c14e10c8e; token or faithfulness mismatch: cba144e8f66ead8a1f147167214b5f40a5be370370bcbefc447d7ded32aaad3c; token or faithfulness mismatch: d4c1aadfb1006cdc60e9ac018777c86d45e9e28b7e685d5d07af054e1bd55414",
+    "token or faithfulness mismatch: 08fff17be97767f989fd9ca91a61bda5555ca493af66e2e779350a118e2de69b; token or faithfulness mismatch: 09ccb02259a95c803a3b3bc4c00dc5cb8ed250450c4f6f4157a0470ce3e955fb; token or faithfulness mismatch: 1632abed1ba877133d696ef4eb602b0a90ade59198965d370d2007f88759ff0a; token or faithfulness mismatch: 182bfea128d3b78ea95103de42bf9c6544227256f078da4a174d4a09c2c92afc; token or faithfulness mismatch: 28b4e05304e9e756bd5bff2aeadaf5b91b38634148fd3afbd73ca0981da6e735; token or faithfulness mismatch: 6ca0f0d2370c190eee3f6bf265fd3984fd053e79d82e10369984a47526c027ac; token or faithfulness mismatch: 6f9b0ed945810e5e966c32452493f67144810f43a38204ee39c2730c08c74acb; token or faithfulness mismatch: 7ea47982c92aa0175ace10fa4f1e60ed776491a94ab580461604622243954cc1; token or faithfulness mismatch: ba248fbefac03a8c0e09603d16543f6ceca50374fe456440bbd0672d93a139cf; token or faithfulness mismatch: cf788a9149e31ba6834d3249c8a419a722d0ec66a5fa09ff5a5959c7e96143db",
+    "token or faithfulness mismatch: 0a0be2f6843cde1215a1c875b7be0029531c1862193484b24e17382bb6cbc306; token or faithfulness mismatch: 0a8cf9dd191bf04295667f34bc0c3b744aa8dd7a742660651e76fa83535868da; token or faithfulness mismatch: 11c6029fc940949a30421c455bc9508efaf218bbbbe2173b7f2d85c1edb39af1; token or faithfulness mismatch: 141b5fdc8f0a80024b97e939cef0f1edf6def7339df9d89e44ba1071cebc99eb; token or faithfulness mismatch: 289b848c6c554c32176d30aec18f4e7771d87926076ce986a89a2e280ad54f81; token or faithfulness mismatch: 3510dff96da0ed33ccfa669520d243c7ae130c5f719195b09dc6d614620b6483; token or faithfulness mismatch: ac99b52db797f3a9eeabf67ec8a468b4630d9d3dfaa716e565fcd3f0e25abdc2; token or faithfulness mismatch: cc2462a07238b98a758df417050b1fe6b0274ece6d18f19f466688bfa276bf80; token or faithfulness mismatch: d4a2deaa3f97e89ce7878d84c01b2138a8bc6a8ebfca9cb692e28b3a2b543983; token or faithfulness mismatch: f4d9af07184a1864adc42ba4b5b8b6cab357853fb39c7bd9a6718db073b15bb7",
+    "token or faithfulness mismatch: 5054c840a6b4d34f551f27cb9cc1712db90623801e2dd1e42087f8a01aecd48e; token or faithfulness mismatch: 69b2ec01e2ab76aede571a98327658bc2ffe85bfb5956299b76a8ac5e18a1b86; token or faithfulness mismatch: cecd821004a5ed5d9ef06f7b6d2d971768d9f7954fe41839bdb0c818d7613856",
+    "topic index mapping is degraded",
+    "version is not a semver, date, or explicit release label"
+  ],
+  "output_path": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task2b-knowledge-publication-body-compiler/apply/evidence/T013.semantic-run-20260812-live.json",
+  "provider": {
+    "base_url": "https://dashscope.in.whatspos.cn/v1",
+    "credential": "environment-only",
+    "model": "qwen3.6",
+    "provider": "qwen3.6"
+  },
+  "revision_ledger": [
+    {
+      "reason": "initial accepted body contract",
+      "revision": 0
+    },
+    {
+      "id": "SR-20260811-task2b-procedure-source-gap",
+      "reason": "procedure_or_rule.exceptions source_not_documented section state",
+      "revision": 1
+    }
+  ],
+  "run_id": "run-3e50d76eed2c408e9cd20a2106a2249a",
+  "run_identity": {
+    "input_fingerprint": "28f547447f97500977b17fb849e612826b8c1bbce461a6c6eb46c4386ff2ac5c",
+    "kb_fingerprint": "d6925a85a1aae91388a3559ae56b4c5cd35b4fb568007321cf1d5ad01066fb1f",
+    "manifest_path": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task2b-knowledge-publication-body-compiler/quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json",
+    "run_id": "run-3e50d76eed2c408e9cd20a2106a2249a",
+    "sample_fingerprint": "fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f",
+    "source_run_hash": "532e6ce4794beb9245b63f8d6a15617a8a8169e667814b52bc4f76ddbb063412"
+  },
+  "run_status": "completed",
+  "sample_manifest": {
+    "content_hash": "fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f",
+    "covered_categories": [
+      "table_image",
+      "bilingual",
+      "multi_source"
+    ],
+    "excluded_categories": [
+      {
+        "category": "long_text",
+        "reason": "source manifest does not expose a long-document feature; no semantic coverage is claimed"
+      }
+    ],
+    "path": "quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json",
+    "required_categories": [
+      "long_text",
+      "table_image",
+      "bilingual",
+      "multi_source"
+    ],
+    "sample_count": 20,
+    "sampling_seed": 4026961625,
+    "sampling_seed_label": "knowledge-digest-task0-v1",
+    "source_count": 89
+  },
+  "schema_version": "task2b-semantic-evidence.v1",
+  "section_completeness": [],
+  "threshold": {
+    "answerability": 1.0,
+    "max_body_lines": 120,
+    "max_page_lines": 300,
+    "section_completeness": 1.0
+  }
+}

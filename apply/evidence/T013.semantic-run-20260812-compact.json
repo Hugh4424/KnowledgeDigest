@@ -1,0 +1,234 @@
+{
+  "ac_bindings": {
+    "AC-01": "structure-evidence",
+    "AC-03": "claim-backtrace",
+    "AC-05": "impact-closure",
+    "AC-07": "status-navigation",
+    "AC-09": "sample-coverage",
+    "AC-10": "run-identity",
+    "AC-11": "machine-bottom-line",
+    "AC-12": "revision-ledger",
+    "AC-13": "source-gap-section-state"
+  },
+  "answerability_source": "task0-question-set.v1",
+  "answerability_subset": {
+    "content_hash": "8f5cb5e82c66d26d598e4aaeba71aa06db1b1cd67f9b92c122ab5ab2c70f1ac9",
+    "id": "knowledge-digest-task0-v1",
+    "method": "section-presence-v1",
+    "questions": [
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-01"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-02"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-03"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-04"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-05"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-06"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-07"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-08"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-09"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-10"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-11"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-12"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-13"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-14"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-15"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-16"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-17"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-01"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-02"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-03"
+      }
+    ],
+    "reason": "machine first-hit from typed sections; this is not human reader review"
+  },
+  "budget": {
+    "max_tokens": 8192,
+    "provider_calls": 15,
+    "provider_calls_planned": 15,
+    "source": "DigestSettings/current environment"
+  },
+  "concepts": [],
+  "contract_revision": 1,
+  "delivery_status": "not_released",
+  "detector": {
+    "name": "task2b-publication-gate.v1",
+    "version": "jaccard-5gram.v1"
+  },
+  "evidence_backtrace": [],
+  "execution_mode": "real_semantic",
+  "failure_reasons": [
+    "provider claim ids are not supplied by the trusted input: 371138529bfddd23abd2a5a6b14796508039b5787ebce44571afcf34e681b43",
+    "provider claim ids are not supplied by the trusted input: 96f6e2f049dbe7c3f801a4175edfb94205fce971d23c63e5dccd1610385d1a1",
+    "provider output is not JSON (Unterminated string starting at: line 125 column 15 (char 11702))",
+    "provider output is not JSON (Unterminated string starting at: line 152 column 9 (char 10625))",
+    "section entry_prerequisites is empty",
+    "semantic evidence backtrace is unavailable",
+    "token or faithfulness mismatch: 0144077d675c855fceb26837da3ad793a79bf355f5c7f1964b1a501c0f30fd7f; token or faithfulness mismatch: 0a46d64086b2f9442d745e65fff71d426c372e9f83bdb566e94a285d265f5453; token or faithfulness mismatch: 5c49229442077ca3edb53faaa49c0d65d1f6b248ac05ce437cc7520ab44cbf08; token or faithfulness mismatch: aab6b29059df8fcdecd7813bfcdddc7ee3ba4e0d97202e1eccc0ce4fa54c285b",
+    "token or faithfulness mismatch: 08fff17be97767f989fd9ca91a61bda5555ca493af66e2e779350a118e2de69b; token or faithfulness mismatch: 09ccb02259a95c803a3b3bc4c00dc5cb8ed250450c4f6f4157a0470ce3e955fb; token or faithfulness mismatch: 1632abed1ba877133d696ef4eb602b0a90ade59198965d370d2007f88759ff0a; token or faithfulness mismatch: 182bfea128d3b78ea95103de42bf9c6544227256f078da4a174d4a09c2c92afc; token or faithfulness mismatch: 1a706408a82285fa1e7ad129d8dcec68ecf651a9a9f4fe12e4ec5255f4a68803; token or faithfulness mismatch: 28b4e05304e9e756bd5bff2aeadaf5b91b38634148fd3afbd73ca0981da6e735; token or faithfulness mismatch: 6ca0f0d2370c190eee3f6bf265fd3984fd053e79d82e10369984a47526c027ac; token or faithfulness mismatch: 6f9b0ed945810e5e966c32452493f67144810f43a38204ee39c2730c08c74acb; token or faithfulness mismatch: 7ea47982c92aa0175ace10fa4f1e60ed776491a94ab580461604622243954cc1; token or faithfulness mismatch: ba248fbefac03a8c0e09603d16543f6ceca50374fe456440bbd0672d93a139cf",
+    "token or faithfulness mismatch: 6aa39a51f50d5680d21d7d64995f55c9f25998b7f05993483d517a3f2320658d",
+    "token or faithfulness mismatch: 751cdb51821d8e69cf2a0551ce6f632b601923ba5142bb53d73e86566c75f0cc; token or faithfulness mismatch: 7911241cc1de90d916ffa41916f64f05b14f41a53bb7a6c43867716d067092df; token or faithfulness mismatch: fdcd87c99b8c1e5603cc10b5489ffc5ee5b3ccb0dfbef90229e2137eb6cfba81",
+    "token or faithfulness mismatch: a2ea6144ecf524170a5c2b90fe46d28bfcd5077a026f8f24fc9aaa294dee353d; token or faithfulness mismatch: c9e87e4355abd984f6fbfdbd083bff07bddb90ab8c93482f20f397ea83d9cf85; token or faithfulness mismatch: d07b2b2bfb0be1e245745642d97641906d23fe5f604697ea2bb899a7d442897b",
+    "token or faithfulness mismatch: cc2462a07238b98a758df417050b1fe6b0274ece6d18f19f466688bfa276bf80",
+    "topic index mapping is degraded",
+    "version is not a semver, date, or explicit release label"
+  ],
+  "output_path": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task2b-knowledge-publication-body-compiler/apply/evidence/T013.semantic-run-20260812-compact.json",
+  "provider": {
+    "base_url": "https://dashscope.in.whatspos.cn/v1",
+    "credential": "environment-only",
+    "model": "qwen3.6",
+    "provider": "qwen3.6"
+  },
+  "revision_ledger": [
+    {
+      "reason": "initial accepted body contract",
+      "revision": 0
+    },
+    {
+      "id": "SR-20260811-task2b-procedure-source-gap",
+      "reason": "procedure_or_rule.exceptions source_not_documented section state",
+      "revision": 1
+    }
+  ],
+  "run_id": "run-768346c90c5f4717beeb1bab7877a031",
+  "run_identity": {
+    "input_fingerprint": "28f547447f97500977b17fb849e612826b8c1bbce461a6c6eb46c4386ff2ac5c",
+    "kb_fingerprint": "83c9e1719b77cd9164a50ac9924340f209e121493e0a01a81833cecc40a9d7a4",
+    "manifest_path": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task2b-knowledge-publication-body-compiler/quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json",
+    "run_id": "run-768346c90c5f4717beeb1bab7877a031",
+    "sample_fingerprint": "fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f",
+    "source_run_hash": "532e6ce4794beb9245b63f8d6a15617a8a8169e667814b52bc4f76ddbb063412"
+  },
+  "run_status": "completed",
+  "sample_manifest": {
+    "content_hash": "fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f",
+    "covered_categories": [
+      "table_image",
+      "bilingual",
+      "multi_source"
+    ],
+    "excluded_categories": [
+      {
+        "category": "long_text",
+        "reason": "source manifest does not expose a long-document feature; no semantic coverage is claimed"
+      }
+    ],
+    "path": "quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json",
+    "required_categories": [
+      "long_text",
+      "table_image",
+      "bilingual",
+      "multi_source"
+    ],
+    "sample_count": 20,
+    "sampling_seed": 4026961625,
+    "sampling_seed_label": "knowledge-digest-task0-v1",
+    "source_count": 89
+  },
+  "schema_version": "task2b-semantic-evidence.v1",
+  "section_completeness": [],
+  "threshold": {
+    "answerability": 1.0,
+    "max_body_lines": 120,
+    "max_page_lines": 300,
+    "section_completeness": 1.0
+  }
+}

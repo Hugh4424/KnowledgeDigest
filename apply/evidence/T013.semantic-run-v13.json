@@ -1,0 +1,230 @@
+{
+  "ac_bindings": {
+    "AC-01": "structure-evidence",
+    "AC-03": "claim-backtrace",
+    "AC-05": "impact-closure",
+    "AC-07": "status-navigation",
+    "AC-09": "sample-coverage",
+    "AC-10": "run-identity",
+    "AC-11": "machine-bottom-line",
+    "AC-12": "revision-ledger"
+  },
+  "answerability_source": "task0-question-set.v1",
+  "answerability_subset": {
+    "content_hash": "8f5cb5e82c66d26d598e4aaeba71aa06db1b1cd67f9b92c122ab5ab2c70f1ac9",
+    "id": "knowledge-digest-task0-v1",
+    "method": "section-presence-v1",
+    "questions": [
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-01"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-02"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-03"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-04"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-05"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-06"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-07"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-08"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-09"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-10"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-11"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-12"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-13"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-14"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-15"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-16"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-17"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-01"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-02"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-03"
+      }
+    ],
+    "reason": "machine first-hit from typed sections; this is not human reader review"
+  },
+  "budget": {
+    "max_tokens": 8192,
+    "provider_calls": 14,
+    "provider_calls_planned": 14,
+    "source": "DigestSettings/current environment"
+  },
+  "concepts": [],
+  "contract_revision": 0,
+  "delivery_status": "not_released",
+  "detector": {
+    "name": "task2b-publication-gate.v1",
+    "version": "jaccard-5gram.v1"
+  },
+  "evidence_backtrace": [],
+  "execution_mode": "real_semantic",
+  "failure_reasons": [
+    "provider output is not JSON (Expecting value: line 77 column 76 (char 15522))",
+    "provider output is not JSON (Unterminated string starting at: line 100 column 9 (char 13193))",
+    "provider output is not JSON (Unterminated string starting at: line 147 column 9 (char 10924))",
+    "provider output is not JSON (Unterminated string starting at: line 163 column 9 (char 11427))",
+    "provider output is not JSON (Unterminated string starting at: line 172 column 9 (char 12811))",
+    "section entry_prerequisites claim mapping is missing",
+    "section limitations claim mapping is missing",
+    "section relationships claim mapping is missing",
+    "semantic evidence backtrace is unavailable",
+    "topic index mapping is degraded",
+    "typed claim mapping is incomplete; token or faithfulness mismatch: 19df3dce30ad8909a6fedefa69be4263d6670da520ea68f6a59c4871ef8d08de; token or faithfulness mismatch: f09add5bb13b58e605b91e94823c5cab161bcd06bf85f9aea6ecb921da8c49e9; token or faithfulness mismatch: 98c9f6bea86f9877c40d9a76244c6c14bede31020fa0562f5163977e179acdc2; token or faithfulness mismatch: 79d4064c44200353abf08d4884a09dc8787d40f5e84f6b717ce28383894c5069; token or faithfulness mismatch: 2726a2ae42a9b2d2f8a3e9757cbc6e6fdace98da1b0aa3b3fdc09344653df2f6; token or faithfulness mismatch: b8d602bd3f2fb95c0e6c1980708fc62376f68780de9ad361bb812140ff4173b2; token or faithfulness mismatch: 146957e9c90d96ae288a6505912a30ff9e3f866376ec36f37cefb7e500bf2b36; token or faithfulness mismatch: 3c0a67109d062c6b1f2db5d000107561bcfab7809ca1883f95ca1baade2d2b08; token or faithfulness mismatch: 85d4d1b4c4c2495d94cc979bba3fb7643df40ae59a6a4c77a9b61d14891b5f0c; token or faithfulness mismatch: 472dd4dfd789449d119b244f6dc1b4903657bd58111bdd438bc5bc5d0a650adc; token or faithfulness mismatch: 4e49cab9fa2e43b2206334012ddfaf6fe4b816f96706d33cea87eca8eea014c6; token or faithfulness mismatch: acf1a7cf1dafb61ed0014b18c78eff0df87e5fdd1837482a2fb740f1539a29da; token or faithfulness mismatch: 69470c40033a521690590ee8e27f70772267346d7bf200adbc275555fe2bd43b; token or faithfulness mismatch: ca74dcd760cd7a423caf2200abeeaf349cfd9ecf3f6ff316a07021488c07a879; token or faithfulness mismatch: cca22d23bf11c9ecb64f1235ba8e5a3bf43678a73a6340fe4f795cf5a5cce22f; token or faithfulness mismatch: 41150c92c856eb57147c42cb297c911c6cb89a9f8cda0d346361449b04f1e5cf; token or faithfulness mismatch: 1bf5c37b33776c96adcae90265831000f05f164004e46d16fb26dab6df25918d; token or faithfulness mismatch: 0b25a779d1d58a6bc5e400c77bb036e698c0f0f8a8e2950afe5afe78651412ee; token or faithfulness mismatch: 4ae68817c54b3eb29914a7b635988f8b3bfc15f2be041004bfc04e3fb1972486; token or faithfulness mismatch: e45640eef02de27e08082c7e85dbc55f8a258c5d5754d342f77acac265c9f4f2; token or faithfulness mismatch: b0f7fd763e78f62048253c4fd750b57573d9af5aaab1ff3d7f600d32bc5cfbad; token or faithfulness mismatch: ee7a6921a7a7caef6ec664d1e9f99d512ddc30b4ab78b6d3377b05f6f1309aaa; token or faithfulness mismatch: 7d37def46f5dd88080b10cf7f4fe628af5a4415aa19d46ae42410f0d2e155ce6; token or faithfulness mismatch: 930751a79e146dca51ec73a1b93f43807daa4d97725b6ca1508cdc3e493ab049; token or faithfulness mismatch: b337feb90121a7d645b080fa672d6caabd7ac93d3e22fcf52852d98cfeae2160; token or faithfulness mismatch: 348a47ff4eda7900046ecb88b6a4c1b009228afe17ab3fadb2a09c8371c3d8bc; token or faithfulness mismatch: 9c86aa97d4655982f142ff6b9a4efcc37b4deebc30a77bbd74da8fecde66e0d4; token or faithfulness mismatch: b9e3e66ff9f5267aa06ad8b76c026cbc3eb92fba6179faeb442d4741be2fe3a2; token or faithfulness mismatch: 7f9ef5de2ae6627d2e032f0a5fee78921d86878098e00f2cfb310f3a0ad974d2; token or faithfulness mismatch: 31c77afb1b04dca29b11a1c8af076910e8ce85c4d53769e1558a1e5d2f28112b; token or faithfulness mismatch: 33c116ea6fb3a01f8f389ffc69d47d4c76bbd507fc560d39729a84ebb7822165; token or faithfulness mismatch: 084501196c402b449b54298fff8ced6978e3aae2738f0804162f6386701d870f; token or faithfulness mismatch: 8934234fabb6c3c478fb1ea234361a9ef41e18c140587b62ff57344dbf4321d6; token or faithfulness mismatch: 62985b0233b2841e246793eb15170f973b0daaee54220badc8636b05985ba82f; token or faithfulness mismatch: a21e73f97eb33ba965d90fc9d7c7cedb27a4f42a2b7fab80c170553b964283fc; token or faithfulness mismatch: f223e19794135168bb7e3e39bb3cce3e03107e2b31721eb3061133d9df848e82; token or faithfulness mismatch: ecc0dc135d6f97693ce7fa248672c36fab9d298661099e9b5e12d7551cc6361c; token or faithfulness mismatch: fdce521a55162b5611c2cdab6f7624e6aa635959c7d2c2c65aab5ce7810bc7ff; token or faithfulness mismatch: 35f672dddd46268c2f23ae69e04b592b5679b004cc46715f4e9b5f316d10e79e; token or faithfulness mismatch: 0e8c420b38a745e502795f6eded0d53692480d52ba0f87701feb0d1151b2f63e; token or faithfulness mismatch: a446f4f53475f205022782d59bf790cee78e1901135570c46766464db4d48bd1; token or faithfulness mismatch: d764f723b7a903abd72fba15311db599bb69a2b6e1ec976e590871c7ba7d7b10; token or faithfulness mismatch: 01c91e1fe9d236dfa6df260a030a834356c35cdb3d7aafc8c10b236ef9087138; token or faithfulness mismatch: 782dfeef1c9e959c4a0c0e30a62f900ba27987de42a6f321cd3420d16e7025c5; token or faithfulness mismatch: d11799a0676868899929f1dd334e92d7541fb7bb117d92493068dd7ca6f6684a; token or faithfulness mismatch: 7a0ebbce7053703dec8255b0c21934fa144a618390217768699e1ff430d226bb; token or faithfulness mismatch: 36f554ec3c9929a004170b38dc36e6321e0d23c0c3a1db10cbf90b9750ac9c69; token or faithfulness mismatch: e3859c0e1adb8b44b44e99d1882112c92b639982c53e663a47b9365a329b3fab; token or faithfulness mismatch: fcd01de84abeaf490b6a2af872bbddd48d74c629bd5ca1511d64aa9b68225f69; token or faithfulness mismatch: 51acb4ff9e8c0fa0ce759ce6269a24d6664b015ea4b15b2167e182e07f7d1d85; token or faithfulness mismatch: e3be9ca151244484ed3eba01c9632493388babd1d484d2d65419460b61b43873; token or faithfulness mismatch: a76119d35179fd5d595a6640c287c45daf43f8a36b7b0bcb002c42871299fb41; token or faithfulness mismatch: 637f1b1eb94d193ef671fa5b717853485a6d76a3bfd2e881383c2b5cc2d0d133; token or faithfulness mismatch: 038c815a900a6f54652301362d41b607010b75a2d7ab76a35d403e5e035b80af; token or faithfulness mismatch: 35b757f8c91eabf239723e6f72878a5f0b1f5117f4a14fb35a72353356666ccf; token or faithfulness mismatch: b33463f0e61abab1206a2d91a1bafe4857e2648bdafaaec4ba3ed02798c4b4a2; token or faithfulness mismatch: fedc8f5a6d1b643ded23340279b37625773f1dee0ae851988dc95bb0daedf7a1; token or faithfulness mismatch: ad5780851865ab2a632c13f785235b3414d7cf4bc97c6842d90d6ae0d99bd7ca; token or faithfulness mismatch: fba05d84dc08695eaede29f5de9aa279b211d0c48472ffe22954dc113fc0ca0e; claim attribution is not unique: 637c56481d8a46fe35acf4bf76652342613061c5db8c17f02e1cdde69312eae8; claim attribution is not unique: 19df3dce30ad8909a6fedefa69be4263d6670da520ea68f6a59c4871ef8d08de; token or faithfulness mismatch: 1dbffe385d9b92a74bc5f66585c1c96899bde97f7a3ada626986f8f601e5c566; token or faithfulness mismatch: 10641c8bf880bb48fa8d277d7143d5740b6ec2c42deb1a56705a28e6431f3e79; token or faithfulness mismatch: e516d7d7d297942c9dcfe10326cbe8d280805694ff851f6cf883ee29ba4a2f79; token or faithfulness mismatch: 41a6c08b5c0c60a7db3035f67d347fcefeb9f0f8017bce984198af1451ce0323; token or faithfulness mismatch: c989952d10947bac5c4e2fd02871692223dd0cafa6cf4ad32becf0f2657e634c; token or faithfulness mismatch: f5420f6ccbdf41a418b68f3609e0f1aaf64ebe58d7ed65307c0668f7a0450cd7; token or faithfulness mismatch: 2e4d83aa58241e528ed997006f60ee24c3df691bb2793fc1b41cb0838a2a28cc; token or faithfulness mismatch: 9e36eb0137ad8adfe4c4a2dc63774975e94da0dfefa0e451a4af945edc221201; token or faithfulness mismatch: 5f95859bf0f1cfea484e3706eeb93382dda2e96c954ded94d4db004616482b31; claim attribution is not unique: 41a6c08b5c0c60a7db3035f67d347fcefeb9f0f8017bce984198af1451ce0323; token or faithfulness mismatch: b741480af05d6557b65cc295a1c60a2b76b4ea944be365404ae1f965a4a07a3f; token or faithfulness mismatch: b8c25a2b2f90f71525fb0f975fa9a182363aa58631d5e548e1be7fc2c956eae5; claim attribution is not unique: f5420f6ccbdf41a418b68f3609e0f1aaf64ebe58d7ed65307c0668f7a0450cd7; token or faithfulness mismatch: ec64646561d347791a1a1bbffdce558540f1c5f82e89b6c458f93555b1e7c62e; token or faithfulness mismatch: bad347976eb100a2fc35003148ba5b647e6e270fd2910bff591397190c95256b; claim attribution is not unique: bad347976eb100a2fc35003148ba5b647e6e270fd2910bff591397190c95256b; token or faithfulness mismatch: 9524390ca6db71449eb87aec64590fe254a6f9e30df06a5462a2716a487e5042; token or faithfulness mismatch: 6953e370aefa4972b81a35ed81ddd3d5bbc811f7a47b8ce5ff841459556a7ded; token or faithfulness mismatch: 51501859736054a778d98bde7ca7502e576bbd295cbdbb56d894720c9d8aab3d; token or faithfulness mismatch: e6705810220c0c33b1f43f0b2870016fbf54cf90d947d8b9dde1380d2125f3a4; token or faithfulness mismatch: 00c02e21f21af1899327ed77f327e04ac12134b46fcb66c1ac4265f88ea18acc; token or faithfulness mismatch: 50ff56e9e2931f714abaf313de49bd0973dd5e7099a80f56824d127e48126081; token or faithfulness mismatch: 5a65500a50cb082d9de1c89bc2c738b5cec4fa8ec5e7f94603cd970cec07d93a; token or faithfulness mismatch: bfb7616024fbc84137759d56b3f42e0fde0b1f1a7b4bb761490b4957750bfc0e; token or faithfulness mismatch: 064af5782102cc534ebe53c469dc27914fd6c524c23bdbdef3e13f791def0211; token or faithfulness mismatch: fb850e954f9cee24f650c226a3270ea6af4b9790a4e301cc8da017b17127437a; token or faithfulness mismatch: c73a00018ad561d48452fc650d4dee8acda9e67335e1b70194034becd2213b37; token or faithfulness mismatch: a71ae4949f11b042f41a5ceed5eebe11ef889fd0f6db8d7c24ef49a303ebd42c; claim attribution is not unique: 51501859736054a778d98bde7ca7502e576bbd295cbdbb56d894720c9d8aab3d; claim attribution is not unique: e6705810220c0c33b1f43f0b2870016fbf54cf90d947d8b9dde1380d2125f3a4; claim attribution is not unique: 00c02e21f21af1899327ed77f327e04ac12134b46fcb66c1ac4265f88ea18acc; claim attribution is not unique: 50ff56e9e2931f714abaf313de49bd0973dd5e7099a80f56824d127e48126081; token or faithfulness mismatch: 9a3963dd8b3c358a485cdb37a71d7215609bb5b5dfb3feb98b36a9fe0cb57892; token or faithfulness mismatch: 783e7f1ceecbdcb4486ab3936cf2ec2ef53f7cd48ab76e22e9ecfc78ee3d5817; token or faithfulness mismatch: 7ea23e67b602b44eb68fd9f10299d46a6340e59b17e5f769f081db9fb3bd2e41",
+    "typed claim mapping is incomplete; token or faithfulness mismatch: 2a6c62e251d60a04a7dedd768549bb29462ddf620fec438d02fae41a2729e112; token or faithfulness mismatch: 710183d07eb07f59ae39a3f775120f86df0225dffb52641246b3dd0d182fa277; claim attribution is not unique: 2a6c62e251d60a04a7dedd768549bb29462ddf620fec438d02fae41a2729e112; near duplicate detected; continuous source block exceeds 3 sentences or 240 characters",
+    "typed claim mapping is incomplete; token or faithfulness mismatch: 682022ce858ddd1b156abaab6001fb364e4c8c909387c89c507c8bac59a53a4b; token or faithfulness mismatch: 604f0519c8a55ad08882757769f193cbd59f4fde9de97f10fb09b3f20c688f56; token or faithfulness mismatch: b22f1f55acff2767e309ec50bc27bf045bb8ad84a6e01b78b56fbca6a5043b9a; token or faithfulness mismatch: c89795ea4612ebbe4010232a2063f6e3d6df742f8f36a6bd86dc533930a6f259; token or faithfulness mismatch: d003d5ef29bd74138c475a690a4b2453038340699e165e0c4e7d50cd1cd01eac; token or faithfulness mismatch: f27cd679d915105285a1b6ebcfb579fc520c611ac4b08f1f0866f1f145facee0; claim attribution is not unique: 425f2600c5cd8dc0adc705ba414cd47860185ef95ed3df59eca945b6d1fe85d3; claim attribution is not unique: 682022ce858ddd1b156abaab6001fb364e4c8c909387c89c507c8bac59a53a4b; token or faithfulness mismatch: 9f15d356cd497550c8a23ef8b835123a5d761dce128ea7647d1096498a6912e2; token or faithfulness mismatch: 7d77b39e84ef7a5e0fa2a056bded6618ec58a9cdaecbfd001ab5a601f6a92d39; token or faithfulness mismatch: 3ed6dc2ddddb0c491a8cee9cf7f50d5dce776c24b886211697a0737d06a0f47b; token or faithfulness mismatch: 67b4550e68b9d3cec9bc536ccd92be87189c46247077766cb87fc19453ab7ad5; token or faithfulness mismatch: 0970b9edf2d8c66ff5df3596eaac3ac508c41bc2b2227fb37da26635f74f9f16; token or faithfulness mismatch: 85aec2130d2be94d100248c779c0a28f7d6d435c46ec777ac93727adbcf3036e; token or faithfulness mismatch: ed43050ffe303689a622f3a5a06adbfb40fca6788db4d5856762764c284905c1; token or faithfulness mismatch: 496f3e564d3b3baaebaf4fc89800b29d9d6a8a9dce8dd1ca98d5521670588eb4; token or faithfulness mismatch: a84807690c514428b9994779869d8636afff8268cde54363d2ff7de610c768a7; token or faithfulness mismatch: 1987e424c4fbef8345b4d407ae99d3fab3ab793b681ed0c4ea79d83b9e615981; token or faithfulness mismatch: f7c4afd355a1f1a81ba946a117407e00860a8697a622e41dd1f829ccc8b31278; token or faithfulness mismatch: c70d040c1fc57cf91ef99882e2e33043ce0956aacaa27957e73f5e3ff50c2ba8; token or faithfulness mismatch: f406d053e2e5ae96e88a58a2eab61cac74a6f4e2aa811d22b95b886c27a2ad72; token or faithfulness mismatch: a9a70d3dde9b67e6fdcd3f869fcd7f5d6759ef5971e067baaebdc6e454492b8e; token or faithfulness mismatch: 59af268630e32540b9eb9aeca4d3ffb3838a6e4d03e5fbc23e24d012878586f8; token or faithfulness mismatch: a10a84524188277958de2f69264a1f307bc8f287ec0877ab3bf7f608e65ded27; token or faithfulness mismatch: 7fc30aefc5e310b81e29f3b9f91dc70eb21bc66d593d4665075a3a4a5a7fdb6b; token or faithfulness mismatch: 3963b8e0d51b942d01208097ad9ae7e14812a0eb3600f931fe9836d845a32f78; token or faithfulness mismatch: d3c72f0299661f5d9ec12116253afcb4ec26d7cee0b2d01de3660af353756b69; token or faithfulness mismatch: 3228c5208d676cfa1929190f4061e19482393531b5067e84923657b95069ceca; token or faithfulness mismatch: 42830a78369c2a936bbe3c6e632aa6f0650af004efa40477011a7e25f888761a; token or faithfulness mismatch: 9a5559f17ab0535456ed4b3ee453e990ce3e7848e36b2f995654c4fea563b0fb; token or faithfulness mismatch: 49418d6fede022345b8776a7d43f04845fe2d54c2fc61a650662e5ff8bd16276; token or faithfulness mismatch: 8fe6fc46bd25aa2d2061509f02789fd566e4c10717cb70a4d8cfc980d701f921; token or faithfulness mismatch: bd1d9dfad5e1f4c0f53d06e816158af5a4435cc6ed89270c837a008bedea53d8; token or faithfulness mismatch: a9e15ce923527a66e206815c341ea04563a2f32bc7e33afd8e2ce1ad77dc909f; token or faithfulness mismatch: fb6c0d0d8a3d1c5f843c5a48f432fa0b8568498c2ef6cad569dd3cf986891c8e; claim attribution is not unique: b9996e722ecd3a41f2d9ca109d08fd6311282169899cbd0e7e3a71f6c32003b3; claim attribution is not unique: c70d040c1fc57cf91ef99882e2e33043ce0956aacaa27957e73f5e3ff50c2ba8; claim attribution is not unique: f406d053e2e5ae96e88a58a2eab61cac74a6f4e2aa811d22b95b886c27a2ad72; claim attribution is not unique: a9a70d3dde9b67e6fdcd3f869fcd7f5d6759ef5971e067baaebdc6e454492b8e; claim attribution is not unique: 59af268630e32540b9eb9aeca4d3ffb3838a6e4d03e5fbc23e24d012878586f8; claim attribution is not unique: a10a84524188277958de2f69264a1f307bc8f287ec0877ab3bf7f608e65ded27; token or faithfulness mismatch: bce58cea52502c6119d417b93bb90738c34082f8f5340cd1e457ab7b9243e574; token or faithfulness mismatch: 874f9eaaa7f1e1cdada8dfa494436de02168ca6bd930457f4616b50b0f5ee1bc; token or faithfulness mismatch: 868ec6331116381a9a35978533d963d9296eeb9e3ec1b1eb0ebfca444ab223bb; claim attribution is not unique: 42830a78369c2a936bbe3c6e632aa6f0650af004efa40477011a7e25f888761a; token or faithfulness mismatch: 824276532d580be60d08024e829da1a1d7a54befa330729f4778b3621327b7a7; claim attribution is not unique: 49418d6fede022345b8776a7d43f04845fe2d54c2fc61a650662e5ff8bd16276; token or faithfulness mismatch: 10cea9c25676d0bc22d46fc3ea9d33764cf9db72514aed67a56600e523f0ae43; token or faithfulness mismatch: f6211f33c7766770a0757d26943ef695d0e26af82d96ee6a0eb325305cfa8c56; token or faithfulness mismatch: 623f4eb384227b435691097a4b2a6f4e002519392d9c5e38cc70a7a060f87f01; token or faithfulness mismatch: 4b4ebe0cb1bfc30691abcda9381e96e4db961dd1698f1415638a27ef299b2621; token or faithfulness mismatch: 2012bc5bbd91dc4b0bcc74b1115ecf500b24a1fdbeccaf0ec9d4fe5a1315a05d; token or faithfulness mismatch: 479a83b7981196483c98347f7fffd70d01e40be2a46857ee743f0348c2688876; token or faithfulness mismatch: b8bebefe2789c7720a299fdeddd57d08b7a817cb395e4e56a8355dcb4ecf83eb; token or faithfulness mismatch: 0144077d675c855fceb26837da3ad793a79bf355f5c7f1964b1a501c0f30fd7f; token or faithfulness mismatch: 88f42cdb1e2c6bda4df7e6c950a3e8d81185208e854f4e8c2bfc8aaa0e179c45; token or faithfulness mismatch: 0a46d64086b2f9442d745e65fff71d426c372e9f83bdb566e94a285d265f5453; token or faithfulness mismatch: 58917421b42e9e55a7a347af62bbb2d4e69acaf9b705dc75a66acb5c6eba14f9; token or faithfulness mismatch: 5c49229442077ca3edb53faaa49c0d65d1f6b248ac05ce437cc7520ab44cbf08",
+    "typed claim mapping is incomplete; token or faithfulness mismatch: 76f55ae78ffbe0cbbd546646afa2976b6ce48a53903375a7ca21dd50183160fc; token or faithfulness mismatch: d6c1f5e6e9e105a88df93f7e037c322ee093e60566d3eaf60a84c152a80987a5; token or faithfulness mismatch: 79e16f142e57495c8dc21a76537ae4a0e8a4f7772eda1ccab025a75c7a50a67f; token or faithfulness mismatch: 7dba40725b11698eb819935265070bd513880e4991d41914e070c3e09c0e741c; token or faithfulness mismatch: ca386db99dc9cfea187cad5818e833fc84fe74de0c557c595e0728390ce43781; token or faithfulness mismatch: d58e8a8eb5f03077bf92077f6ec8e239d3e16321bbb7e2dbcf1f0db3f559999e; token or faithfulness mismatch: 10193eb882a5a4f0507a7af88c086342c079e6361ec810b24f179f21cc8dd779",
+    "typed claim mapping is incomplete; token or faithfulness mismatch: cec6f2b466d24f23bf898daf1d9588e16d39bbeb8d7eadb58f18aa1088fb311a; token or faithfulness mismatch: 58c3a1ee84d889d5818d58167a359bc8cb5fe55caf080539277af6de3107699c; token or faithfulness mismatch: 9becf7a86b6c66ae80872c6cfc18db404c3eaa9cd64386804d9c3dc746a08208; token or faithfulness mismatch: 6aa1e09e6fca690d2508592bc7640d28a1d534d018964358344e8af5d4a9ac52; claim attribution is not unique: 48f3030df84adea8729fc8dd2bc93821376a3896c36307f846d265b46a2ad7e1; token or faithfulness mismatch: 74f9d53874d181d0f98de30bc7c81f44e8a09179e76f7f174a984dcd2a4661b1; claim attribution is not unique: 85514151a11f6a0027b809e7064a88eda2b62f9f8b13c744904991490d653906; token or faithfulness mismatch: c274ca519cd1d68112f9253aaf40a5749a43ab8cc366ec94dfcd31d3134173dc; token or faithfulness mismatch: 7b7595f5730c750cb39f61fdb53a2b9b57df064ba1f81f1d2d3b37c0a1113b9c; token or faithfulness mismatch: b0190932d7cdbf681b4de75533c5583f6b15cf4e15b3b4b3470d73f683e0b1c6; token or faithfulness mismatch: 0cdb2984cf9b9d2221b82bbaa4300bdd238d8d8b918aefaf6751e4dd2c364c06; token or faithfulness mismatch: 267364aa42b5b3621b015a3a11fc0db22d80664dbf5e4f7426e735c3d507b491; token or faithfulness mismatch: 0708ab3edc0d2860c7e8d5e0fc72c7e7639fcf3ef85a56e982f969f68982f8f0; token or faithfulness mismatch: a9d9dc38754ecce7fb8343e88cef27c78ae55a3026564669d69413623befcd19; token or faithfulness mismatch: e5eaf6eeabe84a8b74ffbd82f15b1fc48ed5c533786dc4b9d1fb97b01ccd5357; token or faithfulness mismatch: 95b974869e4d45835d6c283c119d8f992bfc856624e13ce2d1dee68221b93b32; token or faithfulness mismatch: f53f418418125cb9e56b166cf4309915f57f85faba8a527e8af946e4dcd612fd; token or faithfulness mismatch: 74a15d1faadcd15e87e831cd8e798448563daeb2e5ec4bb9adbceaf2b3edad95; token or faithfulness mismatch: 9e51d5b2846472a93ecffd5849cd73b1218163c79299d3f7fbe94644ccabfe3d; token or faithfulness mismatch: a4561e343932a7caa7d80bbba5ac14e6b4195cc3e50d2b17df631aa8c87f75d6; token or faithfulness mismatch: 53fb8356bef9af3864b6e64a2d5395c4b3bdc215ea306e418a7de7bf16a7fed5; token or faithfulness mismatch: 97ac6d38b6056a0e0dd9922f9a3a4eb0d26e3ff1eab86630da2de68620aeb0cc; claim attribution is not unique: a4561e343932a7caa7d80bbba5ac14e6b4195cc3e50d2b17df631aa8c87f75d6; claim attribution is not unique: 6bf9bc180f5ea9788f890721ac7f0ddbbf680b73b2c4bde841dbc7da64926661; token or faithfulness mismatch: 2645c0f53a2a72f6f3b8409325fea6c9cf104fac5659f629e3dd6b65cee7193e; claim attribution is not unique: 042818722e93f41c299e3173dbcc5b126e0034c14be7012c9f884f43dd445d87; token or faithfulness mismatch: 313572b81e0399a61695c3e044d1cb2c023181ea9f73fb8652149773015486ee; claim attribution is not unique: 9a2b1998a5eef4491385ba0570d970b23ea823910005d28a15450f96f3203cbc; token or faithfulness mismatch: e0fc53652ba9b92cbcb10f8ef9b401d15113a55d20beb40abe6c3ef120a657da; claim attribution is not unique: 7b7595f5730c750cb39f61fdb53a2b9b57df064ba1f81f1d2d3b37c0a1113b9c; token or faithfulness mismatch: 80debc0f896950d12cbc5a42c2911b67cc20d8eb1e0357fe6f4e932b5aced791; token or faithfulness mismatch: 721a7a9946c90d497af9b92418abb552278244dc0ef7e39204fe1206b119bb88; token or faithfulness mismatch: f3fd044affb0eb02bc2cf61e286166ba6f2444ca291f712703763b5b69c58786; token or faithfulness mismatch: fc1a4f6738885e93ba71ecd1f71a9ce07421369dc5c9a66087970885cf29808b; token or faithfulness mismatch: e5dae61d39d16e04f4429651ba1de0534dd1b024ae110fc489700a403e40f538; token or faithfulness mismatch: 5c52878c632da023db2af64e37f0403247cc45c9fa325fc494128884a751d1e3; token or faithfulness mismatch: 935aba97913fe0f866449ecd929c9f3433b61ea7ca93fbd61620d257f2ffab71; token or faithfulness mismatch: 1604e2ebb2aff8e5061472ed9140c594ffe238d287082ead38644e470eb36895; token or faithfulness mismatch: 54cc45c79a582738159cfa124c3e10178f652e037d289713ee90ce3eb5510177; token or faithfulness mismatch: 24061646a25596d99ef4b39e226a33252343d4bd800a985493b7786550144f38; token or faithfulness mismatch: 9cb82e959989d2d62368b51698f5c7108ea00368aa1b93f9b8948398bd3bd32b; token or faithfulness mismatch: f6031f2b9b5dfe159dd68b35ff22e5a80a8e71b68e50fd5830efb24ba3916952; token or faithfulness mismatch: c0e64ad5bef9791114baf0fd3959f5cb483e04d3a712475feb0259aca38196b3; token or faithfulness mismatch: 6366391f8adcc93c00cc530e07aa6695d21294720396143928edcf63e1dce802; token or faithfulness mismatch: 1d8e2a6acd7d36f46e7dfa6ca2beb35a2ced06b69cf1e0764ed9b5cdf567960d; token or faithfulness mismatch: 64a23c65619ea4ee209adc7600db08fab3292dd37b4d252fb4f5fe39112947ba; claim attribution is not unique: e0fc53652ba9b92cbcb10f8ef9b401d15113a55d20beb40abe6c3ef120a657da; token or faithfulness mismatch: c1b0b70aee511aa22ec869ea2e3b2ef80850d184028212c0f3a34d5140d56c84; token or faithfulness mismatch: 7aa1f95c1636aa9cf1f65547336605d15ee4fc3609deda9087f20358fc7d526c; token or faithfulness mismatch: da38fff8ae99aa2dfe2fa6751b911ddeffdd895316160aba80af302eafd1acc6; token or faithfulness mismatch: f1c07fee992b5da128a2b00fbc2218905fce3ea829233a53b2c4f70ec13755db; token or faithfulness mismatch: de3047e6ec6ba848105cfce0303d5d3550a986fd33cc151a5f05f70e4852af4d; token or faithfulness mismatch: 347e417c169d4f1aa10270974c67a835015096ca3bc0e15462a9b181d049d530; token or faithfulness mismatch: edb8ee3874ee38a64b3cc76f55ebd54386fc2d41b05a71f2c4696804a354282a; token or faithfulness mismatch: 1330541b1689dd52a07935d5b91fddd2ab9b60dcf8d5c635196a60cd5a11410c; token or faithfulness mismatch: d84e69cd0edc1579ab773451e297ef925d2f60e90f776052283025e09630ed20; token or faithfulness mismatch: 88f04aed254dc028401559005e72ad75a878a347a7a269824aec959df9a5e981; token or faithfulness mismatch: bb5ed3b7c439f601da093b368955cb0718e26c8c9ae39d99c187f5c0e84455c8; token or faithfulness mismatch: 63ffa6039a2361592ef9a5536b18af1e74973b8095c4936bef1d26ded8d58017; token or faithfulness mismatch: 3f28670d3f44cc506c34257c364abd5cc41f9982fd4cdffcca1bc9921f468ac3; token or faithfulness mismatch: 0a17fc9977b88ec61ef29d67581e126954676500f6c05fd22260daf08756592b; token or faithfulness mismatch: d595f5d00185520a9562f6807f5a53f23f58e63681247d00f5fa699fecb72ae5; token or faithfulness mismatch: 5afe17e37ee7f8ad9bc061c78ad8f8c447bcc29daf475f31a8ed3f369bf61b8a; token or faithfulness mismatch: 8892270cdc392a9614480de6e4ef0f1f140ca3cf12fff84bc64d80bd4a2f49b5; token or faithfulness mismatch: 9be689589efb9a28131b2ac4f8659e4e3229aa5887a3d6104933118987c4b186; token or faithfulness mismatch: 05d0d84c91b5288e0db19bebedbe86e7ec4034489f3604976023f8bae8e96de9; token or faithfulness mismatch: fc21066229390be6d7ccf876c4c0b928bd87a156ca4dd89b276b0d958c15dcd1; token or faithfulness mismatch: 4cf65de96154e3803738726c0b6e3f7ca6df1b9bb40b7cc4b8fbfbd7910e94a8; token or faithfulness mismatch: ed5bb26e6b3dfff6edd2a12c2b95ed63cffced41f0ff5f7b063b17b062589152; token or faithfulness mismatch: 334d10b8423562e11d5769e94c5982194c7554b42797fb510ad255e604c7b2f2; token or faithfulness mismatch: 254a79e4e8088ce14dbda4883de59a4c9ead69904328ca73878eaf462c4ff370; token or faithfulness mismatch: 2cf53fce5e5286c16c78169ed739d14cf1855dd4c60765f931fdd4c0614c6f29; token or faithfulness mismatch: 1760f8dd623744a1ab8bda260bb05191579621b7b6632e20d55429b1a40ca32f; token or faithfulness mismatch: cbe1da7559ec3d11e7661d824fd385c15cf41b4e454814f9ce10cd1be01d0ea1; token or faithfulness mismatch: 9f398ce7b5b96e139172aa98f9191a2883dea7f289139e4e984370ada9c38200; token or faithfulness mismatch: 01ad8bdb615d9268bda8adb5bf045de94307639e6749dcdaa0fd2f364af7d8fe; token or faithfulness mismatch: 3312cb791d8f6a3f86ee44f4495b96902807d06303959b84be7e009aa5d4fef3; token or faithfulness mismatch: 2adf658a51d481cd2bd855c39456aa9f477549ad36d89c8e4404d1c48579b6bc; token or faithfulness mismatch: d037ea0b3d5c614ff40a187ccc95227b29d57ef7df309a1e68f258ff556c7107; token or faithfulness mismatch: 5b5f2d4a5d6d1ee0ad75668c71f2277b7d84a21a5f4fc9bea4c77c45d05d35f3; token or faithfulness mismatch: b5af98a8d0e6a5028ee123101c54971cd827d8d9ac9708bb52b771faf9d954e1; token or faithfulness mismatch: ca814bffda1d12535d4a359b765cceb668b04b6df892e3f45f502a0a6d48fe99; token or faithfulness mismatch: da31f2f860374f424f2c921c2d33bf76de41f4e82033a658b8dd72907f0b32b3; token or faithfulness mismatch: f991362817eab93c57509f0587fe059e3d7c3acb4453a19436b84a39dfe7c051; token or faithfulness mismatch: 6de8434a0b60a722eb5f7ebde023559935f6e8c80c3026686c8ff8c22757fb5f; token or faithfulness mismatch: d2fa04e2256b3aee51c31c6423afc397de8dea897d91ed04c6dcf713b6ac387e; token or faithfulness mismatch: d95d043cd7a8b2acf1c85c6a84c7d1b3d838b06f869647c0541d8fe4b0756107; token or faithfulness mismatch: 502d2417e02200cb3ea9ad5b3766de5379e1cf97f9d577a0439ce916d9aa894c; token or faithfulness mismatch: 24d4c3457bb13491230510450cc415fd97bd8a1dd162d784268014a8a01c7a34; token or faithfulness mismatch: dc4c827d61866a19302550d9a6df4629c597ae6242102fe99d3ebad5dc860074; token or faithfulness mismatch: 257c329adc2be0fe017a5006389b7f62e19dac7306521f95cea8991b3fd61f04; token or faithfulness mismatch: d79e17ffd9efefa55298392512d1255a551752a9cf1273a5798668a3ef7614ed; token or faithfulness mismatch: c27bc7d8218fa00cf7b47a97826c9286ae9f266215ea94b1a14046c2b364dbb4; claim attribution is not unique: 9e51d5b2846472a93ecffd5849cd73b1218163c79299d3f7fbe94644ccabfe3d; claim attribution is not unique: 53fb8356bef9af3864b6e64a2d5395c4b3bdc215ea306e418a7de7bf16a7fed5; claim attribution is not unique: 97ac6d38b6056a0e0dd9922f9a3a4eb0d26e3ff1eab86630da2de68620aeb0cc; claim attribution is not unique: 371f0c929bca2f900437299a1e9f616b68e4f0a0e0d05753e28352fc43a56d18; token or faithfulness mismatch: 6537ee664e675521270fdc4afb055f2aaf4bfba6ca03aecdd1e112886671df26; token or faithfulness mismatch: 78805ff0c9e8b53e2bb608ff97dfb43660636dfb8268d28003e016f32a8664c2; claim attribution is not unique: 313572b81e0399a61695c3e044d1cb2c023181ea9f73fb8652149773015486ee; claim attribution is not unique: cd9a14b4ed1a5a99a40d37c83f572611ffcaff219b6bdb436a4647aa4b36bea7; claim attribution is not unique: b0190932d7cdbf681b4de75533c5583f6b15cf4e15b3b4b3470d73f683e0b1c6; token or faithfulness mismatch: b2bd8b9b6ff2bf3f61661163dce56ae40c38d397b5d9e44bf57f511b8e13d7ac; token or faithfulness mismatch: 9265f3d6d0efc6aa468e8632a684179ded699e4f46d3c5ae183d9d235687a3b5; token or faithfulness mismatch: 8d86a14b6a8b852fc64fa0cda9536d39a76abd7474b19adc7751c0aa3f25858d; token or faithfulness mismatch: 817323068050c2e14aa2c03b72009b11074f92dea0080cbdc4281c6e82030d72; token or faithfulness mismatch: fb2a4e95f1dced6e42197942950350ff06267a4e704a0d8575a857e6219e5b57; token or faithfulness mismatch: 5130b5361ba26ca8682bdb034414bf2e50aa4181d67783707bcf53d417afae99; token or faithfulness mismatch: 10309c9fb934eda9db5e5fbae0fcfc597cee56c9175906b6390899b14a6b0c72; token or faithfulness mismatch: 6224aa1c4371222d7ead3e3a1396dbd7217d1ca3a0d32954d322f1c7e8c07210; token or faithfulness mismatch: 497b2d42f5319f176c6ed57d774645c6b8c938ef3d3c5217f32f49870668a822; token or faithfulness mismatch: 5ea48a40fd1cea491c73b2ea01e1262e90e3360e6d1a63af47a84c4b8ece1c58; token or faithfulness mismatch: 389b4c8991997381e25f3d6f96ad4c572ac085cd82a6b9fd94504717c18b41c4; token or faithfulness mismatch: d0937f08d37452a67c0f65230f8a177b5af78c7ba8e4b1a3e87ff0af3b4f7977; token or faithfulness mismatch: f32b446cbb7993e759af5aa1f96855bd86eef6b2601c7fcac6d36e9f2067eb36; token or faithfulness mismatch: f59d373d182766c7fafa14c6a18ddfe7286c2b521fffcb572fe818a9da32dce1; claim attribution is not unique: 7aa1f95c1636aa9cf1f65547336605d15ee4fc3609deda9087f20358fc7d526c; token or faithfulness mismatch: aab24d9e876e8d29cb6ede139c29a392b80570c54f3f8771b303283cc4c20305; token or faithfulness mismatch: 52f7c60dd4e5e8cdddc5334c73035ff3698938db6a0ae423cb399d0ad507f20f; token or faithfulness mismatch: 5d456a4b5778016bd198ed2a5368ebac905da04f69260e807df88a30627d8713; token or faithfulness mismatch: d403fc1d0fa2df97fa984cb085eb60d68cedfc6915de5a5cc6e7275d2ded3de7; token or faithfulness mismatch: 2cf8b3bd06a643fb8c71d10f21e47e97496a10b6a88c3528634f6a260889ce1d; token or faithfulness mismatch: 1bc2a6cb7a9e90fb1f49403e7fc732e077595a967962c1bb6dca203cf6251bf9; token or faithfulness mismatch: 8db80fcd47b1ad0f1b79f6d67adea767f81c91a03d04dd2fe5799edf191c51ce; token or faithfulness mismatch: 9108ca0b1dae9bff09d15ea98a3f6fd60c026b9f9c799b14207dc5e43d847fe1; token or faithfulness mismatch: 2ca6949980a15e350f391ec83663958a612894019758953f9cb9479560c8fa89; token or faithfulness mismatch: c907a79f333e124b1afad020607511a132f56e2d77c356cd3909db6768792c98; token or faithfulness mismatch: ba08ca8b9fa15074b5f29f36aceb5331204f8f8d3057acbe0c7a10553592eea1; token or faithfulness mismatch: 6d3ee13f6496a3b3024f4f7cf0124a91721b4be21edc805fd40db2d67b821b29; token or faithfulness mismatch: d63b5b13a7fc0548ccd42b124ae715cfef67d5e4056a6cb0a251f54797b0b366; token or faithfulness mismatch: 2a98a618329b6c82763a69fd5e4b26a74a2b3ce51cf347af534f154989ffb915; token or faithfulness mismatch: 8acc9128027d78a8ba837185dea6dd3679343db30ac4fd09b884e4fa462cfca9; token or faithfulness mismatch: b7dfff8df9c34a5b57eaef5713326852007226e2e7c8992cff37adf533bfa76d; token or faithfulness mismatch: 530bcb1ea636a6f62bfe2783bf12ba59f536e1bc7c7d736479f6fbbf22366166; token or faithfulness mismatch: 82a1c0760872a656b149f3b28bc26c07cdcbac6a9764d28338820b1891573c88; token or faithfulness mismatch: 981978aada1842b866eff97da0fd25e3803770c4e4dfad2ada5ebe66709420f3; token or faithfulness mismatch: a501119240e20263a76ba311f5e55e927076c327420fe56ffeb35480ffc1f6cd; token or faithfulness mismatch: 5dd0f49fe9f1875da69f8261acbe23325848899e19fd621c503f57a2c429f645; token or faithfulness mismatch: 93edd626b55064d1ece5af83dfb5f207d4ec203f86a569b2d38c23741e7dabd9; token or faithfulness mismatch: 11e7eb50f7a9ce2b10566fe1d9a3e05c8106cbc610aa764f866e588ae93dcde6; token or faithfulness mismatch: db6d1aad3b8e50b9da13fbcf705b546f95a803864540067c6ed307ead765f99d; token or faithfulness mismatch: e4c3c52db66baeecaca2e5b5b35ec57b3c4ed9cf46d40e7ba48b0c28f2459174; token or faithfulness mismatch: 4d962fae6e15c8e75f0fe57d4f14624396f3b59c630e9b76afe42bb355f2a004; claim attribution is not unique: 5afe17e37ee7f8ad9bc061c78ad8f8c447bcc29daf475f31a8ed3f369bf61b8a; token or faithfulness mismatch: bcadc57655dfb522d9949c41beff3bdf1c4a71c7b78abeb78161f78ccda37d7a; token or faithfulness mismatch: 5b634f4f8f2bb41b14872a9f5e11df09321f111124eddb27c3fc76ac7ffe8845; claim attribution is not unique: 5d456a4b5778016bd198ed2a5368ebac905da04f69260e807df88a30627d8713; token or faithfulness mismatch: 1da92c6edbdf8d8d3499cd56bfd52e2ed5422e296d8631e1583d0f3edefa0b77; token or faithfulness mismatch: 1392eef02490e93e51405d7816d35bafe7a60b9654e45fbe16c28012d05dee24; token or faithfulness mismatch: f05cabbf9339797e300f92cc6d1e501bcc3c9bbb4cbb780eddd889600aaa65bd; token or faithfulness mismatch: 3b0395c5b97fddfaeafe30ef517eea777c967a01e92a17fa2e3290f13dea94b2; token or faithfulness mismatch: c0c358d0e6245a2b8cedfd31fb243a588caeee4db7e23e03e72a3a2bea88a644; token or faithfulness mismatch: 5ac7d6470d219e274b4f56858b8e82635f490ec39457db3c8db73d35ba0af6b4; token or faithfulness mismatch: 22182c5f95f1ddfd12077cf8dec5c293ae4027540ec97ab77ee67c3fd5a3ecbd; token or faithfulness mismatch: fadd56504f2ff65707bc2adc4b67b6f042985196f3f874e4544f52feb5530737; token or faithfulness mismatch: 28e17acc88741eacaa8a28ca436dce00afcf2f6638705237a4acea9681c3fb88; token or faithfulness mismatch: b6eb7787c1d98a504222697e7cbe0a870c83f479ae9da10806acb6c46205cdce; token or faithfulness mismatch: 7adb3062724a1e29bea2942803f9881e6a951456570ab3a6704cc6523f52f6c4; token or faithfulness mismatch: b5018c2210599c38b724f101bbfa2ba0cc053a6f4b8ce6c6f8c1bb6801f76e66; token or faithfulness mismatch: ad7cb4b059203367e2f16182c9eca70ed44c9781e439ee648967b46c3ca97844; token or faithfulness mismatch: 149323660ada48bbee30703a447f1b22f2b6f78971084a9943b4f91fb15bf111; token or faithfulness mismatch: ce5a70edb7bf094b70e8a075e79b93543d8aed2270671ccb545188962cdc07e8; token or faithfulness mismatch: 04309b167a4bc87d33a189a86c43db70060a14d93c7a51f82071b9c0419afd9c; token or faithfulness mismatch: dd7a9d708787fa8600833331e429d108a275152eade79af497ac4b03d129b928; token or faithfulness mismatch: 0bf9ef82c958ddbd37e4a2e42a644df9d5ed25fbf7745622ec67bab9b3e3c8e2; token or faithfulness mismatch: d6953306cae9f4bce4e3ca0bd02b61dace1265676129dbae929991dcd49118b1; token or faithfulness mismatch: 173cd930ed28e44f331f41214240342ee3a050299fa8fe2bf35f6a5d6f0ab00d; claim attribution is not unique: 6de8434a0b60a722eb5f7ebde023559935f6e8c80c3026686c8ff8c22757fb5f; claim attribution is not unique: d2fa04e2256b3aee51c31c6423afc397de8dea897d91ed04c6dcf713b6ac387e; claim attribution is not unique: d95d043cd7a8b2acf1c85c6a84c7d1b3d838b06f869647c0541d8fe4b0756107; claim attribution is not unique: 502d2417e02200cb3ea9ad5b3766de5379e1cf97f9d577a0439ce916d9aa894c; claim attribution is not unique: 24d4c3457bb13491230510450cc415fd97bd8a1dd162d784268014a8a01c7a34; claim attribution is not unique: dc4c827d61866a19302550d9a6df4629c597ae6242102fe99d3ebad5dc860074; claim attribution is not unique: 257c329adc2be0fe017a5006389b7f62e19dac7306521f95cea8991b3fd61f04; claim attribution is not unique: d79e17ffd9efefa55298392512d1255a551752a9cf1273a5798668a3ef7614ed; claim attribution is not unique: c27bc7d8218fa00cf7b47a97826c9286ae9f266215ea94b1a14046c2b364dbb4; token or faithfulness mismatch: dc32826cb4f8b5cbb28d0908d991bb1865e81cdfe035959c19c35f92b2d636e4; claim attribution is not unique: 7ad6e0e0eb9fb5f993dbab2219bd94425927e62554fc2432c905e07c435761aa; token or faithfulness mismatch: dcd1df5f88b76629010fba765b686a34f9b8f931a0fbdb1f272f1004101a64a2; token or faithfulness mismatch: ad3a33293aaefdd2024a63f5aca2cd3c08f875db16188398a041e10dc8dd0bad; token or faithfulness mismatch: 94e9ba7f460ff86c9ab541ad91b994f983067557d1e952d6b9929151680af9e2; token or faithfulness mismatch: b7e8b6b99c587f0748463f092e6d5884fb7c1abf88a7785c900da4ce8e420b58; token or faithfulness mismatch: 8d1e753b73658df55c001fea22543a83d51db667a7c9bd6e9d036e5ace63500b; token or faithfulness mismatch: cabd264c3aa77b431891ff34ff393e396e194db0b0a2c6b87be609b82104a310; token or faithfulness mismatch: 6adbaa591a81734115d23098c22d42d5321ab718802760a9625900e22d48fe2f; token or faithfulness mismatch: 1e441272ff15b4fef656271413bd6293df1ea6e5575efc046b1f8655482616a3; token or faithfulness mismatch: c9a69b3db915276f0e9437bb56c3f43e79add6bb3328e9912a83437e35d1a72b; token or faithfulness mismatch: b47c52899440bd22e0d48ce7dfd1d188e3f97f49dc7a52f34f506079193c2672; token or faithfulness mismatch: 7d578d3bf609da238a09d74bd00cc6d89bb5f08489121e0ce286aafae472a80d; token or faithfulness mismatch: f4645bf40f19b8487bc73adecf985c887599c009c3777daacca3b593988503b9; token or faithfulness mismatch: 5a28183948c0446cd69f7ce7da0a9534d134562ee711939fce157c0ad681c5bd; token or faithfulness mismatch: 70368c45c56053648f6b2a6fe4bd7ccd096e6eb1386cb97d790dff27ee96230c; token or faithfulness mismatch: 06496dca14a4d89153d259daf66419abaf23b91e18d2e0e7dd956ac045e519d7; token or faithfulness mismatch: e36552f71f8c45763b7a830ab10be8024503a6e33e35b3a14e1c195718e12781; claim attribution is not unique: 35a30a6784d1b5b3157fb39738c450e3a5bc627df18b1e1921f287cb61605b41; claim attribution is not unique: dcd1df5f88b76629010fba765b686a34f9b8f931a0fbdb1f272f1004101a64a2; token or faithfulness mismatch: 32bb2671fe05ebea8d5cee21952fcde1f487b6a40371a48564d4610a49b2e436; token or faithfulness mismatch: df198ccceca984395ce5d250c5f5f4b4c37e0e36b970e14eb9569bc856bc9b87; token or faithfulness mismatch: a0f9f48c1eb7353ef057bb7433caf4c1e9a75ee66da9a35792388ca4612a42de; token or faithfulness mismatch: 77b297e2f983bace655fc8c3097805d4df91706d9f0eded8ebe744f3bb1c8ee8; token or faithfulness mismatch: 166de29c33d655b0a05c5377f6c81b693b889d19d6fb99fbd110e6560c0ccdc4; continuous source block exceeds 3 sentences or 240 characters",
+    "version is not a semver, date, or explicit release label"
+  ],
+  "output_path": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task2b-knowledge-publication-body-compiler/apply/evidence/T013.semantic-run-v13.json",
+  "provider": {
+    "base_url": "https://dashscope.in.whatspos.cn/v1",
+    "credential": "environment-only",
+    "model": "qwen3.6",
+    "provider": "qwen3.6"
+  },
+  "revision_ledger": [
+    {
+      "reason": "initial accepted body contract",
+      "revision": 0
+    }
+  ],
+  "run_id": "run-538bed276afb43e9b509bda2a835ea55",
+  "run_identity": {
+    "input_fingerprint": "d49651a9340d8c6c42a697a5e9a2875bba892c83e9f14945b9f178476e62d369",
+    "kb_fingerprint": "d7ae54e0d16c1fe16d5947814c46d86315da1117003fbe5af0c2517151ddb9c3",
+    "manifest_path": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task2b-knowledge-publication-body-compiler/quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json",
+    "run_id": "run-538bed276afb43e9b509bda2a835ea55",
+    "sample_fingerprint": "fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f",
+    "source_run_hash": "532e6ce4794beb9245b63f8d6a15617a8a8169e667814b52bc4f76ddbb063412"
+  },
+  "run_status": "completed",
+  "sample_manifest": {
+    "content_hash": "fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f",
+    "covered_categories": [
+      "table_image",
+      "bilingual",
+      "multi_source"
+    ],
+    "excluded_categories": [
+      {
+        "category": "long_text",
+        "reason": "source manifest does not expose a long-document feature; no semantic coverage is claimed"
+      }
+    ],
+    "path": "quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json",
+    "required_categories": [
+      "long_text",
+      "table_image",
+      "bilingual",
+      "multi_source"
+    ],
+    "sample_count": 20,
+    "sampling_seed": 4026961625,
+    "sampling_seed_label": "knowledge-digest-task0-v1",
+    "source_count": 89
+  },
+  "schema_version": "task2b-semantic-evidence.v1",
+  "section_completeness": [],
+  "threshold": {
+    "answerability": 1.0,
+    "max_body_lines": 120,
+    "max_page_lines": 300,
+    "section_completeness": 1.0
+  }
+}

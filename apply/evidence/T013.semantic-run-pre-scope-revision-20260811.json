@@ -1,0 +1,104 @@
+{
+  "ac_bindings": {
+    "AC-01": "structure-evidence",
+    "AC-03": "claim-backtrace",
+    "AC-05": "impact-closure",
+    "AC-07": "status-navigation",
+    "AC-09": "sample-coverage",
+    "AC-10": "run-identity",
+    "AC-11": "machine-bottom-line",
+    "AC-12": "revision-ledger"
+  },
+  "answerability_source": "task0-question-set.v1",
+  "answerability_subset": {
+    "content_hash": "8f5cb5e82c66d26d598e4aaeba71aa06db1b1cd67f9b92c122ab5ab2c70f1ac9",
+    "id": "not-computed",
+    "questions": [],
+    "reason": "answerability subset requires the real semantic run and is not inferred from structural output"
+  },
+  "budget": {
+    "max_tokens": 8192,
+    "provider_calls": null,
+    "source": "DigestSettings/current environment"
+  },
+  "concepts": [],
+  "contract_revision": 0,
+  "delivery_status": "not_released",
+  "detector": {
+    "name": "task2b-publication-gate.v1",
+    "version": "jaccard-5gram.v1"
+  },
+  "evidence_backtrace": [],
+  "execution_mode": "real_semantic",
+  "failure_reasons": [
+    "provider output is not JSON (Expecting ',' delimiter: line 39 column 75 (char 2272))",
+    "provider output is not JSON (Expecting value: line 1 column 1 (char 0))",
+    "provider output is not JSON (Expecting value: line 37 column 76 (char 2103))",
+    "provider output is not JSON (Unterminated string starting at: line 12 column 7 (char 455))",
+    "provider output is not JSON (Unterminated string starting at: line 18 column 7 (char 1214))",
+    "provider output is not JSON (Unterminated string starting at: line 40 column 12 (char 2500))",
+    "provider output is not JSON (Unterminated string starting at: line 47 column 17 (char 1906))",
+    "provider output is not JSON (Unterminated string starting at: line 65 column 9 (char 4137))",
+    "provider request failed (deadline exceeded after 5s)",
+    "provider top-level fields are not allowed: audit_record, reader_eligible, reason, status",
+    "provider top-level fields are not allowed: provider_attempt_count, publication, summary",
+    "semantic evidence backtrace is unavailable",
+    "topic index mapping is degraded"
+  ],
+  "output_path": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task2b-knowledge-publication-body-compiler/apply/evidence/T013.semantic-run.json",
+  "provider": {
+    "base_url": "https://dashscope.in.whatspos.cn/v1",
+    "credential": "environment-only",
+    "model": "qwen3.6",
+    "provider": "qwen3.6"
+  },
+  "revision_ledger": [
+    {
+      "reason": "initial accepted body contract",
+      "revision": 0
+    }
+  ],
+  "run_id": "run-dc0d99596e70414099a31d54cf6b26fb",
+  "run_identity": {
+    "input_fingerprint": "28f547447f97500977b17fb849e612826b8c1bbce461a6c6eb46c4386ff2ac5c",
+    "kb_fingerprint": "cf9cfccee9c337bb8130daefddbcb1d0f541da27a17f42a0e9f817c42153e973",
+    "manifest_path": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task2b-knowledge-publication-body-compiler/quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json",
+    "run_id": "run-dc0d99596e70414099a31d54cf6b26fb",
+    "sample_fingerprint": "fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f",
+    "source_run_hash": "532e6ce4794beb9245b63f8d6a15617a8a8169e667814b52bc4f76ddbb063412"
+  },
+  "run_status": "completed",
+  "sample_manifest": {
+    "content_hash": "fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f",
+    "covered_categories": [
+      "table_image",
+      "bilingual",
+      "multi_source"
+    ],
+    "excluded_categories": [
+      {
+        "category": "long_text",
+        "reason": "source manifest does not expose a long-document feature; no semantic coverage is claimed"
+      }
+    ],
+    "path": "quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json",
+    "required_categories": [
+      "long_text",
+      "table_image",
+      "bilingual",
+      "multi_source"
+    ],
+    "sample_count": 20,
+    "sampling_seed": 4026961625,
+    "sampling_seed_label": "knowledge-digest-task0-v1",
+    "source_count": 89
+  },
+  "schema_version": "task2b-semantic-evidence.v1",
+  "section_completeness": [],
+  "threshold": {
+    "answerability": null,
+    "max_body_lines": 120,
+    "max_page_lines": 300,
+    "section_completeness": 1.0
+  }
+}

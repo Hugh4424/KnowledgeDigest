@@ -271,6 +271,8 @@ def resolve_similarity_backend(
         return BackendResolution("embedding", "jaccard", "artifact_identity_mismatch")
     source = os.environ if env is None else env
     api_key = source.get(embedding.api_key_env)
+    if not api_key:
+        return BackendResolution("embedding", "jaccard", "embedding_api_key_missing")
     client = client_factory(embedding, api_key=api_key)
     actual_probe = probe_fingerprint if probe_fingerprint is not None else client.probe_fingerprint()
     if actual_probe != artifact["probe_fingerprint"]:

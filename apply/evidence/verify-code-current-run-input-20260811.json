@@ -1,0 +1,33 @@
+{
+  "receipts": {
+    "tests": "quality/tests/verify-code-final-full-20260811-current-v2.json",
+    "review": "quality/reviews/attempts/ba26ee80-1ce8-4bc9-8973-881c34a5960b/attempt.json",
+    "quality_review": "quality/reviews/attempts/ba26ee80-1ce8-4bc9-8973-881c34a5960b/attempt.json",
+    "evidence": "quality/evidence/verify-evidence-v6.json",
+    "verification": "quality/evidence/verification-v7.json"
+  },
+  "finding_dispositions": [
+    {
+      "finding_id": "PHASE1-REVIEW-UNAVAILABLE",
+      "original_fact": "当前 phase-1 build-code 异源审查没有形成有效 reviewer JSON",
+      "consequence": "独立审查和严重 finding 状态保持 unknown/incomplete，不声称通过",
+      "status": "accepted_risk",
+      "next_action": "保留 unavailable 事实，在 close 前不作 released 声明",
+      "evidence_ref": "apply/evidence/build-code-phase1-routing-and-review-20260811.json",
+      "owner": "Task 2-B",
+      "consumer": "verify-code close decision",
+      "retain_or_delete": "retain"
+    },
+    {
+      "finding_id": "T013-SEMANTIC-UNKNOWN",
+      "original_fact": "真实语义运行、机器出口和 AC-09/10/11 证据未闭合",
+      "consequence": "delivery 保持 not_released",
+      "status": "accepted_risk",
+      "next_action": "等待冻结输入，不能用旧 evidence 或结构测试替代",
+      "evidence_ref": "apply/evidence/SR-20260811-T016-preflight.txt",
+      "owner": "Task 2-B",
+      "consumer": "semantic exit",
+      "retain_or_delete": "retain"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+Task: T016 / SR-20260811 current evidence handoff
+
+Frozen input and provider run:
+- sample manifest: quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json
+- sample_count=20, source_count=89, sampling_seed=4026961625, manifest_sha256=fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f
+- isolated input: reconstructed from the external Task 0 source-snapshot bundle, selected by the 20 frozen example IDs; 30 source notes were fed to the ordinary digest CLI
+- provider: qwen3.6 at the allowlisted dashscope endpoint; credential was environment-only
+- embedding probe: bounded to 3 seconds; unavailable probe fell back to Jaccard and was not counted as semantic success
+- run_id=run-37095bf59935497985137ca79722f7e6
+- run_status=completed, execution_mode=real_semantic, delivery_status=not_released
+- evidence=apply/evidence/T013.semantic-run.json
+
+Semantic result:
+- contract_revision=1/1; revision ledger contains SR-20260811-task2b-procedure-source-gap revision 1
+- AC-01/03/05/07/09/10/11/12/13 bindings are present in the evidence
+- provider request failures were recorded with a 5-second hard deadline; machine-passing concepts=0, evidence_backtrace=0, section_completeness=0
+- all 20 Task 0 questions are recorded as not answerable with no first hit; no semantic reader pass is claimed
+- failure reasons include provider timeout, unavailable semantic backtrace, degraded TopicIndex mapping, and an invalid version fact
+
+Regression:
+- `uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_evidence_file`: exit 0, 1 passed, 71 deselected
+- Task 2-B / Task 2 / Task 2-A aggregate: exit 0, 154 passed, 2 skipped
+- current full repository regression: `uv run --frozen pytest -q`: exit 0, 511 passed, 3 skipped
+- `git diff --check`: exit 0
+
+Disposition:
+The scope-revision behavior is covered and the current semantic run is bound and reproducible as a failure/incomplete result. T016 returns to verify-code; it does not claim Task 2-B completion or release. Existing pre-scope evidence was preserved as `apply/evidence/T013.semantic-run-pre-scope-revision-20260811.json` and was not overwritten.

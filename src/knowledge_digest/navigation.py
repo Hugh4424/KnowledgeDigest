@@ -40,6 +40,34 @@ def _record(path: str, kind: str, content: str) -> dict[str, Any]:
     }
 
 
+def build_topic_part_navigation(
+    parts: list[dict[str, Any]],
+    *,
+    overview_path: str,
+    related_key: str,
+) -> list[dict[str, Any]]:
+    """Project one topic's overview/part/prev-next navigation without writing."""
+    ordered = sorted(
+        (dict(part) for part in parts),
+        key=lambda part: (int(part.get("part_index", 0)), str(part.get("target_path", ""))),
+    )
+    rows: list[dict[str, Any]] = []
+    for index, part in enumerate(ordered):
+        target_path = str(part.get("target_path", ""))
+        rows.append(
+            {
+                "part_index": int(part.get("part_index", index + 1)),
+                "target_path": target_path,
+                "entry_path": target_path,
+                "overview_path": overview_path,
+                "related_key": related_key,
+                "prev": ordered[index - 1].get("target_path") if index else None,
+                "next": ordered[index + 1].get("target_path") if index + 1 < len(ordered) else None,
+            }
+        )
+    return rows
+
+
 def _validate_existing_navigation(paths: DigestPaths, publication: PublicationContract) -> None:
     targets = [publication.home_path]
     targets.extend(publication.category_index_path(category.category_id) for category in publication.categories)
