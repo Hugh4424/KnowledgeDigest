@@ -1,0 +1,10 @@
+{
+  "schema_version":"task2a-fixture-selection.v1",
+  "selection_id":"task2c-committed-reader-fixtures",
+  "provenance_mode":"committed_acceptance_fixture",
+  "fixtures":[
+    {"sample_id":"fixture-overview","fixture_path":"product-overview.md","fixture_sha256":"c87697e2735bc45b79a88db881d088831dd3ab0cc0b16ea20e71b01858c43fc5","topic_id":"topic-43e930851b8bb3f5bdef","object_intent":"product overview","mapping_role":"product_overview","digest_page_type":"product_overview","source_id":"source-overview","source_fragment_id":"source-overview","content_fingerprint":"c87697e2735bc45b79a88db881d088831dd3ab0cc0b16ea20e71b01858c43fc5","claim_ids":["claim-overview"],"selection_reason":"overview acceptance fixture"},
+    {"sample_id":"fixture-capability","fixture_path":"module-capability.md","fixture_sha256":"d35255198a943412e2837d865c74a9c0a13aa2635ea59e5324ae561bd01ca63b","topic_id":"topic-0d3521f85e4411b86970","object_intent":"module capability","mapping_role":"module_or_capability","digest_page_type":"module_or_capability","source_id":"source-capability","source_fragment_id":"source-capability","content_fingerprint":"d35255198a943412e2837d865c74a9c0a13aa2635ea59e5324ae561bd01ca63b","claim_ids":["claim-capability"],"selection_reason":"capability acceptance fixture"},
+    {"sample_id":"fixture-procedure","fixture_path":"procedure-rule.md","fixture_sha256":"67d165374c6a2d5a244ab43d5bda2a719f50b1d8755786dcf23a4665fe89b2ad","topic_id":"topic-520b6110d7a4abd4dd8b","object_intent":"procedure rule","mapping_role":"procedure_or_rule","digest_page_type":"procedure_or_rule","source_id":"source-procedure","source_fragment_id":"source-procedure","content_fingerprint":"67d165374c6a2d5a244ab43d5bda2a719f50b1d8755786dcf23a4665fe89b2ad","claim_ids":["claim-procedure"],"selection_reason":"procedure acceptance fixture"}
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "schema_version": "task2c-coverage-fixture.v1",
+  "category": "long_document",
+  "disposition": "excluded",
+  "reason": "long_document is not exposed by the current Task 1 inventory schema; full-corpus long-document sampling is deferred to Task 3.",
+  "evidence": "coverage-fixtures/long-document-evidence.json"
+}

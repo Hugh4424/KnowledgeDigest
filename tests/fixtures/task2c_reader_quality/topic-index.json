@@ -1,0 +1,50 @@
+{
+  "schema_version": "2.0.0",
+  "topics": [
+    {
+      "topic_key": "v1/products/alpha-product/product-overview",
+      "topic_id": "topic-43e930851b8bb3f5bdef",
+      "digest_topic_id": "topic-43e930851b8bb3f5bdef",
+      "knowledge_type": "products",
+      "product": "Alpha Product",
+      "module": null,
+      "object_intent": "product overview",
+      "source_ids": ["source-overview"],
+      "source_members": ["source-overview"],
+      "evidence_refs": [{"source_uri": "raw://alpha/product-overview.md", "content_fingerprint": "c87697e2735bc45b79a88db881d088831dd3ab0cc0b16ea20e71b01858c43fc5", "line_number": 1}],
+      "description": "Alpha Product provides a stable overview for readers.",
+      "published_path": "pages/products/alpha-product/product-overview.md",
+      "status": "published"
+    },
+    {
+      "topic_key": "v1/products/alpha-product/core/module-capability",
+      "topic_id": "topic-0d3521f85e4411b86970",
+      "digest_topic_id": "topic-0d3521f85e4411b86970",
+      "knowledge_type": "products",
+      "product": "Alpha Product",
+      "module": "Core",
+      "object_intent": "module capability",
+      "source_ids": ["source-capability"],
+      "source_members": ["source-capability"],
+      "evidence_refs": [{"source_uri": "raw://alpha/module-capability.md", "content_fingerprint": "d35255198a943412e2837d865c74a9c0a13aa2635ea59e5324ae561bd01ca63b", "line_number": 1}],
+      "description": "Core Capability explains the supported product capability.",
+      "published_path": "pages/products/alpha-product/core/module-capability.md",
+      "status": "published"
+    },
+    {
+      "topic_key": "v1/products/beta-product/rules/procedure-rule",
+      "topic_id": "topic-520b6110d7a4abd4dd8b",
+      "digest_topic_id": "topic-520b6110d7a4abd4dd8b",
+      "knowledge_type": "products",
+      "product": "Beta Product",
+      "module": "Rules",
+      "object_intent": "procedure rule",
+      "source_ids": ["source-procedure"],
+      "source_members": ["source-procedure"],
+      "evidence_refs": [{"source_uri": "raw://beta/procedure-rule.md", "content_fingerprint": "67d165374c6a2d5a244ab43d5bda2a719f50b1d8755786dcf23a4665fe89b2ad", "line_number": 1}],
+      "description": "Rules and Procedure explains the supported operating boundary.",
+      "published_path": "pages/products/beta-product/rules/procedure-rule.md",
+      "status": "published"
+    }
+  ]
+}

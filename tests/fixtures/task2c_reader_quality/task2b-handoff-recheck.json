@@ -1,0 +1,45 @@
+{
+  "schema_version": "task2c-task2b-handoff-recheck.v1",
+  "status": "verified",
+  "task2b_commit": "2369a853adb4bc70709036c563233cae361222be",
+  "concept_machine_passing": 12,
+  "delivery_status": "not_released",
+  "answerability_subset": {
+    "content_hash": "8f5cb5e82c66d26d598e4aaeba71aa06db1b1cd67f9b92c122ab5ab2c70f1ac9",
+    "id": "knowledge-digest-task0-v1",
+    "method": "section-presence-v1",
+    "questions": [
+      {"answerable": true, "first_hit": "topic-43e930851b8bb3f5bdef", "polarity": "positive", "question_id": "positive-01"},
+      {"answerable": true, "first_hit": "topic-43e930851b8bb3f5bdef", "polarity": "positive", "question_id": "positive-02"},
+      {"answerable": true, "first_hit": "topic-0d3521f85e4411b86970", "polarity": "positive", "question_id": "positive-03"},
+      {"answerable": true, "first_hit": "topic-520b6110d7a4abd4dd8b", "polarity": "positive", "question_id": "positive-04"},
+      {"answerable": true, "first_hit": "topic-0d3521f85e4411b86970", "polarity": "positive", "question_id": "positive-05"},
+      {"answerable": false, "first_hit": null, "polarity": "positive", "question_id": "positive-06"},
+      {"answerable": true, "first_hit": "topic-0d3521f85e4411b86970", "polarity": "positive", "question_id": "positive-07"},
+      {"answerable": false, "first_hit": null, "polarity": "positive", "question_id": "positive-08"},
+      {"answerable": true, "first_hit": "topic-0d3521f85e4411b86970", "polarity": "positive", "question_id": "positive-09"},
+      {"answerable": true, "first_hit": "topic-0d3521f85e4411b86970", "polarity": "positive", "question_id": "positive-10"},
+      {"answerable": true, "first_hit": "topic-0d3521f85e4411b86970", "polarity": "positive", "question_id": "positive-11"},
+      {"answerable": true, "first_hit": "topic-0d3521f85e4411b86970", "polarity": "positive", "question_id": "positive-12"},
+      {"answerable": false, "first_hit": null, "polarity": "positive", "question_id": "positive-13"},
+      {"answerable": true, "first_hit": "topic-0d3521f85e4411b86970", "polarity": "positive", "question_id": "positive-14"},
+      {"answerable": true, "first_hit": "topic-0d3521f85e4411b86970", "polarity": "positive", "question_id": "positive-15"},
+      {"answerable": true, "first_hit": "topic-0d3521f85e4411b86970", "polarity": "positive", "question_id": "positive-16"},
+      {"answerable": true, "first_hit": "topic-0d3521f85e4411b86970", "polarity": "positive", "question_id": "positive-17"},
+      {"answerable": false, "first_hit": null, "polarity": "negative", "question_id": "negative-01"},
+      {"answerable": false, "first_hit": null, "polarity": "negative", "question_id": "negative-02"},
+      {"answerable": false, "first_hit": null, "polarity": "negative", "question_id": "negative-03"}
+    ]
+  },
+  "evidence": [
+    {
+      "ref": "apply/evidence/T013.semantic-run-task2b-provider-repair-v9-20260812.json",
+      "sha256": "c38aad3185bd534ee988766d55fc26ee68d5f8b2688f8e00ddb72d23dbbd17e4"
+    },
+    {
+      "ref": "apply/evidence/T014.final-regression-task2b-provider-repair-v9-20260812.txt",
+      "sha256": "c202e04f2a2e208fd2e3b7cb3ad6372e57b38459ab69c9c423180e2cd59a852c"
+    }
+  ],
+  "scope": "Task2C consumes the Task2B handoff; it does not rerun or rewrite Task2B evidence."
+}

@@ -1,0 +1,7 @@
+{
+  "schema_version": "task2c-coverage-evidence.v1",
+  "category": "long_document",
+  "basis": "current Task 1 inventory schema does not expose a long_document feature field",
+  "scope": "Task 2-C small corpus",
+  "deferred_to": "Task 3 full corpus gate"
+}

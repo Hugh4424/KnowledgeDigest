@@ -1,0 +1,199 @@
+{
+  "schema_version": "task0-question-set.v1",
+  "question_set_id": "knowledge-digest-task0-v1",
+  "questions": [
+    {
+      "question_id": "positive-01",
+      "polarity": "positive",
+      "original_text": "这个主题或产品解决什么问题？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题或产品总览",
+      "covered_roles": ["reader", "operator"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-02",
+      "polarity": "positive",
+      "original_text": "它是什么，适用于什么场景？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题或产品总览",
+      "covered_roles": ["reader"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-03",
+      "polarity": "positive",
+      "original_text": "如何开始使用它？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题或产品操作页",
+      "covered_roles": ["reader", "operator"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-04",
+      "polarity": "positive",
+      "original_text": "完成这个操作需要哪些步骤？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题操作页",
+      "covered_roles": ["reader", "operator"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-05",
+      "polarity": "positive",
+      "original_text": "这个能力的边界和限制是什么？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题能力页",
+      "covered_roles": ["reader", "operator"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-06",
+      "polarity": "positive",
+      "original_text": "出现异常时应该怎么处理？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题规则页",
+      "covered_roles": ["operator"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-07",
+      "polarity": "positive",
+      "original_text": "这个结论来自哪些来源？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题来源入口",
+      "covered_roles": ["reader", "reviewer"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-08",
+      "polarity": "positive",
+      "original_text": "这条信息的版本或生效范围是什么？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题版本信息",
+      "covered_roles": ["reader", "operator"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-09",
+      "polarity": "positive",
+      "original_text": "这个主题和同一产品的其他能力有什么关系？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前产品模块索引",
+      "covered_roles": ["reader"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-10",
+      "polarity": "positive",
+      "original_text": "如何判断这个主题是否适合当前任务？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题能力页",
+      "covered_roles": ["reader", "operator"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-11",
+      "polarity": "positive",
+      "original_text": "关键参数、标识符或命令是什么？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题操作页",
+      "covered_roles": ["operator"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-12",
+      "polarity": "positive",
+      "original_text": "哪些内容是明确支持的，哪些内容不支持？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题边界说明",
+      "covered_roles": ["reader", "operator"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-13",
+      "polarity": "positive",
+      "original_text": "更新后哪些旧结论仍然有效？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题版本信息",
+      "covered_roles": ["reader", "operator"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-14",
+      "polarity": "positive",
+      "original_text": "这个主题的下一步应该看什么或做什么？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题导航",
+      "covered_roles": ["reader", "operator"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-15",
+      "polarity": "positive",
+      "original_text": "如果没有找到答案，应该从哪里继续排查？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题来源入口",
+      "covered_roles": ["operator", "reviewer"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-16",
+      "polarity": "positive",
+      "original_text": "这个页面的主答案、证据和来源如何对应？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题正式页",
+      "covered_roles": ["reader", "reviewer"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "positive-17",
+      "polarity": "positive",
+      "original_text": "这个主题是否能独立阅读而不打开原始档案？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "当前主题正式页",
+      "covered_roles": ["reader", "reviewer"],
+      "negative_design": "not_a_negative_question"
+    },
+    {
+      "question_id": "negative-01",
+      "polarity": "negative",
+      "original_text": "另一个产品中同名的能力是否也适用于这里？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "no_match",
+      "covered_roles": ["reader", "reviewer"],
+      "negative_design": "跨产品同名，不应误命中当前产品"
+    },
+    {
+      "question_id": "negative-02",
+      "polarity": "negative",
+      "original_text": "语料中没有出现的产品是否支持这个能力？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "no_match",
+      "covered_roles": ["reader", "reviewer"],
+      "negative_design": "语料外产品，不应由相似词推断存在"
+    },
+    {
+      "question_id": "negative-03",
+      "polarity": "negative",
+      "original_text": "已经退休或不存在的能力现在是否仍然可用？",
+      "entry_path": "Home.md",
+      "expected_topic_or_product": "no_match",
+      "covered_roles": ["reader", "reviewer"],
+      "negative_design": "已退休能力，不应被历史文字误导为当前可用"
+    }
+  ],
+  "sample_seed": "knowledge-digest-task0-v1",
+  "reviewer": "task3-independent-human-reviewer",
+  "derivation_rules": {
+    "sources": [
+      "docs/plans/knowledge-digest-knowledge-publication-prd.md Task 2 reader acceptance",
+      "docs/plans/knowledge-digest-knowledge-publication-prd.md Task 3 reader gate",
+      "specs/task0-knowledge-publication/decision-log.md DEC-004"
+    ],
+    "positive_rule": "整理原始需求中的是什么、怎么用、边界、异常、版本、来源和下一步问题，不替 Task 2/3 判定答案质量。",
+    "negative_rule": "覆盖跨产品同名、语料外产品、已退休或不存在能力三类误命中风险。",
+    "sample_rule": "Task 2 只取样本有证据可回答的派生子集，Task 3 执行完整题集。"
+  },
+  "question_set_hash": "41080f16f2955df27b9437df72e3a95c5c437a122abc514ad3abf09e9ab9d2e7"
+}
