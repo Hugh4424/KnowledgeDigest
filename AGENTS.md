@@ -29,6 +29,14 @@ uv run --frozen digest NEW_DIR --manifest config/task4-source-coverage-89-input.
 python scripts/legacy_digest_reference.py NEW_DIR KB_DIR --config CONFIG
 ```
 
+Task8 K2 在同一批次内接在 K1 `semantic_cli` 编译之后：完整且有页面的 K1
+批次会生成 `Home.md`、`Index.md` 和 `products/<product>/<section>/Index.md`，
+并把 `navigation` 状态和成本补记写回 `_audit`。模型描述/查询建议经独立的
+`task8-desc:`/`task8-suggest:` 缓存键空间；provider 缺失、manifest/页面对账、
+自检或提交失败均保持 `blocked`，中断或损坏的 manifest 不写回。CLI 输出 JSON
+包含 `navigation` 节；路径题目清单缺少可用 `target_slug` 时保留
+`incomplete`，不伪装成路径门通过。
+
 严格离线运行（不调用 LLM，也不探测 embedding）：
 
 ```bash
@@ -95,6 +103,8 @@ src/knowledge_digest/
   navigation.py    # README/Home/分类索引/来源索引的读者渲染
   page_layout.py   # 最终主题分页、可读路径和 Home/分类导航记录
   topic_axis.py    # Task1：结构 inventory、ProductGazetteer、TopicPlan/Index、affected/conflict 审计
+  semantic_navigation.py # Task8：同批次三层导航编译、提交/阻塞边界与 CLI 结果
+  semantic_nav_check.py  # Task8：导航输入、模型依赖、确定性生成和自检辅助
   writeback.py     # S5：Home/分类/主题同批归档后原子发布，不删除旧 part
   provenance.py    # S6：来源、Claim、归档溯源
   batch_run.py     # 固定清单、批次状态、失败恢复
