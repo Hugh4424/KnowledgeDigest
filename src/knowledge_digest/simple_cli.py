@@ -1,10 +1,4 @@
-"""Stable ``digest`` entry point for the Task7 semantic compiler.
-
-The previous reader compiler remains available from
-``scripts/legacy_digest_reference.py``. Keeping this shim small makes the
-public command's one behavior explicit and prevents historical flags from
-silently selecting a second compiler.
-"""
+"""Stable ``digest`` entry point for the Task7 semantic compiler."""
 
 from __future__ import annotations
 
@@ -51,7 +45,7 @@ def main(argv: list[str] | None = None) -> int:
         for flag in legacy_flags
     ):
         print(
-            "digest 的历史参数已迁移；请使用 python scripts/legacy_digest_reference.py "
+            "digest 的历史参数已退役；请移除历史参数后使用当前 digest 参数 "
             + " ".join(invocation),
             file=sys.stderr,
         )

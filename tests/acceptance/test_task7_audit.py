@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import hashlib
+from pathlib import Path
 
 import pytest
 
@@ -24,6 +26,45 @@ def _require_api():
 def _require_write_api():
     assert write_audit is not None, "semantic_audit.write_audit is not implemented"
     return write_audit
+
+
+_B1_MODULES = (
+    "agentmemory_store", "batch_run", "cli", "cluster", "draft", "embedding",
+    "ingest", "jsonl", "navigation", "okf_smoke", "page_layout", "paths",
+    "pipeline", "provenance", "providers", "publisher", "queues", "reader_bundle",
+    "reader_frontmatter", "retrieve", "runtime_status", "task4_location_pilot",
+    "topic_axis", "text_similarity", "writeback",
+)
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+_B3_SCRIPTS = (
+    "scripts/legacy_digest_reference.py",
+    "scripts/evaluate_reader_candidate.py",
+    "scripts/task5_m401_r_adapter.py",
+    "scripts/task4_reader_quality.py",
+)
+_B4_CONFIGS = (
+    "config/task4-companybrain-mapping-20260819-v1.json",
+    "config/task4-companybrain-mapping-20260819-v2.json",
+    "config/task4-companybrain-mapping-20260819-v4.json",
+    "config/task4-companybrain-mapping-20260819-v5.json",
+    "config/task4-companybrain-mapping-20260819-v7.json",
+    "config/task4-companybrain-mapping-20260819-v9.json",
+    "config/task4-companybrain-mapping-20260819-v10.json",
+    "config/task4-reader-case-matrix-89-semantic-v4.json",
+    "config/task4-reader-case-matrix-89-semantic-v5.json",
+    "config/task4-reader-case-matrix-89-semantic-v6.json",
+    "config/task4-reader-case-matrix-89-semantic-v7.json",
+    "config/task5-companybrain-baseline-v1.json",
+    "config/task4-reader-quality-88-diagnostic.v1.json",
+    "config/task5-provider-contract-handshake-v1.json",
+    "config/task5-provider-contract-handshake-v2.json",
+    "config/task5-provider-semantic-output-v1.json",
+    "config/task5-root-cause-evidence-v1.json",
+    "config/task5-source-not-documented-contract-v1.json",
+    "config/task5-source-digest-contract-v1.json",
+    "config/task5-publication-layout-v1.json",
+    "config/task5-reader-quality-v1.json",
+)
 
 
 def _block(source_path: str, block_id: str, text: str, *, content_hash: str, kind: str = "table") -> dict[str, object]:
@@ -276,6 +317,64 @@ def test_task7_audit_alias_reuses_canonical_anchor_and_coverage_is_two_way() -> 
     duplicate_page["block_ids"] = ["block-login"]
     with pytest.raises(ValueError, match="coverage"):
         _run(pages=[_fixtures()["pages"][0], duplicate_page])
+
+
+def test_task7_audit_active_dedup_keeps_one_canonical_alias_projection() -> None:
+    bundle = _run()
+    rows = getattr(bundle, "reference_rows")
+    canonical = next(row for row in rows if row["block_id"] == "block-login")
+    alias = next(row for row in rows if row["block_id"] == "block-copy")
+
+    assert canonical["status"] == "ready"
+    assert alias["status"] == "duplicate_alias"
+    assert alias["page_path"] == canonical["page_path"]
+    assert alias["canonical_block_id"] == canonical["block_id"]
+
+
+def test_b1_retirement_guard() -> None:
+    remaining = [
+        f"src/knowledge_digest/{module}.py"
+        for module in _B1_MODULES
+        if (_PROJECT_ROOT / "src" / "knowledge_digest" / f"{module}.py").exists()
+    ]
+    recovery_test = _PROJECT_ROOT / "tests/acceptance/test_task2_batch_recovery.py"
+    if recovery_test.exists():
+        remaining.append("tests/acceptance/test_task2_batch_recovery.py")
+    assert not remaining, "B1 retirement guard: " + ", ".join(remaining)
+
+
+def test_b3_legacy_entry_retirement() -> None:
+    remaining = [path for path in _B3_SCRIPTS if (_PROJECT_ROOT / path).exists()]
+    assert not remaining, "B3 legacy entry guard: " + ", ".join(remaining)
+
+
+def test_b4_config_guard() -> None:
+    existing = []
+    total_bytes = 0
+    details = []
+    for relative in _B4_CONFIGS:
+        path = _PROJECT_ROOT / relative
+        if path.exists():
+            raw = path.read_bytes()
+            existing.append(relative)
+            total_bytes += len(raw)
+            details.append({"path": relative, "bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest()})
+    assert not existing, f"B4 config guard: {len(existing)} A-list files remain ({total_bytes} bytes): {json.dumps(details, sort_keys=True)}"
+
+    scan_roots = (_PROJECT_ROOT / "src", _PROJECT_ROOT / "scripts", _PROJECT_ROOT / "docs", _PROJECT_ROOT / "AGENTS.md", _PROJECT_ROOT / "CONTEXT.md", _PROJECT_ROOT / "pyproject.toml")
+    references = []
+    for root in scan_roots:
+        paths = [root] if root.is_file() else sorted(root.rglob("*")) if root.exists() else []
+        for path in paths:
+            if not path.is_file() or path.suffix not in {".py", ".md", ".json", ".toml"}:
+                continue
+            text = path.read_text(encoding="utf-8", errors="ignore")
+            for relative in _B4_CONFIGS:
+                if Path(relative).name in text:
+                    references.append({"path": path.relative_to(_PROJECT_ROOT).as_posix(), "config": relative})
+    assert not references, f"B4 config guard: live references remain: {references}"
+    assert (_PROJECT_ROOT / "config/task9-comparison-mapping.v1.json").is_file()
+    assert (_PROJECT_ROOT / "config/task5-quality-cases-v2.json").is_file()
 
 
 def test_task7_audit_blocks_declared_audit_only_source_when_it_enters_products() -> None:

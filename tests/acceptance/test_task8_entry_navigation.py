@@ -1117,6 +1117,45 @@ def test_cli_invokes_navigation_after_compile_cli_hook(tmp_path: Path, monkeypat
     assert output["navigation"]["navigation_status"] == "generated_ok"
 
 
+@pytest.mark.parametrize(
+    ("outcome", "run_status", "expected_exit"),
+    (("failed", "blocked", 3), ("cancelled", "interrupted", 4), ("unavailable", "blocked", 2)),
+)
+def test_cli_preserves_noncomplete_terminal_outcome_when_navigation_is_blocked(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    outcome: str,
+    run_status: str,
+    expected_exit: int,
+) -> None:
+    import knowledge_digest.semantic_cli as semantic_cli
+
+    items = tmp_path / "items"
+    items.mkdir()
+    batch = tmp_path / "compiled-batch"
+
+    class FakeBatchResult:
+        output_dir = batch
+        publish_status = "not_released"
+        plan: dict[str, object] = {}
+        provider_calls = 0
+        cache_hits = 0
+
+        def __init__(self) -> None:
+            self.outcome = outcome
+            self.run_status = run_status
+
+    monkeypatch.setattr(semantic_cli, "compile_batch", lambda *args, **kwargs: FakeBatchResult())
+    monkeypatch.setattr(semantic_cli, "configured_provider_from_env", lambda: object())
+
+    exit_code = semantic_cli.main([str(items)])
+    output = json.loads(capsys.readouterr().out)
+
+    assert exit_code == expected_exit
+    assert output["outcome"] == outcome
+
+
 def test_reconcile_rejects_frontmatter_path_escape(tmp_path: Path) -> None:
     reconcile = _require_reconcile_api()
     batch = make_batch(tmp_path / "escape")

@@ -8,13 +8,20 @@ provider credentials never enter the cache path or an entry.
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping
+from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import dataclass
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 from typing import Any
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - Windows has no POSIX flock.
+    fcntl = None
 
 
 _CACHE_FIELDS = frozenset(
@@ -140,6 +147,14 @@ def _sha256(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8", "surrogateescape")).hexdigest()
 
 
+def _fsync_directory(directory: Path) -> None:
+    descriptor = os.open(directory, os.O_RDONLY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
 def _sorted_member_records(members: Iterable[object]) -> tuple[dict[str, Any], ...]:
     records = [_member_record(member) for member in members]
     if records and all("member_order" in item for item in records):
@@ -248,6 +263,37 @@ def _validated_entry(entry: object, line_number: int) -> dict[str, Any]:
     return entry
 
 
+def _is_valid_task8_entry(entry: object, line_number: int) -> bool:
+    """Recognize only valid sibling navigation records in the shared JSONL file.
+
+    K1 and K2 intentionally share the cache file, but their result types differ.
+    A valid Task8 record is outside ModelCache's namespace; a malformed or
+    unknown ``task8-*`` record must still fail closed instead of being hidden.
+    """
+
+    if not isinstance(entry, dict):
+        return False
+    cache_key = entry.get("cache_key")
+    if not isinstance(cache_key, str) or not cache_key.startswith(("task8-desc:", "task8-suggest:")):
+        return False
+    if set(entry) != _CACHE_FIELDS:
+        missing = sorted(_CACHE_FIELDS - set(entry))
+        extra = sorted(set(entry) - _CACHE_FIELDS)
+        raise ValueError(
+            f"cache line {line_number} has invalid Task8 fields; missing={missing}, extra={extra}"
+        )
+    for field in (
+        "cache_key",
+        "model_id",
+        "prompt_version",
+        "topic_map_version",
+        "created_from_fingerprint",
+        "result",
+    ):
+        _required_string(entry[field], field)
+    return True
+
+
 def _invoke_provider(provider: object) -> object:
     if callable(provider):
         return provider()
@@ -279,7 +325,69 @@ class ModelCache:
             raise ValueError(f"cache entries path must not be a symlink: {path}")
         return path
 
+    @contextmanager
+    def _exclusive_lock(self):
+        """Serialize cache readers/writers across compiler processes."""
+
+        lock_path = self.root / "entries.jsonl.lock"
+        if lock_path.is_symlink() or (lock_path.exists() and not lock_path.is_file()):
+            raise ValueError(f"cache lock path must be a regular file: {lock_path}")
+        flags = os.O_RDWR | os.O_CREAT | os.O_APPEND
+        flags |= getattr(os, "O_NOFOLLOW", 0)
+        try:
+            descriptor = os.open(lock_path, flags, 0o600)
+        except OSError as error:
+            raise ValueError(f"cache lock path could not be opened safely: {lock_path}") from error
+        with os.fdopen(descriptor, "a+b") as lock:
+            if fcntl is not None:
+                fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                if fcntl is not None:
+                    fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+
+    def _repair_incomplete_tail(self) -> None:
+        if not self.path.exists():
+            return
+        with self.path.open("r+", encoding="utf-8", newline="") as stream:
+            content = stream.read()
+            if not content or content.endswith("\n"):
+                return
+            last_newline = content.rfind("\n")
+            tail = content[last_newline + 1 :]
+            try:
+                raw_tail = json.loads(tail)
+            except json.JSONDecodeError:
+                raw_tail = None
+            else:
+                # A complete JSONL record can be durable even when the
+                # process stopped before writing its final newline.  Validate
+                # it before repairing so an actually corrupt record remains a
+                # visible integrity failure instead of being silently dropped.
+                _validated_entry(raw_tail, content[: last_newline + 1].count("\n") + 1)
+                stream.seek(0)
+                stream.write(content)
+                stream.write("\n")
+                stream.truncate()
+                stream.flush()
+                os.fsync(stream.fileno())
+                return
+            valid = content[: last_newline + 1] if last_newline >= 0 else ""
+            stream.seek(0)
+            stream.write(valid)
+            stream.truncate()
+            stream.flush()
+            os.fsync(stream.fileno())
+
     def _entries(self) -> list[dict[str, Any]]:
+        with self._exclusive_lock():
+            self._repair_incomplete_tail()
+            return self._entries_unlocked()
+
+    def _entries_unlocked(self) -> list[dict[str, Any]]:
+        """Read entries while the caller owns the cache lock."""
+
         if not self.path.exists():
             return []
         if not self.path.is_file():
@@ -293,10 +401,39 @@ class ModelCache:
                     raw_entry = json.loads(line)
                 except json.JSONDecodeError as exc:
                     raise ValueError(f"cache line {line_number} is not valid JSON") from exc
-                if isinstance(raw_entry, dict) and str(raw_entry.get("cache_key", "")).startswith("task8-"):
+                if _is_valid_task8_entry(raw_entry, line_number):
                     continue
                 entries.append(_validated_entry(raw_entry, line_number))
         return entries
+
+    @staticmethod
+    def _matching_entry(
+        entries: Iterable[Mapping[str, Any]],
+        *,
+        key: str,
+        fingerprint: str,
+        model_id: str,
+        prompt_version: str,
+        topic_map_version: str,
+    ) -> dict[str, Any] | None:
+        matching: dict[str, Any] | None = None
+        for entry in entries:
+            if entry["cache_key"] != key:
+                continue
+            if entry["created_from_fingerprint"] != fingerprint:
+                raise ValueError("cache key and page fingerprint do not agree")
+            if (
+                entry["model_id"] != model_id
+                or entry["prompt_version"] != prompt_version
+                or entry["topic_map_version"] != topic_map_version
+            ):
+                raise ValueError("cache key metadata does not match requested material")
+            if matching is not None and _canonical_json(matching["result"]) != _canonical_json(
+                entry["result"]
+            ):
+                raise ValueError("duplicate cache key has conflicting frozen results")
+            matching = dict(entry)
+        return matching
 
     def get_or_call(
         self,
@@ -307,8 +444,15 @@ class ModelCache:
         topic_key: str,
         members: Iterable[object],
         provider: Callable[[], Mapping[str, Any]] | object,
+        allow_provider: bool = True,
     ) -> CacheResult:
-        """Return a frozen result, calling and recording the provider on miss."""
+        """Return a frozen result, calling and recording the provider on miss.
+
+        ``allow_provider=False`` is the checkpoint resume guard: a topic that
+        was already marked complete may only be served by its exact cache
+        identity.  A missing entry is a cache-integrity failure, never a new
+        provider call that could silently rebuild a different batch.
+        """
 
         material_members = _sorted_member_records(members)
         fingerprint = page_input_fingerprint(material_members)
@@ -325,85 +469,78 @@ class ModelCache:
             topic_map_version, "topic_map_version"
         )
 
-        try:
-            entries = self._entries()
-        except CacheIntegrityError:
-            raise
-        except Exception as error:
-            raise CacheIntegrityError(
-                f"cache read or validation failed: {error}",
-                provider_called=False,
-            ) from error
+        with self._exclusive_lock():
+            self._repair_incomplete_tail()
+            try:
+                entries = self._entries_unlocked()
+                matching = self._matching_entry(
+                    entries,
+                    key=key,
+                    fingerprint=fingerprint,
+                    model_id=normalized_model,
+                    prompt_version=normalized_prompt,
+                    topic_map_version=normalized_topic_map,
+                )
+            except CacheIntegrityError:
+                raise
+            except Exception as error:
+                raise CacheIntegrityError(
+                    f"cache read or validation failed: {error}",
+                    provider_called=False,
+                ) from error
 
-        matching: dict[str, Any] | None = None
-        try:
-            for entry in entries:
-                if entry["cache_key"] != key:
-                    continue
-                if entry["created_from_fingerprint"] != fingerprint:
-                    raise ValueError("cache key and page fingerprint do not agree")
-                if (
-                    entry["model_id"] != normalized_model
-                    or entry["prompt_version"] != normalized_prompt
-                    or entry["topic_map_version"] != normalized_topic_map
-                ):
-                    raise ValueError("cache key metadata does not match requested material")
-                if matching is not None and _canonical_json(matching["result"]) != _canonical_json(
-                    entry["result"]
-                ):
-                    raise ValueError("duplicate cache key has conflicting frozen results")
-                matching = entry
-        except CacheIntegrityError:
-            raise
-        except Exception as error:
-            raise CacheIntegrityError(
-                f"cache identity validation failed: {error}",
-                provider_called=False,
-            ) from error
+            if matching is not None:
+                return CacheResult(
+                    result=deepcopy(matching["result"]),
+                    cache_key=key,
+                    created_from_fingerprint=fingerprint,
+                    hit=True,
+                    called=False,
+                )
 
-        if matching is not None:
+            if not allow_provider:
+                raise CacheIntegrityError(
+                    "checkpoint completed topic is missing from the model cache",
+                    provider_called=False,
+                )
+
+            # Provider exceptions are deliberately allowed through unchanged.
+            # Holding the lock across the miss decision and provider call makes
+            # same-key concurrent callers recheck the cache before dispatching.
+            raw_result = _invoke_provider(provider)
+            try:
+                result = _validated_result(raw_result)
+            except Exception as error:
+                raise CacheIntegrityError(
+                    f"provider result could not be frozen in cache: {error}",
+                    provider_called=True,
+                    provider_result=None,
+                ) from error
+            entry = {
+                "cache_key": key,
+                "model_id": normalized_model,
+                "prompt_version": normalized_prompt,
+                "topic_map_version": normalized_topic_map,
+                "result": result,
+                "created_from_fingerprint": fingerprint,
+            }
+            try:
+                encoded = _canonical_json(entry)
+                with self.path.open("a", encoding="utf-8", newline="") as stream:
+                    stream.write(encoded + "\n")
+                    stream.flush()
+                    os.fsync(stream.fileno())
+                _fsync_directory(self.root)
+            except Exception as error:
+                raise CacheIntegrityError(
+                    f"cache result could not be persisted: {error}",
+                    provider_called=True,
+                    provider_result=result,
+                ) from error
             return CacheResult(
-                result=deepcopy(matching["result"]),
+                result=deepcopy(result),
                 cache_key=key,
                 created_from_fingerprint=fingerprint,
-                hit=True,
-                called=False,
+                hit=False,
+                called=True,
             )
-
-        # Provider exceptions are deliberately allowed through unchanged. A
-        # provider outage is not a cache-integrity failure.
-        raw_result = _invoke_provider(provider)
-        try:
-            result = _validated_result(raw_result)
-        except Exception as error:
-            raise CacheIntegrityError(
-                f"provider result could not be frozen in cache: {error}",
-                provider_called=True,
-                provider_result=None,
-            ) from error
-        entry = {
-            "cache_key": key,
-            "model_id": normalized_model,
-            "prompt_version": normalized_prompt,
-            "topic_map_version": normalized_topic_map,
-            "result": result,
-            "created_from_fingerprint": fingerprint,
-        }
-        try:
-            encoded = _canonical_json(entry)
-            with self.path.open("a", encoding="utf-8", newline="") as stream:
-                stream.write(encoded)
-                stream.write("\n")
-        except Exception as error:
-            raise CacheIntegrityError(
-                f"cache result could not be persisted: {error}",
-                provider_called=True,
-                provider_result=result,
-            ) from error
-        return CacheResult(
-            result=deepcopy(result),
-            cache_key=key,
-            created_from_fingerprint=fingerprint,
-            hit=False,
-            called=True,
-        )

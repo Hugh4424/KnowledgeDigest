@@ -15,6 +15,7 @@ from .semantic_compiler import (
     configured_provider_from_env,
     compile_batch,
 )
+from .reader_projection import compile_reader_candidate, promote_reader_seed
 from . import semantic_navigation
 from .semantic_navigation import build_navigation_dependencies
 
@@ -84,7 +85,7 @@ def main(argv: list[str] | None = None) -> int:
         for flag in _LEGACY_FLAGS
     ):
         print(
-            "digest 的历史参数已迁移；请使用 python scripts/legacy_digest_reference.py "
+            "digest 的历史参数已退役；请移除历史参数后使用当前 digest 参数 "
             + " ".join(invocation),
             file=sys.stderr,
         )
@@ -106,6 +107,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--topic-map", type=Path, default=None, help=argparse.SUPPRESS)
     parser.add_argument("--output-parent", type=Path, default=None, help=argparse.SUPPRESS)
     parser.add_argument("--cache-root", type=Path, default=None, help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--reader",
+        action="store_true",
+        help="在 K1/K2 批次之后编译独立的 K3 Reader candidate",
+    )
+    parser.add_argument(
+        "--reader-seed",
+        type=Path,
+        default=None,
+        help="可选的同语料 Reader seed；先校验 89 条原文哈希，再重新绑定当前 K1/K2 审计",
+    )
     args = parser.parse_args(invocation)
     provider = configured_provider_from_env()
 
@@ -122,13 +134,6 @@ def main(argv: list[str] | None = None) -> int:
     )
     query_fixture_value = os.environ.get("KNOWLEDGEDIGEST_TASK8_QUERY_FIXTURE")
     query_fixture = Path(query_fixture_value) if query_fixture_value else None
-    navigation = semantic_navigation.NavigationResult(
-        navigation_status="blocked",
-        success_pages=0,
-        blocked_sources=0,
-        blocked_reasons=("query-fixture-missing",),
-        nav_files=(),
-    )
     try:
         if result.run_status != "complete":
             navigation = semantic_navigation.NavigationResult(
@@ -170,7 +175,44 @@ def main(argv: list[str] | None = None) -> int:
             nav_files=(),
         )
     navigation_status = getattr(navigation, "navigation_status", navigation.as_dict().get("navigation_status", "blocked"))
-    effective_outcome = "blocked" if navigation_status == "blocked" else result.outcome
+    reader_projection = None
+    if args.reader:
+        if result.run_status != "complete" or navigation_status == "blocked":
+            reader_projection = {
+                "status": "blocked",
+                "publish_status": "not_released",
+                "reason": "reader_requires_complete_k1_k2_navigation",
+            }
+        else:
+            try:
+                if args.reader_seed is not None:
+                    reader_projection = promote_reader_seed(
+                        args.reader_seed,
+                        result.output_dir,
+                        result.output_dir / "_reader-candidate",
+                        input_root=args.new_dir,
+                    ).as_dict()
+                else:
+                    reader_projection = compile_reader_candidate(
+                        result.output_dir,
+                        provider=provider,
+                        cache_root=args.cache_root or _env_path("KNOWLEDGEDIGEST_TASK7_CACHE_ROOT", DEFAULT_CACHE_ROOT),
+                        input_root=args.new_dir,
+                    ).as_dict()
+            except (OSError, TypeError, ValueError, RuntimeError) as error:
+                reader_projection = {
+                    "status": "blocked",
+                    "publish_status": "not_released",
+                    "reason": "reader-projection-failed",
+                    "error": f"{type(error).__name__}: {error}",
+                }
+    effective_outcome = (
+        "blocked"
+        if result.run_status == "complete" and navigation_status == "blocked"
+        else result.outcome
+    )
+    if args.reader and (not isinstance(reader_projection, dict) or reader_projection.get("status") != "candidate"):
+        effective_outcome = "blocked"
     output = {
         "outcome": effective_outcome,
         "run_status": result.run_status,
@@ -180,6 +222,7 @@ def main(argv: list[str] | None = None) -> int:
         "provider_calls": result.provider_calls,
         "cache_hits": result.cache_hits,
         "navigation": navigation.as_dict(),
+        "reader": reader_projection,
     }
     print(json.dumps(output, ensure_ascii=False, sort_keys=True))
     return _exit_code(effective_outcome)
