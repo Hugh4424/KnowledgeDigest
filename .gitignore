@@ -1,0 +1,6 @@
+.DS_Store
+AGENTS.md
+.agent_context/
+.multica/
+.omc/
+.worker-mode/
