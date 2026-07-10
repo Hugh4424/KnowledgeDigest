@@ -372,6 +372,24 @@ Then 输出覆盖新建、更新、merge_multiple、空壳来源过滤、长文�
 - D7 用户确认必须带可核验证据：由上游 decision-log 负责记录；本规格不重复用户 comment 原文。
 - D8 S7 通过依据是异源细节审查完成和用户人工放行：由上游 decision-log 负责记录；本规格只消费最终决策结果。
 
+## 落地计划引用 / Implementation Plan Reference
+
+本规格文档与上游 build-plan 产物共同构成 Phase 0 的完整交付上下文：
+
+- [`specs/kd-phase0-digest-spec/plan.md`](../../specs/kd-phase0-digest-spec/plan.md)：阶段划分、文件清单、gate 命令与 STOP 点。
+- [`specs/kd-phase0-digest-spec/tasks.md`](../../specs/kd-phase0-digest-spec/tasks.md)：T001-T011 任务依赖与执行顺序。
+- [`specs/kd-phase0-digest-spec/data-contracts.md`](../../specs/kd-phase0-digest-spec/data-contracts.md)：CLI、`new_dir`、`kb_dir`、JSONL 阶段产物与队列文件的字段/校验规则。
+
+plan.md 与 tasks.md 将执行分为三个阶段（plan.md 中称为 Phase，tasks.md 中称为 Stage）：
+
+1. **Stage 1: Contract and filesystem foundation (T001-T003)** —— 完成 `digest(new_dir, kb_dir)` CLI 入口、参数与退出码合约、`new_dir`/`kb_dir` 最小目录验证、运行目录与 dry-run 不变性保证。
+2. **Stage 2: S1-S4 processing pipeline (T004-T007)** —— 完成 S1 采集归一与空壳过滤、S2 complete-linkage 聚类与队列写入、S3 top-k 关联检索与 `new`/`revise`/`merge_multiple` 路径判定、S4 草稿生成与 faithfulness 回退。
+3. **Stage 3: Writeback, provenance, and acceptance (T008-T011)** —— 完成 S5 临时文件/原子写回与归档、S6 轻量溯源与最终来源强制、完整验收样本与测试断言，以及本规格文档的最终落地计划引用更新。
+
+关系说明：本规格文档描述“做什么/为什么/契约是什么”；上游 plan.md/tasks.md/data-contracts.md 描述“怎么做/执行顺序/任务拆分/数据契约是什么”；两者合在一起形成 Phase 0 可交付给实现者的 handoff 包。
+
+注意：本规格更新仅完成规格与计划引用锚定，实际代码实现不在本次范围；下游 `verify-code` 阶段将基于本规格及上述计划产物进行实现与验收。
+
 ## 质量事实契约
 
 ### 1. scope 边界
