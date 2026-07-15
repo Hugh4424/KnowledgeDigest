@@ -260,3 +260,122 @@ def test_digest_dry_run_contract_rejects_escaping_digest_symlink(tmp_path: Path)
     assert "symlink" in result.stderr.lower()
     assert "rerun" in result.stderr.lower()
     assert list(outside.iterdir()) == []
+
+
+def test_s1_ingest_module_exports_ingest() -> None:
+    from knowledge_digest.ingest import ingest
+
+    assert callable(ingest)
+
+
+def test_s2_cluster_module_exports_cluster() -> None:
+    from knowledge_digest.cluster import cluster
+
+    assert callable(cluster)
+
+
+def test_s3_retrieve_module_exports_retrieve() -> None:
+    from knowledge_digest.retrieve import retrieve
+
+    assert callable(retrieve)
+
+
+def test_s4_draft_module_exports_draft() -> None:
+    from knowledge_digest.draft import draft
+
+    assert callable(draft)
+
+
+def test_jsonl_module_exports_read_write() -> None:
+    from knowledge_digest.jsonl import read_jsonl, write_jsonl
+
+    assert callable(write_jsonl)
+    assert callable(read_jsonl)
+
+
+def test_queues_module_exports_write_queues() -> None:
+    from knowledge_digest.queues import write_queues
+
+    assert callable(write_queues)
+
+
+def test_faithfulness_module_verifies_claims() -> None:
+    from knowledge_digest.faithfulness import faithfulness_check, verify_claims
+
+    assert callable(verify_claims)
+    assert callable(faithfulness_check)
+
+
+def test_phase0_digest_fixture_files_exist() -> None:
+    fixture_root = PROJECT_ROOT / "tests" / "fixtures" / "phase0_digest"
+    assert (fixture_root / "new_dir" / "items" / "filter-update.md").exists()
+    assert (fixture_root / "new_dir" / "items" / "chart-faq.md").exists()
+    assert (fixture_root / "new_dir" / "items" / "empty-shell.md").exists()
+    assert (fixture_root / "new_dir" / "items" / "long-release.md").exists()
+    assert (fixture_root / "new_dir" / "items" / "filter-duplicate.md").exists()
+    assert (fixture_root / "new_dir" / "sources.jsonl").exists()
+    assert (fixture_root / "kb_dir" / "pages" / "goinsight" / "filtering.md").exists()
+    assert (fixture_root / "kb_dir" / "pages" / "goinsight" / "chart-types.md").exists()
+
+
+def test_digest_runs_s1_through_s4_with_traceable_outputs(tmp_path: Path) -> None:
+    """The runnable slice keeps source material through ingest, decisions, and drafts."""
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    (kb_dir / "kb.structure.md").write_text("---\npage_root: pages\n---\n", encoding="utf-8")
+    items = new_dir / "items"
+    (items / "filter-update.md").write_text(
+        "# Filter update\nfilter field supports status=active.\n"
+        "FAQ: Why is my filter empty?\nError E_FILTER_17.\n"
+        "See https://design.example/filter.\n",
+        encoding="utf-8",
+    )
+    (items / "filter-duplicate.md").write_text(
+        (items / "filter-update.md").read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    (items / "chart-faq.md").write_text(
+        "# Chart and filter FAQ\nChart type filtering uses the filter field.\n"
+        "FAQ: Which chart type supports active filters?\n",
+        encoding="utf-8",
+    )
+    (items / "empty-shell.md").write_text("Home | Navigation | Login\n", encoding="utf-8")
+    (items / "long-release.md").write_text(
+        "\n".join(f"release detail {number}" for number in range(6)) + "\n",
+        encoding="utf-8",
+    )
+    (new_dir / "sources.jsonl").write_text(
+        "\n".join(
+            json.dumps({"content_path": name, "source_uri": f"https://source.example/{name}"})
+            for name in ("filter-update.md", "filter-duplicate.md", "chart-faq.md", "empty-shell.md", "long-release.md")
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    pages = kb_dir / "pages" / "goinsight"
+    pages.mkdir(parents=True)
+    (pages / "filtering.md").write_text("# Filtering\nfilter field and status options\n", encoding="utf-8")
+    (pages / "chart-types.md").write_text("# Chart types\nchart type options and rules\n", encoding="utf-8")
+
+    result = run_digest(str(new_dir), str(kb_dir), "--max-doc-lines", "3")
+
+    assert result.returncode == 0, result.stderr
+    run_dir = next((kb_dir / "_digest" / "runs").iterdir())
+    raw_items = [json.loads(line) for line in (run_dir / "s1" / "raw-items.jsonl").read_text(encoding="utf-8").splitlines()]
+    duplicates = [json.loads(line) for line in (run_dir / "s1" / "duplicates.jsonl").read_text(encoding="utf-8").splitlines()]
+    failures = [json.loads(line) for line in (run_dir / "s1" / "ingest-failed.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert len(raw_items) == 3
+    assert len(duplicates) == 1
+    assert failures[0]["path"].endswith("empty-shell.md")
+    assert all("empty-shell" not in item["source_uri"] for item in raw_items)
+
+    clusters = [json.loads(line) for line in (run_dir / "s2" / "clusters.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert all(cluster["tier"] and cluster["decision_reason"] for cluster in clusters)
+    decisions = [json.loads(line) for line in (run_dir / "s3" / "evolution-decisions.jsonl").read_text(encoding="utf-8").splitlines()]
+    merge = next(decision for decision in decisions if decision["action"] == "merge_multiple")
+    assert len(merge["candidate_paths"]) >= 2
+    assert len(merge["candidate_paths"]) == len(merge["candidate_scores"])
+
+    drafts = [json.loads(line) for line in (run_dir / "s4" / "drafts.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert all(draft["claims"] and draft["provenance"] for draft in drafts)
+    assert all("empty-shell" not in uri for draft in drafts for uri in draft["provenance"])
+    split_suggestions = [json.loads(line) for line in (run_dir / "s4" / "split-suggestions.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert split_suggestions and split_suggestions[0]["reason"] == "max_doc_lines exceeded"

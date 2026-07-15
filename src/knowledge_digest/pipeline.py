@@ -7,13 +7,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
+from .cluster import cluster
 from .config import DigestSettings
+from .draft import draft
 from .errors import ValidationError
+from .ingest import ingest
 from .kb_structure import DEFAULT_ROOTS
 from .paths import DigestPaths
-
-
-INGESTIBLE_SUFFIXES = {".md", ".txt", ".json"}
+from .retrieve import retrieve
 
 
 def _run_id() -> str:
@@ -29,7 +30,8 @@ def audit_run(
 ) -> tuple[Path, str]:
     """Write a single audit report under the allowed run directory.
 
-    Phase one deliberately never writes pages, archives, queues, or source inputs.
+    Phase two writes S1-S4 run artifacts and queue files, but never writes
+    formal knowledge-base pages, archives, or source inputs.
     """
     audit_root = paths.kb_dir / "_digest"
     if audit_root.is_symlink():
@@ -41,7 +43,7 @@ def audit_run(
     source_notes = sum(
         1
         for path in paths.items_dir.rglob("*")
-        if path.is_file() and path.suffix.lower() in INGESTIBLE_SUFFIXES
+        if path.is_file() and path.suffix.lower() in {".md", ".txt", ".json"}
     )
     report_path = run_dir / "report.json"
     report_path.write_text(
@@ -65,6 +67,11 @@ def audit_run(
         + "\n",
         encoding="utf-8",
     )
+    if not dry_run:
+        raw_items = ingest(paths, run_dir)
+        clusters = cluster(raw_items, run_dir, paths, roots, settings)
+        decisions = retrieve(clusters, raw_items, run_dir, paths, roots, settings)
+        draft(decisions, clusters, raw_items, run_dir, settings)
     prefix = "dry-run" if dry_run else "audit"
     summary = (
         f"{prefix}: audited {source_notes} source note(s); roots={', '.join(roots)}; "
