@@ -36,6 +36,8 @@ def cluster(
     paths: DigestPaths,
     roots: tuple[str, ...],
     settings: DigestSettings,
+    *,
+    persist_queues: bool = True,
 ) -> list[dict[str, Any]]:
     """Group raw items into complete-linkage clusters and assign tiers."""
     pending = list(raw_items)
@@ -70,11 +72,12 @@ def cluster(
             }
         )
     write_jsonl(run_dir / "s2" / "clusters.jsonl", clusters)
-    queue_root = _resolve_queue_root(roots)
-    write_queues(
-        paths.kb_dir,
-        queue_root,
-        [item for item in clusters if item["tier"] == "needs_review"],
-        [item for item in clusters if item["tier"] == "insufficient_signal"],
-    )
+    if persist_queues:
+        queue_root = _resolve_queue_root(roots)
+        write_queues(
+            paths.kb_dir,
+            queue_root,
+            [item for item in clusters if item["tier"] == "needs_review"],
+            [item for item in clusters if item["tier"] == "insufficient_signal"],
+        )
     return clusters

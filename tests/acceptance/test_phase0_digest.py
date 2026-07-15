@@ -8,6 +8,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -379,3 +381,362 @@ def test_digest_runs_s1_through_s4_with_traceable_outputs(tmp_path: Path) -> Non
     assert all("empty-shell" not in uri for draft in drafts for uri in draft["provenance"])
     split_suggestions = [json.loads(line) for line in (run_dir / "s4" / "split-suggestions.jsonl").read_text(encoding="utf-8").splitlines()]
     assert split_suggestions and split_suggestions[0]["reason"] == "max_doc_lines exceeded"
+
+
+def test_s5_writeback_reports_completed_atomic_page_writes(tmp_path: Path) -> None:
+    """A completed run records every formal page write and leaves a complete page."""
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    (new_dir / "items" / "release.md").write_text(
+        "# Release note\nThe digest command supports source provenance.\n",
+        encoding="utf-8",
+    )
+
+    result = run_digest(str(new_dir), str(kb_dir))
+
+    assert result.returncode == 0, result.stderr
+    run_dir = next((kb_dir / "_digest" / "runs").iterdir())
+    write_report = run_dir / "s5" / "write-report.jsonl"
+    assert write_report.is_file()
+    writes = [json.loads(line) for line in write_report.read_text(encoding="utf-8").splitlines()]
+    assert writes
+    assert all({"target_path", "action", "status"} <= write.keys() for write in writes)
+    assert all(write["status"] == "success" for write in writes)
+    for write in writes:
+        target_path = Path(write["target_path"])
+        target = target_path if target_path.is_absolute() else kb_dir / target_path
+        assert target.is_file()
+        assert target.read_text(encoding="utf-8").strip()
+
+
+def test_s6_provenance_audit_keeps_only_valid_final_sources(tmp_path: Path) -> None:
+    """Final claims are auditable and never retain an empty-shell source."""
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    items_dir = new_dir / "items"
+    (items_dir / "supported.md").write_text(
+        "# Supported change\nThe filter accepts status=active.\n",
+        encoding="utf-8",
+    )
+    (items_dir / "empty-shell.md").write_text("Home | Navigation | Login\n", encoding="utf-8")
+    (new_dir / "sources.jsonl").write_text(
+        "\n".join(
+            (
+                json.dumps(
+                    {
+                        "content_path": "supported.md",
+                        "source_uri": "https://source.example/supported",
+                    }
+                ),
+                json.dumps(
+                    {
+                        "content_path": "empty-shell.md",
+                        "source_uri": "https://source.example/empty-shell",
+                    }
+                ),
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = run_digest(str(new_dir), str(kb_dir))
+
+    assert result.returncode == 0, result.stderr
+    run_dir = next((kb_dir / "_digest" / "runs").iterdir())
+    provenance_audit = run_dir / "s6" / "provenance-audit.jsonl"
+    assert provenance_audit.is_file()
+    audit_rows = [json.loads(line) for line in provenance_audit.read_text(encoding="utf-8").splitlines()]
+    assert audit_rows
+    assert all(
+        {"claim_id", "claim_body", "source_uri", "source_status", "target_path"} <= row.keys()
+        for row in audit_rows
+    )
+    assert all(row["source_uri"] for row in audit_rows)
+    assert all(row["source_status"] != "empty_shell" for row in audit_rows)
+    assert all("empty-shell" not in row["source_uri"] for row in audit_rows)
+
+
+def _read_jsonl(path: Path) -> list[dict[str, object]]:
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+
+
+def _single_run_dir(kb_dir: Path) -> Path:
+    run_dirs = list((kb_dir / "_digest" / "runs").iterdir())
+    assert len(run_dirs) == 1
+    return run_dirs[0]
+
+
+def test_s5_atomic_failure_keeps_original_page_and_records_failed_write(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """S5 failure must leave no half-written page and must remain auditable."""
+    from knowledge_digest.errors import ValidationError
+    from knowledge_digest.paths import DigestPaths
+    from knowledge_digest.writeback import writeback
+    import knowledge_digest.writeback as writeback_module
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    target = kb_dir / "notes" / "existing.md"
+    target.parent.mkdir()
+    original = "# Original\n\ncomplete old page\n"
+    target.write_text(original, encoding="utf-8")
+    run_dir = kb_dir / "_digest" / "runs" / "atomic-failure"
+    real_replace = writeback_module.os.replace
+
+    def fail_target_replace(source: object, destination: object) -> None:
+        if Path(destination) == target:
+            raise OSError("simulated replace failure")
+        real_replace(source, destination)
+
+    monkeypatch.setattr(writeback_module.os, "replace", fail_target_replace)
+    paths = DigestPaths(
+        new_dir=new_dir,
+        items_dir=new_dir / "items",
+        kb_dir=kb_dir,
+        structure_path=kb_dir / "kb.structure.md",
+    )
+    draft = {
+        "draft_id": "draft-failure",
+        "action": "revise",
+        "target_paths": ["notes/existing.md"],
+        "final_body": "replacement body",
+        "claims": [{"text": "replacement body", "source_uri": "https://source.example/failure"}],
+    }
+
+    with pytest.raises(ValidationError, match="atomic write failed"):
+        writeback([draft], run_dir, paths, ("notes", "_archive", "_queues"))
+
+    assert target.read_text(encoding="utf-8") == original
+    assert not list(target.parent.glob(".existing.md.*.tmp"))
+    failed_report = _read_jsonl(run_dir / "s5" / "write-report.jsonl")
+    assert len(failed_report) == 1
+    assert failed_report[0]["draft_id"] == "draft-failure"
+    assert failed_report[0]["target_path"] == "notes/existing.md"
+    assert failed_report[0]["action"] == "revise"
+    assert failed_report[0]["status"] == "failed"
+
+
+def test_non_dry_run_report_matches_s5_formal_changes(tmp_path: Path) -> None:
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    (new_dir / "items" / "release.md").write_text(
+        "# Release\nDigest pages preserve provenance.\n", encoding="utf-8"
+    )
+
+    result = run_digest(str(new_dir), str(kb_dir))
+
+    assert result.returncode == 0, result.stderr
+    run_dir = _single_run_dir(kb_dir)
+    report = json.loads((run_dir / "report.json").read_text(encoding="utf-8"))
+    writes = _read_jsonl(run_dir / "s5" / "write-report.jsonl")
+    assert report["dry_run"] is False
+    assert report["formal_kb_changes"] == [
+        {key: row[key] for key in ("target_path", "action", "status", "archive_path")}
+        for row in writes
+    ]
+
+
+def test_s2_low_confidence_clusters_are_written_to_review_queues(tmp_path: Path) -> None:
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    items = new_dir / "items"
+    (items / "low-a.md").write_text("alpha beta gamma delta\n", encoding="utf-8")
+    (items / "low-b.md").write_text("alpha beta gamma epsilon\n", encoding="utf-8")
+
+    result = run_digest(
+        str(new_dir),
+        str(kb_dir),
+        "--cluster-auto-threshold",
+        "0.90",
+        "--cluster-review-threshold",
+        "0.50",
+    )
+
+    assert result.returncode == 0, result.stderr
+    clusters = _read_jsonl(_single_run_dir(kb_dir) / "s2" / "clusters.jsonl")
+    review = next(cluster for cluster in clusters if cluster["tier"] == "needs_review")
+    queue = (kb_dir / "_queues" / "needs_review.md").read_text(encoding="utf-8")
+    assert review["cluster_id"] in queue
+    assert review["decision_reason"] in queue
+
+
+def test_s3_covers_new_revise_merge_multiple_and_respects_top_k(tmp_path: Path) -> None:
+    from knowledge_digest.config import DigestSettings
+    from knowledge_digest.paths import DigestPaths
+    from knowledge_digest.retrieve import retrieve
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    pages = kb_dir / "pages"
+    pages.mkdir()
+    (pages / "alpha.md").write_text("alpha beta common\n", encoding="utf-8")
+    (pages / "beta.md").write_text("beta gamma common\n", encoding="utf-8")
+    raw_items = [
+        {"raw_id": "raw-new", "text": "zeta eta theta", "source_uri": "source:new"},
+        {"raw_id": "raw-revise", "text": "alpha", "source_uri": "source:revise"},
+        {"raw_id": "raw-merge", "text": "alpha beta gamma common", "source_uri": "source:merge"},
+    ]
+    clusters = [
+        {"cluster_id": f"cluster-{index}", "tier": "auto", "members": [item["raw_id"]]}
+        for index, item in enumerate(raw_items, start=1)
+    ]
+    paths = DigestPaths(
+        new_dir=new_dir,
+        items_dir=new_dir / "items",
+        kb_dir=kb_dir,
+        structure_path=kb_dir / "kb.structure.md",
+    )
+    run_dir = kb_dir / "_digest" / "runs" / "s3-actions"
+
+    decisions = retrieve(
+        clusters,
+        raw_items,
+        run_dir,
+        paths,
+        ("pages", "_archive", "_queues"),
+        DigestSettings(top_k=2),
+    )
+
+    assert {decision["action"] for decision in decisions} == {"new", "revise", "merge_multiple"}
+    assert all(len(decision["candidate_paths"]) <= 2 for decision in decisions)
+    assert all(len(decision["candidate_paths"]) == len(decision["candidate_scores"]) for decision in decisions)
+
+
+def test_s4_unsupported_claims_are_reported_but_never_written_to_page(tmp_path: Path) -> None:
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    (new_dir / "items" / "claims.md").write_text(
+        "# Claims\nSupported statement.\nUnsupported: invented statement.\n",
+        encoding="utf-8",
+    )
+
+    result = run_digest(str(new_dir), str(kb_dir))
+
+    assert result.returncode == 0, result.stderr
+    run_dir = _single_run_dir(kb_dir)
+    unsupported = _read_jsonl(run_dir / "s4" / "unsupported-claims.jsonl")
+    writes = _read_jsonl(run_dir / "s5" / "write-report.jsonl")
+    rendered = "\n".join((kb_dir / str(write["target_path"])).read_text(encoding="utf-8") for write in writes)
+    assert any("invented statement" in str(row["text"]) for row in unsupported)
+    assert "invented statement" not in rendered
+    assert "Supported statement" in rendered
+
+
+def test_complete_run_has_six_of_six_traceable_stage_artifacts(tmp_path: Path) -> None:
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    source_uri = "https://source.example/trace-six"
+    (new_dir / "items" / "trace.md").write_text(
+        "# Trace\nTraceable claim reaches the formal page.\n", encoding="utf-8"
+    )
+    (new_dir / "sources.jsonl").write_text(
+        json.dumps({"content_path": "trace.md", "source_uri": source_uri}) + "\n",
+        encoding="utf-8",
+    )
+
+    result = run_digest(str(new_dir), str(kb_dir))
+
+    assert result.returncode == 0, result.stderr
+    run_dir = _single_run_dir(kb_dir)
+    required = {
+        "s1": "raw-items.jsonl",
+        "s2": "clusters.jsonl",
+        "s3": "evolution-decisions.jsonl",
+        "s4": "drafts.jsonl",
+        "s5": "write-report.jsonl",
+        "s6": "provenance-audit.jsonl",
+    }
+    assert sum((run_dir / stage / artifact).is_file() for stage, artifact in required.items()) == 6
+    audit = _read_jsonl(run_dir / "s6" / "provenance-audit.jsonl")
+    assert audit and all(row["source_uri"] == source_uri for row in audit)
+    assert all((kb_dir / str(row["target_path"])).is_file() for row in audit)
+
+
+def test_long_document_is_kept_complete_and_emits_split_suggestion(tmp_path: Path) -> None:
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    lines = [f"release detail {number}" for number in range(12)]
+    (new_dir / "items" / "long.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    result = run_digest(str(new_dir), str(kb_dir), "--max-doc-lines", "5")
+
+    assert result.returncode == 0, result.stderr
+    run_dir = _single_run_dir(kb_dir)
+    drafts = _read_jsonl(run_dir / "s4" / "drafts.jsonl")
+    suggestions = _read_jsonl(run_dir / "s4" / "split-suggestions.jsonl")
+    assert suggestions and suggestions[0]["line_count"] == len(lines)
+    assert suggestions[0]["reason"] == "max_doc_lines exceeded"
+    assert all(line in str(drafts[0]["final_body"]) for line in lines)
+
+
+def test_ac011_out_of_scope_integrations_are_not_created(tmp_path: Path) -> None:
+    """Phase 0 remains filesystem-only: no publisher, scheduler, or remote sync artifacts."""
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    (new_dir / "items" / "local.md").write_text("# Local\nLocal digest only.\n", encoding="utf-8")
+
+    result = run_digest(str(new_dir), str(kb_dir))
+
+    assert result.returncode == 0, result.stderr
+    forbidden_names = {"publish.json", "remote-sync.json", "schedule.json", "notifications.json"}
+    assert not any(path.name in forbidden_names for path in tmp_path.rglob("*"))
+    assert "http" not in result.stdout.lower()
+
+
+def test_dry_run_report_contains_stable_write_plan_snapshot(tmp_path: Path) -> None:
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    (new_dir / "items" / "planned.md").write_text("# Planned\nPlanned digest claim.\n", encoding="utf-8")
+
+    first = run_digest(str(new_dir), str(kb_dir), "--dry-run")
+    second = run_digest(str(new_dir), str(kb_dir), "--dry-run")
+
+    assert first.returncode == second.returncode == 0
+    reports = sorted((kb_dir / "_digest" / "runs").glob("*/report.json"))
+    snapshots = [json.loads(path.read_text(encoding="utf-8"))["write_plan_snapshot"] for path in reports]
+    assert len(snapshots) == 2
+    assert snapshots[0] == snapshots[1]
+    assert snapshots[0]["formal_kb_changes"]
+    assert not (kb_dir / "notes").exists()
+
+
+def test_revise_write_archives_exact_before_snapshot_with_reason(tmp_path: Path) -> None:
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    page = kb_dir / "notes" / "existing.md"
+    page.parent.mkdir()
+    original = "# Existing\n\nalpha beta existing behavior\n"
+    page.write_text(original, encoding="utf-8")
+    (new_dir / "items" / "revision.md").write_text(
+        "# Revision\nalpha beta existing behavior now includes gamma.\n", encoding="utf-8"
+    )
+
+    result = run_digest(str(new_dir), str(kb_dir))
+
+    assert result.returncode == 0, result.stderr
+    writes = _read_jsonl(_single_run_dir(kb_dir) / "s5" / "write-report.jsonl")
+    revised = next(row for row in writes if row["archive_path"])
+    archive = kb_dir / str(revised["archive_path"])
+    assert archive.read_text(encoding="utf-8") == original
+    assert revised["archive_reason"] == "pre-write snapshot"
+    assert revised["archive_snapshot_sha256"]
+
+
+def test_rerun_is_idempotent_for_pages_and_queue_entries(tmp_path: Path) -> None:
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    (new_dir / "items" / "stable.md").write_text(
+        "# Stable\nStable alpha beta digest claim.\n", encoding="utf-8"
+    )
+
+    first = run_digest(str(new_dir), str(kb_dir))
+    assert first.returncode == 0, first.stderr
+    page_snapshot = {
+        path.relative_to(kb_dir): path.read_text(encoding="utf-8")
+        for path in (kb_dir / "notes").rglob("*.md")
+    }
+    queue_snapshot = {
+        path.relative_to(kb_dir): path.read_text(encoding="utf-8")
+        for path in (kb_dir / "_queues").glob("*.md")
+    }
+
+    second = run_digest(str(new_dir), str(kb_dir))
+
+    assert second.returncode == 0, second.stderr
+    assert {
+        path.relative_to(kb_dir): path.read_text(encoding="utf-8")
+        for path in (kb_dir / "notes").rglob("*.md")
+    } == page_snapshot
+    assert {
+        path.relative_to(kb_dir): path.read_text(encoding="utf-8")
+        for path in (kb_dir / "_queues").glob("*.md")
+    } == queue_snapshot
