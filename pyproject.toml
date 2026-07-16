@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowledge-digest"
+version = "0.1.0"
+description = "Local knowledge digest command-line tool"
+requires-python = ">=3.11"
+
+[project.scripts]
+digest = "knowledge_digest.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
