@@ -388,7 +388,7 @@ plan.md 与 tasks.md 将执行分为三个阶段（plan.md 中称为 Phase，tas
 
 关系说明：本规格文档描述“做什么/为什么/契约是什么”；上游 plan.md/tasks.md/data-contracts.md 描述“怎么做/执行顺序/任务拆分/数据契约是什么”；两者合在一起形成 Phase 0 可交付给实现者的 handoff 包。
 
-注意：本规格更新仅完成规格与计划引用锚定，实际代码实现不在本次范围；下游 `verify-code` 阶段将基于本规格及上述计划产物进行实现与验收。
+实现对应关系：当前最小闭环已按该计划落在 `src/knowledge_digest/`：`pipeline.py` 编排 S1-S6，`writeback.py` 提供 S5 的临时文件、fsync、atomic rename 与归档，`provenance.py` 提供 S6 最终 claim 审计。构造型验收样本位于 `tests/fixtures/phase0_digest/`：已有筛选页覆盖 `revise`，筛选页和图表页共同覆盖 `merge_multiple`，没有对应目标页的输入覆盖 `new`，空壳材料覆盖过滤，长发布材料覆盖拆分建议。验证者应以完整验收测试和上述 plan/tasks/data-contracts 为准，不另建调度、图数据库或重事务机制。
 
 ## 质量事实契约
 

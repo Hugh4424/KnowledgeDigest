@@ -1,0 +1,2 @@
+"""KnowledgeDigest command-line package."""
+
