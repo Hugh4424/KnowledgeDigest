@@ -36,8 +36,28 @@ def copy_fixture_layout(tmp_path: Path) -> tuple[Path, Path]:
     kb_dir = tmp_path / "kb"
     kb_dir.mkdir()
     structure = PROJECT_ROOT / "tests" / "fixtures" / "phase0_digest" / "kb.structure.md"
-    (kb_dir / "kb.structure.md").write_text(structure.read_text(encoding="utf-8"), encoding="utf-8")
+    structure_text = structure.read_text(encoding="utf-8")
+    structure_text = structure_text.replace(
+        "---\n", "---\nwhy_field: why\nversion_field: version\n", 1
+    )
+    (kb_dir / "kb.structure.md").write_text(structure_text, encoding="utf-8")
+    declare_sources(new_dir)
     return new_dir, kb_dir
+
+
+def declare_sources(new_dir: Path, *content_paths: str) -> None:
+    rows = [
+        json.dumps(
+            {
+                "content_path": content_path,
+                "source_uri": f"https://source.example/{content_path}",
+            }
+        )
+        for content_path in content_paths
+    ]
+    (new_dir / "sources.jsonl").write_text(
+        "\n".join(rows) + ("\n" if rows else ""), encoding="utf-8"
+    )
 
 
 def test_digest_cli_contract_accepts_new_and_kb_directories() -> None:
@@ -185,6 +205,7 @@ def test_digest_dry_run_contract_counts_only_ingestible_item_types(tmp_path: Pat
     (items_dir / "transcript.txt").write_text("Transcript\n", encoding="utf-8")
     (items_dir / "metadata.json").write_text("{}\n", encoding="utf-8")
     (items_dir / "ignored.pdf").write_bytes(b"not an ingestible source")
+    declare_sources(new_dir, "items/note.md", "items/transcript.txt", "items/metadata.json")
 
     result = run_digest(str(new_dir), str(kb_dir), "--dry-run")
 
@@ -233,7 +254,8 @@ def test_digest_cli_contract_accepts_required_threshold_option_names_and_config_
 def test_digest_cli_contract_reads_page_archive_and_queue_root_keys(tmp_path: Path) -> None:
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
     (kb_dir / "kb.structure.md").write_text(
-        "---\npage_root: pages-custom\narchive_root: archive-custom\nqueue_root: queue-custom\n---\n",
+        "---\npage_root: pages-custom\narchive_root: archive-custom\n"
+        "queue_root: queue-custom\nwhy_field: why\nversion_field: version\n---\n",
         encoding="utf-8",
     )
 
@@ -323,7 +345,10 @@ def test_phase0_digest_fixture_files_exist() -> None:
 def test_digest_runs_s1_through_s4_with_traceable_outputs(tmp_path: Path) -> None:
     """The runnable slice keeps source material through ingest, decisions, and drafts."""
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
-    (kb_dir / "kb.structure.md").write_text("---\npage_root: pages\n---\n", encoding="utf-8")
+    (kb_dir / "kb.structure.md").write_text(
+        "---\npage_root: pages\nwhy_field: why\nversion_field: version\n---\n",
+        encoding="utf-8",
+    )
     items = new_dir / "items"
     (items / "filter-update.md").write_text(
         "# Filter update\nfilter field supports status=active.\n"
@@ -344,13 +369,13 @@ def test_digest_runs_s1_through_s4_with_traceable_outputs(tmp_path: Path) -> Non
         "\n".join(f"release detail {number}" for number in range(6)) + "\n",
         encoding="utf-8",
     )
-    (new_dir / "sources.jsonl").write_text(
-        "\n".join(
-            json.dumps({"content_path": name, "source_uri": f"https://source.example/{name}"})
-            for name in ("filter-update.md", "filter-duplicate.md", "chart-faq.md", "empty-shell.md", "long-release.md")
-        )
-        + "\n",
-        encoding="utf-8",
+    declare_sources(
+        new_dir,
+        "filter-update.md",
+        "filter-duplicate.md",
+        "chart-faq.md",
+        "empty-shell.md",
+        "long-release.md",
     )
     pages = kb_dir / "pages" / "goinsight"
     pages.mkdir(parents=True)
@@ -390,6 +415,7 @@ def test_s5_writeback_reports_completed_atomic_page_writes(tmp_path: Path) -> No
         "# Release note\nThe digest command supports source provenance.\n",
         encoding="utf-8",
     )
+    declare_sources(new_dir, "release.md")
 
     result = run_digest(str(new_dir), str(kb_dir))
 
@@ -520,6 +546,7 @@ def test_non_dry_run_report_matches_s5_formal_changes(tmp_path: Path) -> None:
     (new_dir / "items" / "release.md").write_text(
         "# Release\nDigest pages preserve provenance.\n", encoding="utf-8"
     )
+    declare_sources(new_dir, "release.md")
 
     result = run_digest(str(new_dir), str(kb_dir))
 
@@ -539,6 +566,7 @@ def test_s2_low_confidence_clusters_are_written_to_review_queues(tmp_path: Path)
     items = new_dir / "items"
     (items / "low-a.md").write_text("alpha beta gamma delta\n", encoding="utf-8")
     (items / "low-b.md").write_text("alpha beta gamma epsilon\n", encoding="utf-8")
+    declare_sources(new_dir, "low-a.md", "low-b.md")
 
     result = run_digest(
         str(new_dir),
@@ -604,6 +632,7 @@ def test_s4_unsupported_claims_are_reported_but_never_written_to_page(tmp_path: 
         "# Claims\nSupported statement.\nUnsupported: invented statement.\n",
         encoding="utf-8",
     )
+    declare_sources(new_dir, "claims.md")
 
     result = run_digest(str(new_dir), str(kb_dir))
 
@@ -650,6 +679,7 @@ def test_long_document_is_kept_complete_and_emits_split_suggestion(tmp_path: Pat
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
     lines = [f"release detail {number}" for number in range(12)]
     (new_dir / "items" / "long.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    declare_sources(new_dir, "long.md")
 
     result = run_digest(str(new_dir), str(kb_dir), "--max-doc-lines", "5")
 
@@ -666,6 +696,7 @@ def test_ac011_out_of_scope_integrations_are_not_created(tmp_path: Path) -> None
     """Phase 0 remains filesystem-only: no publisher, scheduler, or remote sync artifacts."""
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
     (new_dir / "items" / "local.md").write_text("# Local\nLocal digest only.\n", encoding="utf-8")
+    declare_sources(new_dir, "local.md")
 
     result = run_digest(str(new_dir), str(kb_dir))
 
@@ -678,6 +709,7 @@ def test_ac011_out_of_scope_integrations_are_not_created(tmp_path: Path) -> None
 def test_dry_run_report_contains_stable_write_plan_snapshot(tmp_path: Path) -> None:
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
     (new_dir / "items" / "planned.md").write_text("# Planned\nPlanned digest claim.\n", encoding="utf-8")
+    declare_sources(new_dir, "planned.md")
 
     first = run_digest(str(new_dir), str(kb_dir), "--dry-run")
     second = run_digest(str(new_dir), str(kb_dir), "--dry-run")
@@ -700,6 +732,7 @@ def test_revise_write_archives_exact_before_snapshot_with_reason(tmp_path: Path)
     (new_dir / "items" / "revision.md").write_text(
         "# Revision\nalpha beta existing behavior now includes gamma.\n", encoding="utf-8"
     )
+    declare_sources(new_dir, "revision.md")
 
     result = run_digest(str(new_dir), str(kb_dir))
 
@@ -717,6 +750,7 @@ def test_rerun_is_idempotent_for_pages_and_queue_entries(tmp_path: Path) -> None
     (new_dir / "items" / "stable.md").write_text(
         "# Stable\nStable alpha beta digest claim.\n", encoding="utf-8"
     )
+    declare_sources(new_dir, "stable.md")
 
     first = run_digest(str(new_dir), str(kb_dir))
     assert first.returncode == 0, first.stderr
