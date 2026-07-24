@@ -10,6 +10,11 @@ from typing import Any
 _UNSUPPORTED_PREFIX = "unsupported:"
 
 
+def normalize_newlines(text: str) -> str:
+    """Normalize only CRLF and lone CR before a round comparison."""
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def normalize_claim(text: str) -> str:
     """Normalize only whitespace so a claim fingerprint is deterministic."""
     return " ".join(text.split()).strip().casefold()
