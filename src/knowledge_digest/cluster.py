@@ -65,6 +65,7 @@ def cluster(
             {
                 "cluster_id": f"cluster-{len(clusters) + 1}",
                 "tier": tier,
+                "cluster_tier": tier,
                 "members": [member["raw_id"] for member in members],
                 "min_pair_similarity": min_pair,
                 "decision_reason": reason,
