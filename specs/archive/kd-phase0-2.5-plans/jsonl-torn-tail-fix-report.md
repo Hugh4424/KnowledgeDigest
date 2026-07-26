@@ -73,4 +73,4 @@ Result: `131 passed` (130 baseline + 1 new test), no regressions.
 - `tests/acceptance/test_phase2_5_append_only_durability.py` (1 test updated,
   1 test added)
 
-Not committed, per task instructions.
+当时按任务指示未单独 commit；已随 Phase 2.5 closeout 合入 `c075570`。

@@ -1,6 +1,6 @@
 # B4 — LLM 提炼生成器 执行报告
 
-验收：`uv run pytest tests/ -q` → **111 passed**（B4 前 87）。未 commit。
+验收：`uv run pytest tests/ -q` → **111 passed**（B4 前 87）。当时未单独 commit；已随 Phase 2.5 closeout 合入 `c075570`。
 
 ## 验收命令实测
 

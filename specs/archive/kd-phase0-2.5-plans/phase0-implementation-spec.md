@@ -1,6 +1,8 @@
 # Phase 0 Knowledge Digest Implementation Spec
 
-**实现状态（2026-07）**：Phase 0 合约已落地于 `src/knowledge_digest/`；随后 Phase 1 防丢失与 Phase 2.5 瘦身+LLM 已合入工作树（尚未全部 commit）。`recovery.py` 两阶段提交已按拍板删除；规格正文中「不做 CAS/journal」与现状一致。验收测试口径见 `docs/plans/phase2.5-slim-and-llm.md`（「76 个验收测试」含约 14% 纯形状检查）。
+**实现状态（2026-07-27）**：Phase 0 合约已落地于 `src/knowledge_digest/`；Phase 1 防丢失与 Phase 2.5 瘦身+LLM 已提交（`c075570` @ `cursor/phase2.5-slim-llm-closeout`）。`recovery.py` 两阶段提交已按拍板删除；规格正文中「不做 CAS/journal」与现状一致。当前验收：`uv run pytest tests/ -q` = **131 passed**（早期基线曾记为 76，其中约 14% 为纯形状检查，见 phase2.5 计划）。
+
+本文已归档；活文档入口见 [`docs/plans/README.md`](../../../docs/plans/README.md)。
 
 ## 速读卡
 
@@ -378,9 +380,9 @@ Then 输出覆盖新建、更新、merge_multiple、空壳来源过滤、长文�
 
 本规格文档与上游 build-plan 产物共同构成 Phase 0 的完整交付上下文：
 
-- [`specs/archive/kd-phase0-digest-spec/plan.md`](../../specs/archive/kd-phase0-digest-spec/plan.md)：阶段划分、文件清单、gate 命令与 STOP 点（已归档）。
-- [`specs/archive/kd-phase0-digest-spec/tasks.md`](../../specs/archive/kd-phase0-digest-spec/tasks.md)：T001-T011 任务依赖与执行顺序（已归档）。
-- [`specs/archive/kd-phase0-digest-spec/data-contracts.md`](../../specs/archive/kd-phase0-digest-spec/data-contracts.md)：CLI、`new_dir`、`kb_dir`、JSONL 阶段产物与队列文件的字段/校验规则（已归档）。
+- [`../kd-phase0-digest-spec/plan.md`](../kd-phase0-digest-spec/plan.md)：阶段划分、文件清单、gate 命令与 STOP 点（已归档）。
+- [`../kd-phase0-digest-spec/tasks.md`](../kd-phase0-digest-spec/tasks.md)：T001-T011 任务依赖与执行顺序（已归档）。
+- [`../kd-phase0-digest-spec/data-contracts.md`](../kd-phase0-digest-spec/data-contracts.md)：CLI、`new_dir`、`kb_dir`、JSONL 阶段产物与队列文件的字段/校验规则（已归档）。
 
 plan.md 与 tasks.md 将执行分为三个阶段（plan.md 中称为 Phase，tasks.md 中称为 Stage）：
 
@@ -427,8 +429,8 @@ OUT scope：调度、图数据库、完整双库适配、完整 source attributi
 
 ### 5. handoff required_reads
 
-- `docs/plans/phase0-implementation-spec.md`
-- `specs/archive/kd-phase0-digest-spec/spec.md`
+- `specs/archive/kd-phase0-2.5-plans/phase0-implementation-spec.md`（本文）
+- `../kd-phase0-digest-spec/spec.md`
 - `tasks/kd-phase0-digest-spec/decision-log.md`
 - `tasks/kd-phase0-digest-spec/artifacts/build-spec-requirements.md`
 - `tasks/kd-phase0-digest-spec/artifacts/build-spec-self-check.md`

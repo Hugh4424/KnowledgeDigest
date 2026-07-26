@@ -22,8 +22,8 @@
 | `recovery.py` | 已删除 |
 | copytree | 无 |
 | 运行时依赖 | 零 |
-| LOC | ~3093（完成标准已修订，见 phase2.5 §4） |
-| 文档 | README 索引、归档链接、开放问题同步、Phase1/2/2.5 状态对齐 |
+| LOC | ~3093（完成标准已修订，见同目录 phase2.5 §4） |
+| 文档 | 已迁至 `specs/archive/kd-phase0-2.5-plans/`；`docs/plans` 仅留索引与开放问题 |
 
 ## 仍待用户拍板（非 BLOCKER）
 
@@ -31,4 +31,4 @@
 
 ## 下一步
 
-全部改动仍未 commit。用户确认后可一次性提交。
+已提交：`c075570`（`cursor/phase2.5-slim-llm-closeout`）。开放问题见 `docs/plans/open-questions.md`。

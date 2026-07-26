@@ -1,11 +1,13 @@
 # Phase 2.5 实施计划：瘦身 + 接入真实 LLM 提炼
 
-状态：**B1–B6 已落地，待终验收 / commit**
+状态：**B1–B6 已落地并提交**（`c075570` @ `cursor/phase2.5-slim-llm-closeout`）
 日期：2026-07-26（收口 2026-07-27）
-基线：main @ 8316bf7（clean），`uv run pytest tests/ -q` = 76 passed（其中约 11 个为纯形状检查，见下）
+基线：main @ 8316bf7（clean），当时 `uv run pytest tests/ -q` = 76 passed（其中约 11 个为纯形状检查，见下）；收口后 **131 passed**
 输入：`/tmp/kd_review/architecture-audit.md`、`/tmp/kd_review/code-review.md`、`/tmp/kd_review/test-verification.md`
 
-**验收测试口径**：计划文中「76 个验收测试」含约 11 个纯形状检查（只 `assert callable(...)` / `.exists()` / 查 `--help` 字符串），约 14% 不验证行为；B6 已对关键空跑/溯源/落盘缺口补行为断言，形状检查是否保留见 `.omc/plans/open-questions.md`。
+**验收测试口径**：计划文中「76 个验收测试」是 B1 前基线，含约 11 个纯形状检查（只 `assert callable(...)` / `.exists()` / 查 `--help` 字符串），约 14% 不验证行为；B6 已对关键空跑/溯源/落盘缺口补行为断言，形状检查是否保留见 `docs/plans/open-questions.md`。
+
+本文已归档；活文档入口见 [`docs/plans/README.md`](../../../docs/plans/README.md)。
 
 | 批次 | 状态 |
 |---|---|
@@ -26,7 +28,7 @@
 
 | # | 决策 | 含义 |
 |---|---|---|
-| 1 | 删 recovery.py 全套事务机制 | CAS / journal / 两阶段提交 / 文件锁全删，用「写前归档只增不删」（几十行）替代。接受极端写失败时知识库半写；原文在归档里，重跑即恢复。let it crash |
+| 1 | 删 recovery.py 全套事务机制 | CAS / journal / 两阶段提交 / **recovery 内重量锁**全删，用「写前归档只增不删」替代。接受极端写失败时知识库半写；原文在归档里，重跑即恢复。let it crash。**保留** CLI 级 flock（`lock.py`）仅防双进程误踩，不是 CAS |
 | 2 | 补真正的 LLM 提炼生成器 | `default_generator` 目前是恒等函数，本轮换成真实现 |
 | 3 | LLM 接入方式 | **不用任何 CLI**。实现 OpenAI 兼容 + Anthropic 兼容两种 HTTP API 格式，从环境变量读 base_url / api_key / model，代码保持轻量 |
 | 4 | 总目标 | 简单小巧好维护的 skill，把乱文档转成结构化知识库。**防丢失 9 条硬约束原封不动** |
