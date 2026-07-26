@@ -9,6 +9,48 @@ from typing import Any
 
 _UNSUPPORTED_PREFIX = "unsupported:"
 
+# Fullwidth/CJK punctuation folded onto its ASCII counterpart. Surface-only:
+# every pair here is the same mark in a different width or quoting style, so
+# folding them can never turn one word into a different word.
+_PUNCTUATION_FOLD = str.maketrans(
+    {
+        "。": ".", "，": ",", "、": ",", "；": ";", "：": ":",
+        "？": "?", "！": "!", "（": "(", "）": ")", "［": "[",
+        "］": "]", "｛": "{", "｝": "}", "〈": "<", "〉": ">",
+        "《": "<", "》": ">", "—": "-", "－": "-", "～": "~",
+        "％": "%", "＃": "#", "＆": "&", "＊": "*", "＋": "+",
+        "＝": "=", "／": "/", "＼": "\\", "｜": "|", "＠": "@",
+        "＄": "$", "＾": "^", "＿": "_", "｀": "`",
+        "“": '"', "”": '"', "„": '"', "「": '"', "」": '"',
+        "『": '"', "』": '"', "‘": "'", "’": "'", "‚": "'",
+        "…": "...", "·": ".",
+    }
+)
+
+# Drops the space on either side of an ASCII punctuation mark. Applied after
+# the width fold so that ``a, b`` and ``a，b`` converge. Word characters are
+# never touched, so ``3 times`` and ``three times`` stay distinct.
+_SPACE_AROUND_PUNCTUATION_RE = re.compile(
+    r"\s*([!-/:-@\[-`{-~])\s*"
+)
+
+
+def normalize_for_gate(text: str) -> str:
+    """Fold only surface differences before the faithfulness hard gate.
+
+    Collapses runs of whitespace to one space, folds fullwidth/CJK punctuation
+    onto ASCII, drops whitespace directly adjacent to punctuation, and
+    casefolds. The adjacent-whitespace rule exists because fullwidth marks
+    carry their own spacing (``, `` becomes ``，`` with no following space), so
+    width folding alone would still leave a spurious space difference.
+
+    Deliberately NOT semantic: whitespace *between word characters* is kept, so
+    word substitutions such as ``3 times`` -> ``three times`` still differ after
+    normalization and are still rejected by the gate.
+    """
+    folded = " ".join(text.translate(_PUNCTUATION_FOLD).split()).strip().casefold()
+    return _SPACE_AROUND_PUNCTUATION_RE.sub(r"\1", folded)
+
 
 def normalize_newlines(text: str) -> str:
     """Normalize only CRLF and lone CR before a round comparison."""

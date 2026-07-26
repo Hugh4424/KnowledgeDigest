@@ -6,7 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from .config import resolve_settings
+from .config import SUPPORTED_LLM_FORMATS, resolve_settings
 from .errors import ValidationError
 from .kb_structure import parse_roots
 from .paths import validate_paths
@@ -37,18 +37,36 @@ def build_parser() -> argparse.ArgumentParser:
         "--cluster-review-threshold", "--medium", dest="medium", type=float, default=None
     )
     parser.add_argument("--max-doc-lines", "--max-lines", dest="max_lines", type=int, default=None)
+    parser.add_argument(
+        "--llm-format",
+        choices=SUPPORTED_LLM_FORMATS,
+        default=None,
+        help="provider API format; enables LLM refinement",
+    )
+    parser.add_argument(
+        "--no-llm",
+        dest="llm_enabled",
+        action="store_false",
+        default=None,
+        help="force the offline identity generator (no provider calls)",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     try:
         args = build_parser().parse_args(argv)
+        llm_enabled = args.llm_enabled
+        if llm_enabled is None and args.llm_format is not None:
+            llm_enabled = True
         settings = resolve_settings(
             args.config,
             top_k=args.top_k,
             high=args.high,
             medium=args.medium,
             max_lines=args.max_lines,
+            llm_enabled=llm_enabled,
+            llm_format=args.llm_format,
         )
         paths = validate_paths(args.new_dir, args.kb_dir)
         roots = parse_roots(paths.structure_path)

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from .errors import ValidationError
-from .jsonl import read_jsonl, write_jsonl
+from .jsonl import append_jsonl, read_jsonl, write_jsonl
 
 
 _DISALLOWED_SOURCE_STATUSES = {"empty", "empty_shell", "failed", "shell", "invalid", "inconsistent", "no_body"}
@@ -28,12 +28,6 @@ def retention_deadline(started_at: str | None = None) -> str:
     else:
         start = datetime.now(UTC)
     return (start + timedelta(days=ARCHIVE_RETENTION_DAYS)).isoformat().replace("+00:00", "Z")
-
-
-def append_jsonl(path: Path, records: Iterable[dict[str, Any]]) -> None:
-    values = list(records)
-    if values:
-        write_jsonl(path, [*read_jsonl(path), *values])
 
 
 def _source_statuses(raw_items: list[dict[str, Any]], run_dir: Path) -> dict[str, dict[str, Any]]:
@@ -182,85 +176,3 @@ def archive_claim_records(
         records.append(record)
     append_jsonl(kb_dir / archive_root / "records.jsonl", records)
     return records
-
-
-def _parse_time(value: Any) -> datetime | None:
-    if not isinstance(value, str):
-        return None
-    try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError:
-        return None
-
-
-def cleanup_expired_archives(
-    kb_dir: Path,
-    archive_root: str = "_archive",
-    *,
-    now: datetime | None = None,
-    run_dir: Path | None = None,
-) -> list[dict[str, Any]]:
-    """Delete retained body/snapshot fields and files while preserving lineage."""
-    current = now or datetime.now(UTC)
-    record_path = kb_dir / archive_root / "records.jsonl"
-    records = read_jsonl(record_path)
-    cleaned: list[dict[str, Any]] = []
-    expired: list[dict[str, Any]] = []
-    for record in records:
-        deadline = _parse_time(record.get("retain_content_until"))
-        if deadline is None or deadline > current or record.get("content_retained") is False:
-            cleaned.append(record)
-            continue
-        updated = dict(record)
-        for key in ("full_content", "snapshot_content", "content"):
-            updated.pop(key, None)
-        archive_content_path = record.get("archive_content_path")
-        if isinstance(archive_content_path, str) and archive_content_path.strip():
-            archive_path = (kb_dir / archive_content_path).resolve()
-            archive_root_path = (kb_dir / archive_root).resolve()
-            if archive_path.is_relative_to(archive_root_path) and archive_path.is_file():
-                archive_path.unlink()
-            updated.pop("archive_content_path", None)
-        updated["content_retained"] = False
-        updated["content_expired_at"] = current.isoformat().replace("+00:00", "Z")
-        cleaned.append(updated)
-        expired.append(
-            {
-                "operation": record.get("operation"),
-                "claim_fingerprint": record.get("claim_fingerprint"),
-                "page_path": record.get("page_path"),
-                "content_retained": False,
-                "metadata_retained": True,
-            }
-        )
-    if records:
-        write_jsonl(record_path, cleaned)
-
-    snapshot_path = kb_dir / "_digest" / "source-snapshots.jsonl"
-    snapshots = read_jsonl(snapshot_path)
-    cleaned_snapshots: list[dict[str, Any]] = []
-    for snapshot in snapshots:
-        deadline = _parse_time(snapshot.get("retain_content_until"))
-        if deadline is None or deadline > current:
-            cleaned_snapshots.append(snapshot)
-            continue
-        updated_snapshot = dict(snapshot)
-        for key in ("content", "full_content"):
-            updated_snapshot.pop(key, None)
-        updated_snapshot["content_retained"] = False
-        updated_snapshot["content_expired_at"] = current.isoformat().replace("+00:00", "Z")
-        cleaned_snapshots.append(updated_snapshot)
-        expired.append(
-            {
-                "operation": "source_snapshot_cleanup",
-                "source_uri": snapshot.get("source_uri"),
-                "snapshot_id": snapshot.get("snapshot_id"),
-                "content_retained": False,
-                "metadata_retained": True,
-            }
-        )
-    if snapshots:
-        write_jsonl(snapshot_path, cleaned_snapshots)
-    if run_dir is not None:
-        write_jsonl(run_dir / "s5" / "archive-cleanup.jsonl", expired)
-    return expired

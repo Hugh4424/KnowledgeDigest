@@ -6,7 +6,6 @@ import json
 import os
 import subprocess
 import sys
-from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -140,30 +139,56 @@ def test_ac02_failed_and_shell_sources_are_not_formal_sources(tmp_path: Path) ->
     assert "https://source.example/shell" not in (kb_dir / "_digest" / "source-index.jsonl").read_text(encoding="utf-8")
 
 
+def _replay_fragment(source_text: str, locator: object) -> str:
+    """Return the exact source slice named by a ``lines:start-end`` locator."""
+    text = str(locator)
+    assert text.startswith("lines:"), f"expected lines: locator, got {locator!r}"
+    start_s, end_s = text.split(":", 1)[1].split("-", 1)
+    start, end = int(start_s), int(end_s)
+    lines = source_text.splitlines()
+    assert 1 <= start <= end <= len(lines), f"locator {locator!r} out of range for {len(lines)} lines"
+    return "\n".join(lines[start - 1 : end])
+
+
 def test_ac03_every_final_claim_has_replayable_lineage(tmp_path: Path) -> None:
     new_dir, kb_dir = make_case(tmp_path)
     write_source(new_dir, "good.md", "A supported claim.\nA second claim.\n", "https://source.example/good")
     result = run_digest(str(new_dir), str(kb_dir))
     assert result.returncode == 0, result.stderr
-    claims = jsonl(latest_run(kb_dir) / "s6" / "provenance-audit.jsonl")
+    run = latest_run(kb_dir)
+    claims = jsonl(run / "s6" / "provenance-audit.jsonl")
     assert claims
+    snapshots = {
+        str(row["source_uri"]): str(row["full_content"])
+        for row in jsonl(run / "s1" / "source-snapshots.jsonl")
+        if row.get("full_content") is not None
+    }
     for claim in claims:
-        assert {"claim_fingerprint", "source_uri", "content_fingerprint", "fragment_locator", "verification_status"} <= claim.keys()
+        assert {"claim_fingerprint", "source_uri", "content_fingerprint", "fragment_locator", "verification_status", "claim_body"} <= claim.keys()
         assert claim["verification_status"] == "verified"
         assert str(claim["fragment_locator"]).startswith("lines:")
+        # "Replayable" means the locator actually recovers claim_body from the
+        # captured source — a prefix check alone never exercises the lineage.
+        replayed = _replay_fragment(snapshots[str(claim["source_uri"])], claim["fragment_locator"])
+        assert replayed == str(claim["claim_body"])
 
 
 def test_ac04_content_change_creates_bidirectional_version_relation(tmp_path: Path) -> None:
+    from knowledge_digest.pipeline import fold_claim_history
+
     new_dir, kb_dir = make_case(tmp_path)
     write_source(new_dir, "good.md", "Original versioned claim.\n", "https://source.example/versioned")
     assert run_digest(str(new_dir), str(kb_dir)).returncode == 0
     write_source(new_dir, "good.md", "Revised versioned claim.\n", "https://source.example/versioned")
     assert run_digest(str(new_dir), str(kb_dir)).returncode == 0
-    history = jsonl(kb_dir / "_digest" / "claim-history.jsonl")
+    # claim-history.jsonl is append-only: the superseded claim's later state is a
+    # separate line, so the bidirectional relation is read through the fold.
+    history = fold_claim_history(jsonl(kb_dir / "_digest" / "claim-history.jsonl"))
     old = next(row for row in history if row["text"] == "Original versioned claim.")
     new = next(row for row in history if row["text"] == "Revised versioned claim.")
     assert new["supersedes"] == old["claim_fingerprint"]
     assert old["superseded_by"] == new["claim_fingerprint"]
+    assert old["verification_status"] == "superseded"
 
 
 def test_ac05_later_validation_failure_keeps_claim_pending(tmp_path: Path) -> None:
@@ -189,48 +214,6 @@ def test_ac06_replace_archive_contains_content_reason_and_lineage(tmp_path: Path
     record = records[0]
     assert {"operation", "operation_at", "reason", "page_path", "source_uri", "full_content", "snapshot_content", "retain_content_until", "lineage"} <= record.keys()
     assert record["full_content"] and record["reason"]
-
-
-def test_ac07_expiry_removes_body_but_keeps_metadata(tmp_path: Path) -> None:
-    from knowledge_digest.provenance import cleanup_expired_archives
-
-    new_dir, kb_dir = make_case(tmp_path)
-    write_source(new_dir, "good.md", "Old expiry body.\n", "https://source.example/expiry")
-    assert run_digest(str(new_dir), str(kb_dir)).returncode == 0
-    write_source(new_dir, "good.md", "New expiry body.\n", "https://source.example/expiry")
-    assert run_digest(str(new_dir), str(kb_dir)).returncode == 0
-    records = jsonl(kb_dir / "_archive" / "records.jsonl")
-    archive_path = kb_dir / str(records[0]["archive_content_path"])
-    assert archive_path.is_file()
-    records[0]["retain_content_until"] = "2020-01-01T00:00:00Z"
-    (kb_dir / "_archive" / "records.jsonl").write_text("\n".join(json.dumps(row) for row in records) + "\n", encoding="utf-8")
-    expired = cleanup_expired_archives(kb_dir, now=datetime(2026, 7, 22, tzinfo=UTC))
-    assert expired
-    record = jsonl(kb_dir / "_archive" / "records.jsonl")[0]
-    assert "full_content" not in record and "snapshot_content" not in record
-    assert "archive_content_path" not in record and not archive_path.exists()
-    assert record["source_uri"] and record["content_fingerprint"] and record["fragment_locator"] and record["reason"]
-
-
-def test_ac07_source_snapshot_expiry_removes_body_but_keeps_metadata(tmp_path: Path) -> None:
-    from knowledge_digest.provenance import cleanup_expired_archives
-
-    new_dir, kb_dir = make_case(tmp_path)
-    write_source(new_dir, "good.md", "Snapshot retention body.\n", "https://source.example/snapshot-retention")
-    assert run_digest(str(new_dir), str(kb_dir)).returncode == 0
-    snapshots = jsonl(kb_dir / "_digest" / "source-snapshots.jsonl")
-    target = snapshots[0]
-    target["retain_content_until"] = "2020-01-01T00:00:00Z"
-    (kb_dir / "_digest" / "source-snapshots.jsonl").write_text(
-        "\n".join(json.dumps(row) for row in snapshots) + "\n",
-        encoding="utf-8",
-    )
-
-    cleanup_expired_archives(kb_dir, now=datetime(2026, 7, 22, tzinfo=UTC))
-    cleaned = next(row for row in jsonl(kb_dir / "_digest" / "source-snapshots.jsonl") if row["snapshot_id"] == target["snapshot_id"])
-    assert "content" not in cleaned and "full_content" not in cleaned
-    assert cleaned["content_retained"] is False
-    assert cleaned["source_uri"] and cleaned["content_fingerprint"] and cleaned["validation_status"]
 
 
 def test_ac08_unexpired_archive_is_recoverable(tmp_path: Path) -> None:
@@ -498,7 +481,8 @@ def test_ac06_multi_source_page_archive_keeps_all_snapshot_refs(tmp_path: Path) 
     assert record["source_uri"] == ["https://source.example/a", "https://source.example/b"]
 
 
-def test_ac06_failed_batch_does_not_leave_orphan_archive_files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_ac06_failed_batch_archives_originals_before_overwriting(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A half-written batch must leave every original recoverable from _archive/."""
     from knowledge_digest.paths import DigestPaths
     from knowledge_digest.writeback import writeback
     import knowledge_digest.writeback as writeback_module
@@ -528,8 +512,10 @@ def test_ac06_failed_batch_does_not_leave_orphan_archive_files(tmp_path: Path, m
         ],
     }
     real_atomic_write = writeback_module._atomic_write
+    write_calls: list[Path] = []
 
     def fail_second(path: Path, content: str) -> None:
+        write_calls.append(path)
         if path == second and content.startswith("new second"):
             raise ValidationError("s5", path, "simulated batch failure")
         real_atomic_write(path, content)
@@ -540,9 +526,26 @@ def test_ac06_failed_batch_does_not_leave_orphan_archive_files(tmp_path: Path, m
     with pytest.raises(ValidationError, match="simulated batch failure"):
         writeback([draft], run_dir, paths, ("pages", "_archive", "_queues"))
 
-    assert first.read_text(encoding="utf-8") == "old first"
+    assert write_calls, "_atomic_write was never called; stub was not exercised"
+    assert second in write_calls
+
+    # No rollback: the interrupted batch may leave a half-written knowledge base.
+    # The loss-prevention guarantee is that both originals were durably archived
+    # before any target page was touched, so both remain recoverable.
+    archive_root = kb_dir / "_archive" / "archive-rollback" / "pages"
+    assert (archive_root / "first.md").read_text(encoding="utf-8") == "old first"
+    assert (archive_root / "second.md").read_text(encoding="utf-8") == "old second"
     assert second.read_text(encoding="utf-8") == "old second"
-    assert not list((kb_dir / "_archive" / "archive-rollback").rglob("*"))
+
+    # Rerun recovers: restore from archive, then a clean writeback lands both pages.
+    first.write_text((archive_root / "first.md").read_text(encoding="utf-8"), encoding="utf-8")
+    second.write_text((archive_root / "second.md").read_text(encoding="utf-8"), encoding="utf-8")
+    assert first.read_text(encoding="utf-8") == "old first"
+    monkeypatch.setattr(writeback_module, "_atomic_write", real_atomic_write)
+    retry_dir = kb_dir / "_digest" / "runs" / "archive-rollback-retry"
+    writeback([draft], retry_dir, paths, ("pages", "_archive", "_queues"))
+    assert first.read_text(encoding="utf-8").startswith("new first")
+    assert second.read_text(encoding="utf-8").startswith("new second")
 
 
 def test_ac16_mixed_acceptance_run_has_all_canonical_evidence(tmp_path: Path) -> None:

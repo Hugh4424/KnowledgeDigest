@@ -9,9 +9,9 @@ from pathlib import Path
 from typing import Any
 
 from .errors import ValidationError
-from .jsonl import write_jsonl
+from .jsonl import append_jsonl, write_jsonl
 from .paths import DigestPaths
-from .provenance import append_jsonl, now_utc, retention_deadline
+from .provenance import now_utc, retention_deadline
 
 
 def _safe_relative(path: str, kb_dir: Path) -> Path:
@@ -168,7 +168,6 @@ def writeback(
     operations: list[dict[str, Any]] = []
     archive_records: list[dict[str, Any]] = []
     archive_paths: list[Path] = []
-    original_contents: dict[Path, str | None] = {}
     for page in pages:
         claims = page.get("claims", [])
         target = _safe_relative(str(page["target_path"]), paths.kb_dir)
@@ -200,7 +199,6 @@ def writeback(
         if target_path.exists() and not target_path.is_file():
             raise ValidationError("s5", target_path, "target page must be a regular file")
         before = target_path.read_text(encoding="utf-8") if target_path.exists() else None
-        original_contents[target_path] = before
         if before is not None:
             archive_record = _archive_page_record(
                 paths=paths,
@@ -225,48 +223,21 @@ def writeback(
             }
         )
 
-    try:
-        for page, operation in zip(pages, operations):
-            target_path = paths.kb_dir / operation["target_path"]
-            _atomic_write(target_path, _render_page(page))
-            operation["status"] = "success"
-        for archive_path, archive_record in zip(archive_paths, archive_records):
-            _atomic_write(archive_path, str(archive_record["full_content"]))
-    except ValidationError as original_error:
-        rollback_failures: list[dict[str, str]] = []
-        for target_path, before in original_contents.items():
-            try:
-                if before is None:
-                    target_path.unlink(missing_ok=True)
-                else:
-                    _atomic_write(target_path, before)
-            except (OSError, ValidationError) as error:
-                rollback_failures.append(
-                    {"operation": "restore_page", "path": str(target_path), "error": str(error)}
-                )
-        for archive_path in archive_paths:
-            try:
-                archive_path.unlink(missing_ok=True)
-            except OSError as error:
-                rollback_failures.append(
-                    {"operation": "remove_archive", "path": str(archive_path), "error": str(error)}
-                )
-        for operation in operations:
-            operation["status"] = "failed"
-        write_jsonl(run_dir / "s5" / "write-report.jsonl", operations)
-        if rollback_failures:
-            write_jsonl(run_dir / "s5" / "rollback-failures.jsonl", rollback_failures)
-            paths_text = ", ".join(item["path"] for item in rollback_failures)
-            raise ValidationError(
-                "s5",
-                "rollback",
-                f"batch write failed: {original_error}; rollback failed for: {paths_text}",
-            ) from original_error
-        raise
-
-    write_jsonl(run_dir / "s5" / "write-report.jsonl", operations)
+    # Archive every original page, and record its lineage, before any target is
+    # overwritten. `_atomic_write` fsyncs both the file and its parent directory and
+    # `append_jsonl` fsyncs the ledger, so a failure while writing the target pages
+    # below always leaves the original content recoverable under `_archive/` *with*
+    # the record that points at it. This ordering replaces the former batch rollback.
+    for archive_path, archive_record in zip(archive_paths, archive_records):
+        _atomic_write(archive_path, str(archive_record["full_content"]))
     write_jsonl(run_dir / "s5" / "archive-records.jsonl", archive_records)
     append_jsonl(paths.kb_dir / archive_root / "records.jsonl", archive_records)
+    for page, operation in zip(pages, operations):
+        target_path = paths.kb_dir / operation["target_path"]
+        _atomic_write(target_path, _render_page(page))
+        operation["status"] = "success"
+
+    write_jsonl(run_dir / "s5" / "write-report.jsonl", operations)
     return operations
 
 
