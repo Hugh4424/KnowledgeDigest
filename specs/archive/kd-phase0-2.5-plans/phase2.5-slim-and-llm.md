@@ -325,8 +325,8 @@ uv run pytest tests/acceptance/ -q -k "dirty"
 
 **涉及文件**
 - `tests/acceptance/test_phase0_digest.py`、`test_phase1_loss_prevention.py`、`test_phase2_rethink.py`
-- `docs/plans/universal-knowledge-digest-design.md`、`phase0-implementation-spec.md`、`phase2.5-slim-and-llm.md`
-- `.omc/plans/open-questions.md`
+- `specs/archive/kd-phase0-2.5-plans/universal-knowledge-digest-design.md`、`phase0-implementation-spec.md`、`phase2.5-slim-and-llm.md`（收口后自 `docs/plans/` 迁入归档）
+- `.omc/plans/open-questions.md` / `docs/plans/open-questions.md`
 
 **验收标准**
 ```bash
