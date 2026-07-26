@@ -1,6 +1,8 @@
 # 通用增量知识消化技能 — 设计草案 v2
 
-状态：**草案 v2，供细化，不是实施计划，不含代码**
+**实现状态（2026-07-27）**：Phase 0 / 1 / 2.5 已落地并提交于分支 `cursor/phase2.5-slim-llm-closeout`（`c075570`）；Phase 2（CAS/两阶段/`recovery.py`）已按拍板回退；Phase 3/4 未开。本文是设计原稿，归档于 `specs/archive/kd-phase0-2.5-plans/`。
+
+原稿标注：草案 v2（2026-07-05），供细化；下文「草案」字样保留为历史语气，以文首实现状态为准。
 日期：2026-07-05
 
 ## 参考资料（绝对路径，脱离本 repo 后仍需按此路径查阅）
@@ -160,7 +162,7 @@ KB 结构约定描述文件包含三部分：
 | Embedding 客户端 | **自建轻量 HTTP 客户端**（OpenAI 兼容协议），不引入向量数据库；两库各自独立配置 provider | 借鉴 LightRAG"默认零外部数据库"思路；两库配置互不影响，无需 provider 无关抽象层 |
 | 增量索引/合并调度框架 | **只借思路，不直接引入 LightRAG/Graphiti/Cognee 本体** | 三者都是重量级图知识库框架，与"文件夹+md"场景不匹配；只借"增量 delta 合并、不做全量重建"的设计思想 |
 | 合并/归档操作模式 | **只借思路**：参考 Karpathy LLM-Wiki 的"合并两篇+旧文章归档+留重定向"模式 | 与本设计 S4/S5 的"归档而非删除"原则一致，工程实现自建（文件操作即可，无需额外框架） |
-| 文件锁/journal/CAS/两阶段提交 | **不引入**，降级为"临时文件+fsync+原子rename" | 见第2节简化清单：手动单人触发场景下，重量事务机制的投入产出比低，let it crash + 重跑即可 |
+| 文件锁/journal/CAS/两阶段提交 | **不引入重量事务**；Phase 2.5 仅保留 CLI 级互斥（`lock.py` flock），不做 CAS/journal | 见第2节简化清单：手动单人触发下重量事务投入产出比低；CLI 锁只防误开双进程互相踩 |
 | 触发调度框架 | **不引入** | 手动触发是拍板结论，无需任何调度/定时/recurrence 机制 |
 
 **build-vs-buy 结论（定案）**：不引入任何框架（图知识库框架、事务框架、调度框架），自建轻量管线。理由：总纲要求"技能要尽可能简单"，核心场景收窄为单文件夹对单文件夹的手动 digest，任何框架带来的依赖面、学习成本、配置负担都超过它能解决的问题规模。价值全部落在**移植 ovmc + sleep-curator 已验证过的逻辑思路**（不引入其运行时依赖），并按简化清单砍掉不匹配当前场景的重量机制。
@@ -185,22 +187,30 @@ KB 结构约定描述文件包含三部分：
 
 ## 6. 分期落地路线：最小可用 → 完整（按简化结果重排）
 
-### Phase 0（最小可用，单一目标库打通全链路，`digest(new_dir, kb_dir)` 跑通）
-- 实现 S1（基础质量门禁：空壳判定）→ S2（复用 ovmc 聚类算法，走标准 embedding HTTP 客户端）→ S3（top-k 关联检索 + new/revise/merge_multiple 判定）→ S4（单轮生成 + claim-level verify + faithfulness check，`max_doc_lines` 拆分建议）→ S5（临时文件+fsync+原子rename 写入 `kb_dir`，无 CAS/journal，索引同步为可选步骤，失败即报错退出）。
-- S6 溯源层轻量版：只要求 source_uri 随 claim 落盘。
+### Phase 0（最小可用，单一目标库打通全链路，`digest(new_dir, kb_dir)` 跑通）— **已落地**
+- 实现 S1（基础质量门禁：空壳判定）→ S2（complete-linkage 聚类 + **本地 token Jaccard**（`text_similarity`），本期**未**接 embedding HTTP）→ S3（top-k 关联检索 + new/revise/merge_multiple 判定）→ S4（单轮生成 + claim-level verify + faithfulness check，`max_doc_lines` 拆分建议）→ S5（临时文件+fsync+原子rename 写入 `kb_dir`，无 CAS/journal，索引同步为可选步骤，失败即报错退出）。
+- S6 溯源层轻量版：只要求 source_uri 随 claim 落盘（Phase 1 再加固为可重放 lineage）。
 - 目标：跑通"`new_dir` 新内容进来 → 判断是否已有相似条目 → LLM 生成一版更新/新建/拆分合并 → 落盘 `kb_dir`"，验证 KB 结构约定描述文件是否够用。
-- 验收：在 OpenViking 记忆库上对一批真实新增内容跑通，人工抽查合并结果无明显信息丢失；`needs_review`/`insufficient_signal` 队列文件正确产出。
+- 验收：构造型 fixture + `tests/acceptance/test_phase0_digest.py`；设计原文「OpenViking 真库人工抽查」未作为本轮硬门，留待使用期抽查。
 
-### Phase 1（防丢失机制完整版 + 溯源层加固）
+### Phase 1（防丢失机制完整版 + 溯源层加固）— **已落地**
+
 - 补齐 S6 完整溯源留存层：claim 级来源追溯、归档而非删除、来源索引二次校验。
 - 信息预算机制的 `max_doc_lines` 拆分建议逻辑打磨（按业务/逻辑组件切分页面的具体规则）。
 - KB 结构约定描述文件加入 why/版本历史字段的强制声明检查。
 - 验收：故意构造"抓取失败页 + 高信息密度页混合"的测试簇，验证空壳页不进入来源索引、高密度页无信息丢失；构造超长文档验证拆分建议合理。
+- **实现状态（2026-07）**：`tests/acceptance/test_phase1_loss_prevention.py` 覆盖 AC01–AC06、AC08–AC16（无独立 AC07 编号，属跳号而非缺测）；Phase 2.5 后归档语义改为「写前归档只增不删」（不再做 90 天物理清理）。
 
-### Phase 2（可选加固：多轮 rethink + CAS/两阶段提交，按需启用）
-- 若 Phase 0/1 实测发现单轮生成质量不足，移植 sleep-curator 的多轮 rethink 收敛策略。
-- 若未来场景扩展到"可能并发触发"，再补 CAS 并发写入检查 + 两阶段提交 + journal 崩溃恢复；手动单人触发场景下本 Phase 可长期不启用。
-- 验收（若启用）：并发触发两次消化任务，验证无覆盖丢失；kill -9 中断后重跑，验证无重复处理。
+### Phase 2（已回退：曾无条件启用，按拍板 1 删除）
+
+- **历史**：Phase 2 本应是条件性可选加固（design 原文：仅当 Phase 0/1 实测单轮质量不足，或场景扩展到可能并发时才启用）。实际上曾被无条件合入（多轮 rethink + CAS/两阶段提交/`recovery.py`），触发条件从未满足。
+- **Phase 2.5 拍板 1**：删除 `recovery.py` 全套事务机制，改为「写前归档只增不删」。接受极端写失败时知识库半写；原文在 `_archive/`，重跑即恢复。
+- **保留**：单轮 rethink 收敛（B3 压到一轮）；LLM 真提炼（B4）；并发文件锁仅作 CLI 互斥，不做 CAS/journal。
+- 若未来真要并发/崩溃恢复，另开 Phase，不在本轮恢复两阶段提交。
+
+### Phase 2.5（瘦身 + 真实 LLM；2026-07 落地）
+
+见 [`phase2.5-slim-and-llm.md`](./phase2.5-slim-and-llm.md)：B1–B6 已落地并提交。目标是把「事务很重、核心恒等」压成「防丢失完整、真会提炼」的小工具。
 
 ### Phase 3（双库适配验证）
 - 完成公司知识库的 KB 结构约定描述文件（13 字段模型 + H2 自由正文 + 目录组织规则）。
@@ -214,7 +224,7 @@ KB 结构约定描述文件包含三部分：
 
 ## 7. 开放问题清单
 
-用户已就原 7 条开放问题全部拍板（见文档开头"v2 修订记录"），本节清空。若后续实施中出现新的需要用户决策的问题，记录于 `.omc/plans/open-questions.md`。
+用户已就原 7 条开放问题全部拍板（见文档开头"v2 修订记录"），本节清空。若后续实施中出现新的需要用户决策的问题，记录于 [`docs/plans/open-questions.md`](../../../docs/plans/open-questions.md)（权威实施副本亦见 `.omc/plans/open-questions.md`）。
 
 ---
 

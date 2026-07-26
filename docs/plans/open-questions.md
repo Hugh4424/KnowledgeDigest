@@ -1,9 +1,9 @@
-## 记忆巩固/清理工具设计 - 2026-07-02（已拍板 1-3，4-5 留待实施时定）
+## phase2.5-slim-and-llm — 2026-07-26（仍待拍板）
 
-结论已同步进 `docs/memory-consolidation-design.md` 第 8 节。本文件保留原始问题记录作为历史存档。
+- [ ] `_validate_candidate` 逐字硬门（draft.py）与 LLM 改写冲突 — 若实测拒绝率高，放宽为语义校验还是保持逐字？决定 LLM 提炼是否真正生效，还是绕一圈仍是恒等输出
+- [ ] LLM 环境变量命名 `KD_LLM_FORMAT/BASE_URL/API_KEY/MODEL` 是否与用户其他工具冲突 — 影响配置一致性
+- [ ] 归档只增不删后磁盘持续增长 — 是否需要单独 `kd-gc` 子命令（本轮删了 90 天清理）
+- [ ] 约 11 个纯形状检查测试（只 assert callable/exists/查 --help）保留还是换成行为测试 — 影响验收测试数字的含金量
 
-1. [x] 是否要求物理删除环节——**已拍板**：软删除（`.archived/`/`.pruned_archive/`）满 90 天缓冲期后物理删除，非永久保留。这是设计文档已有默认方案，无需改动。
-2. [x] Consolidate 阶段合并动作是否需要先调研 OpenViking 官方批量更新/失效记忆 API——**已拍板**：第一期启动前必须先完成该调研，作为前置任务（见设计文档 §5.1），避免文件系统操作与 OpenViking 内部索引/向量库（vectordb/context LevelDB）不一致。
-3. [x] "N 天未被召回自动降权"规则依赖工具自建 recall_index，早期可能大范围不生效——**已拍板**：用户接受这一限制，明确写入设计文档为"已知可接受的早期局限"（非 bug），先跑着让索引自然积累（见设计文档 §3.2）。
-4. [ ] LLM 合并 prompt 的"反向校验覆盖率检查"阈值——**留待实施时定**：不在设计阶段预定，由 executor 结合实测样本（如 diff_review_json_output 64 个文件簇）调参。
-5. [ ] 第二期 sessions 归档清理是否值得投入——**留待实施时定**：先看第一期 memories 去重效果的实测清理率数据，再决定是否启动第二期。
+权威实施副本：`.omc/plans/open-questions.md`（与本文件同步）。
+已完成阶段的设计/计划/报告见 `specs/archive/kd-phase0-2.5-plans/`。

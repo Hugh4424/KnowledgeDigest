@@ -9,9 +9,9 @@ from pathlib import Path
 from typing import Any
 
 from .errors import ValidationError
-from .jsonl import read_jsonl, write_jsonl
+from .jsonl import append_jsonl, read_jsonl, write_jsonl
 from .paths import DigestPaths
-from .provenance import append_jsonl, retention_deadline
+from .provenance import retention_deadline
 
 
 INGESTIBLE_SUFFIXES = {".md", ".txt", ".json"}

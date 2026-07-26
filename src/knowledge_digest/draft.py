@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import hashlib
-import inspect
 import re
 import time
+from collections import Counter
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
-from .config import DigestSettings, risk_decision
-from .faithfulness import faithfulness_check, normalize_newlines, verify_claims
+from .config import DigestSettings
+from .faithfulness import claim_fingerprint, faithfulness_check, normalize_for_gate, verify_claims
 from .jsonl import write_jsonl
 
 
@@ -318,22 +318,23 @@ def default_generator(context: dict[str, Any]) -> dict[str, Any]:
     return {"final_body": context["initial_body"]}
 
 
+def resolve_generator(settings: DigestSettings) -> Generator:
+    """Pick the identity generator or a live provider based on configuration.
+
+    Provider construction is imported lazily so the offline path never touches
+    the network module, and provider failures surface as ``ValidationError``
+    rather than a silent downgrade back to the identity generator.
+    """
+    if not getattr(settings, "llm_enabled", False):
+        return default_generator
+    from .llm import generator_from_env
+
+    return generator_from_env(api_format=settings.llm_format)
+
+
 def _invoke_generator(generator: Generator, context: dict[str, Any]) -> Any:
-    """Call supported generator shapes without hiding generator exceptions."""
-    try:
-        parameters = list(inspect.signature(generator).parameters.values())
-    except (TypeError, ValueError):
-        parameters = []
-    positional = [
-        parameter
-        for parameter in parameters
-        if parameter.kind in {inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD}
-    ]
-    if len(positional) <= 1:
-        return generator(context)
-    if len(positional) == 2:
-        return generator(context["items"], context)
-    return generator(context["items"], context["previous_body"], context)
+    """Call the generator with the single supported shape: ``generator(context)``."""
+    return generator(context)
 
 
 def _candidate_from_result(
@@ -348,7 +349,23 @@ def _candidate_from_result(
     if not isinstance(result, Mapping):
         result = {"final_body": initial_body, "valid": False, "invalid_reason": "generator returned a non-object"}
     body = str(result.get("final_body", result.get("body", initial_body)))
-    candidate_claims = [dict(claim) for claim in result.get("claims", claims)]
+    # Provider output is adversarial input here too: a non-list ``claims`` (or a
+    # list holding non-mappings) must fail validation, not crash the whole run
+    # before the existing fallback path can take over.
+    raw_claims = result.get("claims", claims)
+    if not isinstance(raw_claims, list) or any(not isinstance(claim, Mapping) for claim in raw_claims):
+        return {
+            "final_body": initial_body,
+            "claims": [dict(claim) for claim in claims],
+            "coverage_mapping": _coverage_for_claims(claims, target),
+            "component_coverage": [],
+            "faithfulness_status": "",
+            "explicit_invalid": True,
+            "invalid_reason": "generator returned a malformed claims field",
+            "provider_input_tokens": None,
+            "provider_output_tokens": None,
+        }
+    candidate_claims = [dict(claim) for claim in raw_claims]
     coverage = result.get("coverage_mapping")
     if coverage is None:
         coverage = _coverage_for_claims(candidate_claims, target)
@@ -379,10 +396,44 @@ def _validate_candidate(
     """Apply source, coverage, and faithfulness hard gates to one candidate."""
     if candidate["explicit_invalid"]:
         return False, str(candidate.get("invalid_reason") or "candidate marked invalid"), 0.0, 0.0, 0
-    source_fingerprints = {claim.get("claim_fingerprint") for claim in source_claims}
+    source_fingerprints = Counter(claim.get("claim_fingerprint") for claim in source_claims)
+    # Lineage the generator hands back is metadata too. Bind each fingerprint to
+    # the raw_id/fragment_locator the source actually recorded so a self-consistent
+    # forged locator cannot mis-attribute a real claim to another line.
+    source_lineage: dict[Any, set[tuple[Any, Any]]] = {}
+    for claim in source_claims:
+        source_lineage.setdefault(claim.get("claim_fingerprint"), set()).add(
+            (claim.get("raw_id"), claim.get("fragment_locator"))
+        )
     candidate_claims = candidate["claims"]
-    if any(claim.get("claim_fingerprint") not in source_fingerprints for claim in candidate_claims):
+    # A fingerprint is metadata the generator supplies; on its own it proves
+    # nothing. Recompute it from the claim's own source_uri and text so a copied
+    # fingerprint cannot be pasted onto replacement or inverted text and still
+    # satisfy retention, lineage, coverage, and the faithfulness hard gate.
+    for claim in candidate_claims:
+        source_uri = claim.get("source_uri")
+        text = claim.get("text")
+        if not isinstance(source_uri, str) or not isinstance(text, str):
+            return False, "candidate claim is missing source lineage", 0.0, 0.0, 0
+        recomputed = claim_fingerprint(source_uri, text)
+        if recomputed != claim.get("claim_fingerprint"):
+            return False, "candidate claim fingerprint does not match its own text", 0.0, 0.0, 0
+    if any(
+        claim.get("claim_fingerprint") not in source_fingerprints for claim in candidate_claims
+    ):
         return False, "candidate contains a claim not present in the source", 0.0, 0.0, 0
+    # Membership passed, so every fingerprint has a source record. Now require the
+    # candidate's own lineage to equal what that source record says, otherwise a
+    # real claim can be self-consistently mis-attributed to another line.
+    for claim in candidate_claims:
+        if (claim.get("raw_id"), claim.get("fragment_locator")) not in source_lineage[claim.get("claim_fingerprint")]:
+            return False, "candidate claim lineage does not match the source record", 0.0, 0.0, 0
+    candidate_fingerprints = Counter(claim.get("claim_fingerprint") for claim in candidate_claims)
+    # Multiset, not set: two identical source lines share one fingerprint, so a
+    # single candidate claim must not be able to stand in for both of them.
+    missing = source_fingerprints - candidate_fingerprints
+    if missing:
+        return False, "candidate dropped a source claim", 0.0, 0.0, sum(missing.values())
     claim_keys = {
         (claim.get("raw_id"), claim.get("fragment_locator"))
         for claim in candidate_claims
@@ -397,7 +448,8 @@ def _validate_candidate(
         return False, "candidate coverage mapping is incomplete", coverage_ratio, 0.0, 0
     if any(not claim.get("text") or not claim.get("source_uri") for claim in candidate_claims):
         return False, "candidate claim is missing source lineage", coverage_ratio, 0.0, 0
-    if not all(claim["text"] in candidate["final_body"] for claim in candidate_claims):
+    normalized_body = normalize_for_gate(candidate["final_body"])
+    if not all(normalize_for_gate(claim["text"]) in normalized_body for claim in candidate_claims):
         return False, "candidate failed faithfulness hard gate", coverage_ratio, 0.0, 0
     eligible = len(source_claims)
     retained = len(candidate_claims)
@@ -408,7 +460,6 @@ def _validate_candidate(
 
 def _round_record(
     *,
-    round_number: int,
     candidate: dict[str, Any],
     valid: bool,
     reason: str | None,
@@ -417,14 +468,13 @@ def _round_record(
     unsupported_count: int,
     input_chars: int,
     elapsed_ms: int,
-    stop_reason: str | None,
 ) -> dict[str, Any]:
     claims = candidate["claims"]
     candidate_count = len(claims)
     unsupported_rate = unsupported_count / candidate_count if candidate_count else 0.0
     faithfulness_status = candidate.get("faithfulness_status") or ("passed" if valid else "failed")
     return {
-        "round_number": round_number,
+        "round_number": 1,
         "status": "valid" if valid else "invalid",
         "body_sha256": _body_sha256(candidate["final_body"]),
         "candidate_claim_count": candidate_count,
@@ -439,13 +489,12 @@ def _round_record(
         "provider_input_tokens": candidate.get("provider_input_tokens"),
         "provider_output_tokens": candidate.get("provider_output_tokens"),
         "elapsed_ms": elapsed_ms,
-        "stop_reason": stop_reason or reason,
+        "stop_reason": reason,
     }
 
 
 def _planned_draft(
     decision: Mapping[str, Any],
-    risk: dict[str, Any],
     *,
     default_root: str,
     draft_id: str,
@@ -467,11 +516,9 @@ def _planned_draft(
         "split_pages": [],
         "component_coverage": [],
         "coverage_mapping": [],
-        "risk_decision": risk,
         "rounds": [],
         "selected_round": None,
         "round_count": 0,
-        "max_rounds": risk["max_rounds"],
         "rethink_status": "planned",
         "fallback_reason": None,
         "benefit_status": "unmeasured",
@@ -514,75 +561,46 @@ def draft(
         draft_id = f"draft-{len(drafts) + 1}"
         default_root = str(decision.get("page_root", "pages"))
         base_target = str(decision["target_paths"][0]) if decision.get("target_paths") else f"{default_root}/digest/{draft_id}.md"
-        risk = risk_decision(
-            cluster=clusters_by_id[decision["cluster_id"]],
-            decision=decision,
-            items=items,
-            max_doc_lines=settings.max_lines,
-        )
-        decision["risk_decision"] = risk
         if dry_run:
-            drafts.append(_planned_draft(decision, risk, default_root=default_root, draft_id=draft_id))
+            drafts.append(_planned_draft(decision, default_root=default_root, draft_id=draft_id))
             continue
 
-        max_rounds = int(risk["max_rounds"])
-        rounds: list[dict[str, Any]] = []
-        selected: dict[str, Any] | None = None
-        selected_round: int | None = None
-        previous_body = ""
-        generator = generator or default_generator
-        last_round_valid = False
-        for round_number in range(1, max_rounds + 1):
-            context = {
-                "items": items,
-                "source_text": "\n".join(str(item.get("text", "")) for item in items),
-                "initial_body": initial_body,
-                "previous_body": previous_body,
-                "risk_decision": risk,
-                "round_number": round_number,
-                "claims": [dict(claim) for claim in claims],
-                "old_target_body": str(decision.get("old_target_body", "")),
-            }
-            started = time.perf_counter()
-            result = _invoke_generator(generator, context)
-            elapsed_ms = max(0, int((time.perf_counter() - started) * 1000))
-            candidate = _candidate_from_result(
-                result,
-                initial_body=initial_body,
-                claims=claims,
-                target=base_target,
-            )
-            valid, reason, coverage_ratio, retained_ratio, unsupported_count = _validate_candidate(
-                candidate,
-                source_claims=claims,
-            )
-            stop_reason: str | None = None
-            if valid and last_round_valid and normalize_newlines(candidate["final_body"]).encode("utf-8") == normalize_newlines(previous_body).encode("utf-8"):
-                stop_reason = "converged"
-            elif round_number == max_rounds:
-                stop_reason = "max_rounds"
-            record = _round_record(
-                round_number=round_number,
+        generator = generator or resolve_generator(settings)
+        context = {
+            "items": items,
+            "source_text": "\n".join(str(item.get("text", "")) for item in items),
+            "initial_body": initial_body,
+            "claims": [dict(claim) for claim in claims],
+            "old_target_body": str(decision.get("old_target_body", "")),
+            "target_page": base_target,
+        }
+        started = time.perf_counter()
+        result = _invoke_generator(generator, context)
+        elapsed_ms = max(0, int((time.perf_counter() - started) * 1000))
+        candidate = _candidate_from_result(
+            result,
+            initial_body=initial_body,
+            claims=claims,
+            target=base_target,
+        )
+        valid, reason, coverage_ratio, retained_ratio, unsupported_count = _validate_candidate(
+            candidate,
+            source_claims=claims,
+        )
+        rounds = [
+            _round_record(
                 candidate=candidate,
                 valid=valid,
                 reason=reason,
                 coverage_ratio=coverage_ratio,
                 retained_ratio=retained_ratio,
                 unsupported_count=unsupported_count,
-                input_chars=len(context["source_text"] + context["old_target_body"] + previous_body),
+                input_chars=len(context["source_text"] + context["old_target_body"]),
                 elapsed_ms=elapsed_ms,
-                stop_reason=stop_reason,
             )
-            rounds.append(record)
-            if valid:
-                selected = candidate
-                selected_round = round_number
-                previous_body = candidate["final_body"]
-                last_round_valid = True
-            else:
-                last_round_valid = False
-            if stop_reason:
-                break
+        ]
+        selected: dict[str, Any] | None = candidate if valid else None
+        selected_round: int | None = 1 if valid else None
 
         fallback_reason: str | None = None
         if selected is None:
@@ -598,12 +616,8 @@ def draft(
             }
             fallback_reason = "no valid round; used claim fallback"
             rethink_status = "fallback"
-        elif rounds[-1]["stop_reason"] == "converged":
-            rethink_status = "converged"
         else:
-            rethink_status = "max_rounds" if len(rounds) == max_rounds else "completed"
-            if any(round_record["status"] == "invalid" for round_record in rounds):
-                fallback_reason = "invalid round rejected; retained latest valid round"
+            rethink_status = "completed"
 
         final_body = selected["final_body"]
         final_claims = selected["claims"]
@@ -658,11 +672,9 @@ def draft(
             "split_pages": pages,
             "component_coverage": (split_suggestions[-1]["component_coverage"] if has_long_item else []),
             "coverage_mapping": (split_suggestions[-1]["coverage_mapping"] if has_long_item else final_coverage),
-            "risk_decision": risk,
             "rounds": rounds,
             "selected_round": selected_round,
             "round_count": len(rounds),
-            "max_rounds": max_rounds,
             "rethink_status": rethink_status,
             "fallback_reason": fallback_reason,
             "benefit_status": "unmeasured",
@@ -686,11 +698,9 @@ def draft(
             {
                 "draft_id": draft_record["draft_id"],
                 "cluster_id": draft_record["cluster_id"],
-                "risk_decision": draft_record.get("risk_decision"),
                 "rounds": draft_record.get("rounds", []),
                 "selected_round": draft_record.get("selected_round"),
                 "round_count": draft_record.get("round_count", 0),
-                "max_rounds": draft_record.get("max_rounds"),
                 "rethink_status": draft_record.get("rethink_status"),
                 "fallback_reason": draft_record.get("fallback_reason"),
                 "benefit_status": draft_record.get("benefit_status", "unmeasured"),

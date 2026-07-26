@@ -191,6 +191,7 @@ def test_digest_dry_run_contract_audits_structure_with_defaults_without_writing(
     after = {path.relative_to(tmp_path) for path in tmp_path.rglob("*")}
     run_dir = report_paths[0].parent.relative_to(tmp_path)
     assert after - before == {
+        Path("kb/.digest.lock"),
         Path("kb/_digest"),
         Path("kb/_digest/runs"),
         run_dir,
@@ -434,14 +435,23 @@ def test_s5_writeback_reports_completed_atomic_page_writes(tmp_path: Path) -> No
         assert target.read_text(encoding="utf-8").strip()
 
 
+def _replay_fragment(source_text: str, locator: object) -> str:
+    """Return the exact source slice named by a ``lines:start-end`` locator."""
+    text = str(locator)
+    assert text.startswith("lines:"), f"expected lines: locator, got {locator!r}"
+    start_s, end_s = text.split(":", 1)[1].split("-", 1)
+    start, end = int(start_s), int(end_s)
+    lines = source_text.splitlines()
+    assert 1 <= start <= end <= len(lines), f"locator {locator!r} out of range for {len(lines)} lines"
+    return "\n".join(lines[start - 1 : end])
+
+
 def test_s6_provenance_audit_keeps_only_valid_final_sources(tmp_path: Path) -> None:
-    """Final claims are auditable and never retain an empty-shell source."""
+    """Final claims are auditable, shell-free, and replayable from the source."""
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
     items_dir = new_dir / "items"
-    (items_dir / "supported.md").write_text(
-        "# Supported change\nThe filter accepts status=active.\n",
-        encoding="utf-8",
-    )
+    supported_body = "# Supported change\nThe filter accepts status=active.\n"
+    (items_dir / "supported.md").write_text(supported_body, encoding="utf-8")
     (items_dir / "empty-shell.md").write_text("Home | Navigation | Login\n", encoding="utf-8")
     (new_dir / "sources.jsonl").write_text(
         "\n".join(
@@ -473,12 +483,26 @@ def test_s6_provenance_audit_keeps_only_valid_final_sources(tmp_path: Path) -> N
     audit_rows = [json.loads(line) for line in provenance_audit.read_text(encoding="utf-8").splitlines()]
     assert audit_rows
     assert all(
-        {"claim_id", "claim_body", "source_uri", "source_status", "target_path"} <= row.keys()
+        {"claim_id", "claim_body", "source_uri", "source_status", "target_path", "fragment_locator"}
+        <= row.keys()
         for row in audit_rows
     )
     assert all(row["source_uri"] for row in audit_rows)
     assert all(row["source_status"] != "empty_shell" for row in audit_rows)
     assert all("empty-shell" not in row["source_uri"] for row in audit_rows)
+
+    # Content correspondence: fragment_locator must replay the claim_body from
+    # the captured source snapshot. Swapping every source_uri to one legal URI
+    # would still pass a keys-only check; replaying the bytes does not.
+    snapshots = {
+        str(row["source_uri"]): str(row["full_content"])
+        for row in _read_jsonl(run_dir / "s1" / "source-snapshots.jsonl")
+        if row.get("full_content") is not None
+    }
+    for row in audit_rows:
+        source_text = snapshots[str(row["source_uri"])]
+        replayed = _replay_fragment(source_text, row["fragment_locator"])
+        assert replayed == str(row["claim_body"])
 
 
 def _read_jsonl(path: Path) -> list[dict[str, object]]:
@@ -494,7 +518,17 @@ def _single_run_dir(kb_dir: Path) -> Path:
 def test_s5_atomic_failure_keeps_original_page_and_records_failed_write(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """S5 failure must leave no half-written page and must remain auditable."""
+    """S5 failure must leave the original page whole and durably archived.
+
+    The claim below carries every field the S5 provenance pre-check requires
+    (claim_fingerprint/content_fingerprint/fragment_locator), so the run
+    actually reaches ``_atomic_write`` and hits the injected ``os.replace``
+    failure instead of being rejected earlier by the provenance gate. The
+    call counter proves the stub was really exercised: without it this test
+    could regress back to asserting on a path that os.replace never took,
+    with pytest.raises matching an unrelated error (a repeat of the original
+    empty-run bug).
+    """
     from knowledge_digest.errors import ValidationError
     from knowledge_digest.paths import DigestPaths
     from knowledge_digest.writeback import writeback
@@ -507,8 +541,10 @@ def test_s5_atomic_failure_keeps_original_page_and_records_failed_write(
     target.write_text(original, encoding="utf-8")
     run_dir = kb_dir / "_digest" / "runs" / "atomic-failure"
     real_replace = writeback_module.os.replace
+    replace_calls: list[Path] = []
 
     def fail_target_replace(source: object, destination: object) -> None:
+        replace_calls.append(Path(destination))
         if Path(destination) == target:
             raise OSError("simulated replace failure")
         real_replace(source, destination)
@@ -525,20 +561,39 @@ def test_s5_atomic_failure_keeps_original_page_and_records_failed_write(
         "action": "revise",
         "target_paths": ["notes/existing.md"],
         "final_body": "replacement body",
-        "claims": [{"text": "replacement body", "source_uri": "https://source.example/failure"}],
+        "claims": [
+            {
+                "text": "replacement body",
+                "source_uri": "https://source.example/failure",
+                "claim_fingerprint": "claim-failure-fp",
+                "content_fingerprint": "content-failure-fp",
+                "fragment_locator": "lines:1-1",
+            }
+        ],
     }
 
     with pytest.raises(ValidationError, match="atomic write failed"):
         writeback([draft], run_dir, paths, ("notes", "_archive", "_queues"))
 
+    # The stub must have actually been invoked, and specifically for the
+    # target page: a call count of 0 here would mean the run never reached
+    # _atomic_write and this test would be an empty run again.
+    assert replace_calls, "os.replace was never called; the run did not reach the atomic write path"
+    assert target in replace_calls
+
+    # New writeback semantics (post B1/B2): there is no batch rollback. The
+    # guarantee is that the original is archived to durable storage *before*
+    # any target is overwritten, so the pre-write content survives under
+    # _archive/ even though the target write itself failed.
     assert target.read_text(encoding="utf-8") == original
     assert not list(target.parent.glob(".existing.md.*.tmp"))
-    failed_report = _read_jsonl(run_dir / "s5" / "write-report.jsonl")
-    assert len(failed_report) == 1
-    assert failed_report[0]["draft_id"] == "draft-failure"
-    assert failed_report[0]["target_path"] == "notes/existing.md"
-    assert failed_report[0]["action"] == "revise"
-    assert failed_report[0]["status"] == "failed"
+    archived = list((kb_dir / "_archive").rglob("existing.md"))
+    assert archived, "original page must be archived before the target write is attempted"
+    assert any(candidate.read_text(encoding="utf-8") == original for candidate in archived)
+    archive_records = _read_jsonl(kb_dir / "_archive" / "records.jsonl")
+    assert any(record.get("full_content") == original for record in archive_records)
+    run_archive_records = _read_jsonl(run_dir / "s5" / "archive-records.jsonl")
+    assert any(record.get("full_content") == original for record in run_archive_records)
 
 
 def test_non_dry_run_report_matches_s5_formal_changes(tmp_path: Path) -> None:
@@ -690,6 +745,17 @@ def test_long_document_is_kept_complete_and_emits_split_suggestion(tmp_path: Pat
     assert suggestions and suggestions[0]["line_count"] == len(lines)
     assert suggestions[0]["reason"] == "max_doc_lines exceeded"
     assert all(line in str(drafts[0]["final_body"]) for line in lines)
+
+    # On-disk formal pages are the loss-prevention surface, not just drafts.
+    # Phase0 fixture roots use ``notes`` (not ``pages``); follow write-report.
+    writes = _read_jsonl(run_dir / "s5" / "write-report.jsonl")
+    assert writes, "long document must produce formal page writes"
+    page_paths = [kb_dir / str(write["target_path"]) for write in writes]
+    assert all(path.is_file() for path in page_paths)
+    rendered = "\n".join(
+        path.read_text(encoding="utf-8").split("\n\n## Provenance", 1)[0] for path in page_paths
+    )
+    assert all(line in rendered for line in lines)
 
 
 def test_ac011_out_of_scope_integrations_are_not_created(tmp_path: Path) -> None:
