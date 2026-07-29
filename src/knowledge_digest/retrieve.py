@@ -8,7 +8,7 @@ from typing import Any
 from .config import DigestSettings
 from .jsonl import write_jsonl
 from .paths import DigestPaths
-from .text_similarity import _similarity
+from .text_similarity import JaccardScorer, SimilarityScorer
 
 
 def _page_records(kb_dir: Path, page_root: str) -> list[tuple[Path, str]]:
@@ -25,12 +25,15 @@ def retrieve(
     paths: DigestPaths,
     roots: tuple[str, ...],
     settings: DigestSettings,
+    *,
+    scorer: SimilarityScorer | None = None,
 ) -> list[dict[str, Any]]:
     """For each processable cluster, decide whether to merge, revise, or create a page.
 
     ``insufficient_signal`` is intentionally left to the queue.  ``needs_review``
     is processable, but its risk route is upgraded to high by the preflight rules.
     """
+    active_scorer = scorer or JaccardScorer()
     by_id = {item["raw_id"]: item for item in raw_items}
     pages = _page_records(paths.kb_dir, roots[0])
     decisions: list[dict[str, Any]] = []
@@ -38,7 +41,7 @@ def retrieve(
         if cluster.get("tier", cluster.get("cluster_tier")) == "insufficient_signal":
             continue
         text = "\n".join(by_id[raw_id]["text"] for raw_id in cluster["members"])
-        ranked = sorted(((path, _similarity(text, page_text)) for path, page_text in pages), key=lambda item: (-item[1], str(item[0])))[: settings.top_k]
+        ranked = sorted(((path, active_scorer.score(text, page_text)) for path, page_text in pages), key=lambda item: (-item[1], str(item[0])))[: settings.top_k]
         scored = [(path, round(score, 6)) for path, score in ranked]
         candidate_paths = [str(path.relative_to(paths.kb_dir)) for path, _ in scored]
         candidate_scores = [score for _, score in scored]

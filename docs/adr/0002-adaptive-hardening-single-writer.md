@@ -1,5 +1,9 @@
 # Use adaptive hardening with a single writer
 
+Status: deprecated
+
+Phase 2.5 removed durable recovery state and reduced rethink to one round. Current behavior uses a CLI lock, archives originals before writing, accepts that an extreme failure may leave a partial batch, and recovers by rerunning.
+
 Knowledge Digest will add crash-safe write recovery and adaptive rethink now. Explainable local content signals choose the path: low and medium risk remain single-pass; high risk may use at most three rethink rounds and stops early only when its normalized digest body is byte-identical to the immediately preceding completed round. The user explicitly accepted this direction despite the absence of measured Phase 0/1 quality insufficiency; quality benefit and cost are therefore accepted risks to validate in implementation. The release retains one writer per knowledge base and reuses existing atomic replacement and caught-error rollback, adding durable prepare/commit recovery state around it. Full concurrent-writer support, including CAS conflict handling, remains deferred.
 
 ## Considered Options

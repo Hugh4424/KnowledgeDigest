@@ -9,7 +9,7 @@ from .config import DigestSettings
 from .jsonl import write_jsonl
 from .paths import DigestPaths
 from .queues import write_queues
-from .text_similarity import _similarity, _tokens
+from .text_similarity import JaccardScorer, SimilarityScorer, _tokens
 
 
 def _resolve_queue_root(roots: tuple[str, ...]) -> str:
@@ -24,19 +24,21 @@ def cluster(
     settings: DigestSettings,
     *,
     persist_queues: bool = True,
+    scorer: SimilarityScorer | None = None,
 ) -> list[dict[str, Any]]:
     """Group raw items into complete-linkage clusters and assign tiers."""
+    active_scorer = scorer or JaccardScorer()
     pending = list(raw_items)
     clusters: list[dict[str, Any]] = []
     while pending:
         seed = pending.pop(0)
         members = [seed]
         for candidate in list(pending):
-            similarities = [_similarity(candidate["text"], member["text"]) for member in members]
+            similarities = [active_scorer.score(candidate["text"], member["text"]) for member in members]
             if similarities and min(similarities) >= settings.medium:
                 members.append(candidate)
                 pending.remove(candidate)
-        pair_scores = [_similarity(a["text"], b["text"]) for index, a in enumerate(members) for b in members[index + 1 :]]
+        pair_scores = [active_scorer.score(a["text"], b["text"]) for index, a in enumerate(members) for b in members[index + 1 :]]
         min_pair = min(pair_scores) if pair_scores else 1.0
         token_count = len(_tokens("\n".join(member["text"] for member in members)))
         if token_count < 3:

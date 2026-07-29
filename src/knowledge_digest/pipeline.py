@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import tempfile
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -12,6 +13,7 @@ from .cluster import cluster
 from .config import DigestSettings, RISK_RULE_VERSION
 from .draft import draft
 from .errors import ValidationError
+from .embedding import EmbeddingError, resolve_similarity_backend
 from .ingest import ingest
 from .kb_structure import DEFAULT_ROOTS, StructureContract, inspect_structure
 from .jsonl import append_jsonl, read_jsonl, replace_jsonl, write_jsonl
@@ -24,12 +26,124 @@ from .provenance import (
 )
 from .queues import write_queues
 from .retrieve import retrieve
+from .text_similarity import EmbeddingScorer, JaccardScorer
 from .writeback import targets_for_draft, writeback
 
 
 def _formal_changes(writes: list[dict[str, object]]) -> list[dict[str, object]]:
     keys = ("target_path", "action", "status", "archive_path")
     return [{key: row[key] for key in keys} for row in writes]
+
+
+def _run_similarity_stages(
+    raw_items: list[dict[str, Any]],
+    run_dir: Path,
+    paths: DigestPaths,
+    roots: tuple[str, ...],
+    settings: DigestSettings,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    try:
+        resolution = resolve_similarity_backend(settings)
+    except EmbeddingError as error:
+        resolution = None
+        resolution_failure = error
+    else:
+        resolution_failure = None
+    if resolution_failure is not None:
+        fallback = JaccardScorer()
+        clusters = cluster(raw_items, run_dir, paths, roots, settings, persist_queues=False, scorer=fallback)
+        decisions = retrieve(clusters, raw_items, run_dir, paths, roots, settings, scorer=fallback)
+        return clusters, decisions, {
+            "requested_backend": "embedding",
+            "effective_backend": "jaccard",
+            "reason_code": "embedding_probe_failed",
+            "failure_type": type(resolution_failure).__name__,
+            "fallback_restarted_from": "S2",
+            "cache": {"entries": 0},
+        }
+    assert resolution is not None
+    scorer = (
+        EmbeddingScorer(
+            resolution.client,
+            resolution.probe_fingerprint or "",
+            run_dir / "embedding-cache.jsonl",
+        )
+        if resolution.effective_backend == "embedding"
+        else JaccardScorer()
+    )
+    effective_settings = settings
+    if resolution.thresholds is not None:
+        effective_settings = replace(settings, **resolution.thresholds)
+    try:
+        if isinstance(scorer, EmbeddingScorer):
+            scorer.prefetch([str(item["text"]) for item in raw_items])
+        clusters = cluster(
+            raw_items,
+            run_dir,
+            paths,
+            roots,
+            effective_settings,
+            persist_queues=False,
+            scorer=scorer,
+        )
+        if isinstance(scorer, EmbeddingScorer):
+            by_id = {item["raw_id"]: item for item in raw_items}
+            composite = [
+                "\n".join(str(by_id[raw_id]["text"]) for raw_id in item["members"])
+                for item in clusters
+                if item.get("tier", item.get("cluster_tier")) != "insufficient_signal"
+            ]
+            page_root = paths.kb_dir / roots[0]
+            pages = [
+                path.read_text(encoding="utf-8")
+                for path in sorted(page_root.rglob("*.md"))
+                if path.is_file()
+            ] if page_root.exists() else []
+            scorer.prefetch(composite + pages)
+        decisions = retrieve(
+            clusters,
+            raw_items,
+            run_dir,
+            paths,
+            roots,
+            effective_settings,
+            scorer=scorer,
+        )
+        return clusters, decisions, {
+            "requested_backend": resolution.requested_backend,
+            "effective_backend": resolution.effective_backend,
+            "reason_code": resolution.reason_code,
+            "fallback_restarted_from": None,
+            "cache": getattr(scorer, "cache_stats", {"entries": 0}),
+        }
+    except EmbeddingError as error:
+        fallback = JaccardScorer()
+        clusters = cluster(
+            raw_items,
+            run_dir,
+            paths,
+            roots,
+            settings,
+            persist_queues=False,
+            scorer=fallback,
+        )
+        decisions = retrieve(
+            clusters,
+            raw_items,
+            run_dir,
+            paths,
+            roots,
+            settings,
+            scorer=fallback,
+        )
+        return clusters, decisions, {
+            "requested_backend": "embedding",
+            "effective_backend": "jaccard",
+            "reason_code": "embedding_run_failed",
+            "failure_type": type(error).__name__,
+            "fallback_restarted_from": "S2",
+            "cache": getattr(scorer, "cache_stats", {"entries": 0}),
+        }
 
 
 def _write_plan(drafts: list[dict[str, object]], paths: DigestPaths, roots: tuple[str, ...]) -> dict[str, object]:
@@ -208,6 +322,11 @@ def _initial_report(
                     "status": "pending",
                 },
                 "source_filter": {},
+                "similarity": {
+                    "requested_backend": settings.similarity.backend,
+                    "effective_backend": "jaccard",
+                    "reason_code": "not_resolved",
+                },
                 "pending_review": [],
                 "archive_cleanup": [],
                 "formal_kb_changes": [],
@@ -530,8 +649,9 @@ def _audit_run_locked(
                 planning_dir,
                 persist_snapshot=False,
             )
-            clusters = cluster(raw_items, planning_dir, paths, roots, settings, persist_queues=False)
-            decisions = retrieve(clusters, raw_items, planning_dir, paths, roots, settings)
+            clusters, decisions, similarity_audit = _run_similarity_stages(
+                raw_items, planning_dir, paths, roots, settings
+            )
             for decision in decisions:
                 decision["page_root"] = roots[0]
             drafts = draft(decisions, clusters, raw_items, planning_dir, settings, dry_run=True)
@@ -548,6 +668,9 @@ def _audit_run_locked(
             official_status="dry_run",
         )
         _update_digest_report(report_path, drafts, decisions, clusters, dry_run=True)
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        report["similarity"] = similarity_audit
+        report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         summary = (
             f"dry-run: audited {source_notes} source note(s); roots={', '.join(roots)}; "
             f"top_k={settings.top_k}; high={settings.high:.2f}; medium={settings.medium:.2f}; "
@@ -558,8 +681,9 @@ def _audit_run_locked(
 
     raw_items = ingest(paths, run_dir, persist_snapshot=False)
     failed_snapshots = _read_failed_snapshots(run_dir)
-    clusters = cluster(raw_items, run_dir, paths, roots, settings, persist_queues=False)
-    decisions = retrieve(clusters, raw_items, run_dir, paths, roots, settings)
+    clusters, decisions, similarity_audit = _run_similarity_stages(
+        raw_items, run_dir, paths, roots, settings
+    )
     for decision in decisions:
         decision["page_root"] = roots[0]
     drafts = draft(decisions, clusters, raw_items, run_dir, settings, generator=generator)
@@ -606,6 +730,9 @@ def _audit_run_locked(
         official_status="written",
     )
     _update_digest_report(report_path, drafts, decisions, clusters, dry_run=False)
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    report["similarity"] = similarity_audit
+    report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     summary = (
         f"audit committed: audited {source_notes} source note(s); roots={', '.join(roots)}; "
         f"top_k={settings.top_k}; high={settings.high:.2f}; medium={settings.medium:.2f}; "

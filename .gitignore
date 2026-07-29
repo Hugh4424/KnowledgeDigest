@@ -6,3 +6,4 @@ AGENTS.md
 .worker-mode/
 __pycache__/
 *.py[cod]
+*.egg-info/

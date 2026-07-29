@@ -38,6 +38,7 @@ _CONFIG_KEYS = frozenset(
         "llm_batch_max_claims",
         "llm_batch_max_source_chars",
         "llm_batch_concurrency",
+        "similarity",
     }
 )
 _CONFIG_ALIASES = {
@@ -45,6 +46,21 @@ _CONFIG_ALIASES = {
     "cluster_review_threshold": "medium",
     "max_doc_lines": "max_lines",
 }
+
+
+@dataclass(frozen=True)
+class EmbeddingSettings:
+    base_url: str
+    model: str
+    expected_dimension: int
+    calibration_artifact: Path
+    api_key_env: str
+
+
+@dataclass(frozen=True)
+class SimilaritySettings:
+    backend: str = "jaccard"
+    embedding: EmbeddingSettings | None = None
 
 
 @dataclass(frozen=True)
@@ -62,6 +78,7 @@ class DigestSettings:
     llm_batch_max_claims: int = DEFAULT_LLM_BATCH_MAX_CLAIMS
     llm_batch_max_source_chars: int = DEFAULT_LLM_BATCH_MAX_SOURCE_CHARS
     llm_batch_concurrency: int = DEFAULT_LLM_BATCH_CONCURRENCY
+    similarity: SimilaritySettings = SimilaritySettings()
 
 
 def _load_json(path: Path | None) -> dict[str, Any]:
@@ -99,6 +116,63 @@ def _require_bool(name: str, value: Any) -> bool:
     return value
 
 
+def _similarity_settings(value: Any) -> SimilaritySettings:
+    if value is None:
+        return SimilaritySettings()
+    if not isinstance(value, dict):
+        raise ValidationError("config", "similarity", "must be an object")
+    unknown = sorted(set(value) - {"backend", "embedding"})
+    if unknown:
+        raise ValidationError("config", "similarity", f"unknown field(s): {', '.join(unknown)}")
+    backend = value.get("backend")
+    if backend not in {"jaccard", "embedding"}:
+        raise ValidationError("config", "similarity.backend", "must be jaccard or embedding")
+    raw_embedding = value.get("embedding")
+    if raw_embedding is None:
+        if backend == "embedding":
+            raise ValidationError("config", "similarity.embedding", "is required for embedding")
+        return SimilaritySettings(backend=backend)
+    if not isinstance(raw_embedding, dict):
+        raise ValidationError("config", "similarity.embedding", "must be an object")
+    required = {
+        "base_url",
+        "model",
+        "expected_dimension",
+        "calibration_artifact",
+        "api_key_env",
+    }
+    unknown = sorted(set(raw_embedding) - required)
+    missing = sorted(required - set(raw_embedding))
+    if unknown or missing:
+        details = []
+        if missing:
+            details.append(f"missing field(s): {', '.join(missing)}")
+        if unknown:
+            details.append(f"unknown field(s): {', '.join(unknown)}")
+        raise ValidationError("config", "similarity.embedding", "; ".join(details))
+    for field in ("base_url", "model", "calibration_artifact", "api_key_env"):
+        if not isinstance(raw_embedding[field], str) or not raw_embedding[field].strip():
+            raise ValidationError("config", f"similarity.embedding.{field}", "must be a non-empty string")
+    dimension = _require_int(
+        "similarity.embedding.expected_dimension",
+        raw_embedding["expected_dimension"],
+    )
+    if dimension < 1:
+        raise ValidationError(
+            "config", "similarity.embedding.expected_dimension", "must be at least 1"
+        )
+    return SimilaritySettings(
+        backend=backend,
+        embedding=EmbeddingSettings(
+            base_url=raw_embedding["base_url"],
+            model=raw_embedding["model"],
+            expected_dimension=dimension,
+            calibration_artifact=Path(raw_embedding["calibration_artifact"]),
+            api_key_env=raw_embedding["api_key_env"],
+        ),
+    )
+
+
 def resolve_settings(
     config_path: Path | None,
     *,
@@ -128,6 +202,7 @@ def resolve_settings(
         "llm_batch_max_claims": DEFAULT_LLM_BATCH_MAX_CLAIMS,
         "llm_batch_max_source_chars": DEFAULT_LLM_BATCH_MAX_SOURCE_CHARS,
         "llm_batch_concurrency": DEFAULT_LLM_BATCH_CONCURRENCY,
+        "similarity": None,
     }
     values.update(_load_json(config_path))
 
@@ -173,6 +248,7 @@ def resolve_settings(
         llm_batch_concurrency=_require_int(
             "llm_batch_concurrency", values["llm_batch_concurrency"]
         ),
+        similarity=_similarity_settings(values["similarity"]),
     )
     if settings.llm_format not in SUPPORTED_LLM_FORMATS:
         raise ValidationError(
