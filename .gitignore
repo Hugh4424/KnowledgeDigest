@@ -4,3 +4,5 @@ AGENTS.md
 .multica/
 .omc/
 .worker-mode/
+__pycache__/
+*.py[cod]
