@@ -233,6 +233,130 @@ def test_runner_requires_distinct_absolute_paths(tmp_path: Path) -> None:
         _MODULE.validate_paths(corpus, kb, temp, temp, config)
 
 
+def test_runner_rejects_nonempty_evidence_without_overwriting(tmp_path: Path) -> None:
+    corpus, kb, temp, evidence = (
+        tmp_path / "corpus", tmp_path / "kb", tmp_path / "temp", tmp_path / "evidence"
+    )
+    for path in (corpus, kb, temp, evidence):
+        path.mkdir()
+    _corpus(corpus)
+    config = tmp_path / "config.json"
+    _config(config)
+    existing = evidence / "calibration-artifact.json"
+    existing.write_text("preserve-me", encoding="utf-8")
+    with pytest.raises(ValueError, match="evidence directory must be empty"):
+        _MODULE.run_acceptance(
+            corpus=corpus, kb=kb, temp_root=temp, evidence_dir=evidence, config=config
+        )
+    assert existing.read_text(encoding="utf-8") == "preserve-me"
+
+
+def test_replay_mismatch_is_blocked_and_removes_current_artifact(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    evidence = tmp_path / "evidence"
+    disposable = tmp_path / "temp" / "corpus-copy"
+    kb = tmp_path / "kb"
+    for path in (evidence, disposable, kb):
+        path.mkdir(parents=True)
+    cases = tmp_path / "gold.json"
+    cases.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(_MODULE, "load_confirmed_gold", lambda _path: {"cases": []})
+    monkeypatch.setattr(
+        _MODULE,
+        "_score_real_cases",
+        lambda *_args, **_kwargs: (
+            [],
+            "a" * 64,
+            hashlib.sha256(canonical_json_bytes([])).hexdigest(),
+            [],
+        ),
+    )
+    calls = 0
+    def fake_calibration(argv):
+        nonlocal calls
+        calls += 1
+        output = Path(argv[argv.index("--output") + 1])
+        split = Path(argv[argv.index("--split-audit") + 1])
+        output.write_text(
+            json.dumps(
+                    {
+                        "adoption_status": "not_adopted",
+                        "vectors_hash": hashlib.sha256(canonical_json_bytes([])).hexdigest(),
+                    }
+            ) + ("" if calls == 1 else " "),
+            encoding="utf-8",
+        )
+        split.write_text("{}" + ("" if calls == 1 else " "), encoding="utf-8")
+        return 0
+    monkeypatch.setattr(_MODULE, "calibration_main", fake_calibration)
+    result = _MODULE._default_calibrate(
+        cases=cases,
+        evidence_dir=evidence,
+        service_identity={
+            "endpoint_identity": "http://127.0.0.1:9/v1",
+            "model": "model",
+            "dimension": 3,
+            "probe_fingerprint": "c" * 64,
+        },
+        corpus_hash="d" * 64,
+        config=tmp_path / "config.json",
+        disposable_corpus=disposable,
+        formal_kb=kb,
+        embedding_settings=EmbeddingSettings(
+            "http://127.0.0.1:9/v1", "model", 3, tmp_path / "artifact.json", "KEY"
+        ),
+        digest_settings=DigestSettings(),
+        env={},
+    )
+    assert result == {
+        "result": "BLOCKED",
+        "reason_code": "replay_mismatch",
+        "replay_match": False,
+    }
+    assert not (evidence / "calibration-artifact.json").exists()
+    assert not (tmp_path / "temp" / "scored-cases.json").exists()
+    assert not list(evidence.glob(".replay-*"))
+
+
+def test_calibration_exception_removes_every_partial_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    evidence = tmp_path / "evidence"
+    disposable = tmp_path / "temp" / "corpus-copy"
+    kb = tmp_path / "kb"
+    for path in (evidence, disposable, kb):
+        path.mkdir(parents=True)
+    cases = tmp_path / "gold.json"
+    cases.write_text("{}", encoding="utf-8")
+    vectors_hash = hashlib.sha256(canonical_json_bytes([])).hexdigest()
+    monkeypatch.setattr(_MODULE, "load_confirmed_gold", lambda _path: {"cases": []})
+    monkeypatch.setattr(
+        _MODULE, "_score_real_cases", lambda *_args, **_kwargs: ([], "a" * 64, vectors_hash, [])
+    )
+    def fail_after_partial(argv):
+        Path(argv[argv.index("--output") + 1]).write_text("partial", encoding="utf-8")
+        Path(argv[argv.index("--split-audit") + 1]).write_text("partial", encoding="utf-8")
+        raise RuntimeError("simulated calibration failure")
+    monkeypatch.setattr(_MODULE, "calibration_main", fail_after_partial)
+    with pytest.raises(RuntimeError, match="simulated"):
+        _MODULE._default_calibrate(
+            cases=cases, evidence_dir=evidence,
+            service_identity={
+                "endpoint_identity": "http://127.0.0.1:9/v1", "model": "model",
+                "dimension": 3, "probe_fingerprint": "c" * 64,
+            },
+            corpus_hash="d" * 64, config=tmp_path / "config.json",
+            disposable_corpus=disposable, formal_kb=kb,
+            embedding_settings=EmbeddingSettings(
+                "http://127.0.0.1:9/v1", "model", 3, tmp_path / "artifact.json", "KEY"
+            ),
+            digest_settings=DigestSettings(), env={},
+        )
+    assert not (tmp_path / "temp" / "scored-cases.json").exists()
+    assert not list(evidence.iterdir())
+
+
 def test_blocked_run_proves_isolation_cleanup_and_writes_no_artifact(
     tmp_path: Path,
 ) -> None:

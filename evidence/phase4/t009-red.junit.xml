@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.049" timestamp="2026-07-29T20:39:47.398833+08:00" hostname="MacBook-Pro.local"><testcase classname="" name="tests.acceptance.test_phase4_calibration" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/kd-phase4-t009.h7k4i7/tree/tests/acceptance/test_phase4_calibration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/Hugh/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/acceptance/test_phase4_calibration.py:10: in &lt;module&gt;
+    from knowledge_digest.calibration import (
+E   ModuleNotFoundError: No module named 'knowledge_digest.calibration'</error></testcase></testsuite></testsuites>

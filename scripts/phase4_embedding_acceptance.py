@@ -155,101 +155,75 @@ def _default_calibrate(
     if not cases.is_absolute() or not cases.is_file():
         raise ValueError("cases path must be an existing absolute file")
     raw = load_confirmed_gold(cases)
-    scored_rows, gold_hash, vectors_hash, vector_manifest = _score_real_cases(
-        raw,
-        disposable_corpus=disposable_corpus,
-        kb_root=formal_kb,
-        settings=embedding_settings,
-        digest_settings=digest_settings,
-        env=env,
-    )
     scored_path = disposable_corpus.parent / "scored-cases.json"
-    _write_json(scored_path, {"cases": scored_rows})
-    vector_manifest_path = evidence_dir / "vector-manifest.json"
-    _write_json(vector_manifest_path, vector_manifest)
-    persisted_vectors_hash = _sha256_bytes(
-        json.dumps(
-            json.loads(vector_manifest_path.read_text(encoding="utf-8")),
-            sort_keys=True,
-            separators=(",", ":"),
-        ).encode("utf-8")
-    )
-    if persisted_vectors_hash != vectors_hash:
-        raise RuntimeError("persisted vector manifest hash mismatch")
     artifact = evidence_dir / ARTIFACT_NAME
     split_audit = evidence_dir / "split-coverage-audit.json"
-    exit_code = calibration_main(
-        [
-            "calibrate",
-            "--cases",
-            str(scored_path),
-            "--output",
-            str(artifact),
-            "--split-audit",
-            str(split_audit),
-            "--endpoint-identity",
-            str(service_identity["endpoint_identity"]),
-            "--model",
-            str(service_identity["model"]),
-            "--dimension",
-            str(service_identity["dimension"]),
-            "--probe-fingerprint",
-            str(service_identity["probe_fingerprint"]),
-            "--corpus-hash",
-            corpus_hash,
-            "--gold-hash",
-            gold_hash,
-            "--vectors-hash",
-            vectors_hash,
-            "--config",
-            str(config),
-        ]
-    )
-    if exit_code != 0 or not artifact.is_file():
-        raise RuntimeError("calibration command failed")
-    artifact_value = json.loads(artifact.read_text(encoding="utf-8"))
+    vector_manifest_path = evidence_dir / "vector-manifest.json"
     replay_path = evidence_dir / ".replay-artifact.json"
     replay_audit = evidence_dir / ".replay-split-audit.json"
-    replay_exit = calibration_main(
-        [
-            "calibrate",
-            "--cases",
-            str(scored_path),
-            "--output",
-            str(replay_path),
-            "--split-audit",
-            str(replay_audit),
-            "--endpoint-identity",
-            str(service_identity["endpoint_identity"]),
-            "--model",
-            str(service_identity["model"]),
-            "--dimension",
-            str(service_identity["dimension"]),
-            "--probe-fingerprint",
-            str(service_identity["probe_fingerprint"]),
-            "--corpus-hash",
-            corpus_hash,
-            "--gold-hash",
-            gold_hash,
-            "--vectors-hash",
-            vectors_hash,
+    completed = False
+    try:
+        scored_rows, gold_hash, vectors_hash, vector_manifest = _score_real_cases(
+            raw,
+            disposable_corpus=disposable_corpus,
+            kb_root=formal_kb,
+            settings=embedding_settings,
+            digest_settings=digest_settings,
+            env=env,
+        )
+        _write_json(scored_path, {"cases": scored_rows})
+        _write_json(vector_manifest_path, vector_manifest)
+        persisted_vectors_hash = _sha256_bytes(
+            json.dumps(
+                json.loads(vector_manifest_path.read_text(encoding="utf-8")),
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode("utf-8")
+        )
+        if persisted_vectors_hash != vectors_hash:
+            raise RuntimeError("persisted vector manifest hash mismatch")
+        common = [
+            "calibrate", "--cases", str(scored_path), "--confirmed-gold", str(cases),
+            "--endpoint-identity", str(service_identity["endpoint_identity"]),
+            "--model", str(service_identity["model"]), "--dimension", str(service_identity["dimension"]),
+            "--probe-fingerprint", str(service_identity["probe_fingerprint"]),
+            "--corpus-hash", corpus_hash, "--gold-hash", gold_hash,
+            "--vectors-hash", vectors_hash,
         ]
-    )
-    replay_match = (
-        replay_exit == 0
-        and replay_path.read_bytes() == artifact.read_bytes()
-        and replay_audit.read_bytes() == split_audit.read_bytes()
-        and persisted_vectors_hash == artifact_value["vectors_hash"]
-    )
-    replay_path.unlink(missing_ok=True)
-    replay_audit.unlink(missing_ok=True)
-    scored_path.unlink(missing_ok=True)
-    return {
-        "result": artifact_value["adoption_status"],
-        "artifact": artifact_value,
-        "artifact_path": str(artifact),
-        "replay_match": replay_match,
-    }
+        exit_code = calibration_main(
+            common + ["--output", str(artifact), "--split-audit", str(split_audit), "--config", str(config)]
+        )
+        if exit_code != 0 or not artifact.is_file():
+            raise RuntimeError("calibration command failed")
+        artifact_value = json.loads(artifact.read_text(encoding="utf-8"))
+        replay_exit = calibration_main(
+            common + ["--output", str(replay_path), "--split-audit", str(replay_audit)]
+        )
+        replay_match = (
+            replay_exit == 0
+            and replay_path.is_file()
+            and replay_audit.is_file()
+            and replay_path.read_bytes() == artifact.read_bytes()
+            and replay_audit.read_bytes() == split_audit.read_bytes()
+            and persisted_vectors_hash == artifact_value["vectors_hash"]
+        )
+        if not replay_match:
+            return {"result": "BLOCKED", "reason_code": "replay_mismatch", "replay_match": False}
+        completed = True
+        return {
+            "result": artifact_value["adoption_status"],
+            "artifact": artifact_value,
+            "artifact_path": str(artifact),
+            "replay_match": True,
+        }
+    finally:
+        if not completed:
+            artifact.unlink(missing_ok=True)
+            split_audit.unlink(missing_ok=True)
+            vector_manifest_path.unlink(missing_ok=True)
+        replay_path.unlink(missing_ok=True)
+        replay_audit.unlink(missing_ok=True)
+        scored_path.unlink(missing_ok=True)
 
 
 def _safe_read(root: Path, relative: object) -> str:
@@ -640,8 +614,8 @@ def run_acceptance(
     )
     if any(temp_root.iterdir()):
         raise ValueError("temp root must be empty and caller-owned")
-    if (evidence_dir / RESULT_NAME).exists():
-        raise ValueError("acceptance evidence already exists")
+    if any(evidence_dir.iterdir()):
+        raise ValueError("evidence directory must be empty and caller-owned")
     source_before = tree_manifest(corpus)
     kb_before = tree_manifest(kb)
     config_before = config.read_bytes()
@@ -775,6 +749,8 @@ def run_acceptance(
             result["formal_kb_unchanged"],
             result["config_unchanged"],
             cleanup["complete"],
+            not any(temp_root.iterdir()),
+            not list(evidence_dir.glob(".replay-*")),
         )
     ):
         artifact_path.unlink(missing_ok=True)

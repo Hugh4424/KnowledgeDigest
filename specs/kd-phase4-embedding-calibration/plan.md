@@ -299,12 +299,12 @@ embedding failure → invalidate S2/S3 decisions → Jaccard scorer → rerun S2
 
 ## 13. Test Strategy
 
-- **Target**：FR-CONFIG/EMBED/ARTIFACT；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`; RED=1，GREEN=0；Phase evidence `evidence/phase4/runtime-contract.txt`；Oracle `KD-P4-CONTRACT` 验证默认零请求、严格响应和 artifact 错配。
-- **Target**：FR-SCORE/FALLBACK/COMPAT；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`; RED=1，GREEN=0；Phase evidence `evidence/phase4/fallback.txt`；Oracle `KD-P4-FALLBACK` 验证 S2/S3 单后端、整轮重跑和现有 digest 兼容回归。
-- **Target**：FR-CORPUS-001；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_gold.py`; RED=1，GREEN=0；Phase evidence `evidence/phase4/corpus-prep.txt`；Oracle `KD-P4-CORPUS-PREP` 验证 Markdown-only 副本、manifest、只读边界和 cleanup。
-- **Target**：FR-GOLD；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_gold.py`; RED=1，GREEN=0；Phase evidence `evidence/phase4/gold.txt`；Oracle `KD-P4-GOLD` 验证 AI draft exchange、逐项确认和 identity。
-- **Target**：FR-CONFIG/SCORE/CAL/ADOPT/REPORT；feature-separation 与阈值候选来源必须从 cases 独立重算；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_calibration.py`; RED=1，GREEN=0；`evidence_path`：`evidence/phase4/calibration.txt`；Oracle `KD-P4-CAL` 验证严格 split、feature-separation、阈值候选来源、指标重算、安全门和 replay。
-- **Target**：runner 合同与全回归；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_embedding_runner.py && pytest -q`; RED=1，GREEN=0；Phase evidence `evidence/phase4/runner-and-regression.txt`；Oracle `KD-P4-RUNNER` 同时证明 runner 合同与全量 pytest 回归。
+- **Target**：FR-CONFIG/EMBED/ARTIFACT；`gate_cmd`：`uv run pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`; RED=2（新模块尚不存在时 pytest collection error），GREEN=0；Phase evidence `evidence/phase4/runtime-contract.txt`；Oracle `KD-P4-CONTRACT` 验证默认零请求、严格响应和 artifact 错配。
+- **Target**：FR-SCORE/FALLBACK/COMPAT；`gate_cmd`：`uv run pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`; RED=2（pipeline 尚无 scorer coordinator 时 pytest collection error），GREEN=0；Phase evidence `evidence/phase4/fallback.txt`；Oracle `KD-P4-FALLBACK` 验证 S2/S3 单后端、整轮重跑和现有 digest 兼容回归。
+- **Target**：FR-CORPUS-001；`gate_cmd`：`uv run pytest -q tests/acceptance/test_phase4_gold.py`; RED=2（corpus producer 尚不存在时 pytest collection error），GREEN=0；Phase evidence `evidence/phase4/corpus-prep.txt`；Oracle `KD-P4-CORPUS-PREP` 验证 Markdown-only 副本、manifest、只读边界和 cleanup。
+- **Target**：FR-GOLD；`gate_cmd`：`uv run pytest -q tests/acceptance/test_phase4_gold.py`; RED=2（gold producer 尚不存在时 pytest collection error），GREEN=0；Phase evidence `evidence/phase4/gold.txt`；Oracle `KD-P4-GOLD` 验证 AI draft exchange、逐项确认和 identity。
+- **Target**：FR-CONFIG/SCORE/CAL/ADOPT/REPORT；feature-separation 与阈值候选来源必须从 cases 独立重算；`gate_cmd`：`uv run pytest -q tests/acceptance/test_phase4_calibration.py`; RED=2（calibration domain 尚不存在时 pytest collection error），GREEN=0；`evidence_path`：`evidence/phase4/calibration.txt`；Oracle `KD-P4-CAL` 验证严格 split、feature-separation、阈值候选来源、指标重算、安全门和 replay。
+- **Target**：runner 合同与全回归；`gate_cmd`：`uv run pytest -q tests/acceptance/test_phase4_embedding_runner.py && uv run pytest -q`; RED=2（runner 尚不存在时 pytest collection error），GREEN=0；Phase evidence `evidence/phase4/runner-and-regression.txt`；Oracle `KD-P4-RUNNER` 同时证明 runner 合同与全量 pytest 回归。
 - **Target**：AC-03/AC-11 正式真实服务；`gate_cmd`：`uv run python scripts/phase4_embedding_acceptance.py --corpus "$KD_CONFLUENCE_CORPUS" --kb "$KD_FORMAL_KB" --temp-root "$KD_PHASE4_TEMP_ROOT" --config "$KD_CONFIG" --evidence-dir "$KD_PHASE4_EVIDENCE_DIR" --cases "$KD_PHASE4_CASES"`; expected_exit=0；evidence `$KD_PHASE4_EVIDENCE_DIR/real-service-acceptance.json`；Oracle `KD-P4-REAL-SERVICE` 证明真实受控服务的端点/模型/维度/探针身份、89 Markdown/排除 2 非 Markdown、源与正式 KB before/after 不变、真实批量评分、replay 和敏感扫描；服务不可用只能 BLOCKED 且不得满足 AC-03/AC-11。
 - **Target**：AC-07 manual；检查 `gold-confirmation-audit.json` 的 unconfirmed_count=0 与逐项 identity/decision，再检查 calibration-owned `split-coverage-audit.json` 的 lineage intersection 为空、两集合 strict-cell decidability 完整；证据 `evidence/phase4/gold-manual-audit.json`。
 
@@ -331,7 +331,7 @@ embedding failure → invalidate S2/S3 decisions → Jaccard scorer → rerun S2
 
 ### Verify
 
-- `pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`；证据 `evidence/phase4/runtime-contract.txt`。
+- `uv run pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`；证据 `evidence/phase4/runtime-contract.txt`。
 
 ### Knowledge
 
@@ -370,7 +370,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 
 ### Verify
 
-- `pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`；证据 `evidence/phase4/fallback.txt`。
+- `uv run pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`；证据 `evidence/phase4/fallback.txt`。
 
 ### Knowledge
 
@@ -413,9 +413,9 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 
 ### Verify
 
-- `pytest -q tests/acceptance/test_phase4_gold.py`；证据 `evidence/phase4/gold.txt`，Oracle `KD-P4-GOLD`。
-- `pytest -q tests/acceptance/test_phase4_gold.py`；同时覆盖 FR-CORPUS-001，证据 `evidence/phase4/corpus-prep.txt`，Oracle `KD-P4-CORPUS-PREP`。
-- `pytest -q tests/acceptance/test_phase4_calibration.py`；证据 `evidence/phase4/calibration.txt`，Oracle `KD-P4-CAL`。
+- `uv run pytest -q tests/acceptance/test_phase4_gold.py`；证据 `evidence/phase4/gold.txt`，Oracle `KD-P4-GOLD`。
+- `uv run pytest -q tests/acceptance/test_phase4_gold.py`；同时覆盖 FR-CORPUS-001，证据 `evidence/phase4/corpus-prep.txt`，Oracle `KD-P4-CORPUS-PREP`。
+- `uv run pytest -q tests/acceptance/test_phase4_calibration.py`；证据 `evidence/phase4/calibration.txt`，Oracle `KD-P4-CAL`。
 - 人工核对 `gold-confirmation-audit.json` 与 `split-coverage-audit.json` 并保存 `evidence/phase4/gold-manual-audit.json`。
 
 ### Knowledge
@@ -458,7 +458,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 
 ### Verify
 
-- `pytest -q tests/acceptance/test_phase4_embedding_runner.py && pytest -q`；证据 `evidence/phase4/runner-and-regression.txt`。
+- `uv run pytest -q tests/acceptance/test_phase4_embedding_runner.py && uv run pytest -q`；证据 `evidence/phase4/runner-and-regression.txt`。
 
 ### Knowledge
 

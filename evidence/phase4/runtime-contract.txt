@@ -1,0 +1,8 @@
+phase=Phase 1
+result=pass
+red_ref=evidence/phase4/t001-red.txt
+green_ref=evidence/phase4/t002-green.txt
+gate=uv run pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py
+gate_exit=0
+gate_passed=80
+oracle=KD-P4-CONTRACT

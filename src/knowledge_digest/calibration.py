@@ -126,10 +126,10 @@ def _validate_cases(cases: Iterable[dict[str, Any]], *, require_split: bool) -> 
     for case in materialized:
         if not isinstance(case, dict):
             raise ValidationError("calibration", "case", "must be an object")
-        unknown = sorted(set(case) - _CASE_FIELDS)
-        if unknown:
+        expected_fields = _CASE_FIELDS if require_split else _CASE_FIELDS - {"split"}
+        if set(case) != expected_fields:
             raise ValidationError(
-                "calibration", "case", f"unknown field(s): {', '.join(unknown)}"
+                "calibration", "case", "case fields must match the exact schema"
             )
         case_id = case.get("case_id")
         if not isinstance(case_id, str) or not case_id or case_id in seen_ids:
@@ -139,6 +139,17 @@ def _validate_cases(cases: Iterable[dict[str, Any]], *, require_split: bool) -> 
             raise ValidationError("calibration", case_id, "only confirmed gold is allowed")
         if not isinstance(case.get("lineage_id"), str) or not case["lineage_id"]:
             raise ValidationError("calibration", case_id, "lineage_id is required")
+        content_identity = case.get("content_identity")
+        if (
+            not isinstance(content_identity, str)
+            or len(content_identity) != 64
+            or any(ch not in "0123456789abcdef" for ch in content_identity)
+        ):
+            raise ValidationError(
+                "calibration", case_id, "content_identity must be sha256"
+            )
+        if not isinstance(case.get("label_version"), str) or not case["label_version"]:
+            raise ValidationError("calibration", case_id, "label_version is required")
         if case.get("stage") not in STAGES or case.get("label") not in LABELS:
             raise ValidationError("calibration", case_id, "invalid stage or label")
         _validate_stratum(case)
@@ -158,21 +169,18 @@ def _validate_cases(cases: Iterable[dict[str, Any]], *, require_split: bool) -> 
                 raise ValidationError(
                     "calibration", case_id, f"invalid {backend} outcome"
                 )
-        if "vector_hashes" in case:
-            hashes = case["vector_hashes"]
-            if not isinstance(hashes, dict) or set(hashes) != {"left", "right"}:
-                raise ValidationError("calibration", case_id, "vector_hashes are invalid")
-            for item in hashes.values():
-                if not isinstance(item, str) or len(item) != 64 or any(ch not in "0123456789abcdef" for ch in item):
-                    raise ValidationError("calibration", case_id, "vector hash must be sha256")
-        if "gold_case_hash" in case:
-            item = case["gold_case_hash"]
+        hashes = case["vector_hashes"]
+        if not isinstance(hashes, dict) or set(hashes) != {"left", "right"}:
+            raise ValidationError("calibration", case_id, "vector_hashes are invalid")
+        for item in hashes.values():
             if not isinstance(item, str) or len(item) != 64 or any(ch not in "0123456789abcdef" for ch in item):
-                raise ValidationError("calibration", case_id, "gold_case_hash must be sha256")
-        if "vector_manifest_hash" in case:
-            item = case["vector_manifest_hash"]
+                raise ValidationError("calibration", case_id, "vector hash must be sha256")
+        for field in ("gold_case_hash", "vector_manifest_hash"):
+            item = case[field]
             if not isinstance(item, str) or len(item) != 64 or any(ch not in "0123456789abcdef" for ch in item):
-                raise ValidationError("calibration", case_id, "vector_manifest_hash must be sha256")
+                raise ValidationError("calibration", case_id, f"{field} must be sha256")
+        if not isinstance(case["query_id"], str) or not case["query_id"]:
+            raise ValidationError("calibration", case_id, "query_id is required")
         if require_split and case.get("split") not in {"calibration", "holdout"}:
             raise ValidationError("calibration", case_id, "split is required")
     return materialized

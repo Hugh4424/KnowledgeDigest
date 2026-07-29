@@ -1,0 +1,11 @@
+task=T003
+result=RED
+baseline=3c24d09 plus Phase 1 implementation
+command=uv run pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py
+exit_code=2
+failure=ImportError: knowledge_digest.pipeline has no _run_similarity_stages coordinator
+oracle=KD-P4-FALLBACK
+interpretation=The Phase 1-only tree cannot collect the fallback tests because the shared S2/S3 coordinator does not exist.
+test_contract_sha256=cc9d8a8336ad7efedd328368b7ac4430383384daf03b7f0b5e9dc2d184bb3fd2
+raw_junit_ref=evidence/phase4/t003-red.junit.xml
+raw_junit_sha256=b8feb5f3b53995c60ea0b6a4ab421e77e5fba5ebf618c834ecabc5eebcb9af84

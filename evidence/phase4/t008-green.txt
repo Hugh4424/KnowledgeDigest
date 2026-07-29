@@ -1,0 +1,9 @@
+task=T008
+result=GREEN
+command=uv run pytest -q tests/acceptance/test_phase4_gold.py
+exit_code=0
+passed=8
+oracle=KD-P4-GOLD
+test_contract_sha256=e74bd2fc6ee143997a680542ed33a32dd2def5dabe821b4459d61008a4054f76
+raw_junit_ref=evidence/phase4/t008-green.junit.xml
+raw_junit_sha256=672fd6b68b1d98ad0e6c938cbdc65916974fcd6497c31a0827e9ad00232a0335

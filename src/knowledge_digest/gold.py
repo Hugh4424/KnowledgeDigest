@@ -27,7 +27,33 @@ _DRAFT_FIELDS = frozenset(
         "gold_action",
     }
 )
-_DECISION_FIELDS = frozenset({"case_id", "decision", "label"})
+_DECISION_FIELDS = frozenset(
+    {
+        "case_id",
+        "decision",
+        "label",
+        "lineage_id",
+        "content_identity",
+        "draft_hash",
+    }
+)
+_CONFIRMED_CASE_FIELDS = frozenset(
+    {
+        "case_id",
+        "lineage_id",
+        "content_identity",
+        "stage",
+        "stratum",
+        "label",
+        "label_version",
+        "left_ref",
+        "right_ref",
+        "right_root",
+        "query_id",
+        "gold_action",
+        "confirmed",
+    }
+)
 
 
 def canonical_json_bytes(value: object) -> bytes:
@@ -127,6 +153,29 @@ def _validate_right_root(stage: str, right_root: str) -> None:
         raise ValidationError("gold", "right_root", f"{stage} requires {expected}")
 
 
+def _validate_confirmed_case(case: dict[str, Any]) -> None:
+    if set(case) != _CONFIRMED_CASE_FIELDS:
+        raise ValidationError("gold", "case", "confirmed case fields must match the exact schema")
+    for field in ("case_id", "lineage_id", "label", "label_version", "left_ref", "right_ref", "query_id"):
+        if not isinstance(case[field], str) or not case[field]:
+            raise ValidationError("gold", field, "must be non-empty")
+    _validate_sha256(case["content_identity"], "content_identity")
+    if case["stage"] not in {"S2", "S3"}:
+        raise ValidationError("gold", "stage", "must be S2 or S3")
+    if not isinstance(case["stratum"], dict) or not case["stratum"]:
+        raise ValidationError("gold", "stratum", "must be a non-empty object")
+    if case["right_root"] not in {"corpus", "kb"}:
+        raise ValidationError("gold", "right_root", "must be corpus or kb")
+    _validate_right_root(case["stage"], case["right_root"])
+    if case["stage"] == "S2":
+        if case["gold_action"] is not None:
+            raise ValidationError("gold", "gold_action", "must be null for S2")
+    elif case["gold_action"] not in {"new", "revise", "merge_multiple"}:
+        raise ValidationError("gold", "gold_action", "is required for S3")
+    if case["confirmed"] is not True:
+        raise ValidationError("gold", "confirmed", "must be true")
+
+
 def freeze_confirmed_gold(
     draft_path: Path,
     decisions_path: Path,
@@ -138,6 +187,7 @@ def freeze_confirmed_gold(
         raise ValidationError("gold", output_path, "gold and audit paths must differ")
     drafts = _read_jsonl(draft_path, "draft")
     decisions = _read_jsonl(decisions_path, "decision")
+    draft_hash = hashlib.sha256(draft_path.read_bytes()).hexdigest()
     by_id: dict[str, dict[str, Any]] = {}
     for row in drafts:
         if set(row) != _DRAFT_FIELDS:
@@ -168,13 +218,23 @@ def freeze_confirmed_gold(
 
     decision_by_id: dict[str, dict[str, Any]] = {}
     for row in decisions:
-        if not set(row).issubset(_DECISION_FIELDS) or not {"case_id", "decision"} <= set(row):
+        required = _DECISION_FIELDS - {"label"}
+        if not set(row).issubset(_DECISION_FIELDS) or not required <= set(row):
             raise ValidationError("gold", "decision", "decision fields are invalid")
         case_id = row["case_id"]
         if case_id not in by_id or case_id in decision_by_id:
             raise ValidationError("gold", "decision", "each known case needs one decision")
         if row["decision"] not in {"confirm", "reject"}:
             raise ValidationError("gold", "decision", "must be confirm or reject")
+        draft = by_id[case_id]
+        if (
+            row["lineage_id"] != draft["lineage_id"]
+            or row["content_identity"] != draft["content_identity"]
+            or row["draft_hash"] != draft_hash
+        ):
+            raise ValidationError(
+                "gold", case_id, "decision identity or draft hash mismatch"
+            )
         if "label" in row and (
             row["decision"] != "confirm"
             or not isinstance(row["label"], str)
@@ -197,6 +257,7 @@ def freeze_confirmed_gold(
                 "lineage_id": draft["lineage_id"],
                 "content_identity": draft["content_identity"],
                 "decision": decision["decision"],
+                "draft_hash": draft_hash,
             }
         )
         if decision["decision"] == "confirm":
@@ -257,10 +318,16 @@ def load_confirmed_gold(path: Path) -> dict[str, Any]:
     if value["schema_version"] != "confirmed-gold.v1" or value["unconfirmed_count"] != 0:
         raise ValidationError("gold", path, "gold is not fully confirmed")
     cases = value["cases"]
-    if not isinstance(cases, list) or not all(
-        isinstance(case, dict) and case.get("confirmed") is True for case in cases
+    if not isinstance(cases, list) or not cases or not all(
+        isinstance(case, dict) for case in cases
     ):
         raise ValidationError("gold", path, "unconfirmed case cannot enter metrics")
+    seen: set[str] = set()
+    for case in cases:
+        _validate_confirmed_case(case)
+        if case["case_id"] in seen:
+            raise ValidationError("gold", "case_id", "must be unique")
+        seen.add(case["case_id"])
     actual_hash = hashlib.sha256(
         canonical_json_bytes(
             [hashlib.sha256(canonical_json_bytes(case)).hexdigest() for case in cases]

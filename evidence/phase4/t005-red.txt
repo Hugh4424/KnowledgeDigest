@@ -1,0 +1,9 @@
+task=T005
+result=RED
+baseline=3c24d09 plus Phase 1 and Phase 2 implementation
+exit_code=2
+failure=ModuleNotFoundError: knowledge_digest.corpus_isolation
+oracle=KD-P4-CORPUS-PREP
+test_contract_sha256=e74bd2fc6ee143997a680542ed33a32dd2def5dabe821b4459d61008a4054f76
+raw_junit_ref=evidence/phase4/t005-red.junit.xml
+raw_junit_sha256=dcb2bfa81fddb72ee8cde4eda36b09bcf84bda61db09d5b6ffae5a60c62f8ab6

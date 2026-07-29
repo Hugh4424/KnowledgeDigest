@@ -14,7 +14,7 @@ from knowledge_digest.calibration import (
     feature_separation,
     strict_lineage_split,
 )
-from knowledge_digest.calibration_cli import main
+from knowledge_digest.calibration_cli import main, write_recommended_config
 from knowledge_digest.errors import ValidationError
 
 
@@ -110,6 +110,48 @@ def _binding_hashes(cases: list[dict[str, object]]) -> tuple[str, str]:
     return hashlib.sha256(canonical(gold)).hexdigest(), str(ordered[0]["vector_manifest_hash"])
 
 
+def _write_confirmed_gold(
+    cases: list[dict[str, object]], path: Path
+) -> str:
+    confirmed_cases: list[dict[str, object]] = []
+    for case in sorted(cases, key=lambda item: str(item["case_id"])):
+        raw = {
+            key: case[key]
+            for key in (
+                "case_id",
+                "lineage_id",
+                "content_identity",
+                "stage",
+                "stratum",
+                "label",
+                "label_version",
+                "query_id",
+                "gold_action",
+                "confirmed",
+            )
+        }
+        raw["left_ref"] = f"{case['case_id']}-left.md"
+        raw["right_ref"] = f"{case['case_id']}-right.md"
+        raw["right_root"] = "corpus" if case["stage"] == "S2" else "kb"
+        case["gold_case_hash"] = hashlib.sha256(
+            json.dumps(raw, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
+        confirmed_cases.append(raw)
+    gold_hash, _ = _binding_hashes(cases)
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": "confirmed-gold.v1",
+                "unconfirmed_count": 0,
+                "gold_hash": gold_hash,
+                "cases": confirmed_cases,
+            }
+        ),
+        encoding="utf-8",
+    )
+    return gold_hash
+
+
 def test_feature_separation_is_recomputable_and_thresholds_ignore_holdout() -> None:
     cases = _complete_cases()
     first = build_calibration_result(cases)
@@ -170,6 +212,10 @@ def test_adoption_fails_closed_for_missing_cells_leakage_or_new_errors() -> None
     assert result["adoption_status"] == "not_adopted"
     assert "thresholds" not in result
     assert result["metrics"]["new_errors"]["S2"] == [holdout_s2["case_id"]]
+    missing_identity = copy.deepcopy(cases)
+    del missing_identity[0]["content_identity"]
+    with pytest.raises(ValidationError, match="exact schema"):
+        build_calibration_result(missing_identity)
 
 
 def test_zero_metric_denominator_lists_expansion_and_stays_not_adopted() -> None:
@@ -301,7 +347,9 @@ def test_cli_writes_exact_artifact_and_preserves_explicit_jaccard(
     split_audit = tmp_path / "split-audit.json"
     config = tmp_path / "config.json"
     recommendation = tmp_path / "recommendation.json"
+    confirmed_gold = tmp_path / "confirmed-gold.json"
     complete = _complete_cases()
+    gold_hash = _write_confirmed_gold(complete, confirmed_gold)
     cases_path.write_text(json.dumps({"cases": complete}), encoding="utf-8")
     config.write_text(
         json.dumps(
@@ -317,7 +365,7 @@ def test_cli_writes_exact_artifact_and_preserves_explicit_jaccard(
     recommendation.write_bytes(config.read_bytes())
     before = recommendation.read_bytes()
     digest = "a" * 64
-    gold_hash, vectors_hash = _binding_hashes(complete)
+    _, vectors_hash = _binding_hashes(complete)
 
     assert (
         main(
@@ -325,6 +373,8 @@ def test_cli_writes_exact_artifact_and_preserves_explicit_jaccard(
                 "calibrate",
                 "--cases",
                 str(cases_path),
+                "--confirmed-gold",
+                str(confirmed_gold),
                 "--output",
                 str(artifact_path),
                 "--split-audit",
@@ -374,17 +424,96 @@ def test_cli_writes_exact_artifact_and_preserves_explicit_jaccard(
     assert audit["undecidable_cells"] == []
 
 
+@pytest.mark.parametrize("field", ["lineage_id", "content_identity", "label"])
+def test_cli_rejects_scored_gold_field_tampering_with_old_hash(
+    tmp_path: Path, field: str
+) -> None:
+    complete = _complete_cases()
+    confirmed_gold = tmp_path / "confirmed-gold.json"
+    gold_hash = _write_confirmed_gold(complete, confirmed_gold)
+    complete[0][field] = (
+        hashlib.sha256(b"tampered").hexdigest()
+        if field == "content_identity"
+        else "tampered"
+    )
+    cases_path = tmp_path / "cases.json"
+    cases_path.write_text(json.dumps({"cases": complete}), encoding="utf-8")
+    _, vectors_hash = _binding_hashes(complete)
+    digest = "a" * 64
+    assert main(
+        [
+            "calibrate",
+            "--cases",
+            str(cases_path),
+            "--confirmed-gold",
+            str(confirmed_gold),
+            "--output",
+            str(tmp_path / "artifact.json"),
+            "--split-audit",
+            str(tmp_path / "split.json"),
+            "--endpoint-identity",
+            "https://llm.paxszapp.com:443/v1",
+            "--model",
+            "approved-model",
+            "--dimension",
+            "4",
+            "--probe-fingerprint",
+            digest,
+            "--corpus-hash",
+            digest,
+            "--gold-hash",
+            gold_hash,
+            "--vectors-hash",
+            vectors_hash,
+        ]
+    ) == 2
+
+
+def test_fresh_recommendation_enables_embedding_without_mutating_source(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "config.json"
+    destination = tmp_path / "recommended.json"
+    source.write_text(
+        json.dumps(
+            {
+                "similarity": {
+                    "backend": "jaccard",
+                    "embedding": {
+                        "base_url": "https://llm.paxszapp.com/v1",
+                        "model": "jina-embeddings",
+                    },
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    before = source.read_bytes()
+    assert write_recommended_config(source, destination) is True
+    assert source.read_bytes() == before
+    recommended = json.loads(destination.read_text(encoding="utf-8"))
+    assert recommended["similarity"]["backend"] == "embedding"
+    assert recommended["similarity"]["embedding"] == json.loads(
+        before
+    )["similarity"]["embedding"]
+
+
 def test_cli_blocked_writes_no_artifact(tmp_path: Path) -> None:
     cases = tmp_path / "cases.json"
     artifact = tmp_path / "artifact.json"
     evidence = tmp_path / "BLOCKED.json"
-    cases.write_text(json.dumps({"cases": _complete_cases()}), encoding="utf-8")
+    complete = _complete_cases()
+    confirmed_gold = tmp_path / "confirmed-gold.json"
+    _write_confirmed_gold(complete, confirmed_gold)
+    cases.write_text(json.dumps({"cases": complete}), encoding="utf-8")
     digest = "b" * 64
     exit_code = main(
         [
             "calibrate",
             "--cases",
             str(cases),
+            "--confirmed-gold",
+            str(confirmed_gold),
             "--output",
             str(artifact),
             "--split-audit",

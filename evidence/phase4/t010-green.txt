@@ -1,0 +1,9 @@
+task=T010
+result=GREEN
+command=uv run pytest -q tests/acceptance/test_phase4_calibration.py
+exit_code=0
+passed=13
+oracle=KD-P4-CAL
+test_contract_sha256=03a37d351b709ce319849b38524a179489a0e9d43c2dfa0c6db863955cd3bd68
+raw_junit_ref=evidence/phase4/t010-green.junit.xml
+raw_junit_sha256=d63531e307917a8983c7a1ae28ca28c2dff6f7add6f09bb063cfa6445c699046

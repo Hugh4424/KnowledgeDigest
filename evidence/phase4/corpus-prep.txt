@@ -1,0 +1,7 @@
+phase=Phase 3
+scope=corpus isolation mechanism
+result=pass
+red_ref=evidence/phase4/t005-red.txt
+green_ref=evidence/phase4/t006-green.txt
+gate_passed=8
+real_corpus_status=pending Phase 4 formal gate

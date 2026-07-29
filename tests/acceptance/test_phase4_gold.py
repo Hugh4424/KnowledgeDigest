@@ -12,7 +12,7 @@ from knowledge_digest.corpus_isolation import (
     tree_manifest,
 )
 from knowledge_digest.errors import ValidationError
-from knowledge_digest.gold import freeze_confirmed_gold
+from knowledge_digest.gold import freeze_confirmed_gold, load_confirmed_gold
 
 
 def _write_jsonl(path: Path, rows: list[dict[str, object]]) -> None:
@@ -20,6 +20,19 @@ def _write_jsonl(path: Path, rows: list[dict[str, object]]) -> None:
         "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows),
         encoding="utf-8",
     )
+
+
+def _decision(
+    draft: Path, case: dict[str, object], decision: str, **extra: object
+) -> dict[str, object]:
+    return {
+        "case_id": case["case_id"],
+        "decision": decision,
+        "lineage_id": case["lineage_id"],
+        "content_identity": case["content_identity"],
+        "draft_hash": hashlib.sha256(draft.read_bytes()).hexdigest(),
+        **extra,
+    }
 
 
 def test_prepare_corpus_copies_markdown_only_and_binds_read_only_inputs(tmp_path: Path) -> None:
@@ -88,14 +101,15 @@ def test_gold_requires_per_item_decisions_and_complete_identity(tmp_path: Path) 
         "query_id": "query-a",
         "gold_action": None,
     }
+    draft_rows = [
+        {"case_id": "case-a", **common},
+        {"case_id": "case-b", **{**common, "lineage_id": "lineage-b"}},
+    ]
     _write_jsonl(
         draft,
-        [
-            {"case_id": "case-a", **common},
-            {"case_id": "case-b", **{**common, "lineage_id": "lineage-b"}},
-        ],
+        draft_rows,
     )
-    _write_jsonl(decisions, [{"case_id": "case-a", "decision": "confirm"}])
+    _write_jsonl(decisions, [_decision(draft, draft_rows[0], "confirm")])
     with pytest.raises(ValidationError, match="decision"):
         freeze_confirmed_gold(draft, decisions, output, audit)
     assert not output.exists()
@@ -104,8 +118,8 @@ def test_gold_requires_per_item_decisions_and_complete_identity(tmp_path: Path) 
     _write_jsonl(
         decisions,
         [
-            {"case_id": "case-a", "decision": "confirm"},
-            {"case_id": "case-b", "decision": "reject"},
+            _decision(draft, draft_rows[0], "confirm"),
+            _decision(draft, draft_rows[1], "reject"),
         ],
     )
     result = freeze_confirmed_gold(draft, decisions, output, audit)
@@ -118,12 +132,14 @@ def test_gold_requires_per_item_decisions_and_complete_identity(tmp_path: Path) 
             "case_id": "case-a",
             "content_identity": common["content_identity"],
             "decision": "confirm",
+            "draft_hash": hashlib.sha256(draft.read_bytes()).hexdigest(),
             "lineage_id": "lineage-a",
         },
         {
             "case_id": "case-b",
             "content_identity": common["content_identity"],
             "decision": "reject",
+            "draft_hash": hashlib.sha256(draft.read_bytes()).hexdigest(),
             "lineage_id": "lineage-b",
         },
     ]
@@ -148,8 +164,55 @@ def test_gold_rejects_batch_defaults_duplicate_decisions_and_bad_identity(tmp_pa
         "gold_action": "new",
     }
     _write_jsonl(draft, [row])
-    _write_jsonl(decisions, [{"case_id": "*", "decision": "confirm"}])
+    _write_jsonl(
+        decisions,
+        [
+            {
+                "case_id": "*",
+                "decision": "confirm",
+                "lineage_id": "lineage-a",
+                "content_identity": row["content_identity"],
+                "draft_hash": hashlib.sha256(draft.read_bytes()).hexdigest(),
+            }
+        ],
+    )
     with pytest.raises(ValidationError):
+        freeze_confirmed_gold(
+            draft,
+            decisions,
+            tmp_path / "confirmed.json",
+            tmp_path / "audit.json",
+        )
+
+
+def test_gold_rejects_stale_decision_after_draft_identity_changes(
+    tmp_path: Path,
+) -> None:
+    draft = tmp_path / "draft.jsonl"
+    decisions = tmp_path / "decisions.jsonl"
+    row = {
+        "case_id": "case-a",
+        "lineage_id": "lineage-a",
+        "content_identity": hashlib.sha256(b"original").hexdigest(),
+        "stage": "S2",
+        "stratum": {"relation": "mergeable", "similarity_band": "high"},
+        "ai_label": "positive",
+        "label_version": "v1",
+        "left_ref": "a.md",
+        "right_ref": "b.md",
+        "right_root": "corpus",
+        "query_id": "query-a",
+        "gold_action": None,
+    }
+    _write_jsonl(draft, [row])
+    _write_jsonl(decisions, [_decision(draft, row, "confirm")])
+    mutated = {
+        **row,
+        "lineage_id": "lineage-replaced",
+        "content_identity": hashlib.sha256(b"replacement").hexdigest(),
+    }
+    _write_jsonl(draft, [mutated])
+    with pytest.raises(ValidationError, match="identity or draft hash mismatch"):
         freeze_confirmed_gold(
             draft,
             decisions,
@@ -164,28 +227,29 @@ def test_gold_binds_stage_to_the_only_valid_right_root(
 ) -> None:
     draft = tmp_path / "draft.jsonl"
     decisions = tmp_path / "decisions.jsonl"
+    draft_row = {
+        "case_id": "case-a",
+        "lineage_id": "lineage-a",
+        "content_identity": hashlib.sha256(b"identity").hexdigest(),
+        "stage": stage,
+        "stratum": (
+            {"relation": "mergeable", "similarity_band": "high"}
+            if stage == "S2"
+            else {"action": "new", "target_in_top_k": False}
+        ),
+        "ai_label": "positive" if stage == "S2" else "negative",
+        "label_version": "v1",
+        "left_ref": "a.md",
+        "right_ref": "same-name.md",
+        "right_root": right_root,
+        "query_id": "query-a",
+        "gold_action": None if stage == "S2" else "new",
+    }
     _write_jsonl(
         draft,
-        [{
-            "case_id": "case-a",
-            "lineage_id": "lineage-a",
-            "content_identity": hashlib.sha256(b"identity").hexdigest(),
-            "stage": stage,
-            "stratum": (
-                {"relation": "mergeable", "similarity_band": "high"}
-                if stage == "S2"
-                else {"action": "new", "target_in_top_k": False}
-            ),
-            "ai_label": "positive" if stage == "S2" else "negative",
-            "label_version": "v1",
-            "left_ref": "a.md",
-            "right_ref": "same-name.md",
-            "right_root": right_root,
-            "query_id": "query-a",
-            "gold_action": None if stage == "S2" else "new",
-        }],
+        [draft_row],
     )
-    _write_jsonl(decisions, [{"case_id": "case-a", "decision": "confirm"}])
+    _write_jsonl(decisions, [_decision(draft, draft_row, "confirm")])
     with pytest.raises(ValidationError, match=f"{stage} requires"):
         freeze_confirmed_gold(
             draft,
@@ -193,3 +257,47 @@ def test_gold_binds_stage_to_the_only_valid_right_root(
             tmp_path / "confirmed.json",
             tmp_path / "audit.json",
         )
+
+
+def test_load_confirmed_gold_rejects_missing_or_bad_identity(tmp_path: Path) -> None:
+    path = tmp_path / "confirmed.json"
+    case = {
+        "case_id": "case-a",
+        "lineage_id": "lineage-a",
+        "content_identity": hashlib.sha256(b"identity").hexdigest(),
+        "stage": "S2",
+        "stratum": {"relation": "mergeable", "similarity_band": "high"},
+        "label": "positive",
+        "label_version": "v1",
+        "left_ref": "a.md",
+        "right_ref": "b.md",
+        "right_root": "corpus",
+        "query_id": "query-a",
+        "gold_action": None,
+        "confirmed": True,
+    }
+    for mutation in ("missing", "bad"):
+        candidate = dict(case)
+        if mutation == "missing":
+            del candidate["content_identity"]
+        else:
+            candidate["content_identity"] = "bad"
+        case_hash = hashlib.sha256(
+            json.dumps(candidate, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
+        gold_hash = hashlib.sha256(
+            json.dumps([case_hash], sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
+        path.write_text(
+            json.dumps(
+                {
+                    "schema_version": "confirmed-gold.v1",
+                    "unconfirmed_count": 0,
+                    "gold_hash": gold_hash,
+                    "cases": [candidate],
+                }
+            ),
+            encoding="utf-8",
+        )
+        with pytest.raises(ValidationError):
+            load_confirmed_gold(path)

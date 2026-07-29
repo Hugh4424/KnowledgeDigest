@@ -1,0 +1,10 @@
+task=T004
+result=GREEN
+command=uv run pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py
+exit_code=0
+passed=80
+oracle=KD-P4-FALLBACK
+coverage=one run-scoped scorer; S2 failure fallback; S3 failure discards embedding decisions and reruns S2/S3 with Jaccard; valid vectors retained; final decisions use one backend
+test_contract_sha256=cc9d8a8336ad7efedd328368b7ac4430383384daf03b7f0b5e9dc2d184bb3fd2
+raw_junit_ref=evidence/phase4/t004-green.junit.xml
+raw_junit_sha256=89733658c0f951fabfb1cb879772d036f57123b88c5eb60be0be5d81acf6b0bf

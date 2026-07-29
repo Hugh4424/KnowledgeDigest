@@ -283,6 +283,17 @@ def _update_digest_report(
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def _write_similarity_audit(
+    report_path: Path, similarity_audit: dict[str, Any]
+) -> None:
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    report["similarity"] = similarity_audit
+    report_path.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
 def _initial_report(
     run_dir: Path,
     *,
@@ -668,9 +679,7 @@ def _audit_run_locked(
             official_status="dry_run",
         )
         _update_digest_report(report_path, drafts, decisions, clusters, dry_run=True)
-        report = json.loads(report_path.read_text(encoding="utf-8"))
-        report["similarity"] = similarity_audit
-        report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        _write_similarity_audit(report_path, similarity_audit)
         summary = (
             f"dry-run: audited {source_notes} source note(s); roots={', '.join(roots)}; "
             f"top_k={settings.top_k}; high={settings.high:.2f}; medium={settings.medium:.2f}; "
@@ -706,6 +715,7 @@ def _audit_run_locked(
             official_status="blocked_coverage",
         )
         _update_digest_report(report_path, drafts, decisions, clusters, dry_run=False)
+        _write_similarity_audit(report_path, similarity_audit)
         return report_path, "audit blocked: coverage mapping is incomplete; no formal knowledge-base files written"
 
     writes, pending, cleanup = _commit_outputs(
@@ -730,9 +740,7 @@ def _audit_run_locked(
         official_status="written",
     )
     _update_digest_report(report_path, drafts, decisions, clusters, dry_run=False)
-    report = json.loads(report_path.read_text(encoding="utf-8"))
-    report["similarity"] = similarity_audit
-    report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _write_similarity_audit(report_path, similarity_audit)
     summary = (
         f"audit committed: audited {source_notes} source note(s); roots={', '.join(roots)}; "
         f"top_k={settings.top_k}; high={settings.high:.2f}; medium={settings.medium:.2f}; "

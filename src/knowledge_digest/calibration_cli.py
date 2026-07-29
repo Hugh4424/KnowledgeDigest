@@ -15,7 +15,12 @@ from .calibration import CalibrationBlocked, build_calibration_result
 from .calibration_artifact import validate_calibration_artifact
 from .corpus_isolation import cleanup_disposable_corpus, prepare_disposable_corpus
 from .errors import ValidationError
-from .gold import canonical_json_bytes, freeze_confirmed_gold, write_gold_draft
+from .gold import (
+    canonical_json_bytes,
+    freeze_confirmed_gold,
+    load_confirmed_gold,
+    write_gold_draft,
+)
 
 
 def _read_object(path: Path) -> dict[str, Any]:
@@ -120,8 +125,49 @@ def _calibrate(args: argparse.Namespace) -> int:
             _write_json(args.blocked_evidence, blocked.evidence)
             return 2
     result = build_calibration_result(cases)
+    confirmed = load_confirmed_gold(args.confirmed_gold)
+    confirmed_cases = confirmed["cases"]
+    confirmed_by_id = {case["case_id"]: case for case in confirmed_cases}
     ordered_cases = sorted(cases, key=lambda item: item["case_id"])
-    gold_binding = [case.get("gold_case_hash") for case in ordered_cases]
+    gold_owned_fields = (
+        "case_id",
+        "lineage_id",
+        "content_identity",
+        "stage",
+        "stratum",
+        "label",
+        "label_version",
+        "query_id",
+        "gold_action",
+        "confirmed",
+    )
+    if set(confirmed_by_id) != {case.get("case_id") for case in ordered_cases}:
+        raise ValidationError(
+            "calibration",
+            "confirmed_gold",
+            "scored cases do not bind the frozen confirmed gold",
+        )
+    gold_binding: list[str] = []
+    for case in ordered_cases:
+        confirmed_case = confirmed_by_id[case["case_id"]]
+        if any(case.get(field) != confirmed_case[field] for field in gold_owned_fields):
+            raise ValidationError(
+                "calibration",
+                "confirmed_gold",
+                "scored cases do not match the frozen confirmed gold",
+            )
+        canonical_hash = hashlib.sha256(canonical_json_bytes(confirmed_case)).hexdigest()
+        if case.get("gold_case_hash") != canonical_hash:
+            raise ValidationError(
+                "calibration",
+                "confirmed_gold",
+                "scored case hash does not bind the frozen confirmed gold",
+            )
+        gold_binding.append(canonical_hash)
+    if args.gold_hash != confirmed["gold_hash"]:
+        raise ValidationError(
+            "calibration", "gold_hash", "does not match the frozen confirmed gold"
+        )
     vector_manifest_hashes = {case.get("vector_manifest_hash") for case in ordered_cases}
     if any(not isinstance(item, str) for item in gold_binding) or _sha256(gold_binding) != args.gold_hash:
         raise ValidationError("calibration", "gold_hash", "does not bind the confirmed cases")
@@ -194,6 +240,7 @@ def _parser() -> argparse.ArgumentParser:
 
     calibrate = commands.add_parser("calibrate")
     calibrate.add_argument("--cases", type=Path, required=True)
+    calibrate.add_argument("--confirmed-gold", type=Path, required=True)
     calibrate.add_argument("--output", type=Path, required=True)
     calibrate.add_argument("--split-audit", type=Path, required=True)
     calibrate.add_argument("--endpoint-identity", required=True)

@@ -1,0 +1,7 @@
+phase=Phase 3
+scope=gold draft and per-item confirmation mechanism
+result=pass
+red_ref=evidence/phase4/t007-red.txt
+green_ref=evidence/phase4/t008-green.txt
+gate_passed=8
+manual_gold_status=pending real candidate confirmation

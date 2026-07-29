@@ -1,0 +1,11 @@
+task=T001
+result=RED
+baseline=3c24d09
+command=uv run pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py
+exit_code=2
+failure=ModuleNotFoundError: knowledge_digest.calibration
+oracle=KD-P4-CONTRACT
+interpretation=The pre-Phase-4 baseline cannot collect the new contract tests because the required artifact module does not exist.
+test_contract_sha256=cc9d8a8336ad7efedd328368b7ac4430383384daf03b7f0b5e9dc2d184bb3fd2
+raw_junit_ref=evidence/phase4/t001-red.junit.xml
+raw_junit_sha256=c2d7d28c11576095361831d6cf181d106077e4d0ae0d70610e51ebb378c29b08

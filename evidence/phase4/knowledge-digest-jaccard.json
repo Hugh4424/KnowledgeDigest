@@ -1,0 +1,12 @@
+{
+  "similarity": {
+    "backend": "jaccard",
+    "embedding": {
+      "base_url": "https://llm.paxszapp.com/v1",
+      "model": "jina-embeddings",
+      "expected_dimension": 1024,
+      "calibration_artifact": "/Users/Hugh/Hugh/Project/KnowledgeDigest-kd-phase4-embedding-calibration/evidence/phase4/calibration-artifact.json",
+      "api_key_env": "KD_PHASE4_EMBEDDING_KEY"
+    }
+  }
+}

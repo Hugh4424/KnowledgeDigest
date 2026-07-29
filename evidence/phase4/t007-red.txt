@@ -1,0 +1,9 @@
+task=T007
+result=RED
+baseline=Phase 2 plus T006 corpus producer
+exit_code=2
+failure=ModuleNotFoundError: knowledge_digest.gold
+oracle=KD-P4-GOLD
+test_contract_sha256=e74bd2fc6ee143997a680542ed33a32dd2def5dabe821b4459d61008a4054f76
+raw_junit_ref=evidence/phase4/t007-red.junit.xml
+raw_junit_sha256=baab158570781d3b9f9e344ebd8cfa3f244b1abc59d57baaa3bf60b9abe54970

@@ -1,0 +1,7 @@
+phase=Phase 3
+scope=calibration and adoption mechanism
+result=pass
+red_ref=evidence/phase4/t009-red.txt
+green_ref=evidence/phase4/t010-green.txt
+gate_passed=13
+formal_artifact_status=pending real scored confirmed gold

@@ -62,7 +62,7 @@ def normalize_endpoint_identity(base_url: str) -> str:
 
 
 class OpenAIEmbeddingClient:
-    def __init__(self, settings: EmbeddingSettings, *, api_key: str | None = None, timeout: float = 30.0):
+    def __init__(self, settings: EmbeddingSettings, *, api_key: str | None = None, timeout: float = 180.0):
         self.endpoint_identity = normalize_endpoint_identity(settings.base_url)
         self.model = settings.model
         self.dimension = settings.expected_dimension
@@ -96,7 +96,7 @@ class OpenAIEmbeddingClient:
             raise EmbeddingBatchError("embedding response indexes are incomplete")
         return [ordered[index] for index in range(count)]
 
-    def embed(self, texts: list[str]) -> list[list[float]]:
+    def _embed_batch(self, texts: list[str]) -> list[list[float]]:
         body = json.dumps({"model": self.model, "input": texts}).encode("utf-8")
         headers = {"Content-Type": "application/json"}
         if self._api_key:
@@ -110,6 +110,29 @@ class OpenAIEmbeddingClient:
         except (HTTPError, URLError, OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
             raise EmbeddingError(f"embedding request failed ({type(error).__name__})") from error
         return self.validate_response(payload, count=len(texts), dimension=self.dimension)
+
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        """Embed every input in bounded batches; publish nothing on partial failure."""
+        if not texts:
+            return []
+        if any(len(text) > 70_000 for text in texts):
+            raise EmbeddingBatchError("embedding input exceeds batch character limit")
+        batches: list[list[str]] = []
+        current: list[str] = []
+        current_chars = 0
+        for text in texts:
+            if current and (len(current) >= 8 or current_chars + len(text) > 70_000):
+                batches.append(current)
+                current = []
+                current_chars = 0
+            current.append(text)
+            current_chars += len(text)
+        if current:
+            batches.append(current)
+        vectors: list[list[float]] = []
+        for batch in batches:
+            vectors.extend(self._embed_batch(batch))
+        return vectors
 
     def probe_fingerprint(self) -> str:
         vector = self.embed(["KnowledgeDigest embedding identity probe"])[0]

@@ -1,0 +1,9 @@
+task=T012
+result=GREEN
+command=uv run pytest -q tests/acceptance/test_phase4_embedding_runner.py
+exit_code=0
+passed=9
+oracle=KD-P4-REAL-RUNNER
+test_contract_sha256=a7d7f4f67cc24dd37ed27c81df6653823bf45625c95e12c10404b91419691e80
+raw_junit_ref=evidence/phase4/t012-green.junit.xml
+raw_junit_sha256=5feabff2bd75971165669a3aa33820eb7a7fb914c8d21b2ce23fe2839530aa0d

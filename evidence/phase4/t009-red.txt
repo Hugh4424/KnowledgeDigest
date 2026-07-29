@@ -1,0 +1,9 @@
+task=T009
+result=RED
+baseline=Phase 2 plus T006 and T008 producers
+exit_code=2
+failure=ModuleNotFoundError: knowledge_digest.calibration
+oracle=KD-P4-CAL
+test_contract_sha256=03a37d351b709ce319849b38524a179489a0e9d43c2dfa0c6db863955cd3bd68
+raw_junit_ref=evidence/phase4/t009-red.junit.xml
+raw_junit_sha256=97e8e4cd5c61dbd0a20a540f7211eb04915700decd395f2c105596646c4dc0e4

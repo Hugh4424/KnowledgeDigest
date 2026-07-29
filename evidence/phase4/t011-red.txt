@@ -1,0 +1,10 @@
+task=T011
+result=RED
+baseline=3c24d09
+command=uv run pytest -q tests/acceptance/test_phase4_embedding_runner.py
+exit_code=2
+failure=ImportError: cannot import name EmbeddingSettings
+oracle=KD-P4-REAL-RUNNER
+test_contract_sha256=a7d7f4f67cc24dd37ed27c81df6653823bf45625c95e12c10404b91419691e80
+raw_junit_ref=evidence/phase4/t011-red.junit.xml
+raw_junit_sha256=e7a29b96dfd94445bad047ee36e5dc3e1fe2557dfd8855462d2adbb6ec9b6595
