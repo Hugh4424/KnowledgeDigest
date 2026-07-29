@@ -10,6 +10,7 @@ import pytest
 from knowledge_digest.calibration import (
     CalibrationBlocked,
     build_calibration_result,
+    coverage_audit,
     feature_separation,
     strict_lineage_split,
 )
@@ -116,6 +117,13 @@ def test_feature_separation_is_recomputable_and_thresholds_ignore_holdout() -> N
     assert set(first["thresholds"]) == {"high", "medium", "page_match_threshold"}
     assert first["metrics"]["feature_separation"] == feature_separation(cases, "calibration")
     assert first["metrics"]["new_errors"] == {"S2": [], "S3": []}
+    assert first["metrics"]["tier_distribution"]["gate_effect"] == "diagnostic_only"
+    assert set(first["metrics"]["tier_distribution"]) == {
+        "basis",
+        "gate_effect",
+        "jaccard",
+        "embedding",
+    }
 
     changed_holdout = copy.deepcopy(cases)
     for case in changed_holdout:
@@ -127,18 +135,22 @@ def test_feature_separation_is_recomputable_and_thresholds_ignore_holdout() -> N
 
 def test_adoption_fails_closed_for_missing_cells_leakage_or_new_errors() -> None:
     cases = _complete_cases()
-    with pytest.raises(ValidationError, match="coverage"):
-        build_calibration_result(
-            [
-                case
-                for case in cases
-                if not (
-                    case["split"] == "holdout"
-                    and case["stage"] == "S3"
-                    and case["label"] == "negative"
-                )
-            ]
-        )
+    incomplete = build_calibration_result(
+        [
+            case
+            for case in cases
+            if not (
+                case["split"] == "holdout"
+                and case["stage"] == "S3"
+                and case["label"] == "negative"
+            )
+        ]
+    )
+    assert incomplete["adoption_status"] == "not_adopted"
+    assert "thresholds" not in incomplete
+    audit = incomplete["metrics"]["coverage"]
+    assert audit["undecidable_cells"] == audit["missing_cells"]
+    assert all("split=holdout" in cell for cell in audit["undecidable_cells"])
 
     leaked = copy.deepcopy(cases)
     leaked[-1]["lineage_id"] = leaked[0]["lineage_id"]
@@ -158,6 +170,44 @@ def test_adoption_fails_closed_for_missing_cells_leakage_or_new_errors() -> None
     assert result["adoption_status"] == "not_adopted"
     assert "thresholds" not in result
     assert result["metrics"]["new_errors"]["S2"] == [holdout_s2["case_id"]]
+
+
+def test_zero_metric_denominator_lists_expansion_and_stays_not_adopted() -> None:
+    cases = _complete_cases()
+    for case in cases:
+        if case["split"] == "holdout":
+            case["outcomes"]["embedding"] = {
+                "predicted_positive": False,
+                "correct": case["label"] == "negative",
+                "error": case["label"] == "positive",
+            }
+    result = build_calibration_result(cases)
+    assert result["adoption_status"] == "not_adopted"
+    assert "thresholds" not in result
+    assert result["metrics"]["status"] == "zero_metric_denominator"
+    assert result["metrics"]["coverage"]["all_metric_denominators_nonzero"] is False
+    assert result["metrics"]["coverage"]["undecidable_cells"] == [
+        "S2|embedding|precision|predicted_positive",
+        "S3|embedding|precision|predicted_positive",
+    ]
+
+
+def test_tier_distribution_deduplicates_observed_clusters() -> None:
+    cases = _complete_cases()
+    for case in cases:
+        if case["split"] == "holdout" and case["stage"] == "S2":
+            for backend in ("jaccard", "embedding"):
+                case["outcomes"][backend]["observed_clusters"] = [
+                    {"cluster_id": f"{backend}-shared", "tier": "needs_review"}
+                ]
+    distribution = build_calibration_result(cases)["metrics"]["tier_distribution"]
+    assert distribution["basis"] == "holdout-s2-observed-unique-cluster-tiers.v1"
+    assert distribution["jaccard"]["counts"] == {
+        "auto": 0,
+        "needs_review": 1,
+        "insufficient_signal": 0,
+    }
+    assert distribution["embedding"]["counts"] == distribution["jaccard"]["counts"]
 
 
 def test_split_is_deterministic_stratified_and_confirmed_only() -> None:
@@ -212,6 +262,26 @@ def test_split_is_deterministic_stratified_and_confirmed_only() -> None:
     bad[0]["confirmed"] = False
     with pytest.raises(ValidationError, match="confirmed"):
         strict_lineage_split(bad)
+
+
+def test_single_lineage_cell_becomes_not_adopted_expansion_evidence() -> None:
+    unsplit = [
+        {key: value for key, value in case.items() if key != "split"}
+        for case in _complete_cases()
+        if case["split"] == "calibration"
+    ]
+    single_cell = unsplit[0]["stratum"]
+    reduced = [
+        case
+        for index, case in enumerate(unsplit)
+        if case["stratum"] != single_cell or index == 0
+    ]
+    split = strict_lineage_split(reduced)
+    audit = coverage_audit(split)
+    assert audit["undecidable_cells"]
+    result = build_calibration_result(split)
+    assert result["adoption_status"] == "not_adopted"
+    assert result["metrics"]["coverage"]["undecidable_cells"] == audit["undecidable_cells"]
 
 
 def test_service_unavailable_is_blocked_not_an_artifact() -> None:
@@ -299,7 +369,9 @@ def test_cli_writes_exact_artifact_and_preserves_explicit_jaccard(
         "thresholds",
     }
     assert recommendation.read_bytes() == before
-    assert json.loads(split_audit.read_text(encoding="utf-8"))["lineage_intersection"] == []
+    audit = json.loads(split_audit.read_text(encoding="utf-8"))
+    assert audit["lineage_intersection"] == []
+    assert audit["undecidable_cells"] == []
 
 
 def test_cli_blocked_writes_no_artifact(tmp_path: Path) -> None:

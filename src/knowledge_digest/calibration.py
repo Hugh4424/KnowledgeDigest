@@ -8,6 +8,7 @@ import math
 from collections import defaultdict
 from typing import Any, Iterable
 
+from .config import DEFAULT_HIGH, DEFAULT_MEDIUM
 from .errors import ValidationError
 
 BACKENDS = ("jaccard", "embedding")
@@ -40,6 +41,10 @@ _OUTCOME_FIELDS = frozenset(
         "predicted_positive",
         "action_correct",
         "predicted_action",
+        "predicted_tier",
+        "tier_high",
+        "tier_medium",
+        "observed_clusters",
     }
 )
 _S2_RELATIONS = {"mergeable", "not_mergeable"}
@@ -190,8 +195,11 @@ def strict_lineage_split(cases: Iterable[dict[str, Any]]) -> list[dict[str, Any]
     for lineage, strata in lineage_strata.items():
         for cell in strata:
             by_stratum[cell].append(lineage)
-    if any(len(set(members)) < 2 for members in by_stratum.values()):
-        raise ValidationError("calibration", "coverage", "every strict cell needs two lineages")
+    coverable_strata = {
+        cell: members
+        for cell, members in by_stratum.items()
+        if len(set(members)) >= 2
+    }
     ordered_lineages = sorted(
         lineages,
         key=lambda value: (
@@ -206,7 +214,7 @@ def strict_lineage_split(cases: Iterable[dict[str, Any]]) -> list[dict[str, Any]
         if index == len(ordered_lineages):
             return all(
                 {assignment[lineage] for lineage in members} == {"calibration", "holdout"}
-                for members in by_stratum.values()
+                for members in coverable_strata.values()
             )
         lineage = ordered_lineages[index]
         preferred = (
@@ -217,7 +225,7 @@ def strict_lineage_split(cases: Iterable[dict[str, Any]]) -> list[dict[str, Any]
         for split in (preferred, "holdout" if preferred == "calibration" else "calibration"):
             assignment[lineage] = split
             impossible = False
-            for members in by_stratum.values():
+            for members in coverable_strata.values():
                 assigned = {assignment[item] for item in members if item in assignment}
                 if len(assigned) == 1 and all(item in assignment for item in members):
                     impossible = True
@@ -250,17 +258,12 @@ def _coverage_audit(cases: list[dict[str, Any]]) -> dict[str, Any]:
         key = f"{case['stage']}|{case['label']}|{_stratum_key(case)}"
         cells.setdefault(key, {"calibration": 0, "holdout": 0})
         cells[key][case["split"]] += 1
-    missing = sorted(key for key, counts in cells.items() if 0 in counts.values())
-    required_stage_labels = {
-        (split, stage, label)
-        for split in ("calibration", "holdout")
-        for stage in STAGES
-        for label in LABELS
-    }
-    present_stage_labels = {
-        (case["split"], case["stage"], case["label"]) for case in cases
-    }
-    missing_stage_labels = sorted(required_stage_labels - present_stage_labels)
+    missing = sorted(
+        f"{key}|split={split}"
+        for key, counts in cells.items()
+        for split, count in counts.items()
+        if count == 0
+    )
     required_cells = {
         f"S2|{label}|{json.dumps({'relation': relation, 'similarity_band': band}, sort_keys=True, separators=(',', ':'))}"
         for relation, label in (("mergeable", "positive"), ("not_mergeable", "negative"))
@@ -270,16 +273,27 @@ def _coverage_audit(cases: list[dict[str, Any]]) -> dict[str, Any]:
         for action in sorted(_S3_ACTIONS)
         for target in (False, True)
     }
-    missing_required_cells = sorted(required_cells - set(cells))
-    if missing or missing_stage_labels or missing_required_cells:
-        raise ValidationError("calibration", "coverage", "strict coverage is incomplete")
+    missing_required_cells = sorted(
+        f"{key}|split={split}"
+        for key in required_cells - set(cells)
+        for split in ("calibration", "holdout")
+    )
+    # Exact strict cells are the expansion contract; stage/label gaps are
+    # derivable from them and would only duplicate the requested work.
+    undecidable = sorted(set(missing + missing_required_cells))
     return {
         "schema_version": "split-coverage-audit.v1",
         "lineage_intersection": intersection,
         "cells": {key: cells[key] for key in sorted(cells)},
-        "missing_cells": [],
-        "all_metric_denominators_nonzero": True,
+        "missing_cells": undecidable,
+        "undecidable_cells": undecidable,
+        "all_metric_denominators_nonzero": not undecidable,
     }
+
+
+def coverage_audit(cases: Iterable[dict[str, Any]]) -> dict[str, Any]:
+    """Return the strict split expansion contract without running metrics."""
+    return _coverage_audit(_validate_cases(cases, require_split=True))
 
 
 def feature_separation(
@@ -352,6 +366,26 @@ def _classification_metrics(cases: list[dict[str, Any]], backend: str) -> dict[s
     return {"precision": precision, "recall": recall, "f1": f1}
 
 
+def _metric_denominator_gaps(cases: list[dict[str, Any]]) -> list[str]:
+    gaps: list[str] = []
+    holdout = [case for case in cases if case["split"] == "holdout"]
+    for stage in STAGES:
+        stage_cases = [case for case in holdout if case["stage"] == stage]
+        for backend in BACKENDS:
+            true_positive = false_positive = false_negative = 0
+            for case in stage_cases:
+                actual = case["label"] == "positive"
+                predicted = _predicted_positive(case, backend)
+                true_positive += int(actual and predicted)
+                false_positive += int(not actual and predicted)
+                false_negative += int(actual and not predicted)
+            if true_positive + false_positive == 0:
+                gaps.append(f"{stage}|{backend}|precision|predicted_positive")
+            if true_positive + false_negative == 0:
+                gaps.append(f"{stage}|{backend}|recall|gold_positive")
+    return gaps
+
+
 def _complete_metrics(cases: list[dict[str, Any]]) -> dict[str, Any]:
     holdout = [case for case in cases if case["split"] == "holdout"]
     metrics: dict[str, Any] = {"S2": {}, "S3": {}}
@@ -413,6 +447,122 @@ def _thresholds(separation: dict[str, Any]) -> tuple[dict[str, float], dict[str,
     return values, provenance
 
 
+def _partial_feature_separation(cases: list[dict[str, Any]]) -> dict[str, Any]:
+    """Keep incomplete calibration evidence machine-readable without inventing data."""
+    result: dict[str, Any] = {}
+    for stage in STAGES:
+        result[stage] = {}
+        for backend in BACKENDS:
+            classes: dict[str, Any] = {}
+            for label in LABELS:
+                values = [
+                    _finite_score(case["scores"][backend], backend)
+                    for case in cases
+                    if case["split"] == "calibration"
+                    and case["stage"] == stage
+                    and case["label"] == label
+                ]
+                classes[label] = _distribution(values) if values else None
+            result[stage][backend] = {
+                **classes,
+                "status": "insufficient_coverage",
+                "overlap_count": None,
+                "overlap_rate": None,
+                "margin": None,
+            }
+    return result
+
+
+def _tier_distribution(
+    cases: list[dict[str, Any]], thresholds: dict[str, float]
+) -> dict[str, Any]:
+    """Diagnostic-only S2 holdout pair score bands for both backends."""
+
+    def counts(backend: str, high: float, medium: float) -> tuple[dict[str, int], bool]:
+        result = {"auto": 0, "needs_review": 0, "insufficient_signal": 0}
+        observed: dict[str, str] = {}
+        pair_cases: list[dict[str, Any]] = []
+        for case in cases:
+            if case["split"] != "holdout" or case["stage"] != "S2":
+                continue
+            pair_cases.append(case)
+            clusters = case["outcomes"][backend].get("observed_clusters")
+            if isinstance(clusters, list):
+                for cluster in clusters:
+                    if (
+                        isinstance(cluster, dict)
+                        and isinstance(cluster.get("cluster_id"), str)
+                        and cluster.get("tier") in result
+                    ):
+                        existing = observed.setdefault(
+                            cluster["cluster_id"], cluster["tier"]
+                        )
+                        if existing != cluster["tier"]:
+                            raise ValidationError(
+                                "calibration",
+                                cluster["cluster_id"],
+                                "cluster tier conflicts across cases",
+                            )
+        if observed:
+            for tier in observed.values():
+                result[tier] += 1
+            return result, True
+        for case in pair_cases:
+            tier = case["outcomes"][backend].get("predicted_tier")
+            if tier not in result:
+                score = _finite_score(case["scores"][backend], backend)
+                tier = (
+                    "auto"
+                    if score >= high
+                    else "needs_review"
+                    if score >= medium
+                    else "insufficient_signal"
+                )
+            result[tier] += 1
+        return result, False
+
+    def recorded_threshold(backend: str, name: str, fallback: float) -> float:
+        values = {
+            case["outcomes"][backend].get(name)
+            for case in cases
+            if case["split"] == "holdout" and case["stage"] == "S2"
+        }
+        numeric = {
+            float(value)
+            for value in values
+            if isinstance(value, (int, float)) and not isinstance(value, bool)
+        }
+        return next(iter(numeric)) if len(numeric) == 1 else fallback
+
+    jaccard_high = recorded_threshold("jaccard", "tier_high", DEFAULT_HIGH)
+    jaccard_medium = recorded_threshold("jaccard", "tier_medium", DEFAULT_MEDIUM)
+    jaccard_counts, jaccard_actual = counts(
+        "jaccard", jaccard_high, jaccard_medium
+    )
+    embedding_counts, embedding_actual = counts(
+        "embedding", thresholds["high"], thresholds["medium"]
+    )
+    return {
+        "basis": (
+            "holdout-s2-observed-unique-cluster-tiers.v1"
+            if jaccard_actual and embedding_actual
+            else "holdout-s2-pair-score-bands.v1"
+        ),
+        "gate_effect": "diagnostic_only",
+        "jaccard": {
+            "thresholds": {"high": jaccard_high, "medium": jaccard_medium},
+            "counts": jaccard_counts,
+        },
+        "embedding": {
+            "thresholds": {
+                "high": thresholds["high"],
+                "medium": thresholds["medium"],
+            },
+            "counts": embedding_counts,
+        },
+    }
+
+
 def _new_errors(cases: list[dict[str, Any]]) -> dict[str, list[str]]:
     result: dict[str, list[str]] = {"S2": [], "S3": []}
     for case in cases:
@@ -462,9 +612,61 @@ def build_calibration_result(
         raise CalibrationBlocked(service_failure_code)
     rows = _validate_cases(cases, require_split=True)
     coverage = _coverage_audit(rows)
+    if coverage["undecidable_cells"]:
+        return {
+            "adoption_status": "not_adopted",
+            "metrics": {
+                "feature_separation": _partial_feature_separation(rows),
+                "threshold_provenance": None,
+                "holdout": None,
+                "new_errors": {"S2": [], "S3": []},
+                "coverage": coverage,
+                "tier_distribution": None,
+                "status": "insufficient_coverage",
+            },
+            "cases": sorted(rows, key=lambda case: case["case_id"]),
+        }
     separation = feature_separation(rows, "calibration")
     thresholds, provenance = _thresholds(separation)
-    complete = _complete_metrics(rows)
+    denominator_gaps = _metric_denominator_gaps(rows)
+    if denominator_gaps:
+        coverage["all_metric_denominators_nonzero"] = False
+        coverage["undecidable_cells"] = denominator_gaps
+        coverage["missing_cells"] = denominator_gaps
+        return {
+            "adoption_status": "not_adopted",
+            "metrics": {
+                "feature_separation": separation,
+                "threshold_provenance": provenance,
+                "holdout": None,
+                "new_errors": {"S2": [], "S3": []},
+                "coverage": coverage,
+                "tier_distribution": _tier_distribution(rows, thresholds),
+                "status": "zero_metric_denominator",
+            },
+            "cases": sorted(rows, key=lambda case: case["case_id"]),
+        }
+    try:
+        complete = _complete_metrics(rows)
+    except ValidationError as exc:
+        if exc.failed_input != "metrics" or exc.reason != "metric denominator is zero":
+            raise
+        coverage["all_metric_denominators_nonzero"] = False
+        coverage["undecidable_cells"] = ["holdout|unknown_metric_denominator"]
+        coverage["missing_cells"] = ["holdout|unknown_metric_denominator"]
+        return {
+            "adoption_status": "not_adopted",
+            "metrics": {
+                "feature_separation": separation,
+                "threshold_provenance": provenance,
+                "holdout": None,
+                "new_errors": {"S2": [], "S3": []},
+                "coverage": coverage,
+                "tier_distribution": _tier_distribution(rows, thresholds),
+                "status": "zero_metric_denominator",
+            },
+            "cases": sorted(rows, key=lambda case: case["case_id"]),
+        }
     errors = _new_errors(rows)
     adopted = _adoption_allowed(complete, errors)
     metrics = {
@@ -473,6 +675,8 @@ def build_calibration_result(
         "holdout": complete,
         "new_errors": errors,
         "coverage": coverage,
+        "tier_distribution": _tier_distribution(rows, thresholds),
+        "status": "complete",
     }
     result: dict[str, Any] = {
         "adoption_status": "adopted" if adopted else "not_adopted",

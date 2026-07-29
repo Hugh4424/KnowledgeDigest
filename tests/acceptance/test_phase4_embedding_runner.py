@@ -133,7 +133,7 @@ def test_formal_cases_are_scored_by_one_real_batch_not_trusted(
             ]
 
     monkeypatch.setattr(_MODULE, "OpenAIEmbeddingClient", BatchClient)
-    scored, gold_hash, vectors_hash = _MODULE._score_real_cases(
+    scored, gold_hash, vectors_hash, vector_manifest = _MODULE._score_real_cases(
         raw,
         disposable_corpus=corpus,
         kb_root=kb,
@@ -150,6 +150,22 @@ def test_formal_cases_are_scored_by_one_real_batch_not_trusted(
     assert BatchClient.calls == 1
     assert gold_hash == raw["gold_hash"]
     assert len(vectors_hash) == 64
+    assert vector_manifest
+    assert all(set(item) == {"root", "path_hash", "input_hash", "vector_hash"} for item in vector_manifest)
+    assert hashlib.sha256(canonical_json_bytes(vector_manifest)).hexdigest() == vectors_hash
+    assert all(
+        row["outcomes"][backend]["predicted_tier"]
+        in {"auto", "needs_review", "insufficient_signal"}
+        for row in scored
+        if row["stage"] == "S2"
+        for backend in ("jaccard", "embedding")
+    )
+    assert all(
+        row["outcomes"][backend]["observed_clusters"]
+        for row in scored
+        if row["stage"] == "S2"
+        for backend in ("jaccard", "embedding")
+    )
     assert all(set(row["scores"]) == {"jaccard", "embedding"} for row in scored)
     forged = json.loads(json.dumps(raw))
     forged["cases"][0]["scores"] = {"jaccard": 1.0, "embedding": 1.0}

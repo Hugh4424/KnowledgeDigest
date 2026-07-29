@@ -21,7 +21,7 @@
 - **Primary dependencies**：仅 Python 标准库和 pytest；已批准的 OpenAI-compatible `/v1/embeddings` 服务是运行时外部能力。
 - **Storage / state**：KnowledgeDigest JSON 是配置权威；缓存和标定证据为本地版本化 JSON；公司正文只存在受控源和 disposable 副本。
 - **Testing**：pytest acceptance；真实服务正式验收另用隔离 runner，mock 只测协议故障，不能证明价值。
-- **Target environment**：macOS 本机；embedding 服务可为 loopback，或显式批准的公司内网 HTTPS 端点 `https://llm.paxszapp.com/v1`。
+- **Target environment**：macOS 本机；embedding 服务可为 loopback，或显式批准的公司内网 HTTPS 端点；输入可省略默认端口，但规范化身份必须精确等于 `https://llm.paxszapp.com:443/v1`。
 - **Project type**：Python CLI 与本地文件流水线。
 - **Performance goals**：每轮唯一文本批量向量化，禁止逐 pair HTTP；未规定硬延迟上限。
 - **Scale / scope**：首次真实语料恰好 89 个 Markdown，排除 2 个非 Markdown；S2 complete-linkage 和 S3 top-k。
@@ -140,7 +140,7 @@ pipeline 先收集 S2 原文和 S3 候选页需要的唯一文本，批量获取
 
 - **Responsibility**：解析嵌套配置，验证 loopback/批准的公司内网 HTTPS 端点、artifact schema/hash/endpoint/model/dimension/probe/split 身份。
 - **Consumes**：KnowledgeDigest JSON、环境凭证、calibration artifact。
-- **Produces**：不可变 similarity settings、digest runtime resolution、calibration-only client factory。
+- **Produces**：不可变 similarity settings、digest runtime resolution、可由标定域复用的 client 与 endpoint 规范化函数。
 - **Must not decide**：不得选择阈值或覆盖显式 Jaccard。
 
 #### Embedding client 与 scorer
@@ -190,7 +190,7 @@ pipeline 先收集 S2 原文和 S3 候选页需要的唯一文本，批量获取
 
 - `POST {base_url}/embeddings`（`base_url` 已含 `/v1`）；request 为 `model`、`input`；凭证只从环境注入。
 - response 必须含与输入数量一致的 data；index 唯一且完整；每个 vector 维度一致、全有限、非零。
-- client 禁系统代理和 HTTP redirect；地址只接受 IPv4/IPv6 loopback，或规范化后精确等于 `https://llm.paxszapp.com/v1` 的公司内网端点；后者强制 HTTPS 且不得因重定向改变 scheme/host/port/path。
+- client 禁系统代理和 HTTP redirect；地址只接受 IPv4/IPv6 loopback，或规范化后精确等于 `https://llm.paxszapp.com:443/v1` 的公司内网端点；输入 `https://llm.paxszapp.com/v1` 与显式 `:443` 归一为同一身份，artifact/runtime 复用同一规范化函数比较；后者强制 HTTPS 且不得因重定向改变 scheme/host/port/path。
 - 错误只返回稳定 code、批次计数和安全上下文，不回显 input/header/body。
 - 兼容性：Jaccard scorer 继续返回当前浮点结果；S2/S3 既有字段保留，仅增加 scorer audit 字段。
 
@@ -300,7 +300,8 @@ embedding failure → invalidate S2/S3 decisions → Jaccard scorer → rerun S2
 ## 13. Test Strategy
 
 - **Target**：FR-CONFIG/EMBED/ARTIFACT；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`; RED=1，GREEN=0；Phase evidence `evidence/phase4/runtime-contract.txt`；Oracle `KD-P4-CONTRACT` 验证默认零请求、严格响应和 artifact 错配。
-- **Target**：FR-SCORE/FALLBACK/COMPAT；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_embedding_runtime.py`; RED=1，GREEN=0；Phase evidence `evidence/phase4/fallback.txt`；Oracle `KD-P4-FALLBACK` 验证 S2/S3 单后端和整轮重跑。
+- **Target**：FR-SCORE/FALLBACK/COMPAT；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`; RED=1，GREEN=0；Phase evidence `evidence/phase4/fallback.txt`；Oracle `KD-P4-FALLBACK` 验证 S2/S3 单后端、整轮重跑和现有 digest 兼容回归。
+- **Target**：FR-CORPUS-001；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_gold.py`; RED=1，GREEN=0；Phase evidence `evidence/phase4/corpus-prep.txt`；Oracle `KD-P4-CORPUS-PREP` 验证 Markdown-only 副本、manifest、只读边界和 cleanup。
 - **Target**：FR-GOLD；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_gold.py`; RED=1，GREEN=0；Phase evidence `evidence/phase4/gold.txt`；Oracle `KD-P4-GOLD` 验证 AI draft exchange、逐项确认和 identity。
 - **Target**：FR-CONFIG/SCORE/CAL/ADOPT/REPORT；feature-separation 与阈值候选来源必须从 cases 独立重算；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_calibration.py`; RED=1，GREEN=0；`evidence_path`：`evidence/phase4/calibration.txt`；Oracle `KD-P4-CAL` 验证严格 split、feature-separation、阈值候选来源、指标重算、安全门和 replay。
 - **Target**：runner 合同与全回归；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_embedding_runner.py && pytest -q`; RED=1，GREEN=0；Phase evidence `evidence/phase4/runner-and-regression.txt`；Oracle `KD-P4-RUNNER` 同时证明 runner 合同与全量 pytest 回归。
@@ -359,7 +360,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 ### Files
 
 - **NEW**：N/A — 本 Phase 只扩展已声明文件。
-- **MODIFY**：`tests/acceptance/test_phase4_embedding_runtime.py`、`src/knowledge_digest/cluster.py`、`src/knowledge_digest/retrieve.py`、`src/knowledge_digest/pipeline.py`
+- **MODIFY**：`tests/acceptance/test_phase4_embedding_runtime.py`、`tests/acceptance/test_phase0_digest.py`、`src/knowledge_digest/cluster.py`、`src/knowledge_digest/retrieve.py`、`src/knowledge_digest/pipeline.py`
 - **DO NOT TOUCH**：`src/knowledge_digest/draft.py`、`src/knowledge_digest/provenance.py`、`src/knowledge_digest/writeback.py`
 
 ### Tasks
@@ -369,7 +370,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 
 ### Verify
 
-- `pytest -q tests/acceptance/test_phase4_embedding_runtime.py`；证据 `evidence/phase4/fallback.txt`。
+- `pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`；证据 `evidence/phase4/fallback.txt`。
 
 ### Knowledge
 
@@ -413,13 +414,16 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 ### Verify
 
 - `pytest -q tests/acceptance/test_phase4_gold.py`；证据 `evidence/phase4/gold.txt`，Oracle `KD-P4-GOLD`。
+- `pytest -q tests/acceptance/test_phase4_gold.py`；同时覆盖 FR-CORPUS-001，证据 `evidence/phase4/corpus-prep.txt`，Oracle `KD-P4-CORPUS-PREP`。
 - `pytest -q tests/acceptance/test_phase4_calibration.py`；证据 `evidence/phase4/calibration.txt`，Oracle `KD-P4-CAL`。
 - 人工核对 `gold-confirmation-audit.json` 与 `split-coverage-audit.json` 并保存 `evidence/phase4/gold-manual-audit.json`。
 
 ### Knowledge
 
-- feature-separation 固定输出 S2/S3 × Jaccard/embedding 的 count、min、max、quantiles、overlap_count、overlap_rate、margin，并从 cases 重算；阈值候选必须可追溯到该诊断。
+- feature-separation 固定输出 S2/S3 × Jaccard/embedding 的 count、min、max、quantiles、overlap_count、overlap_rate、margin，并从 cases 重算。
+- 阈值冻结算法固定为 `deterministic-positive-median-and-class-midpoint.v1`：`high=S2 embedding positive.p50`；`medium=min(high,(S2 positive.min+S2 negative.max)/2)`；`page_match_threshold=(S3 positive.min+S3 negative.max)/2`。输入 cases 先按 `case_id` 确定性排序；quantile 使用线性插值；不搜索候选、不做十进制 rounding，canonical JSON 直接编码有限 IEEE-754 值；holdout 只评估，冻结后不得改阈值。
 - 完整指标固定为 S2 pair P/R/F1、S3 page P/R/F1、S3 action exact accuracy；holdout 不参与选阈值。
+- artifact 诊断另记录 Jaccard 与 embedding 在 holdout 的 `auto/needs_review/insufficient_signal` tier 分布，仅用于人工确认 `high` 的影响，不进入 adopted 门。
 
 ### STOP
 
@@ -484,11 +488,11 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 
 | FR | Task IDs | AC IDs | Phase | Gate / evidence |
 | --- | --- | --- | --- | --- |
-| FR-CONFIG-001 | T001,T002,T009,T010 | AC-01,AC-02 | Phase 1 | runtime-contract.txt |
+| FR-CONFIG-001 | T001,T002,T009,T010 | AC-01,AC-02 | Phase 1,3 | runtime-contract.txt/calibration.txt |
 | FR-EMBED-001 | T001,T002,T011,T012 | AC-02,AC-03 | Phase 1,4 | runtime/runner |
-| FR-CORPUS-001 | T005,T006,T011,T012 | AC-03 | Phase 3,4 | corpus-prep/real-service |
+| FR-CORPUS-001 | T005,T006,T011,T012 | AC-03 | Phase 3,4 | corpus-prep.txt/real-service |
 | FR-GOLD-001 | T007,T008,T009,T010,T011,T012 | AC-05,AC-07 | Phase 3,4 | calibration/runner |
-| FR-SCORE-001 | T003,T004,T009,T010 | AC-04,AC-09 | Phase 2,3 | fallback.txt |
+| FR-SCORE-001 | T003,T004,T009,T010 | AC-04,AC-09 | Phase 2,3 | fallback.txt/calibration.txt |
 | FR-CAL-001 | T009,T010 | AC-05,AC-10 | Phase 3 | calibration.txt |
 | FR-ARTIFACT-001 | T001,T002,T009,T010 | AC-06,AC-10 | Phase 1,3 | runtime/calibration |
 | FR-ADOPT-001 | T009,T010,T011,T012 | AC-05,AC-08 | Phase 3,4 | calibration/runner |

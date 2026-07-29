@@ -41,13 +41,13 @@
 - **Phase**：Phase 1：本地服务与绑定合同
 - **goal**：证明默认/错配零请求，非法 endpoint/artifact/批量响应被整体拒绝。
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"595b2b3a8708235cb66b7130a8c6006b8ba5861a84de3fd1dab57ce42de8df1a","id":"kd-phase4-embedding-calibration-plan"}]`
+- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"205c7ef996ce6d8bdcf5873d19d0722d7bae885ddfdaec6dbbfbad08581c4aee","id":"kd-phase4-embedding-calibration-plan"}]`
 - **输入**：FR-CONFIG-001、FR-EMBED-001、FR-ARTIFACT-001；A-001/A-002。
 - **依赖**：N/A — first task。
 - **并行**：否 — 建立所有 consumer 的安全合同。
 - **FR**：FR-CONFIG-001、FR-EMBED-001、FR-ARTIFACT-001
 - **AC**：AC-01、AC-02、AC-06
-- **动作**：新增 acceptance 断言覆盖精确嵌套 schema、loopback/批准的公司内网 HTTPS 端点、密钥环境变量、artifact/cache 和批量响应。
+- **动作**：新增 acceptance 断言覆盖精确嵌套 schema、loopback/批准的公司内网 HTTPS 端点、默认端口规范化正负例、密钥环境变量、artifact/cache 和批量响应。
 - **精确文件**：`tests/acceptance/test_phase4_embedding_runtime.py`、`tests/acceptance/test_phase0_digest.py`
 - **boundary**：files: `tests/acceptance/test_phase4_embedding_runtime.py`, `tests/acceptance/test_phase0_digest.py`; symbols/regions: Phase 4 contract tests only
 - **输出**：因目标能力缺失而失败的 RED 证据。
@@ -56,7 +56,7 @@
 - **paired_task**：T002
 - **gate_cmd**：`pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`
 - **expected_exit**：1
-- **oracle**：KD-P4-CONTRACT 证明默认/错配零请求；无 artifact、not_adopted、endpoint/model/dimension/probe identity mismatch 分别写稳定 machine-readable `similarity.reason_code`；artifact/cache 都绑定 `endpoint_identity`；`api_key_env` 只保存变量名，密钥值不进入 config/log/error/artifact/cache；代理、redirect、TLS 降级和无效证书被拒绝；非法批次整体拒绝。
+- **oracle**：KD-P4-CONTRACT 证明默认/错配零请求；`https://llm.paxszapp.com/v1` 与显式 `:443` 均规范化为精确身份 `https://llm.paxszapp.com:443/v1`，其他 scheme/host/port/path 拒绝；无 artifact、not_adopted、endpoint/model/dimension/probe identity mismatch 分别写稳定 machine-readable `similarity.reason_code`；artifact/cache 都绑定 `endpoint_identity`；`api_key_env` 只保存变量名，密钥值不进入 config/log/error/artifact/cache；代理、redirect、TLS 降级和无效证书被拒绝；非法批次整体拒绝。
 - **evidence_path**：`evidence/phase4/t001-red.txt`
 - **STOP**：命令损坏、RED 来自环境，或测试要求正文/凭证落盘。
 - **recovery**：build-code owner 修正 fixture/断言后重跑，不弱化 accepted contract。
@@ -68,7 +68,7 @@
 - **Phase**：Phase 1：本地服务与绑定合同
 - **goal**：让 KD-P4-CONTRACT 通过并保持现有 Jaccard 数值/配置兼容。
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"595b2b3a8708235cb66b7130a8c6006b8ba5861a84de3fd1dab57ce42de8df1a","id":"kd-phase4-embedding-calibration-plan"}]`
+- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"205c7ef996ce6d8bdcf5873d19d0722d7bae885ddfdaec6dbbfbad08581c4aee","id":"kd-phase4-embedding-calibration-plan"}]`
 - **输入**：T001 RED；SIG-003/SIG-004；artifact/cache 精确字段。
 - **依赖**：T001
 - **并行**：否 — RED/GREEN 必须串行。
@@ -125,7 +125,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 ### Files
 
 - **NEW**：N/A — 本 Phase 只扩展已声明文件。
-- **MODIFY**：`tests/acceptance/test_phase4_embedding_runtime.py`、`src/knowledge_digest/cluster.py`、`src/knowledge_digest/retrieve.py`、`src/knowledge_digest/pipeline.py`
+- **MODIFY**：`tests/acceptance/test_phase4_embedding_runtime.py`、`tests/acceptance/test_phase0_digest.py`、`src/knowledge_digest/cluster.py`、`src/knowledge_digest/retrieve.py`、`src/knowledge_digest/pipeline.py`
 - **DO NOT TOUCH**：`src/knowledge_digest/draft.py`、`src/knowledge_digest/provenance.py`、`src/knowledge_digest/writeback.py`
 
 ### Tasks
@@ -136,20 +136,20 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 - **Phase**：Phase 2：共享 scorer 与整轮回退
 - **goal**：证明 S2/S3 共享身份，S2 或 S3 failure 都必须从 S2 统一重跑 Jaccard。
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"595b2b3a8708235cb66b7130a8c6006b8ba5861a84de3fd1dab57ce42de8df1a","id":"kd-phase4-embedding-calibration-plan"}]`
+- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"205c7ef996ce6d8bdcf5873d19d0722d7bae885ddfdaec6dbbfbad08581c4aee","id":"kd-phase4-embedding-calibration-plan"}]`
 - **输入**：T002 scorer；A-003/A-004/A-005。
 - **依赖**：T002
 - **并行**：否 — consumer 依赖 Phase 1 producer。
 - **FR**：FR-SCORE-001、FR-FALLBACK-001、FR-COMPAT-001
 - **AC**：AC-04、AC-09、AC-12
 - **动作**：增加 S2/S3 success、S2 failure、S3 failure 的请求/决策/report 审计断言。
-- **精确文件**：`tests/acceptance/test_phase4_embedding_runtime.py`
-- **boundary**：files: `tests/acceptance/test_phase4_embedding_runtime.py`; symbols/regions: scorer identity and fallback tests
+- **精确文件**：`tests/acceptance/test_phase4_embedding_runtime.py`、`tests/acceptance/test_phase0_digest.py`
+- **boundary**：files: `tests/acceptance/test_phase4_embedding_runtime.py`, `tests/acceptance/test_phase0_digest.py`; symbols/regions: scorer identity, fallback, and existing digest compatibility tests
 - **输出**：旧 pipeline 因无法共享/回退而失败的 RED。
 - **Knowledge**：fallback 必须在 S4 前完成；有效 cache 可留但旧决策不可留。
 - **verification_role**：RED
 - **paired_task**：T004
-- **gate_cmd**：`pytest -q tests/acceptance/test_phase4_embedding_runtime.py`
+- **gate_cmd**：`pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`
 - **expected_exit**：1
 - **oracle**：KD-P4-FALLBACK 显示最终决策仅一个 backend，failure 后 S2 调用重新发生。
 - **evidence_path**：`evidence/phase4/t003-red.txt`
@@ -163,7 +163,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 - **Phase**：Phase 2：共享 scorer 与整轮回退
 - **goal**：实现批量预取、同 scorer S2/S3 和 typed failure 整轮 Jaccard 重跑。
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"595b2b3a8708235cb66b7130a8c6006b8ba5861a84de3fd1dab57ce42de8df1a","id":"kd-phase4-embedding-calibration-plan"}]`
+- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"205c7ef996ce6d8bdcf5873d19d0722d7bae885ddfdaec6dbbfbad08581c4aee","id":"kd-phase4-embedding-calibration-plan"}]`
 - **输入**：T003 RED；SIG-001/SIG-002；T002 scorer。
 - **依赖**：T003
 - **并行**：否 — RED/GREEN 必须串行。
@@ -176,7 +176,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 - **Knowledge**：complete-linkage/top-k/action 不变；`write_jsonl` 可确定性替换本轮文件。
 - **verification_role**：GREEN
 - **paired_task**：T003
-- **gate_cmd**：`pytest -q tests/acceptance/test_phase4_embedding_runtime.py`
+- **gate_cmd**：`pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`
 - **expected_exit**：0
 - **oracle**：KD-P4-FALLBACK 全绿且 S2/S3 决策身份一致，无混合分数。
 - **evidence_path**：`evidence/phase4/t004-green.txt`
@@ -187,11 +187,11 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 ### Verify
 
 - **Target**：FR-SCORE-001、FR-FALLBACK-001、FR-COMPAT-001
-- **gate_cmd**：`pytest -q tests/acceptance/test_phase4_embedding_runtime.py`
+- **gate_cmd**：`pytest -q tests/acceptance/test_phase4_embedding_runtime.py tests/acceptance/test_phase0_digest.py`
 - **expected_exit**：0
 - **evidence_path**：`evidence/phase4/fallback.txt`
 - **display_cmd**：N/A — pytest 输出已足够。
-- **Oracle**：KD-P4-FALLBACK 从实际调用/文件证明 S2 重跑和最终单后端。
+- **Oracle**：KD-P4-FALLBACK 从实际调用/文件证明 S2 重跑、最终单后端和现有 digest 兼容回归。
 
 ### Knowledge
 
@@ -231,7 +231,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 - **Phase**：Phase 3：标定、gold 与采用门
 - **goal**：证明只复制 Markdown、生成 source/copy manifest 与 corpus_hash，源或正式 KB 变化即失败。
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"595b2b3a8708235cb66b7130a8c6006b8ba5861a84de3fd1dab57ce42de8df1a","id":"kd-phase4-embedding-calibration-plan"}]`
+- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"205c7ef996ce6d8bdcf5873d19d0722d7bae885ddfdaec6dbbfbad08581c4aee","id":"kd-phase4-embedding-calibration-plan"}]`
 - **输入**：FR-CORPUS-001、AC-03；显式 source/kb/temp roots。
 - **依赖**：T004
 - **并行**：否 — 是 gold 和 calibration 的输入 producer。
@@ -258,7 +258,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 - **Phase**：Phase 3：标定、gold 与采用门
 - **goal**：在 gold 前产出只读、可验证、可清理的 disposable corpus 与 manifest。
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"595b2b3a8708235cb66b7130a8c6006b8ba5861a84de3fd1dab57ce42de8df1a","id":"kd-phase4-embedding-calibration-plan"}]`
+- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"205c7ef996ce6d8bdcf5873d19d0722d7bae885ddfdaec6dbbfbad08581c4aee","id":"kd-phase4-embedding-calibration-plan"}]`
 - **输入**：T005 RED；显式 source/kb/temp roots。
 - **依赖**：T005
 - **并行**：否 — RED/GREEN 必须串行。
@@ -285,7 +285,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 - **Phase**：Phase 3：标定、gold 与采用门
 - **goal**：证明未确认项、缺 lineage/content identity、批量确认和外部网络草稿都不能进入正式 gold。
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"595b2b3a8708235cb66b7130a8c6006b8ba5861a84de3fd1dab57ce42de8df1a","id":"kd-phase4-embedding-calibration-plan"}]`
+- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"205c7ef996ce6d8bdcf5873d19d0722d7bae885ddfdaec6dbbfbad08581c4aee","id":"kd-phase4-embedding-calibration-plan"}]`
 - **输入**：FR-GOLD-001、AC-07；隔离 corpus manifest 和 AI draft exchange contract。
 - **依赖**：T006
 - **并行**：否 — gold 是后续 split/metrics 的 authority producer。
@@ -312,7 +312,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 - **Phase**：Phase 3：标定、gold 与采用门
 - **goal**：产出绑定 lineage/content identity 的 confirmed gold 和可人工核对的 AC-07 audit。
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"595b2b3a8708235cb66b7130a8c6006b8ba5861a84de3fd1dab57ce42de8df1a","id":"kd-phase4-embedding-calibration-plan"}]`
+- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"205c7ef996ce6d8bdcf5873d19d0722d7bae885ddfdaec6dbbfbad08581c4aee","id":"kd-phase4-embedding-calibration-plan"}]`
 - **输入**：T007 RED；corpus manifest；AI draft JSONL；逐项用户 reply records。
 - **依赖**：T007
 - **并行**：否 — RED/GREEN 必须串行。
@@ -339,7 +339,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 - **Phase**：Phase 3：标定、gold 与采用门
 - **goal**：证明缺 cell/分母、未确认 gold、lineage 泄漏、缺失或不可重算 feature-separation、阈值无 calibration 来源、指标退化和新增错误都不能 adopted。
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"595b2b3a8708235cb66b7130a8c6006b8ba5861a84de3fd1dab57ce42de8df1a","id":"kd-phase4-embedding-calibration-plan"}]`
+- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"205c7ef996ce6d8bdcf5873d19d0722d7bae885ddfdaec6dbbfbad08581c4aee","id":"kd-phase4-embedding-calibration-plan"}]`
 - **输入**：FR-GOLD/CAL/ADOPT/REPORT；T002 artifact/client。
 - **依赖**：T008
 - **并行**：否 — 标定复用已验证 scorer/artifact。
@@ -354,7 +354,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 - **paired_task**：T010
 - **gate_cmd**：`pytest -q tests/acceptance/test_phase4_calibration.py`
 - **expected_exit**：1
-- **oracle**：KD-P4-CAL 证明 feature-separation 与阈值候选来源可从 cases 重算；backend=jaccard 可用连接字段做真实探针；adopted fresh config 写 backend=embedding；已有显式 Jaccard 文件字节不变；其余安全门可重算。
+- **oracle**：KD-P4-CAL 证明 feature-separation 与阈值候选来源可从 cases 重算；阈值严格使用 `high=S2 embedding positive.p50`、`medium=min(high,(S2 positive.min+S2 negative.max)/2)`、`page_match_threshold=(S3 positive.min+S3 negative.max)/2`，按 case_id 排序、quantile 线性插值、无十进制 rounding，且 holdout 改动不改变冻结阈值；覆盖不足时 `split-coverage-audit.json` 精确枚举 undecidable strict cells 并得出 not_adopted；backend=jaccard 可用连接字段做真实探针；adopted fresh config 写 backend=embedding；已有显式 Jaccard 文件字节不变；其余安全门可重算。
 - **evidence_path**：`evidence/phase4/t009-red.txt`
 - **STOP**：fixture 无法让每个严格 cell 在 calibration/holdout 都可判定。
 - **recovery**：扩充 synthetic contract fixtures，但不得降低真实 corpus 覆盖门。
@@ -366,22 +366,22 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 - **Phase**：Phase 3：标定、gold 与采用门
 - **goal**：实现 confirmed-only、strict split、machine-readable feature-separation、calibration-only 阈值选择、holdout 门和 artifact/BLOCKED 分离。
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"595b2b3a8708235cb66b7130a8c6006b8ba5861a84de3fd1dab57ce42de8df1a","id":"kd-phase4-embedding-calibration-plan"}]`
+- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"205c7ef996ce6d8bdcf5873d19d0722d7bae885ddfdaec6dbbfbad08581c4aee","id":"kd-phase4-embedding-calibration-plan"}]`
 - **输入**：T009 RED；T002 client/artifact；T004 scorer 行为。
 - **依赖**：T009
 - **并行**：否 — RED/GREEN 必须串行。
 - **FR**：FR-CONFIG-001、FR-SCORE-001、FR-GOLD-001、FR-CAL-001、FR-ARTIFACT-001、FR-ADOPT-001、FR-REPORT-001
 - **AC**：AC-05、AC-06、AC-07、AC-08、AC-10
-- **动作**：实现 calibration-only client factory、feature-separation、threshold candidate provenance、阈值冻结、完整 metrics/cases、安全门、artifact/BLOCKED、`split-coverage-audit.json` 和安全推荐配置。
+- **动作**：在 Calibration domain 内实现 calibration-only client factory（只复用 `embedding.py` 导出的 client 与 endpoint 规范化函数，不复制校验），实现 feature-separation、`deterministic-positive-median-and-class-midpoint.v1` 阈值冻结、完整 metrics/cases、安全门、artifact/BLOCKED、`split-coverage-audit.json`、holdout tier 分布诊断和安全推荐配置。
 - **精确文件**：`src/knowledge_digest/calibration.py`、`src/knowledge_digest/calibration_cli.py`、`pyproject.toml`
 - **boundary**：files: `src/knowledge_digest/calibration.py`, `src/knowledge_digest/calibration_cli.py`, `pyproject.toml`; symbols/regions: calibration console entry and domain
-- **输出**：含 machine-readable feature-separation 与阈值候选来源的可重放 artifact或 BLOCKED evidence，以及 calibration-owned split/coverage audit。
-- **Knowledge**：gold confirmation audit 是输入；本任务拥有 `split-coverage-audit.json`，记录 lineage intersection 与两集合 strict-cell decidability。
+- **输出**：含 machine-readable feature-separation、阈值候选来源与 holdout tier 分布诊断的可重放 artifact 或 BLOCKED evidence，以及 calibration-owned split/coverage audit；覆盖不足时 audit 必须精确枚举 undecidable strict cells，作为按证据扩充清单。
+- **Knowledge**：gold confirmation audit 是输入；本任务拥有 `split-coverage-audit.json`，记录 lineage intersection、两集合 strict-cell decidability 与 undecidable strict-cell 扩充清单。阈值公式、case_id 排序、quantile 线性插值、无 rounding 和 holdout 只读规则均为冻结合同。
 - **verification_role**：GREEN
 - **paired_task**：T009
 - **gate_cmd**：`pytest -q tests/acceptance/test_phase4_calibration.py`
 - **expected_exit**：0
-- **oracle**：KD-P4-CAL 全绿；cases 可独立重算 feature-separation 且阈值候选来源可追溯；runtime 与 calibration client 构造边界分离，推荐配置两条规则通过，cases 独立重算与 replay 一致。
+- **oracle**：KD-P4-CAL 全绿；cases 可独立重算 feature-separation 且按冻结公式得到同一阈值；覆盖不足的扩充清单精确且结论为 not_adopted；runtime 与 calibration client 构造边界分离，推荐配置两条规则通过，cases 独立重算与 replay 一致。
 - **evidence_path**：`evidence/phase4/t010-green.txt`
 - **STOP**：实现需要 holdout 调参、自动确认 gold 或生成 BLOCKED artifact。
 - **recovery**：固定保持 Jaccard，保存诊断，返回 spec owner 处理任何产品决策变化。
@@ -390,6 +390,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 ### Verify
 
 - **Target**：FR-GOLD-001；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_gold.py`；`expected_exit`：0；`evidence_path`：`evidence/phase4/gold.txt`；Oracle KD-P4-GOLD。
+- **Target**：FR-CORPUS-001；`gate_cmd`：`pytest -q tests/acceptance/test_phase4_gold.py`；`expected_exit`：0；`evidence_path`：`evidence/phase4/corpus-prep.txt`；Oracle KD-P4-CORPUS-PREP。
 - **Target**：AC-07 manual；核对 `gold-confirmation-audit.json` 与 calibration-owned `split-coverage-audit.json` 并保存 `evidence/phase4/gold-manual-audit.json`。
 - **Target**：FR-CONFIG-001、FR-SCORE-001、FR-CAL-001、FR-ARTIFACT-001、FR-ADOPT-001、FR-REPORT-001
 - **gate_cmd**：`pytest -q tests/acceptance/test_phase4_calibration.py`
@@ -436,7 +437,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 - **Phase**：Phase 4：隔离真实服务验收与回归
 - **goal**：证明 89 Markdown、排除 2 非 Markdown、before/after manifest、真实服务和 BLOCKED/no-artifact 合同。
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"595b2b3a8708235cb66b7130a8c6006b8ba5861a84de3fd1dab57ce42de8df1a","id":"kd-phase4-embedding-calibration-plan"}]`
+- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"205c7ef996ce6d8bdcf5873d19d0722d7bae885ddfdaec6dbbfbad08581c4aee","id":"kd-phase4-embedding-calibration-plan"}]`
 - **输入**：T010 CLI；A-006 隔离模式；真实验收边界。
 - **依赖**：T010
 - **并行**：否 — runner 消费完整工具链。
@@ -463,7 +464,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 - **Phase**：Phase 4：隔离真实服务验收与回归
 - **goal**：实现一键隔离 runner，产出真实 adopted/not_adopted 或 BLOCKED evidence，并保持全回归。
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"595b2b3a8708235cb66b7130a8c6006b8ba5861a84de3fd1dab57ce42de8df1a","id":"kd-phase4-embedding-calibration-plan"}]`
+- **versioned_refs**：`[{"artifact_kind":"spec","ref":"specs/kd-phase4-embedding-calibration/spec.md","hash":"57a63cb5a5212d359ebd7eb3260f6cdfb3e9aed768d57e3c5be3cf920028dc62","id":"kd-phase4-embedding-calibration"},{"artifact_kind":"plan","ref":"specs/kd-phase4-embedding-calibration/plan.md","hash":"205c7ef996ce6d8bdcf5873d19d0722d7bae885ddfdaec6dbbfbad08581c4aee","id":"kd-phase4-embedding-calibration-plan"}]`
 - **输入**：T011 RED；T010 calibration CLI；用户确认的 gold 和显式批准的受控服务/corpus 参数。
 - **依赖**：T011
 - **并行**：否 — RED/GREEN 和真实资源使用必须串行。
@@ -529,7 +530,7 @@ T001 → T002 → T003 → T004 → T005 → T006 → T007 → T008 → T009 →
 
 | FR | Task IDs | AC IDs | Phase | Gate / evidence |
 | --- | --- | --- | --- | --- |
-| FR-CONFIG-001 | T001,T002,T009,T010 | AC-01,AC-02 | Phase 1 | KD-P4-CONTRACT |
+| FR-CONFIG-001 | T001,T002,T009,T010 | AC-01,AC-02 | Phase 1,3 | KD-P4-CONTRACT/CAL |
 | FR-EMBED-001 | T001,T002,T011,T012 | AC-02,AC-03 | Phase 1,4 | contract/runner |
 | FR-CORPUS-001 | T005,T006,T011,T012 | AC-03 | Phase 3,4 | CORPUS-PREP/REAL-SERVICE |
 | FR-GOLD-001 | T007,T008,T009,T010,T011,T012 | AC-05,AC-07 | Phase 3,4 | CAL/RUNNER |

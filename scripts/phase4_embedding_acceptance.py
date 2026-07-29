@@ -12,7 +12,11 @@ from pathlib import Path
 from typing import Any, Callable, Sequence
 
 from knowledge_digest.calibration_cli import main as calibration_main
-from knowledge_digest.calibration import feature_separation, strict_lineage_split
+from knowledge_digest.calibration import (
+    coverage_audit,
+    feature_separation,
+    strict_lineage_split,
+)
 from knowledge_digest.config import DigestSettings, EmbeddingSettings, resolve_settings
 from knowledge_digest.corpus_isolation import (
     cleanup_disposable_corpus,
@@ -24,7 +28,7 @@ from knowledge_digest.embedding import (
     OpenAIEmbeddingClient,
     normalize_endpoint_identity,
 )
-from knowledge_digest.text_similarity import _similarity
+from knowledge_digest.text_similarity import _similarity, _tokens
 from knowledge_digest.gold import canonical_json_bytes, load_confirmed_gold
 
 
@@ -151,7 +155,7 @@ def _default_calibrate(
     if not cases.is_absolute() or not cases.is_file():
         raise ValueError("cases path must be an existing absolute file")
     raw = load_confirmed_gold(cases)
-    scored_rows, gold_hash, vectors_hash = _score_real_cases(
+    scored_rows, gold_hash, vectors_hash, vector_manifest = _score_real_cases(
         raw,
         disposable_corpus=disposable_corpus,
         kb_root=formal_kb,
@@ -161,6 +165,17 @@ def _default_calibrate(
     )
     scored_path = disposable_corpus.parent / "scored-cases.json"
     _write_json(scored_path, {"cases": scored_rows})
+    vector_manifest_path = evidence_dir / "vector-manifest.json"
+    _write_json(vector_manifest_path, vector_manifest)
+    persisted_vectors_hash = _sha256_bytes(
+        json.dumps(
+            json.loads(vector_manifest_path.read_text(encoding="utf-8")),
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    )
+    if persisted_vectors_hash != vectors_hash:
+        raise RuntimeError("persisted vector manifest hash mismatch")
     artifact = evidence_dir / ARTIFACT_NAME
     split_audit = evidence_dir / "split-coverage-audit.json"
     exit_code = calibration_main(
@@ -224,6 +239,7 @@ def _default_calibrate(
         replay_exit == 0
         and replay_path.read_bytes() == artifact.read_bytes()
         and replay_audit.read_bytes() == split_audit.read_bytes()
+        and persisted_vectors_hash == artifact_value["vectors_hash"]
     )
     replay_path.unlink(missing_ok=True)
     replay_audit.unlink(missing_ok=True)
@@ -282,7 +298,7 @@ def _score_real_cases(
     settings: EmbeddingSettings,
     digest_settings: DigestSettings,
     env: dict[str, str],
-) -> tuple[list[dict[str, Any]], str, str]:
+) -> tuple[list[dict[str, Any]], str, str, list[dict[str, str]]]:
     """Derive every score/outcome from approved files and the real service."""
     rows = raw["cases"]
     allowed = {
@@ -384,6 +400,8 @@ def _score_real_cases(
     )
     if raw.get("gold_hash") != computed_gold_hash:
         raise ValueError("confirmed gold hash mismatch")
+    if coverage_audit(split_rows)["undecidable_cells"]:
+        return split_rows, computed_gold_hash, vector_manifest_hash, vector_manifest
     separation = feature_separation(split_rows, "calibration")
     thresholds = {
         "jaccard": {
@@ -417,9 +435,10 @@ def _score_real_cases(
         if split_by_source.setdefault(source, row["split"]) != row["split"]:
             raise ValueError("one source identity cannot cross calibration and holdout")
 
-    def cluster_memberships(backend: str) -> dict[str, int]:
+    def cluster_outcomes(backend: str) -> tuple[dict[str, int], dict[str, str]]:
         pending = list(corpus_candidates)
         memberships: dict[str, int] = {}
+        tiers: dict[str, str] = {}
         cluster_id = 0
         while pending:
             seed_path, seed_text = pending.pop(0)
@@ -434,12 +453,36 @@ def _score_real_cases(
                 if scores and min(scores) >= thresholds[backend]["S2"]:
                     members.append(candidate)
                     pending.remove(candidate)
+            pair_scores = [
+                _similarity(left[1], right[1])
+                if backend == "jaccard"
+                else _cosine(by_text[left[1]], by_text[right[1]])
+                for index, left in enumerate(members)
+                for right in members[index + 1 :]
+            ]
+            min_pair = min(pair_scores) if pair_scores else 1.0
+            token_count = len(_tokens("\n".join(text for _, text in members)))
             for path, _ in members:
                 memberships[path] = cluster_id
+                tiers[path] = (
+                    "insufficient_signal"
+                    if token_count < 3
+                    else "auto"
+                    if min_pair >= (
+                        digest_settings.high
+                        if backend == "jaccard"
+                        else separation["S2"]["embedding"]["positive"]["quantiles"]["p50"]
+                    )
+                    else "needs_review"
+                    if min_pair >= thresholds[backend]["S2"]
+                    else "insufficient_signal"
+                )
             cluster_id += 1
-        return memberships
+        return memberships, tiers
 
-    cluster_maps = {backend: cluster_memberships(backend) for backend in ("jaccard", "embedding")}
+    cluster_results = {
+        backend: cluster_outcomes(backend) for backend in ("jaccard", "embedding")
+    }
     original_by_id = {row["case_id"]: row for row in rows}
     query_groups: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
     for row in split_rows:
@@ -449,8 +492,8 @@ def _score_real_cases(
             if row["stage"] == "S2":
                 original = original_by_id[row["case_id"]]
                 predicted = (
-                    cluster_maps[backend][original["left_ref"]]
-                    == cluster_maps[backend][original["right_ref"]]
+                    cluster_results[backend][0][original["left_ref"]]
+                    == cluster_results[backend][0][original["right_ref"]]
                 )
             if row["stage"] == "S3":
                 query_id = original.get("query_id")
@@ -464,6 +507,27 @@ def _score_real_cases(
                 "correct": predicted == actual,
                 "error": predicted != actual,
             }
+            if row["stage"] == "S2":
+                row["outcomes"][backend]["predicted_tier"] = cluster_results[backend][1][
+                    original["left_ref"]
+                ]
+                observed_paths = {
+                    original["left_ref"],
+                    original["right_ref"],
+                }
+                row["outcomes"][backend]["observed_clusters"] = [
+                    {
+                        "cluster_id": f"cluster-{cluster_results[backend][0][path]}",
+                        "tier": cluster_results[backend][1][path],
+                    }
+                    for path in sorted(observed_paths)
+                ]
+                row["outcomes"][backend]["tier_high"] = (
+                    digest_settings.high
+                    if backend == "jaccard"
+                    else separation["S2"]["embedding"]["positive"]["quantiles"]["p50"]
+                )
+                row["outcomes"][backend]["tier_medium"] = thresholds[backend]["S2"]
     for (split, query_id, backend), candidates in query_groups.items():
         query_text = material_by_case[candidates[0]["case_id"]][0]
         candidate_scores = [
@@ -515,7 +579,7 @@ def _score_real_cases(
             row["outcomes"][backend]["predicted_action"] = predicted_action
             row["outcomes"][backend]["action_correct"] = predicted_action == row.get("gold_action")
     vectors_hash = vector_manifest_hash
-    return split_rows, computed_gold_hash, vectors_hash
+    return split_rows, computed_gold_hash, vectors_hash, vector_manifest
 
 
 def _sensitive_scan(
