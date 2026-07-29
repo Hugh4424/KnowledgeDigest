@@ -60,6 +60,11 @@ def _run_similarity_stages(
             "failure_type": type(resolution_failure).__name__,
             "fallback_restarted_from": "S2",
             "cache": {"entries": 0},
+            "effective_thresholds": {
+                "high": settings.high,
+                "medium": settings.medium,
+                "page_match_threshold": settings.page_match_threshold,
+            },
         }
     assert resolution is not None
     scorer = (
@@ -115,6 +120,11 @@ def _run_similarity_stages(
             "reason_code": resolution.reason_code,
             "fallback_restarted_from": None,
             "cache": getattr(scorer, "cache_stats", {"entries": 0}),
+            "effective_thresholds": {
+                "high": effective_settings.high,
+                "medium": effective_settings.medium,
+                "page_match_threshold": effective_settings.page_match_threshold,
+            },
         }
     except EmbeddingError as error:
         fallback = JaccardScorer()
@@ -143,6 +153,11 @@ def _run_similarity_stages(
             "failure_type": type(error).__name__,
             "fallback_restarted_from": "S2",
             "cache": getattr(scorer, "cache_stats", {"entries": 0}),
+            "effective_thresholds": {
+                "high": settings.high,
+                "medium": settings.medium,
+                "page_match_threshold": settings.page_match_threshold,
+            },
         }
 
 
@@ -288,6 +303,8 @@ def _write_similarity_audit(
 ) -> None:
     report = json.loads(report_path.read_text(encoding="utf-8"))
     report["similarity"] = similarity_audit
+    if "effective_thresholds" in similarity_audit and "settings" in report:
+        report["settings"].update(similarity_audit["effective_thresholds"])
     report_path.write_text(
         json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -680,10 +697,12 @@ def _audit_run_locked(
         )
         _update_digest_report(report_path, drafts, decisions, clusters, dry_run=True)
         _write_similarity_audit(report_path, similarity_audit)
+        effective_thresholds = similarity_audit["effective_thresholds"]
         summary = (
             f"dry-run: audited {source_notes} source note(s); roots={', '.join(roots)}; "
-            f"top_k={settings.top_k}; high={settings.high:.2f}; medium={settings.medium:.2f}; "
-            f"page_match_threshold={settings.page_match_threshold:.2f}; "
+            f"top_k={settings.top_k}; high={effective_thresholds['high']:.2f}; "
+            f"medium={effective_thresholds['medium']:.2f}; "
+            f"page_match_threshold={effective_thresholds['page_match_threshold']:.2f}; "
             f"max_lines={settings.max_lines}; no formal knowledge-base files written"
         )
         return report_path, summary
@@ -741,10 +760,12 @@ def _audit_run_locked(
     )
     _update_digest_report(report_path, drafts, decisions, clusters, dry_run=False)
     _write_similarity_audit(report_path, similarity_audit)
+    effective_thresholds = similarity_audit["effective_thresholds"]
     summary = (
         f"audit committed: audited {source_notes} source note(s); roots={', '.join(roots)}; "
-        f"top_k={settings.top_k}; high={settings.high:.2f}; medium={settings.medium:.2f}; "
-        f"page_match_threshold={settings.page_match_threshold:.2f}; "
+        f"top_k={settings.top_k}; high={effective_thresholds['high']:.2f}; "
+        f"medium={effective_thresholds['medium']:.2f}; "
+        f"page_match_threshold={effective_thresholds['page_match_threshold']:.2f}; "
         f"max_lines={settings.max_lines}; {len(writes)} formal output(s) committed"
     )
     return report_path, summary

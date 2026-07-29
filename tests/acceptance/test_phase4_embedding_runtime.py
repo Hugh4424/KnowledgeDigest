@@ -14,6 +14,7 @@ from knowledge_digest.calibration_artifact import (
     load_calibration_artifact,
     validate_calibration_artifact,
 )
+from knowledge_digest.cli import DEFAULT_CONFIG_PATH, build_parser
 from knowledge_digest.config import resolve_settings
 from knowledge_digest.embedding import (
     BackendResolution,
@@ -28,6 +29,12 @@ from knowledge_digest.embedding import (
 from knowledge_digest.paths import DigestPaths
 from knowledge_digest.pipeline import _run_similarity_stages, _write_similarity_audit
 from knowledge_digest.text_similarity import EmbeddingScorer
+
+
+def test_digest_cli_defaults_to_project_embedding_config() -> None:
+    args = build_parser().parse_args(["new", "kb"])
+    assert args.config == DEFAULT_CONFIG_PATH
+    assert json.loads(args.config.read_text(encoding="utf-8"))["similarity"]["backend"] == "embedding"
 
 
 def _settings(path: Path, payload: dict[str, object]):
@@ -629,6 +636,39 @@ def test_similarity_audit_is_written_on_early_report_exit(tmp_path: Path) -> Non
     }
     _write_similarity_audit(report, audit)
     assert json.loads(report.read_text(encoding="utf-8"))["similarity"] == audit
+
+
+def test_similarity_audit_updates_report_to_effective_thresholds(tmp_path: Path) -> None:
+    report = tmp_path / "report.json"
+    report.write_text(
+        json.dumps(
+            {
+                "settings": {
+                    "high": 0.9,
+                    "medium": 0.8,
+                    "page_match_threshold": 0.15,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    thresholds = {
+        "high": 0.79,
+        "medium": 0.79,
+        "page_match_threshold": 0.35,
+    }
+    _write_similarity_audit(
+        report,
+        {
+            "requested_backend": "embedding",
+            "effective_backend": "embedding",
+            "reason_code": "adopted_artifact_match",
+            "effective_thresholds": thresholds,
+        },
+    )
+    persisted = json.loads(report.read_text(encoding="utf-8"))
+    assert {key: persisted["settings"][key] for key in thresholds} == thresholds
+    assert persisted["similarity"]["effective_thresholds"] == thresholds
 
 
 def test_probe_failure_falls_back_before_s2(

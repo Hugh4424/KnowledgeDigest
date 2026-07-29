@@ -12,6 +12,8 @@ from .kb_structure import parse_roots
 from .paths import validate_paths
 from .pipeline import audit_run
 
+DEFAULT_CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "knowledge-digest.json"
+
 
 class DigestArgumentParser(argparse.ArgumentParser):
     """Keep command-line input failures inside the documented error contract."""
@@ -27,7 +29,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("new_dir", type=Path, help="directory containing new source notes")
     parser.add_argument("kb_dir", type=Path, help="knowledge-base directory containing kb.structure.md")
-    parser.add_argument("--config", type=Path, help="JSON file with threshold defaults")
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=DEFAULT_CONFIG_PATH,
+        help="JSON settings file (defaults to the KnowledgeDigest project configuration)",
+    )
     parser.add_argument("--dry-run", action="store_true", help="write only a run audit report")
     parser.add_argument("--top-k", type=int, default=None)
     parser.add_argument("--page-match-threshold", type=float, default=None)
