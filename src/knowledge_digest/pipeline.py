@@ -83,7 +83,10 @@ def _digest_metrics(
         }
         for draft_record in drafts
     ]
-    ceilings = [1 for _ in round_groups]
+    ceilings = [
+        int(draft_record.get("planned_generator_calls", 1))
+        for draft_record in drafts
+    ]
     all_rounds = [
         round_record
         for group in round_groups
@@ -131,7 +134,9 @@ def _digest_metrics(
         ]
         total_tokens = sum(int(value) for value in token_values) if token_values and all(value is not None for value in token_values) else None
         cost = {
-            "generator_calls": len(all_rounds),
+            "generator_calls": sum(
+                int(item.get("provider_call_count", 1)) for item in all_rounds
+            ),
             "planned_generator_calls": sum(ceilings),
             "total_input_chars": sum(int(item.get("input_chars", 0)) for item in all_rounds),
             "total_output_chars": sum(int(item.get("output_chars", 0)) for item in all_rounds),
@@ -183,13 +188,19 @@ def _initial_report(
                 "roots": list(roots),
                 "settings": {
                     "top_k": settings.top_k,
+                    "page_match_threshold": settings.page_match_threshold,
                     "high": settings.high,
                     "medium": settings.medium,
                     "max_lines": settings.max_lines,
                     "max_doc_lines": settings.max_lines,
                     "risk_rule_version": settings.risk_rule_version,
+                    "routing_rule_version": settings.routing_rule_version,
+                    "llm_batch_max_claims": settings.llm_batch_max_claims,
+                    "llm_batch_max_source_chars": settings.llm_batch_max_source_chars,
+                    "llm_summary_enabled": settings.llm_summary_enabled,
                 },
                 "risk_rule_version": RISK_RULE_VERSION,
+                "routing_rule_version": settings.routing_rule_version,
                 "benefit_status": "unmeasured",
                 "structure_check": structure.as_dict(),
                 "official_write": {
@@ -540,6 +551,7 @@ def _audit_run_locked(
         summary = (
             f"dry-run: audited {source_notes} source note(s); roots={', '.join(roots)}; "
             f"top_k={settings.top_k}; high={settings.high:.2f}; medium={settings.medium:.2f}; "
+            f"page_match_threshold={settings.page_match_threshold:.2f}; "
             f"max_lines={settings.max_lines}; no formal knowledge-base files written"
         )
         return report_path, summary
@@ -597,6 +609,7 @@ def _audit_run_locked(
     summary = (
         f"audit committed: audited {source_notes} source note(s); roots={', '.join(roots)}; "
         f"top_k={settings.top_k}; high={settings.high:.2f}; medium={settings.medium:.2f}; "
+        f"page_match_threshold={settings.page_match_threshold:.2f}; "
         f"max_lines={settings.max_lines}; {len(writes)} formal output(s) committed"
     )
     return report_path, summary

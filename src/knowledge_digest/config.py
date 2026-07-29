@@ -12,14 +12,20 @@ from .errors import ValidationError
 
 
 DEFAULT_TOP_K = 5
+DEFAULT_PAGE_MATCH_THRESHOLD = 0.15
 DEFAULT_HIGH = 0.90
 DEFAULT_MEDIUM = 0.80
 DEFAULT_MAX_LINES = 300
+DEFAULT_LLM_BATCH_MAX_CLAIMS = 20
+DEFAULT_LLM_BATCH_MAX_SOURCE_CHARS = 3000
+DEFAULT_LLM_BATCH_CONCURRENCY = 4
 RISK_RULE_VERSION = "risk-rules-v1"
+ROUTING_RULE_VERSION = "routing-jaccard-v2"
 SUPPORTED_LLM_FORMATS = ("openai", "anthropic")
 _CONFIG_KEYS = frozenset(
     {
         "top_k",
+        "page_match_threshold",
         "high",
         "medium",
         "max_lines",
@@ -28,6 +34,10 @@ _CONFIG_KEYS = frozenset(
         "max_doc_lines",
         "llm_enabled",
         "llm_format",
+        "llm_summary_enabled",
+        "llm_batch_max_claims",
+        "llm_batch_max_source_chars",
+        "llm_batch_concurrency",
     }
 )
 _CONFIG_ALIASES = {
@@ -40,12 +50,18 @@ _CONFIG_ALIASES = {
 @dataclass(frozen=True)
 class DigestSettings:
     top_k: int = DEFAULT_TOP_K
+    page_match_threshold: float = DEFAULT_PAGE_MATCH_THRESHOLD
     high: float = DEFAULT_HIGH
     medium: float = DEFAULT_MEDIUM
     max_lines: int = DEFAULT_MAX_LINES
     risk_rule_version: str = RISK_RULE_VERSION
+    routing_rule_version: str = ROUTING_RULE_VERSION
     llm_enabled: bool = False
     llm_format: str = "openai"
+    llm_summary_enabled: bool = False
+    llm_batch_max_claims: int = DEFAULT_LLM_BATCH_MAX_CLAIMS
+    llm_batch_max_source_chars: int = DEFAULT_LLM_BATCH_MAX_SOURCE_CHARS
+    llm_batch_concurrency: int = DEFAULT_LLM_BATCH_CONCURRENCY
 
 
 def _load_json(path: Path | None) -> dict[str, Any]:
@@ -90,18 +106,28 @@ def resolve_settings(
     high: float | None,
     medium: float | None,
     max_lines: int | None,
+    page_match_threshold: float | None = None,
     llm_enabled: bool | None = None,
     llm_format: str | None = None,
+    llm_summary_enabled: bool | None = None,
+    llm_batch_max_claims: int | None = None,
+    llm_batch_max_source_chars: int | None = None,
+    llm_batch_concurrency: int | None = None,
     env: dict[str, str] | None = None,
 ) -> DigestSettings:
     """Apply bundled defaults, JSON defaults, environment, then CLI overrides."""
     values: dict[str, Any] = {
         "top_k": DEFAULT_TOP_K,
+        "page_match_threshold": DEFAULT_PAGE_MATCH_THRESHOLD,
         "high": DEFAULT_HIGH,
         "medium": DEFAULT_MEDIUM,
         "max_lines": DEFAULT_MAX_LINES,
         "llm_enabled": False,
         "llm_format": "openai",
+        "llm_summary_enabled": False,
+        "llm_batch_max_claims": DEFAULT_LLM_BATCH_MAX_CLAIMS,
+        "llm_batch_max_source_chars": DEFAULT_LLM_BATCH_MAX_SOURCE_CHARS,
+        "llm_batch_concurrency": DEFAULT_LLM_BATCH_CONCURRENCY,
     }
     values.update(_load_json(config_path))
 
@@ -112,21 +138,41 @@ def resolve_settings(
 
     cli_values = {
         "top_k": top_k,
+        "page_match_threshold": page_match_threshold,
         "high": high,
         "medium": medium,
         "max_lines": max_lines,
         "llm_enabled": llm_enabled,
         "llm_format": llm_format,
+        "llm_summary_enabled": llm_summary_enabled,
+        "llm_batch_max_claims": llm_batch_max_claims,
+        "llm_batch_max_source_chars": llm_batch_max_source_chars,
+        "llm_batch_concurrency": llm_batch_concurrency,
     }
     values.update({name: value for name, value in cli_values.items() if value is not None})
 
     settings = DigestSettings(
         top_k=_require_int("top_k", values["top_k"]),
+        page_match_threshold=_require_float(
+            "page_match_threshold", values["page_match_threshold"]
+        ),
         high=_require_float("high", values["high"]),
         medium=_require_float("medium", values["medium"]),
         max_lines=_require_int("max_lines", values["max_lines"]),
         llm_enabled=_require_bool("llm_enabled", values["llm_enabled"]),
         llm_format=str(values["llm_format"]),
+        llm_summary_enabled=_require_bool(
+            "llm_summary_enabled", values["llm_summary_enabled"]
+        ),
+        llm_batch_max_claims=_require_int(
+            "llm_batch_max_claims", values["llm_batch_max_claims"]
+        ),
+        llm_batch_max_source_chars=_require_int(
+            "llm_batch_max_source_chars", values["llm_batch_max_source_chars"]
+        ),
+        llm_batch_concurrency=_require_int(
+            "llm_batch_concurrency", values["llm_batch_concurrency"]
+        ),
     )
     if settings.llm_format not in SUPPORTED_LLM_FORMATS:
         raise ValidationError(
@@ -134,8 +180,20 @@ def resolve_settings(
         )
     if settings.top_k < 1:
         raise ValidationError("config", "top_k", "must be at least 1")
+    if not 0 < settings.page_match_threshold <= 1:
+        raise ValidationError(
+            "config", "page_match_threshold", "must be greater than 0 and at most 1"
+        )
     if settings.max_lines < 1:
         raise ValidationError("config", "max_lines", "must be at least 1")
+    if settings.llm_batch_max_claims < 1:
+        raise ValidationError("config", "llm_batch_max_claims", "must be at least 1")
+    if settings.llm_batch_max_source_chars < 1:
+        raise ValidationError(
+            "config", "llm_batch_max_source_chars", "must be at least 1"
+        )
+    if settings.llm_batch_concurrency < 1:
+        raise ValidationError("config", "llm_batch_concurrency", "must be at least 1")
     if not 0 <= settings.medium <= 1:
         raise ValidationError("config", "medium", "must be between 0 and 1")
     if not 0 <= settings.high <= 1:

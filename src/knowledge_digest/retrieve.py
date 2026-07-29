@@ -39,15 +39,21 @@ def retrieve(
             continue
         text = "\n".join(by_id[raw_id]["text"] for raw_id in cluster["members"])
         ranked = sorted(((path, _similarity(text, page_text)) for path, page_text in pages), key=lambda item: (-item[1], str(item[0])))[: settings.top_k]
-        candidate_paths = [str(path.relative_to(paths.kb_dir)) for path, _ in ranked]
-        candidate_scores = [round(score, 6) for _, score in ranked]
-        selected = [(path, score) for path, score in ranked if score > 0]
+        scored = [(path, round(score, 6)) for path, score in ranked]
+        candidate_paths = [str(path.relative_to(paths.kb_dir)) for path, _ in scored]
+        candidate_scores = [score for _, score in scored]
+        selected = [
+            (path, score)
+            for path, score in scored
+            if score >= settings.page_match_threshold
+        ]
+        threshold_note = f"page_match_threshold={settings.page_match_threshold:.6f}"
         if len(selected) >= 2:
-            action, reason = "merge_multiple", "multiple related pages retained from top-k retrieval"
+            action, reason = "merge_multiple", f"multiple top-k pages met {threshold_note}"
         elif len(selected) == 1:
-            action, reason = "revise", "one related page retained from top-k retrieval"
+            action, reason = "revise", f"one top-k page met {threshold_note}"
         else:
-            action, reason = "new", "no related page in top-k retrieval"
+            action, reason = "new", f"no top-k page met {threshold_note}"
         decisions.append(
             {
                 "cluster_id": cluster["cluster_id"],
@@ -59,6 +65,7 @@ def retrieve(
                 "cluster_tier": cluster.get("cluster_tier", cluster.get("tier")),
                 "source_count": len(cluster.get("members", [])),
                 "target_page_count": len(selected),
+                "routing_rule_version": settings.routing_rule_version,
             }
         )
     write_jsonl(run_dir / "s3" / "evolution-decisions.jsonl", decisions)

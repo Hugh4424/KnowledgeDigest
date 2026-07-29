@@ -30,6 +30,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--config", type=Path, help="JSON file with threshold defaults")
     parser.add_argument("--dry-run", action="store_true", help="write only a run audit report")
     parser.add_argument("--top-k", type=int, default=None)
+    parser.add_argument("--page-match-threshold", type=float, default=None)
     parser.add_argument(
         "--cluster-auto-threshold", "--high", dest="high", type=float, default=None
     )
@@ -42,6 +43,16 @@ def build_parser() -> argparse.ArgumentParser:
         choices=SUPPORTED_LLM_FORMATS,
         default=None,
         help="provider API format; enables LLM refinement",
+    )
+    parser.add_argument("--llm-batch-max-claims", type=int, default=None)
+    parser.add_argument("--llm-batch-max-source-chars", type=int, default=None)
+    parser.add_argument("--llm-batch-concurrency", type=int, default=None)
+    parser.add_argument(
+        "--llm-summary",
+        dest="llm_summary_enabled",
+        action="store_true",
+        default=None,
+        help="generate a cited summary with a deterministic evidence section",
     )
     parser.add_argument(
         "--no-llm",
@@ -62,11 +73,16 @@ def main(argv: list[str] | None = None) -> int:
         settings = resolve_settings(
             args.config,
             top_k=args.top_k,
+            page_match_threshold=args.page_match_threshold,
             high=args.high,
             medium=args.medium,
             max_lines=args.max_lines,
             llm_enabled=llm_enabled,
             llm_format=args.llm_format,
+            llm_summary_enabled=args.llm_summary_enabled,
+            llm_batch_max_claims=args.llm_batch_max_claims,
+            llm_batch_max_source_chars=args.llm_batch_max_source_chars,
+            llm_batch_concurrency=args.llm_batch_concurrency,
         )
         paths = validate_paths(args.new_dir, args.kb_dir)
         roots = parse_roots(paths.structure_path)

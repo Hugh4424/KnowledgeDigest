@@ -78,8 +78,13 @@ def audit_provenance(
 ) -> list[dict[str, Any]]:
     """Emit one complete source record for every claim on a formal page."""
     statuses = _source_statuses(raw_items, run_dir)
-    successful = {(write["draft_id"], write.get("page_index", 1)): write for write in writes if write["status"] == "success"}
+    successful = {
+        str(write["target_path"]): write
+        for write in writes
+        if write["status"] == "success"
+    }
     records: list[dict[str, Any]] = []
+    seen_claims: set[tuple[str, str]] = set()
     for draft in drafts:
         pages = draft.get("split_pages")
         if not isinstance(pages, list) or not pages:
@@ -104,9 +109,18 @@ def audit_provenance(
                 source_status = str(snapshot.get("validation_status", "unknown")).lower()
                 if not source_uri or source_status in _DISALLOWED_SOURCE_STATUSES or source_status not in {"passed", "verified", "ok"}:
                     raise ValidationError("s6", draft.get("draft_id", "draft"), "final claims require a validated local source snapshot")
-                write = successful.get((draft["draft_id"], page_index))
+                target_path = str(
+                    claim.get("target_path")
+                    or page.get("target_path")
+                    or (draft.get("target_paths") or [""])[0]
+                )
+                write = successful.get(target_path)
                 if write is None:
                     raise ValidationError("s6", draft.get("draft_id", "draft"), "claim has no successful output page")
+                claim_key = (target_path, str(claim.get("claim_fingerprint")))
+                if claim_key in seen_claims:
+                    continue
+                seen_claims.add(claim_key)
                 records.append(
                     {
                         "claim_id": f"{draft['draft_id']}-claim-{len(records) + 1}",
@@ -119,7 +133,7 @@ def audit_provenance(
                         "verification_status": claim.get("verification_status", "verified"),
                         "source_snapshot_ref": claim.get("source_snapshot_ref") or snapshot.get("snapshot_id"),
                         "page_index": page_index,
-                        "target_path": write["target_path"],
+                        "target_path": target_path,
                         "supersedes": claim.get("supersedes"),
                         "superseded_by": claim.get("superseded_by"),
                     }

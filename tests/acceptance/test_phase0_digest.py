@@ -111,18 +111,28 @@ def test_digest_cli_contract_reads_json_config_defaults_and_options(tmp_path: Pa
 
     assert result.returncode == 0, result.stderr
     assert "top_k=5" in result.stdout
+    assert "page_match_threshold=0.15" in result.stdout
     assert "high=0.90" in result.stdout
     assert "medium=0.80" in result.stdout
     assert "max_lines=300" in result.stdout
 
     config_path.write_text(
-        json.dumps({"top_k": 3, "high": 0.95, "medium": 0.85, "max_lines": 120}),
+        json.dumps(
+            {
+                "top_k": 3,
+                "page_match_threshold": 0.20,
+                "high": 0.95,
+                "medium": 0.85,
+                "max_lines": 120,
+            }
+        ),
         encoding="utf-8",
     )
     result = run_digest(str(new_dir), str(kb_dir), "--config", str(config_path), "--dry-run")
 
     assert result.returncode == 0, result.stderr
     assert "top_k=3" in result.stdout
+    assert "page_match_threshold=0.20" in result.stdout
     assert "high=0.95" in result.stdout
     assert "medium=0.85" in result.stdout
     assert "max_lines=120" in result.stdout
@@ -139,6 +149,22 @@ def test_digest_cli_contract_reports_validation_error_for_invalid_json_config(tm
     assert "validate" in result.stderr.lower()
     assert str(config_path) in result.stderr
     assert "json" in result.stderr.lower()
+
+
+def test_digest_cli_rejects_invalid_page_match_threshold(tmp_path: Path) -> None:
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+
+    result = run_digest(
+        str(new_dir),
+        str(kb_dir),
+        "--page-match-threshold",
+        "0",
+        "--dry-run",
+    )
+
+    assert result.returncode == 1
+    assert "page_match_threshold" in result.stderr
+    assert "greater than 0" in result.stderr
 
 
 def test_digest_cli_contract_validation_errors_identify_the_failing_stage(tmp_path: Path) -> None:
@@ -223,6 +249,7 @@ def test_digest_cli_contract_accepts_required_threshold_option_names_and_config_
         json.dumps(
             {
                 "top_k": 4,
+                "page_match_threshold": 0.18,
                 "cluster_auto_threshold": 0.93,
                 "cluster_review_threshold": 0.83,
                 "max_doc_lines": 111,
@@ -242,11 +269,14 @@ def test_digest_cli_contract_accepts_required_threshold_option_names_and_config_
         "0.86",
         "--max-doc-lines",
         "222",
+        "--page-match-threshold",
+        "0.22",
         "--dry-run",
     )
 
     assert result.returncode == 0, result.stderr
     assert "top_k=4" in result.stdout
+    assert "page_match_threshold=0.22" in result.stdout
     assert "high=0.96" in result.stdout
     assert "medium=0.86" in result.stdout
     assert "max_lines=222" in result.stdout
@@ -681,6 +711,118 @@ def test_s3_covers_new_revise_merge_multiple_and_respects_top_k(tmp_path: Path) 
     assert all(len(decision["candidate_paths"]) == len(decision["candidate_scores"]) for decision in decisions)
 
 
+def test_s3_keeps_weak_positive_candidates_without_treating_them_as_targets(tmp_path: Path) -> None:
+    from knowledge_digest.config import DigestSettings
+    from knowledge_digest.paths import DigestPaths
+    from knowledge_digest.retrieve import retrieve
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    pages = kb_dir / "pages"
+    pages.mkdir()
+    (pages / "alpha.md").write_text("alpha page unrelated details\n", encoding="utf-8")
+    (pages / "beta.md").write_text("beta page unrelated details\n", encoding="utf-8")
+    raw_items = [{
+        "raw_id": "raw-weak",
+        "text": "alpha beta new material with many distinct tokens",
+        "source_uri": "source:weak",
+    }]
+    clusters = [{"cluster_id": "cluster-weak", "tier": "auto", "members": ["raw-weak"]}]
+    paths = DigestPaths(
+        new_dir=new_dir,
+        items_dir=new_dir / "items",
+        kb_dir=kb_dir,
+        structure_path=kb_dir / "kb.structure.md",
+    )
+
+    decisions = retrieve(
+        clusters,
+        raw_items,
+        kb_dir / "_digest" / "runs" / "s3-weak",
+        paths,
+        ("pages", "_archive", "_queues"),
+        DigestSettings(top_k=2),
+    )
+
+    assert decisions[0]["candidate_paths"] == ["pages/alpha.md", "pages/beta.md"]
+    assert all(score > 0 for score in decisions[0]["candidate_scores"])
+    assert decisions[0]["action"] == "new"
+    assert decisions[0]["target_paths"] == []
+
+
+def test_s3_excludes_incidental_second_candidate_from_revise_targets(tmp_path: Path) -> None:
+    from knowledge_digest.config import DigestSettings
+    from knowledge_digest.paths import DigestPaths
+    from knowledge_digest.retrieve import retrieve
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    pages = kb_dir / "pages"
+    pages.mkdir()
+    (pages / "primary.md").write_text("alpha beta gamma delta\n", encoding="utf-8")
+    (pages / "incidental.md").write_text("alpha unrelated one two three four five six\n", encoding="utf-8")
+    raw_items = [{
+        "raw_id": "raw-primary",
+        "text": "alpha beta gamma delta update",
+        "source_uri": "source:primary",
+    }]
+    clusters = [{"cluster_id": "cluster-primary", "tier": "auto", "members": ["raw-primary"]}]
+    paths = DigestPaths(
+        new_dir=new_dir,
+        items_dir=new_dir / "items",
+        kb_dir=kb_dir,
+        structure_path=kb_dir / "kb.structure.md",
+    )
+
+    decisions = retrieve(
+        clusters,
+        raw_items,
+        kb_dir / "_digest" / "runs" / "s3-incidental",
+        paths,
+        ("pages", "_archive", "_queues"),
+        DigestSettings(top_k=2),
+    )
+
+    assert decisions[0]["candidate_paths"] == ["pages/primary.md", "pages/incidental.md"]
+    assert decisions[0]["action"] == "revise"
+    assert decisions[0]["target_paths"] == ["pages/primary.md"]
+
+
+def test_s3_page_match_threshold_includes_exact_boundary_only(tmp_path: Path) -> None:
+    from knowledge_digest.config import DigestSettings
+    from knowledge_digest.paths import DigestPaths
+    from knowledge_digest.retrieve import retrieve
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    pages = kb_dir / "pages"
+    pages.mkdir()
+    (pages / "boundary.md").write_text("alpha delta epsilon\n", encoding="utf-8")
+    (pages / "below.md").write_text("alpha delta epsilon zeta\n", encoding="utf-8")
+    raw_items = [{
+        "raw_id": "raw-boundary",
+        "text": "alpha beta gamma",
+        "source_uri": "source:boundary",
+    }]
+    paths = DigestPaths(
+        new_dir=new_dir,
+        items_dir=new_dir / "items",
+        kb_dir=kb_dir,
+        structure_path=kb_dir / "kb.structure.md",
+    )
+
+    decisions = retrieve(
+        [{"cluster_id": "cluster-boundary", "tier": "auto", "members": ["raw-boundary"]}],
+        raw_items,
+        kb_dir / "_digest" / "runs" / "s3-boundary",
+        paths,
+        ("pages", "_archive", "_queues"),
+        DigestSettings(top_k=2, page_match_threshold=0.20),
+    )
+
+    assert decisions[0]["candidate_scores"] == [0.2, 0.166667]
+    assert decisions[0]["action"] == "revise"
+    assert decisions[0]["target_paths"] == ["pages/boundary.md"]
+    assert decisions[0]["routing_rule_version"] == "routing-jaccard-v2"
+
+
 def test_s4_unsupported_claims_are_reported_but_never_written_to_page(tmp_path: Path) -> None:
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
     (new_dir / "items" / "claims.md").write_text(
@@ -840,3 +982,437 @@ def test_rerun_is_idempotent_for_pages_and_queue_entries(tmp_path: Path) -> None
         path.relative_to(kb_dir): path.read_text(encoding="utf-8")
         for path in (kb_dir / "_queues").glob("*.md")
     } == queue_snapshot
+
+
+def _writeback_claim(raw_id: str, source_uri: str, text: str, line: int = 1) -> dict[str, str]:
+    from knowledge_digest.faithfulness import claim_fingerprint
+
+    return {
+        "text": text,
+        "source_uri": source_uri,
+        "claim_fingerprint": claim_fingerprint(source_uri, text),
+        "content_fingerprint": f"content-{raw_id}",
+        "fragment_locator": f"lines:{line}-{line}",
+        "raw_id": raw_id,
+        "verification_status": "verified",
+    }
+
+
+def _test_digest_paths(new_dir: Path, kb_dir: Path):
+    from knowledge_digest.paths import DigestPaths
+
+    return DigestPaths(
+        new_dir=new_dir,
+        items_dir=new_dir / "items",
+        kb_dir=kb_dir,
+        structure_path=kb_dir / "kb.structure.md",
+    )
+
+
+def test_merge_multiple_writes_all_target_pages_from_one_real_draft(tmp_path: Path) -> None:
+    from knowledge_digest.config import DigestSettings
+    from knowledge_digest.draft import draft
+    from knowledge_digest.writeback import writeback
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    for page_name in ("page1.md", "page2.md"):
+        page = kb_dir / "notes" / page_name
+        page.parent.mkdir(parents=True, exist_ok=True)
+        page.write_text("# Existing\nshared topic\n", encoding="utf-8")
+    raw_item = {
+        "raw_id": "raw-a",
+        "text": "# A\nA final claim for both pages.\n",
+        "source_uri": "source:a",
+        "content_fingerprint": "content-a",
+    }
+    decisions = [{
+        "cluster_id": "cluster-a",
+        "action": "merge_multiple",
+        "target_paths": ["notes/page1.md", "notes/page2.md"],
+        "page_root": "notes",
+    }]
+    clusters = [{"cluster_id": "cluster-a", "members": ["raw-a"], "tier": "auto"}]
+    run_dir = kb_dir / "_digest" / "runs" / "merge-multiple"
+
+    drafts = draft(decisions, clusters, [raw_item], run_dir, DigestSettings())
+    writes = writeback(drafts, run_dir, _test_digest_paths(new_dir, kb_dir), ("notes", "_archive", "_queues"))
+
+    assert {row["target_path"] for row in writes} == {"notes/page1.md", "notes/page2.md"}
+    assert "A final claim for both pages." in (kb_dir / "notes" / "page2.md").read_text(encoding="utf-8")
+
+
+def test_two_clusters_targeting_one_page_are_aggregated_without_overwrite(tmp_path: Path) -> None:
+    from knowledge_digest.writeback import writeback
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    target = kb_dir / "notes" / "shared.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("# Existing\nOld page body.\n", encoding="utf-8")
+    drafts = [
+        {
+            "draft_id": "draft-a",
+            "action": "revise",
+            "target_paths": ["notes/shared.md"],
+            "final_body": "A contribution.",
+            "claims": [_writeback_claim("raw-a", "source:a", "A contribution.")],
+        },
+        {
+            "draft_id": "draft-b",
+            "action": "revise",
+            "target_paths": ["notes/shared.md"],
+            "final_body": "B contribution.",
+            "claims": [_writeback_claim("raw-b", "source:b", "B contribution.")],
+        },
+    ]
+    run_dir = kb_dir / "_digest" / "runs" / "same-page"
+
+    writes = writeback(drafts, run_dir, _test_digest_paths(new_dir, kb_dir), ("notes", "_archive", "_queues"))
+    rendered = target.read_text(encoding="utf-8")
+
+    assert len(writes) == 1
+    assert "Old page body." in rendered
+    assert "A contribution." in rendered
+    assert "B contribution." in rendered
+
+
+def test_existing_page_is_archived_once_and_old_body_stays_formal(tmp_path: Path) -> None:
+    from knowledge_digest.writeback import writeback
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    target = kb_dir / "notes" / "existing.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("# Existing\nKeep this formal body.\n", encoding="utf-8")
+    draft_record = {
+        "draft_id": "draft-existing",
+        "action": "revise",
+        "target_paths": ["notes/existing.md"],
+        "final_body": "New contribution.",
+        "claims": [_writeback_claim("raw-new", "source:new", "New contribution.")],
+    }
+    run_dir = kb_dir / "_digest" / "runs" / "archive-once"
+
+    writes = writeback([draft_record], run_dir, _test_digest_paths(new_dir, kb_dir), ("notes", "_archive", "_queues"))
+    archive_records = _read_jsonl(run_dir / "s5" / "archive-records.jsonl")
+
+    assert len(writes) == 1
+    assert len(archive_records) == 1
+    formal = target.read_text(encoding="utf-8")
+    assert "Keep this formal body." in formal
+    assert "New contribution." in formal
+
+
+def test_cross_target_contributions_are_merged_per_page(tmp_path: Path) -> None:
+    from knowledge_digest.writeback import writeback
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    for name in ("page1.md", "page2.md"):
+        page = kb_dir / "notes" / name
+        page.parent.mkdir(parents=True, exist_ok=True)
+        page.write_text(f"# {name}\n", encoding="utf-8")
+    drafts = [
+        {
+            "draft_id": "draft-a",
+            "action": "merge_multiple",
+            "target_paths": ["notes/page1.md", "notes/page2.md"],
+            "final_body": "A contribution.",
+            "claims": [_writeback_claim("raw-a", "source:a", "A contribution.")],
+        },
+        {
+            "draft_id": "draft-b",
+            "action": "revise",
+            "target_paths": ["notes/page1.md"],
+            "final_body": "B contribution.",
+            "claims": [_writeback_claim("raw-b", "source:b", "B contribution.")],
+        },
+    ]
+    run_dir = kb_dir / "_digest" / "runs" / "cross-target"
+
+    writes = writeback(drafts, run_dir, _test_digest_paths(new_dir, kb_dir), ("notes", "_archive", "_queues"))
+    page1 = (kb_dir / "notes" / "page1.md").read_text(encoding="utf-8")
+    page2 = (kb_dir / "notes" / "page2.md").read_text(encoding="utf-8")
+
+    assert {row["target_path"] for row in writes} == {"notes/page1.md", "notes/page2.md"}
+    assert "A contribution." in page1 and "B contribution." in page1
+    assert "A contribution." in page2 and "B contribution." not in page2
+
+
+def test_end_to_end_s3_to_s6_keeps_all_targets_coverage_and_unique_claims(tmp_path: Path) -> None:
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    pages = kb_dir / "notes"
+    pages.mkdir(parents=True)
+    for name in ("page1.md", "page2.md"):
+        (pages / name).write_text("# Shared page\nshared routing topic\n", encoding="utf-8")
+    (new_dir / "items" / "shared.md").write_text(
+        "# Shared\nshared routing topic\nA repeated claim.\nA repeated claim.\n",
+        encoding="utf-8",
+    )
+    declare_sources(new_dir, "shared.md")
+
+    result = run_digest(str(new_dir), str(kb_dir))
+
+    assert result.returncode == 0, result.stderr
+    run_dir = _single_run_dir(kb_dir)
+    decisions = _read_jsonl(run_dir / "s3" / "evolution-decisions.jsonl")
+    drafts = _read_jsonl(run_dir / "s4" / "drafts.jsonl")
+    writes = _read_jsonl(run_dir / "s5" / "write-report.jsonl")
+    audit = _read_jsonl(run_dir / "s6" / "provenance-audit.jsonl")
+    assert decisions[0]["target_paths"] == ["notes/page1.md", "notes/page2.md"]
+    assert drafts[0]["target_paths"] == ["notes/page1.md", "notes/page2.md"]
+    assert {row["target_path"] for row in writes} == {"notes/page1.md", "notes/page2.md"}
+    assert {row["target_path"] for row in audit} == {"notes/page1.md", "notes/page2.md"}
+    for target_path in ("notes/page1.md", "notes/page2.md"):
+        target_claims = [row for row in audit if row["target_path"] == target_path]
+        fingerprints = [row["claim_fingerprint"] for row in target_claims]
+        assert len(fingerprints) == len(set(fingerprints))
+        coverage = [row for row in drafts[0]["coverage_mapping"] if row["output_page"] == target_path]
+        assert coverage
+
+
+def test_aggregated_writeback_keeps_existing_frontmatter_at_file_start(tmp_path: Path) -> None:
+    from knowledge_digest.writeback import writeback
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    target = kb_dir / "notes" / "frontmatter.md"
+    target.parent.mkdir(parents=True)
+    frontmatter = "---\ncontract_version: phase0\nwhy_field: why\nversion_field: version\n---\n"
+    target.write_text(frontmatter + "# Existing\nKeep the old page body.\n", encoding="utf-8")
+    draft_record = {
+        "draft_id": "draft-frontmatter",
+        "action": "revise",
+        "target_paths": ["notes/frontmatter.md"],
+        "final_body": "New frontmatter-safe contribution.",
+        "claims": [_writeback_claim("raw-frontmatter", "source:frontmatter", "New frontmatter-safe contribution.")],
+    }
+
+    writeback([draft_record], kb_dir / "_digest" / "runs" / "frontmatter", _test_digest_paths(new_dir, kb_dir), ("notes", "_archive", "_queues"))
+    rendered = target.read_text(encoding="utf-8")
+
+    assert rendered.startswith("---\n")
+    assert rendered.startswith(frontmatter)
+    assert rendered.count(frontmatter) == 1
+    assert "Keep the old page body." in rendered
+    assert "New frontmatter-safe contribution." in rendered
+
+
+def test_long_merge_multiple_split_evidence_matches_all_real_targets(tmp_path: Path) -> None:
+    from knowledge_digest.config import DigestSettings
+    from knowledge_digest.draft import draft
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    targets = ["notes/long-a.md", "notes/long-b.md"]
+    raw_item = {
+        "raw_id": "raw-long-multi",
+        "text": "\n".join(f"long contribution line {index}" for index in range(8)) + "\n",
+        "source_uri": "source:long-multi",
+        "content_fingerprint": "content-long-multi",
+    }
+    decisions = [{
+        "cluster_id": "cluster-long-multi",
+        "action": "merge_multiple",
+        "target_paths": targets,
+        "page_root": "notes",
+    }]
+    clusters = [{"cluster_id": "cluster-long-multi", "members": ["raw-long-multi"], "tier": "auto"}]
+    run_dir = kb_dir / "_digest" / "runs" / "long-multi"
+
+    drafts = draft(decisions, clusters, [raw_item], run_dir, DigestSettings(max_lines=3))
+    suggestion = drafts[0]["split_suggestion"]
+
+    assert suggestion["output_pages"] == targets
+    assert [page["target_path"] for page in suggestion["pages"]] == targets
+    assert {row["output_page"] for row in suggestion["component_coverage"]} == set(targets)
+    assert {row["output_page"] for row in suggestion["coverage_mapping"]} == set(targets)
+    assert suggestion["coverage_complete"] is True
+    assert drafts[0]["target_paths"] == targets
+
+
+def test_same_run_id_replay_keeps_each_archive_snapshot_replayable(tmp_path: Path) -> None:
+    from knowledge_digest.writeback import writeback
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    target = kb_dir / "notes" / "replay.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("Original replay snapshot.\n", encoding="utf-8")
+    draft_record = {
+        "draft_id": "draft-replay",
+        "action": "revise",
+        "target_paths": ["notes/replay.md"],
+        "final_body": "Replay contribution.",
+        "claims": [_writeback_claim("raw-replay", "source:replay", "Replay contribution.")],
+    }
+    run_dir = kb_dir / "_digest" / "runs" / "same-run-id"
+    paths = _test_digest_paths(new_dir, kb_dir)
+
+    writeback([draft_record], run_dir, paths, ("notes", "_archive", "_queues"))
+    first_rendered = target.read_text(encoding="utf-8")
+    writeback([draft_record], run_dir, paths, ("notes", "_archive", "_queues"))
+    ledger = _read_jsonl(kb_dir / "_archive" / "records.jsonl")
+
+    assert len(ledger) == 2
+    for record in ledger:
+        archive = kb_dir / str(record["archive_content_path"])
+        assert archive.read_text(encoding="utf-8") == record["full_content"]
+    assert ledger[0]["full_content"] == "Original replay snapshot.\n"
+    assert ledger[1]["full_content"] == first_rendered
+
+
+def test_aggregated_writeback_preserves_fenced_code_blocks(tmp_path: Path) -> None:
+    from knowledge_digest.writeback import writeback
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    target = kb_dir / "notes" / "code.md"
+    target.parent.mkdir(parents=True)
+    target.write_text(
+        "# Existing\n```python\nprint('old')\n```\nOld code body.\n",
+        encoding="utf-8",
+    )
+    draft_record = {
+        "draft_id": "draft-code",
+        "action": "revise",
+        "target_paths": ["notes/code.md"],
+        "final_body": "# New\n```python\nprint('new')\n```\nNew code claim.",
+        "claims": [_writeback_claim("raw-code", "source:code", "New code claim.")],
+    }
+
+    writeback([draft_record], kb_dir / "_digest" / "runs" / "code", _test_digest_paths(new_dir, kb_dir), ("notes", "_archive", "_queues"))
+    rendered = target.read_text(encoding="utf-8")
+
+    assert rendered.count("```python") == 2
+    assert rendered.count("```\n") >= 2
+    assert "print('old')" in rendered and "print('new')" in rendered
+    assert "Old code body." in rendered and "New code claim." in rendered
+
+
+def test_body_provenance_details_heading_is_not_system_provenance(tmp_path: Path) -> None:
+    from knowledge_digest.writeback import writeback
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    target = kb_dir / "notes" / "provenance-details.md"
+    target.parent.mkdir(parents=True)
+    target.write_text(
+        "# Existing\n## Provenance details\nKeep this business chapter.\n## Next chapter\nKeep this too.\n",
+        encoding="utf-8",
+    )
+    draft_record = {
+        "draft_id": "draft-provenance-details",
+        "action": "revise",
+        "target_paths": ["notes/provenance-details.md"],
+        "final_body": "New details claim.",
+        "claims": [_writeback_claim("raw-details", "source:details", "New details claim.")],
+    }
+
+    writeback([draft_record], kb_dir / "_digest" / "runs" / "provenance-details", _test_digest_paths(new_dir, kb_dir), ("notes", "_archive", "_queues"))
+    rendered = target.read_text(encoding="utf-8")
+
+    assert rendered.count("## Provenance details") == 1
+    assert "Keep this business chapter." in rendered
+    assert "## Next chapter" in rendered
+    assert rendered.index("## Provenance details") < rendered.index("\n## Provenance\n")
+
+
+def test_same_page_write_report_and_archive_record_all_contributors(tmp_path: Path) -> None:
+    from knowledge_digest.writeback import writeback
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    target = kb_dir / "notes" / "contributors.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("Old contributor page.\n", encoding="utf-8")
+    drafts = [
+        {
+            "draft_id": "draft-contributor-a",
+            "action": "revise",
+            "target_paths": ["notes/contributors.md"],
+            "final_body": "Contributor A claim.",
+            "claims": [_writeback_claim("raw-contributor-a", "source:contributor-a", "Contributor A claim.")],
+        },
+        {
+            "draft_id": "draft-contributor-b",
+            "action": "revise",
+            "target_paths": ["notes/contributors.md"],
+            "final_body": "Contributor B claim.",
+            "claims": [_writeback_claim("raw-contributor-b", "source:contributor-b", "Contributor B claim.")],
+        },
+    ]
+    run_dir = kb_dir / "_digest" / "runs" / "contributors"
+
+    writes = writeback(drafts, run_dir, _test_digest_paths(new_dir, kb_dir), ("notes", "_archive", "_queues"))
+    archive = _read_jsonl(run_dir / "s5" / "archive-records.jsonl")
+
+    assert len(writes) == 1
+    assert {row["draft_id"] for row in writes[0]["contributors"]} == {
+        "draft-contributor-a",
+        "draft-contributor-b",
+    }
+    assert {row["draft_id"] for row in archive[0]["lineage"]["contributors"]} == {
+        "draft-contributor-a",
+        "draft-contributor-b",
+    }
+
+
+def test_writeback_rejects_symlink_escape_before_external_write(tmp_path: Path) -> None:
+    from knowledge_digest.errors import ValidationError
+    from knowledge_digest.writeback import writeback
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    notes = kb_dir / "notes"
+    os.symlink(outside, notes, target_is_directory=True)
+    draft_record = {
+        "draft_id": "draft-escape-dir",
+        "action": "new",
+        "target_paths": ["notes/escaped.md"],
+        "final_body": "Must not escape.",
+        "claims": [_writeback_claim("raw-escape-dir", "source:escape-dir", "Must not escape.")],
+    }
+    with pytest.raises(ValidationError, match="outside kb_dir"):
+        writeback([draft_record], kb_dir / "_digest" / "runs" / "escape-dir", _test_digest_paths(new_dir, kb_dir), ("notes", "_archive", "_queues"))
+    assert not (outside / "escaped.md").exists()
+    assert not (kb_dir / "_archive").exists()
+
+    notes.unlink()
+    notes.mkdir()
+    outside_file = outside / "escaped-file.md"
+    os.symlink(outside_file, notes / "escaped-file.md")
+    draft_record["draft_id"] = "draft-escape-file"
+    draft_record["target_paths"] = ["notes/escaped-file.md"]
+    with pytest.raises(ValidationError, match="outside kb_dir"):
+        writeback([draft_record], kb_dir / "_digest" / "runs" / "escape-file", _test_digest_paths(new_dir, kb_dir), ("notes", "_archive", "_queues"))
+    assert not outside_file.exists()
+
+
+def test_same_claim_text_is_deduped_in_markdown_and_provenance_on_replay(tmp_path: Path) -> None:
+    from knowledge_digest.writeback import writeback
+
+    new_dir, kb_dir = copy_fixture_layout(tmp_path)
+    target = kb_dir / "notes" / "same-claim.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("# Existing\nUnrelated structure.\n", encoding="utf-8")
+    drafts = [
+        {
+            "draft_id": "draft-same-a",
+            "action": "revise",
+            "target_paths": ["notes/same-claim.md"],
+            "final_body": "- Same claim.",
+            "claims": [_writeback_claim("raw-same-a", "source:same-a", "Same claim.")],
+        },
+        {
+            "draft_id": "draft-same-b",
+            "action": "revise",
+            "target_paths": ["notes/same-claim.md"],
+            "final_body": "**Same claim.**",
+            "claims": [_writeback_claim("raw-same-b", "source:same-b", "Same claim.")],
+        },
+    ]
+    paths = _test_digest_paths(new_dir, kb_dir)
+    run_dir = kb_dir / "_digest" / "runs" / "same-claim"
+
+    writeback(drafts, run_dir, paths, ("notes", "_archive", "_queues"))
+    writeback(drafts, run_dir, paths, ("notes", "_archive", "_queues"))
+    rendered = target.read_text(encoding="utf-8")
+    body = rendered.split("\n## Provenance\n", 1)[0]
+    provenance = rendered.split("\n## Provenance\n", 1)[1]
+
+    assert body.count("Same claim.") == 1
+    assert provenance.count("Same claim.") == 1
+    assert "Unrelated structure." in body

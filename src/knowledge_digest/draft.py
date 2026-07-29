@@ -6,6 +6,7 @@ import hashlib
 import re
 import time
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
@@ -18,6 +19,7 @@ _HEADING_RE = re.compile(r"^\s*#{1,6}\s+")
 _FAQ_RE = re.compile(r"^\s*(?:FAQ|Q(?:uestion)?)[\s:：]", re.IGNORECASE)
 _ERROR_RE = re.compile(r"^\s*(?:Error\s+)?[A-Z][A-Z0-9_-]*\d+[\s:：-]", re.IGNORECASE)
 _PARAM_RE = re.compile(r"^\s*(?:[-*]\s*)?(?:parameter|param|argument)\b[^:：]*[:：]", re.IGNORECASE)
+_SUMMARY_NUMBER_RE = re.compile(r"(?<![A-Za-z0-9_])\d+(?:\.\d+)?")
 
 
 def _marker(line: str) -> str | None:
@@ -308,6 +310,191 @@ def _coverage_for_claims(claims: list[dict[str, Any]], target: str) -> list[dict
     ]
 
 
+def _dedupe_claims(claims: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Keep the first occurrence of each claim fingerprint."""
+    result: list[dict[str, Any]] = []
+    seen: set[Any] = set()
+    for claim in claims:
+        fingerprint = claim.get("claim_fingerprint")
+        if fingerprint in seen:
+            continue
+        seen.add(fingerprint)
+        result.append(dict(claim))
+    return result
+
+
+def _claim_line_start(claim: Mapping[str, Any]) -> int:
+    locator = str(claim.get("fragment_locator", "lines:0-0"))
+    try:
+        return int(locator.split(":", 1)[1].split("-", 1)[0])
+    except (IndexError, ValueError):
+        return 0
+
+
+def _generation_contexts(
+    items: list[dict[str, Any]],
+    claims: list[dict[str, Any]],
+    *,
+    base_context: dict[str, Any],
+    max_claims: int,
+    max_chars: int,
+    summary_enabled: bool = False,
+) -> list[dict[str, Any]]:
+    """Split a provider request at source-component boundaries.
+
+    Ordinary prose may be split further when one section exceeds a limit.
+    Atomic FAQ/error/parameter/code components stay whole for the legacy body
+    refinement path. Summary mode can split an oversized atomic component into
+    claim-sized provider inputs because the complete source is rendered later
+    as deterministic Evidence; this keeps the provider request bounded without
+    dropping any source content from the formal page.
+    """
+    units: list[dict[str, Any]] = []
+    claims_by_raw: dict[Any, list[dict[str, Any]]] = {}
+    for claim in claims:
+        claims_by_raw.setdefault(claim.get("raw_id"), []).append(dict(claim))
+
+    for item in items:
+        raw_claims = claims_by_raw.get(item.get("raw_id"), [])
+        for span in _component_spans(str(item.get("text", "")).splitlines()):
+            body = "\n".join(
+                line for line in span["lines"] if not _is_unsupported(line)
+            ).strip()
+            span_claims = [
+                claim
+                for claim in raw_claims
+                if span["line_start"] <= _claim_line_start(claim) <= span["line_end"]
+            ]
+            if not span_claims and not _required_structure_lines(body):
+                continue
+            oversized = len(span_claims) > max_claims or len(body) > max_chars
+            if span.get("atomic") and oversized and summary_enabled and span_claims:
+                structure_lines = _required_structure_lines(body)
+                claim_texts = {str(claim.get("text", "")).strip() for claim in span_claims}
+                for claim in span_claims:
+                    claim_text = str(claim.get("text", "")).strip()
+                    parts = [line for line in structure_lines if line not in claim_texts]
+                    if claim_text:
+                        parts.append(claim_text)
+                    units.append(
+                        {
+                            "body": "\n".join(parts),
+                            "claims": [dict(claim)],
+                            "oversized_atomic": False,
+                        }
+                    )
+                continue
+            if (
+                not span.get("atomic")
+                and (
+                    oversized
+                )
+            ):
+                claim_texts = {
+                    str(claim.get("text", "")).strip() for claim in span_claims
+                }
+                units.extend(
+                    {
+                        "body": line,
+                        "claims": [],
+                        "oversized_atomic": False,
+                    }
+                    for line in _required_structure_lines(body)
+                    if line not in claim_texts
+                )
+                units.extend(
+                    {
+                        "body": str(claim.get("text", "")),
+                        "claims": [dict(claim)],
+                        "oversized_atomic": False,
+                    }
+                    for claim in span_claims
+                )
+            else:
+                units.append(
+                    {
+                        "body": body,
+                        "claims": span_claims,
+                        "oversized_atomic": bool(
+                            span.get("atomic")
+                            and (
+                                len(span_claims) > max_claims
+                                or len(body) > max_chars
+                            )
+                        ),
+                    }
+                )
+
+    if not units:
+        return [dict(base_context)]
+
+    grouped: list[list[dict[str, Any]]] = []
+    current: list[dict[str, Any]] = []
+    current_claims = 0
+    current_chars = 0
+    for unit in units:
+        unit_claims = len(unit["claims"])
+        unit_chars = len(unit["body"])
+        if current and (
+            current_claims + unit_claims > max_claims
+            or current_chars + unit_chars > max_chars
+        ):
+            grouped.append(current)
+            current = []
+            current_claims = 0
+            current_chars = 0
+        current.append(unit)
+        current_claims += unit_claims
+        current_chars += unit_chars
+        if unit["oversized_atomic"]:
+            grouped.append(current)
+            current = []
+            current_claims = 0
+            current_chars = 0
+    if current:
+        grouped.append(current)
+
+    contexts: list[dict[str, Any]] = []
+    batch_count = len(grouped)
+    for index, group in enumerate(grouped, start=1):
+        body = "\n\n".join(unit["body"] for unit in group if unit["body"]).strip()
+        batch_claims = [
+            dict(claim)
+            for unit in group
+            for claim in unit["claims"]
+        ]
+        contexts.append(
+            {
+                **base_context,
+                "source_text": body,
+                "initial_body": body,
+                "claims": batch_claims,
+                "batch_index": index,
+                "batch_count": batch_count,
+                "batch_oversized_atomic": any(
+                    unit["oversized_atomic"] for unit in group
+                ),
+            }
+        )
+    return contexts
+
+
+def _sum_optional_int(values: list[Any]) -> int | None:
+    return sum(int(value) for value in values) if values and all(value is not None for value in values) else None
+
+
+def _required_structure_lines(body: str) -> list[str]:
+    return [
+        line.strip()
+        for line in body.splitlines()
+        if line.strip()
+        and (
+            _marker(line) in {"heading", "code"}
+            or line.lstrip().startswith("|")
+        )
+    ]
+
+
 def default_generator(context: dict[str, Any]) -> dict[str, Any]:
     """The local generation boundary used until a provider is supplied.
 
@@ -343,6 +530,8 @@ def _candidate_from_result(
     initial_body: str,
     claims: list[dict[str, Any]],
     target: str,
+    summary_enabled: bool = False,
+    evidence_body: str | None = None,
 ) -> dict[str, Any]:
     if isinstance(result, str):
         result = {"final_body": result}
@@ -364,8 +553,29 @@ def _candidate_from_result(
             "invalid_reason": "generator returned a malformed claims field",
             "provider_input_tokens": None,
             "provider_output_tokens": None,
+            "provider_attempt_count": result.get("provider_attempt_count", 1),
         }
     candidate_claims = [dict(claim) for claim in raw_claims]
+    summary = result.get("summary") if summary_enabled else None
+    if isinstance(summary, Mapping):
+        normalized_summary = dict(summary)
+        normalized_segments: list[dict[str, Any]] = []
+        for segment in summary.get("segments", []):
+            if not isinstance(segment, Mapping):
+                normalized_segments.append(segment)  # validation reports the shape
+                continue
+            normalized_segment = dict(segment)
+            supports = segment.get("supports")
+            if isinstance(supports, list):
+                normalized_segment["supports"] = [
+                    {"claim_fingerprint": support}
+                    if isinstance(support, str)
+                    else support
+                    for support in supports
+                ]
+            normalized_segments.append(normalized_segment)
+        normalized_summary["segments"] = normalized_segments
+        summary = normalized_summary
     coverage = result.get("coverage_mapping")
     if coverage is None:
         coverage = _coverage_for_claims(candidate_claims, target)
@@ -376,22 +586,177 @@ def _candidate_from_result(
     if faithfulness_status.casefold() in {"failed", "invalid", "unfaithful"}:
         explicit_invalid = True
     return {
-        "final_body": body,
+        "final_body": evidence_body if summary_enabled and evidence_body is not None else body,
         "claims": candidate_claims,
         "coverage_mapping": coverage,
         "component_coverage": [dict(row) for row in result.get("component_coverage", []) if isinstance(row, Mapping)],
+        "summary": summary,
         "faithfulness_status": faithfulness_status,
         "explicit_invalid": explicit_invalid,
         "invalid_reason": result.get("invalid_reason") or result.get("reason"),
         "provider_input_tokens": result.get("provider_input_tokens", result.get("input_tokens")),
         "provider_output_tokens": result.get("provider_output_tokens", result.get("output_tokens")),
+        "provider_attempt_count": result.get("provider_attempt_count", 1),
     }
+
+
+def _validate_summary(
+    summary: Any,
+    *,
+    source_claims: list[dict[str, Any]],
+    target: str,
+) -> tuple[bool, str | None]:
+    """Validate that every generated summary statement points to source claims."""
+    if not isinstance(summary, Mapping):
+        return False, "summary is missing or not an object"
+    if summary.get("status") != "validated":
+        return False, "summary status is not validated"
+    segments = summary.get("segments")
+    if not isinstance(segments, list) or not segments:
+        return False, "summary segments are missing or empty"
+    source_fingerprints = {
+        str(claim.get("claim_fingerprint"))
+        for claim in source_claims
+        if claim.get("claim_fingerprint")
+    }
+    referenced: set[str] = set()
+    for segment in segments:
+        if not isinstance(segment, Mapping) or not str(segment.get("summary_id", "")).strip():
+            return False, "summary segment is missing summary_id"
+        if not str(segment.get("text", "")).strip():
+            return False, "summary segment is missing text"
+        supports = segment.get("supports")
+        if not isinstance(supports, list) or not supports:
+            return False, "summary segment has no supports"
+        for support in supports:
+            if not isinstance(support, Mapping):
+                return False, "summary support is not an object"
+            fingerprint = str(support.get("claim_fingerprint", ""))
+            if fingerprint not in source_fingerprints:
+                return False, "summary references a claim outside the source batch"
+            support_target = support.get("target_path")
+            if support_target not in (None, "", target):
+                return False, "summary support targets a different page"
+            referenced.add(fingerprint)
+    if referenced != source_fingerprints:
+        return False, "summary does not reference every source claim"
+    summary_text = "\n".join(
+        str(segment.get("text", ""))
+        for segment in segments
+        if isinstance(segment, Mapping)
+    )
+    protected_numbers = {
+        number
+        for claim in source_claims
+        for number in _SUMMARY_NUMBER_RE.findall(str(claim.get("text", "")))
+    }
+    missing_numbers = sorted(
+        number for number in protected_numbers if number not in summary_text
+    )
+    if missing_numbers:
+        return False, f"summary omitted protected number(s): {', '.join(missing_numbers)}"
+    protected_identifiers = {
+        identifier
+        for claim in source_claims
+        for identifier in re.findall(r"`([^`]+)`", str(claim.get("text", "")))
+        if (
+            "/" in identifier
+            or "://" in identifier
+            or identifier.startswith("--")
+            or identifier.endswith("()")
+            or identifier.endswith((".py", ".md", ".yaml"))
+            or identifier.startswith("ov ")
+        )
+    }
+    missing_identifiers = sorted(
+        identifier for identifier in protected_identifiers if identifier not in summary_text
+    )
+    if missing_identifiers:
+        return False, (
+            "summary omitted protected identifier(s): "
+            + ", ".join(missing_identifiers)
+        )
+    return True, None
+
+
+def _repair_summary(
+    summary: Any,
+    *,
+    source_claims: list[dict[str, Any]],
+    target: str,
+) -> Any:
+    """Add exact source wording when a model summary drops protected details.
+
+    The provider may compress a limit such as "at most 3" into "a few".  The
+    source claim is trusted; copying it into a clearly marked repair segment is
+    safer than accepting the vague wording or deleting the Summary entirely.
+    Evidence remains the complete deterministic source body.
+    """
+    if not isinstance(summary, Mapping) or not isinstance(summary.get("segments"), list):
+        return summary
+    repaired = dict(summary)
+    segments = [dict(segment) for segment in summary["segments"] if isinstance(segment, Mapping)]
+    summary_text = "\n".join(str(segment.get("text", "")) for segment in segments)
+    protected_identifiers = {
+        identifier
+        for claim in source_claims
+        for identifier in re.findall(r"`([^`]+)`", str(claim.get("text", "")))
+        if (
+            "/" in identifier
+            or "://" in identifier
+            or identifier.startswith("--")
+            or identifier.endswith("()")
+            or identifier.endswith((".py", ".md", ".yaml"))
+            or identifier.startswith("ov ")
+        )
+    }
+    protected_numbers = {
+        number
+        for claim in source_claims
+        for number in _SUMMARY_NUMBER_RE.findall(str(claim.get("text", "")))
+    }
+    missing_numbers = {number for number in protected_numbers if number not in summary_text}
+    missing_identifiers = {
+        identifier for identifier in protected_identifiers if identifier not in summary_text
+    }
+    repair_index = 1
+    for claim in source_claims:
+        text = str(claim.get("text", "")).strip()
+        claim_numbers = set(_SUMMARY_NUMBER_RE.findall(text))
+        claim_identifiers = set(re.findall(r"`([^`]+)`", text)) & protected_identifiers
+        if not ((claim_numbers & missing_numbers) or (claim_identifiers & missing_identifiers)):
+            continue
+        segments.append(
+            {
+                "summary_id": f"summary-repair-{repair_index}",
+                "text": f"关键保真细节：{text}",
+                "supports": [
+                    {
+                        "claim_fingerprint": claim.get("claim_fingerprint"),
+                        "target_path": target,
+                    }
+                ],
+            }
+        )
+        repair_index += 1
+    repaired["segments"] = segments
+    return repaired
+
+
+def _render_summary(summary: Mapping[str, Any], evidence_body: str) -> str:
+    """Render model summaries above a deterministic, lossless evidence body."""
+    lines = ["## Summary", ""]
+    for segment in summary.get("segments", []):
+        lines.append(f"- {str(segment['text']).strip()} [{segment['summary_id']}]")
+    lines.extend(["", "## Evidence", "", evidence_body.strip()])
+    return "\n".join(lines).strip()
 
 
 def _validate_candidate(
     candidate: dict[str, Any],
     *,
     source_claims: list[dict[str, Any]],
+    required_structure_lines: list[str] | None = None,
 ) -> tuple[bool, str | None, float, float, int]:
     """Apply source, coverage, and faithfulness hard gates to one candidate."""
     if candidate["explicit_invalid"]:
@@ -451,6 +816,12 @@ def _validate_candidate(
     normalized_body = normalize_for_gate(candidate["final_body"])
     if not all(normalize_for_gate(claim["text"]) in normalized_body for claim in candidate_claims):
         return False, "candidate failed faithfulness hard gate", coverage_ratio, 0.0, 0
+    candidate_lines = Counter(
+        line.strip() for line in candidate["final_body"].splitlines() if line.strip()
+    )
+    required_lines = Counter(required_structure_lines or [])
+    if required_lines - candidate_lines:
+        return False, "candidate dropped source structure", coverage_ratio, 0.0, 0
     eligible = len(source_claims)
     retained = len(candidate_claims)
     retained_ratio = retained / eligible if eligible else 1.0
@@ -488,6 +859,7 @@ def _round_record(
         "output_chars": len(candidate["final_body"]),
         "provider_input_tokens": candidate.get("provider_input_tokens"),
         "provider_output_tokens": candidate.get("provider_output_tokens"),
+        "provider_attempt_count": candidate.get("provider_attempt_count", 1),
         "elapsed_ms": elapsed_ms,
         "stop_reason": reason,
     }
@@ -498,6 +870,7 @@ def _planned_draft(
     *,
     default_root: str,
     draft_id: str,
+    planned_generator_calls: int,
 ) -> dict[str, Any]:
     targets = [str(path) for path in decision.get("target_paths", [])]
     if not targets:
@@ -522,6 +895,7 @@ def _planned_draft(
         "rethink_status": "planned",
         "fallback_reason": None,
         "benefit_status": "unmeasured",
+        "planned_generator_calls": planned_generator_calls,
         "quality": {
             "coverage_ratio": None,
             "retained_input_unit_ratio": None,
@@ -561,44 +935,220 @@ def draft(
         draft_id = f"draft-{len(drafts) + 1}"
         default_root = str(decision.get("page_root", "pages"))
         base_target = str(decision["target_paths"][0]) if decision.get("target_paths") else f"{default_root}/digest/{draft_id}.md"
-        if dry_run:
-            drafts.append(_planned_draft(decision, default_root=default_root, draft_id=draft_id))
-            continue
-
-        generator = generator or resolve_generator(settings)
-        context = {
+        base_context = {
             "items": items,
             "source_text": "\n".join(str(item.get("text", "")) for item in items),
             "initial_body": initial_body,
             "claims": [dict(claim) for claim in claims],
             "old_target_body": str(decision.get("old_target_body", "")),
             "target_page": base_target,
+            "summary_enabled": settings.llm_summary_enabled,
         }
-        started = time.perf_counter()
-        result = _invoke_generator(generator, context)
-        elapsed_ms = max(0, int((time.perf_counter() - started) * 1000))
-        candidate = _candidate_from_result(
-            result,
-            initial_body=initial_body,
-            claims=claims,
-            target=base_target,
+        generation_contexts = (
+            _generation_contexts(
+                items,
+                claims,
+                base_context=base_context,
+                max_claims=settings.llm_batch_max_claims,
+                max_chars=settings.llm_batch_max_source_chars,
+                summary_enabled=settings.llm_summary_enabled,
+            )
+            if settings.llm_enabled
+            else [base_context]
         )
-        valid, reason, coverage_ratio, retained_ratio, unsupported_count = _validate_candidate(
-            candidate,
-            source_claims=claims,
-        )
-        rounds = [
-            _round_record(
-                candidate=candidate,
-                valid=valid,
-                reason=reason,
-                coverage_ratio=coverage_ratio,
-                retained_ratio=retained_ratio,
-                unsupported_count=unsupported_count,
+        if dry_run:
+            drafts.append(
+                _planned_draft(
+                    decision,
+                    default_root=default_root,
+                    draft_id=draft_id,
+                    planned_generator_calls=len(generation_contexts),
+                )
+            )
+            continue
+
+        generator = generator or resolve_generator(settings)
+        batch_candidates: list[dict[str, Any]] = []
+        batch_records: list[dict[str, Any]] = []
+        failure_reason: str | None = None
+
+        def run_batch(
+            batch_index: int, context: dict[str, Any]
+        ) -> tuple[int, dict[str, Any], dict[str, Any], bool, str | None]:
+            started = time.perf_counter()
+            result = _invoke_generator(generator, context)
+            elapsed_ms = max(0, int((time.perf_counter() - started) * 1000))
+            batch_candidate = _candidate_from_result(
+                result,
+                initial_body=context["initial_body"],
+                claims=context["claims"],
+                target=base_target,
+                summary_enabled=settings.llm_summary_enabled,
+                evidence_body=context["initial_body"],
+            )
+            if settings.llm_summary_enabled and not batch_candidate["explicit_invalid"]:
+                batch_candidate["summary"] = _repair_summary(
+                    batch_candidate.get("summary"),
+                    source_claims=context["claims"],
+                    target=base_target,
+                )
+                summary_valid, summary_reason = _validate_summary(
+                    batch_candidate.get("summary"),
+                    source_claims=context["claims"],
+                    target=base_target,
+                )
+                if not summary_valid:
+                    batch_candidate["explicit_invalid"] = True
+                    batch_candidate["invalid_reason"] = summary_reason
+            (
+                batch_valid,
+                batch_reason,
+                batch_coverage_ratio,
+                batch_retained_ratio,
+                batch_unsupported_count,
+            ) = _validate_candidate(
+                batch_candidate,
+                source_claims=context["claims"],
+                required_structure_lines=_required_structure_lines(
+                    context["initial_body"]
+                ),
+            )
+            batch_record = _round_record(
+                candidate=batch_candidate,
+                valid=batch_valid,
+                reason=batch_reason,
+                coverage_ratio=batch_coverage_ratio,
+                retained_ratio=batch_retained_ratio,
+                unsupported_count=batch_unsupported_count,
                 input_chars=len(context["source_text"] + context["old_target_body"]),
                 elapsed_ms=elapsed_ms,
             )
-        ]
+            batch_record.update(
+                {
+                    "batch_index": batch_index,
+                    "batch_count": len(generation_contexts),
+                    "oversized_atomic": bool(
+                        context.get("batch_oversized_atomic", False)
+                    ),
+                }
+            )
+            return batch_index, batch_candidate, batch_record, batch_valid, batch_reason
+
+        worker_count = min(settings.llm_batch_concurrency, len(generation_contexts))
+        with ThreadPoolExecutor(max_workers=worker_count) as executor:
+            futures = [
+                executor.submit(run_batch, batch_index, context)
+                for batch_index, context in enumerate(generation_contexts, start=1)
+            ]
+            for future in futures:
+                batch_index, batch_candidate, batch_record, batch_valid, batch_reason = future.result()
+                batch_candidates.append(batch_candidate)
+                batch_records.append(batch_record)
+                if not batch_valid and failure_reason is None:
+                    failure_reason = (
+                        str(batch_reason)
+                        if len(generation_contexts) == 1
+                        else f"batch {batch_index}: {batch_reason}"
+                    )
+
+        candidate = {
+            "final_body": "\n\n".join(
+                batch["final_body"] for batch in batch_candidates if batch["final_body"]
+            ).strip(),
+            "claims": [
+                dict(claim)
+                for batch in batch_candidates
+                for claim in batch["claims"]
+            ],
+            "coverage_mapping": [
+                dict(row)
+                for batch in batch_candidates
+                for row in batch["coverage_mapping"]
+            ],
+            "component_coverage": [
+                dict(row)
+                for batch in batch_candidates
+                for row in batch.get("component_coverage", [])
+            ],
+            "faithfulness_status": (
+                "passed"
+                if batch_candidates
+                and all(
+                    (batch.get("faithfulness_status") or "passed")
+                    in {"faithful", "passed"}
+                    for batch in batch_candidates
+                )
+                else ""
+            ),
+            "explicit_invalid": False,
+            "invalid_reason": failure_reason,
+            "provider_input_tokens": _sum_optional_int(
+                [batch.get("provider_input_tokens") for batch in batch_candidates]
+            ),
+            "provider_output_tokens": _sum_optional_int(
+                [batch.get("provider_output_tokens") for batch in batch_candidates]
+            ),
+            "provider_attempt_count": sum(
+                int(batch.get("provider_attempt_count", 1)) for batch in batch_candidates
+            ),
+            "summary": (
+                {
+                    "status": "validated",
+                    "segments": [
+                        dict(segment)
+                        for batch in batch_candidates
+                        for segment in (batch.get("summary") or {}).get("segments", [])
+                    ],
+                }
+                if settings.llm_summary_enabled and failure_reason is None
+                else None
+            ),
+        }
+        if settings.llm_summary_enabled and candidate.get("summary"):
+            for index, segment in enumerate(candidate["summary"]["segments"], start=1):
+                segment["summary_id"] = f"summary-{index}"
+                segment["supports"] = [
+                    dict(support, target_path=base_target)
+                    for support in segment.get("supports", [])
+                ]
+            candidate["final_body"] = _render_summary(candidate["summary"], initial_body)
+        if failure_reason is None:
+            (
+                valid,
+                reason,
+                coverage_ratio,
+                retained_ratio,
+                unsupported_count,
+            ) = _validate_candidate(
+                candidate,
+                source_claims=claims,
+                required_structure_lines=_required_structure_lines(initial_body),
+            )
+        else:
+            valid = False
+            reason = failure_reason
+            coverage_ratio = 0.0
+            retained_ratio = 0.0
+            unsupported_count = max(0, len(claims) - len(candidate["claims"]))
+        round_record = _round_record(
+            candidate=candidate,
+            valid=valid,
+            reason=reason,
+            coverage_ratio=coverage_ratio,
+            retained_ratio=retained_ratio,
+            unsupported_count=unsupported_count,
+            input_chars=sum(
+                int(record.get("input_chars", 0)) for record in batch_records
+            ),
+            elapsed_ms=sum(
+                int(record.get("elapsed_ms", 0)) for record in batch_records
+            ),
+        )
+        round_record["provider_call_count"] = sum(
+            int(record.get("provider_attempt_count", 1)) for record in batch_records
+        )
+        round_record["batches"] = batch_records
+        rounds = [round_record]
         selected: dict[str, Any] | None = candidate if valid else None
         selected_round: int | None = 1 if valid else None
 
@@ -613,6 +1163,9 @@ def draft(
                 "faithfulness_status": fallback_status,
                 "provider_input_tokens": None,
                 "provider_output_tokens": None,
+                "summary": {"status": "rejected", "segments": []}
+                if settings.llm_summary_enabled
+                else None,
             }
             fallback_reason = "no valid round; used claim fallback"
             rethink_status = "fallback"
@@ -620,10 +1173,11 @@ def draft(
             rethink_status = "completed"
 
         final_body = selected["final_body"]
-        final_claims = selected["claims"]
+        final_claims = _dedupe_claims(selected["claims"])
         final_coverage = selected["coverage_mapping"]
         faithfulness_status = selected.get("faithfulness_status") or "passed"
         has_long_item = any(len(item["text"].splitlines()) > settings.max_lines for item in items)
+        requested_targets = [str(path) for path in decision.get("target_paths", [])]
         if has_long_item:
             pages, suggestion = _build_pages(
                 items,
@@ -632,17 +1186,79 @@ def draft(
                 base_target=base_target,
                 draft_id=draft_id,
             )
+            if len(requested_targets) > 1:
+                # A multi-target merge is a contribution to every retrieved
+                # page. Keep the long source whole on each requested page;
+                # single-target runs retain the existing split suggestion.
+                original_component_rows = [
+                    dict(row) for row in suggestion.get("component_coverage", [])
+                ]
+                original_components = [
+                    dict(component)
+                    for page in suggestion.get("pages", [])
+                    for component in page.get("components", [])
+                ]
+                pages = [
+                    {
+                        "page_index": index,
+                        "target_path": target,
+                        "final_body": final_body,
+                        "claims": [dict(claim, page_index=index, target_path=target) for claim in final_claims],
+                        "components": original_components,
+                        "oversized_components": [],
+                    }
+                    for index, target in enumerate(requested_targets, start=1)
+                ]
+                suggestion["output_pages"] = requested_targets
+                suggestion["pages"] = [
+                    {
+                        "page_index": page["page_index"],
+                        "target_path": page["target_path"],
+                        "components": page["components"],
+                        "unsplittable_components": page["oversized_components"],
+                    }
+                    for page in pages
+                ]
+                suggestion["component_coverage"] = [
+                    dict(row, output_page=target)
+                    for target in requested_targets
+                    for row in original_component_rows
+                ]
+                suggestion["coverage_mapping"] = [
+                    row
+                    for target in requested_targets
+                    for row in _coverage_for_claims(final_claims, target)
+                ]
+                target_set = set(requested_targets)
+                suggestion["coverage_complete"] = bool(
+                    target_set
+                    and all(
+                        row.get("output_page") in target_set
+                        for row in suggestion["coverage_mapping"]
+                        + suggestion["component_coverage"]
+                    )
+                    and {
+                        (row.get("raw_id"), row.get("input_fragment"))
+                        for row in suggestion["coverage_mapping"]
+                    }
+                    >= {
+                        (claim.get("raw_id"), claim.get("fragment_locator"))
+                        for claim in final_claims
+                    }
+                )
             split_suggestions.append(suggestion)
         else:
+            targets = requested_targets or [base_target]
             pages = [
                 {
-                    "page_index": 1,
-                    "target_path": base_target,
+                    "page_index": index,
+                    "target_path": target,
                     "final_body": final_body,
-                    "claims": [dict(claim, page_index=1, target_path=base_target) for claim in final_claims],
+                    "claims": [dict(claim, page_index=index, target_path=target) for claim in final_claims],
                     "components": [],
                     "oversized_components": [],
                 }
+                for index, target in enumerate(targets, start=1)
             ]
 
         removed = []
@@ -665,19 +1281,31 @@ def draft(
             "target_paths": [page["target_path"] for page in pages],
             "final_body": final_body,
             "claims": final_claims,
+            "summary": selected.get("summary"),
             "removed_claims": removed,
             "provenance": provenance,
             "faithfulness_status": faithfulness_status,
             "split_suggestion": split_suggestions[-1] if has_long_item else None,
             "split_pages": pages,
             "component_coverage": (split_suggestions[-1]["component_coverage"] if has_long_item else []),
-            "coverage_mapping": (split_suggestions[-1]["coverage_mapping"] if has_long_item else final_coverage),
+            "coverage_mapping": (
+                split_suggestions[-1]["coverage_mapping"]
+                if has_long_item and len(requested_targets) <= 1
+                else [
+                    row
+                    for page in pages
+                    for row in _coverage_for_claims(page["claims"], page["target_path"])
+                ]
+                if pages
+                else final_coverage
+            ),
             "rounds": rounds,
             "selected_round": selected_round,
             "round_count": len(rounds),
             "rethink_status": rethink_status,
             "fallback_reason": fallback_reason,
             "benefit_status": "unmeasured",
+            "planned_generator_calls": len(generation_contexts),
             "quality": {
                 "coverage_ratio": rounds[selected_round - 1]["coverage_ratio"] if selected_round else 0.0,
                 "retained_input_unit_ratio": rounds[selected_round - 1]["retained_input_unit_ratio"] if selected_round else 0.0,
