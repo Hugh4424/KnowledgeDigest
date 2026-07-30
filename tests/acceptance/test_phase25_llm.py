@@ -1589,7 +1589,9 @@ def _kb_case(tmp_path: Path) -> tuple[Path, Path]:
     kb_dir.mkdir()
     (kb_dir / "kb.structure.md").write_text(
         "---\ncontract_version: phase2\nroots: [pages, _archive, _queues]\n"
-        "why_field: why\nversion_field: version\n---\n",
+        "why_field: why\nversion_field: version\npublication_home: Home.md\n"
+        "publication_index_root: indexes\npublication_categories:\n"
+        "  - id: pending\n    title: 待归类\n    topic_dir: pages/待归类\n---\n",
         encoding="utf-8",
     )
     (new_dir / "items" / "source.md").write_text("Claim one.\nClaim two.\n", encoding="utf-8")

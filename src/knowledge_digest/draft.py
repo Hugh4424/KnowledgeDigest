@@ -17,6 +17,7 @@ from .jsonl import write_jsonl
 
 
 _HEADING_RE = re.compile(r"^\s*#{1,6}\s+")
+_TITLE_H1_RE = re.compile(r"^\s*#\s+(.+?)\s*$")
 _FAQ_RE = re.compile(r"^\s*(?:FAQ|Q(?:uestion)?)[\s:：]", re.IGNORECASE)
 _ERROR_RE = re.compile(r"^\s*(?:Error\s+)?[A-Z][A-Z0-9_-]*\d+[\s:：-]", re.IGNORECASE)
 _PARAM_RE = re.compile(r"^\s*(?:[-*]\s*)?(?:parameter|param|argument)\b[^:：]*[:：]", re.IGNORECASE)
@@ -39,6 +40,31 @@ def _marker(line: str) -> str | None:
 
 def _is_unsupported(line: str) -> bool:
     return line.strip().casefold().startswith("unsupported:")
+
+
+def _publication_title_candidates(items: list[dict[str, Any]]) -> list[str]:
+    """Collect deterministic reader-title candidates in source order.
+
+    Page-layout owns the existing managed-title check.  Drafting only records
+    source facts, so an offline run needs neither a provider nor a heuristic
+    classification step to create a useful reader-facing title.
+    """
+    values: list[str] = []
+    for item in items:
+        metadata = item.get("source_meta")
+        if isinstance(metadata, Mapping):
+            title = metadata.get("title")
+            if isinstance(title, str) and title.strip():
+                values.append(title.strip())
+        for line in str(item.get("text", "")).splitlines():
+            match = _TITLE_H1_RE.match(line)
+            if match and match.group(1).strip():
+                values.append(match.group(1).strip())
+                break
+        input_path = item.get("input_path")
+        if isinstance(input_path, str) and input_path.strip():
+            values.append(Path(input_path).stem)
+    return list(dict.fromkeys(values))
 
 
 def _code_component_end(lines: list[str], start: int) -> int:
@@ -1290,6 +1316,7 @@ def draft(
             "draft_id": draft_id,
             "cluster_id": decision["cluster_id"],
             "topic_id": stable_topic_id,
+            "publication_title_candidates": _publication_title_candidates(items),
             "action": decision["action"],
             "target_paths": [page["target_path"] for page in pages],
             "final_body": final_body,

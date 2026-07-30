@@ -14,6 +14,16 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
+_PUBLICATION_DECLARATION = [
+    "publication_home: Home.md",
+    "publication_index_root: indexes",
+    "publication_categories:",
+    "  - id: pending",
+    "    title: 待归类",
+    "    topic_dir: pages/待归类",
+]
+
+
 def run_digest(*args: str) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env["PYTHONPATH"] = str(PROJECT_ROOT / "src") + os.pathsep + env.get("PYTHONPATH", "")
@@ -32,7 +42,11 @@ def make_case(tmp_path: Path, *, why: str | None = "why", version: str | None = 
     (new_dir / "items").mkdir(parents=True)
     kb_dir = tmp_path / "kb"
     kb_dir.mkdir()
-    fields = ["contract_version: phase1", "roots: [pages, _archive, _queues]"]
+    fields = [
+        "contract_version: phase1",
+        "roots: [pages, _archive, _queues]",
+        *_PUBLICATION_DECLARATION,
+    ]
     if why is not None:
         fields.append(f"why_field: {why}")
     if version is not None:
@@ -255,8 +269,12 @@ def test_ac09_ac10_both_structure_declarations_missing_is_fail_closed(tmp_path: 
 @pytest.mark.parametrize(
     "structure",
     [
-        "---\ncontract_version: phase1\nroots:\n  - pages\n  - _archive\n  - _queues\n---\n",
-        "---\ncontract_version: phase1\npage_root: pages\narchive_root: _archive\nqueue_root: _queues\n---\n",
+        "---\ncontract_version: phase1\nroots:\n  - pages\n  - _archive\n  - _queues\n"
+        + "\n".join(_PUBLICATION_DECLARATION)
+        + "\n---\n",
+        "---\ncontract_version: phase1\npage_root: pages\narchive_root: _archive\nqueue_root: _queues\n"
+        + "\n".join(_PUBLICATION_DECLARATION)
+        + "\n---\n",
     ],
 )
 def test_ac09_ac10_phase0_root_layout_remains_fail_closed(tmp_path: Path, structure: str) -> None:
@@ -433,7 +451,12 @@ def test_ac15_structure_failure_leaves_existing_formal_page_untouched(tmp_path: 
     before = page.read_text(encoding="utf-8")
     snapshots_path = kb_dir / "_digest" / "source-snapshots.jsonl"
     snapshots_before = snapshots_path.read_text(encoding="utf-8")
-    (kb_dir / "kb.structure.md").write_text("---\ncontract_version: phase1\nroots: [pages, _archive, _queues]\nwhy_field: why\n---\n", encoding="utf-8")
+    (kb_dir / "kb.structure.md").write_text(
+        "---\ncontract_version: phase1\nroots: [pages, _archive, _queues]\nwhy_field: why\n"
+        + "\n".join(_PUBLICATION_DECLARATION)
+        + "\n---\n",
+        encoding="utf-8",
+    )
     write_source(new_dir, "good.md", "Would be blocked.\n", "https://source.example/atomic")
     assert run_digest(str(new_dir), str(kb_dir)).returncode == 0
     assert page.read_text(encoding="utf-8") == before

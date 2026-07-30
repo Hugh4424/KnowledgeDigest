@@ -8,7 +8,10 @@ here are deliberately derived only from durable source facts.
 from __future__ import annotations
 
 import hashlib
+import re
+import unicodedata
 from collections.abc import Iterable
+from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
 from .errors import ValidationError
@@ -61,3 +64,44 @@ def topic_part_path(page_root: str, stable_topic_id: str, part_number: int) -> s
         raise ValidationError("identity", "part_number", "topic part number must be positive")
     suffix = "" if part_number == 1 else f".part-{part_number:03d}"
     return f"{page_root}/digest/{stable_topic_id}{suffix}.md"
+
+
+def readable_slug(title: str) -> str:
+    """Return a stable human-readable filename stem without path semantics."""
+    normalized = unicodedata.normalize("NFKC", title).casefold().strip()
+    value = re.sub(r"[^\w]+", "-", normalized, flags=re.UNICODE).strip("-_")
+    if not value:
+        raise ValidationError("identity", "title", "topic title cannot produce an empty filename")
+    return value[:80].rstrip("-_")
+
+
+def publication_topic_part_path(
+    topic_dir: str,
+    title: str,
+    stable_topic_id: str,
+    part_number: int,
+    *,
+    disambiguate: bool = False,
+) -> str:
+    """Return a readable topic path, with an identity suffix only on collision."""
+    if part_number < 1:
+        raise ValidationError("identity", "part_number", "topic part number must be positive")
+    if not stable_topic_id.startswith("topic-"):
+        raise ValidationError("identity", "topic", "topic ID is malformed")
+    stem = readable_slug(title)
+    if disambiguate:
+        stem = f"{stem}-{stable_topic_id.removeprefix('topic-')[:8]}"
+    suffix = "" if part_number == 1 else f".part-{part_number:03d}"
+    return (Path(topic_dir) / f"{stem}{suffix}.md").as_posix()
+
+
+def published_part_path(first_path: str, part_number: int) -> str:
+    """Keep a locked first path while deriving deterministic readable part paths."""
+    if part_number < 1:
+        raise ValidationError("identity", "part_number", "topic part number must be positive")
+    if part_number == 1:
+        return first_path
+    path = Path(first_path)
+    if path.suffix.lower() != ".md":
+        raise ValidationError("identity", first_path, "published topic path must be Markdown")
+    return path.with_name(f"{path.stem}.part-{part_number:03d}.md").as_posix()
