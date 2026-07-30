@@ -11,7 +11,8 @@ from pathlib import Path
 from typing import Any, Callable, Mapping
 
 from .config import DigestSettings
-from .faithfulness import claim_fingerprint, faithfulness_check, normalize_for_gate, verify_claims
+from .identity import topic_part_path
+from .faithfulness import claim_entity_key, claim_fingerprint, faithfulness_check, normalize_for_gate, verify_claims
 from .jsonl import write_jsonl
 
 
@@ -313,12 +314,12 @@ def _coverage_for_claims(claims: list[dict[str, Any]], target: str) -> list[dict
 def _dedupe_claims(claims: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Keep the first occurrence of each claim fingerprint."""
     result: list[dict[str, Any]] = []
-    seen: set[Any] = set()
+    seen: set[tuple[str, str, str]] = set()
     for claim in claims:
-        fingerprint = claim.get("claim_fingerprint")
-        if fingerprint in seen:
+        identity = claim_entity_key(claim)
+        if identity in seen:
             continue
-        seen.add(fingerprint)
+        seen.add(identity)
         result.append(dict(claim))
     return result
 
@@ -873,11 +874,15 @@ def _planned_draft(
     planned_generator_calls: int,
 ) -> dict[str, Any]:
     targets = [str(path) for path in decision.get("target_paths", [])]
+    stable_topic_id = decision.get("topic_id")
+    if isinstance(stable_topic_id, str) and stable_topic_id:
+        targets = [topic_part_path(default_root, stable_topic_id, 1)]
     if not targets:
         targets = [f"{default_root}/digest/{draft_id}.md"]
     return {
         "draft_id": draft_id,
         "cluster_id": decision["cluster_id"],
+        "topic_id": stable_topic_id,
         "action": decision["action"],
         "target_paths": targets,
         "final_body": "",
@@ -934,7 +939,14 @@ def draft(
         provenance = sorted({claim["source_uri"] for claim in claims})
         draft_id = f"draft-{len(drafts) + 1}"
         default_root = str(decision.get("page_root", "pages"))
-        base_target = str(decision["target_paths"][0]) if decision.get("target_paths") else f"{default_root}/digest/{draft_id}.md"
+        stable_topic_id = decision.get("topic_id")
+        base_target = (
+            topic_part_path(default_root, stable_topic_id, 1)
+            if isinstance(stable_topic_id, str) and stable_topic_id
+            else str(decision["target_paths"][0])
+            if decision.get("target_paths")
+            else f"{default_root}/digest/{draft_id}.md"
+        )
         base_context = {
             "items": items,
             "source_text": "\n".join(str(item.get("text", "")) for item in items),
@@ -1277,6 +1289,7 @@ def draft(
         draft_record = {
             "draft_id": draft_id,
             "cluster_id": decision["cluster_id"],
+            "topic_id": stable_topic_id,
             "action": decision["action"],
             "target_paths": [page["target_path"] for page in pages],
             "final_body": final_body,

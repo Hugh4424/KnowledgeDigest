@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from .errors import ValidationError
+from .faithfulness import claim_entity_key
 from .jsonl import append_jsonl, read_jsonl, write_jsonl
 
 
@@ -45,46 +46,27 @@ def _source_statuses(raw_items: list[dict[str, Any]], run_dir: Path) -> dict[str
     return {str(key): value for key, value in snapshots.items() if key}
 
 
-def source_index_records(raw_items: list[dict[str, Any]], run_dir: Path) -> list[dict[str, Any]]:
-    """Return only validated source snapshots suitable for a formal index."""
-    result: list[dict[str, Any]] = []
-    seen: set[str] = set()
-    for source_uri, snapshot in _source_statuses(raw_items, run_dir).items():
-        if str(snapshot.get("validation_status", "")).lower() not in {"passed", "verified", "ok"}:
-            continue
-        if source_uri in seen:
-            continue
-        seen.add(source_uri)
-        result.append(
-            {
-                "source_uri": source_uri,
-                "captured_at": snapshot.get("captured_at"),
-                "validated_at": snapshot.get("validated_at"),
-                "content_fingerprint": snapshot.get("content_fingerprint"),
-                "validation_status": snapshot.get("validation_status"),
-                "validation_reason": snapshot.get("validation_reason"),
-                "input_path": snapshot.get("input_path"),
-                "source_snapshot_ref": snapshot.get("snapshot_id"),
-            }
-        )
-    return result
-
-
 def audit_provenance(
     drafts: list[dict[str, Any]],
     writes: list[dict[str, Any]],
     raw_items: list[dict[str, Any]],
     run_dir: Path,
+    *,
+    source_snapshots: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """Emit one complete source record for every claim on a formal page."""
     statuses = _source_statuses(raw_items, run_dir)
+    for snapshot in source_snapshots or []:
+        source_uri = snapshot.get("source_uri")
+        if source_uri:
+            statuses[str(source_uri)] = dict(snapshot)
     successful = {
         str(write["target_path"]): write
         for write in writes
         if write["status"] == "success"
     }
     records: list[dict[str, Any]] = []
-    seen_claims: set[tuple[str, str]] = set()
+    seen_claims: set[tuple[str, tuple[str, str, str]]] = set()
     for draft in drafts:
         pages = draft.get("split_pages")
         if not isinstance(pages, list) or not pages:
@@ -117,7 +99,7 @@ def audit_provenance(
                 write = successful.get(target_path)
                 if write is None:
                     raise ValidationError("s6", draft.get("draft_id", "draft"), "claim has no successful output page")
-                claim_key = (target_path, str(claim.get("claim_fingerprint")))
+                claim_key = (target_path, claim_entity_key(claim))
                 if claim_key in seen_claims:
                     continue
                 seen_claims.add(claim_key)

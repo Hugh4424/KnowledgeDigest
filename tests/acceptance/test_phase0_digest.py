@@ -1136,7 +1136,7 @@ def test_cross_target_contributions_are_merged_per_page(tmp_path: Path) -> None:
     assert "A contribution." in page2 and "B contribution." not in page2
 
 
-def test_end_to_end_s3_to_s6_keeps_all_targets_coverage_and_unique_claims(tmp_path: Path) -> None:
+def test_end_to_end_s3_to_s6_consolidates_multiple_candidates_into_one_stable_topic(tmp_path: Path) -> None:
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
     pages = kb_dir / "notes"
     pages.mkdir(parents=True)
@@ -1157,15 +1157,16 @@ def test_end_to_end_s3_to_s6_keeps_all_targets_coverage_and_unique_claims(tmp_pa
     writes = _read_jsonl(run_dir / "s5" / "write-report.jsonl")
     audit = _read_jsonl(run_dir / "s6" / "provenance-audit.jsonl")
     assert decisions[0]["target_paths"] == ["notes/page1.md", "notes/page2.md"]
-    assert drafts[0]["target_paths"] == ["notes/page1.md", "notes/page2.md"]
-    assert {row["target_path"] for row in writes} == {"notes/page1.md", "notes/page2.md"}
-    assert {row["target_path"] for row in audit} == {"notes/page1.md", "notes/page2.md"}
-    for target_path in ("notes/page1.md", "notes/page2.md"):
-        target_claims = [row for row in audit if row["target_path"] == target_path]
-        fingerprints = [row["claim_fingerprint"] for row in target_claims]
-        assert len(fingerprints) == len(set(fingerprints))
-        coverage = [row for row in drafts[0]["coverage_mapping"] if row["output_page"] == target_path]
-        assert coverage
+    topic_targets = drafts[0]["target_paths"]
+    assert len(topic_targets) == 1
+    assert topic_targets[0].startswith("notes/digest/topic-")
+    assert topic_targets[0] in {row["target_path"] for row in writes}
+    assert {row["target_path"] for row in audit} == set(topic_targets)
+    claim_locations = {(row["claim_fingerprint"], row["fragment_locator"]) for row in audit}
+    assert len(audit) == len(claim_locations)
+    assert {row["output_page"] for row in drafts[0]["coverage_mapping"]} == set(topic_targets)
+    assert not (kb_dir / "notes" / "page1.md").exists()
+    assert not (kb_dir / "notes" / "page2.md").exists()
 
 
 def test_aggregated_writeback_keeps_existing_frontmatter_at_file_start(tmp_path: Path) -> None:

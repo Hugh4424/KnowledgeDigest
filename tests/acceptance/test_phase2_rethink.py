@@ -154,7 +154,9 @@ def test_writeback_lands_pages_directly_in_the_real_kb(tmp_path: Path) -> None:
         if path.is_file() and "_digest/runs/" not in path.relative_to(kb_dir).as_posix()
     }
     assert after_formal != before
-    assert (kb_dir / "pages" / "digest" / "draft-1.md").is_file()
+    digest_pages = list((kb_dir / "pages" / "digest").glob("topic-*.md"))
+    assert len(digest_pages) == 1
+    assert "digest_topic_id:" in digest_pages[0].read_text(encoding="utf-8")
     assert (kb_dir / "_digest" / "claim-history.jsonl").is_file()
 
 
@@ -183,8 +185,9 @@ def test_phase4_regression_targets_and_cli_boundary_remain_explicit() -> None:
     assert help_result.returncode == 0
     for option in ("--config", "--dry-run", "--max-doc-lines"):
         assert option in help_result.stdout
-    for out_of_scope_option in ("--resume", "--run-id"):
-        assert out_of_scope_option not in help_result.stdout
+    assert "--resume" in help_result.stdout
+    assert "--batch-state" in help_result.stdout
+    assert "--run-id" not in help_result.stdout
 
     cli_source = (PROJECT_ROOT / "src/knowledge_digest/cli.py").read_text(encoding="utf-8")
     assert "scheduler" not in cli_source.casefold()

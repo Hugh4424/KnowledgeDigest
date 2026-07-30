@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import DigestSettings
+from .identity import source_id, topic_id
 from .jsonl import write_jsonl
 from .paths import DigestPaths
 from .text_similarity import JaccardScorer, SimilarityScorer
@@ -16,6 +17,20 @@ def _page_records(kb_dir: Path, page_root: str) -> list[tuple[Path, str]]:
     if not root.exists():
         return []
     return [(path, path.read_text(encoding="utf-8")) for path in sorted(root.rglob("*.md")) if path.is_file()]
+
+
+def _stored_topic_id(page_text: str) -> str | None:
+    """Read the small metadata marker written on canonical digest pages."""
+    lines = page_text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return None
+    for line in lines[1:]:
+        if line.strip() == "---":
+            break
+        key, separator, value = line.partition(":")
+        if separator and key.strip() == "digest_topic_id" and value.strip():
+            return value.strip()
+    return None
 
 
 def retrieve(
@@ -57,6 +72,17 @@ def retrieve(
             action, reason = "revise", f"one top-k page met {threshold_note}"
         else:
             action, reason = "new", f"no top-k page met {threshold_note}"
+        selected_topic_ids = sorted(
+            {
+                stored
+                for path, _score in selected
+                if (stored := _stored_topic_id(path.read_text(encoding="utf-8")))
+            }
+        )
+        cluster_source_ids = [
+            str(by_id[raw_id].get("source_id") or source_id(str(by_id[raw_id]["source_uri"])))
+            for raw_id in cluster["members"]
+        ]
         decisions.append(
             {
                 "cluster_id": cluster["cluster_id"],
@@ -68,6 +94,11 @@ def retrieve(
                 "cluster_tier": cluster.get("cluster_tier", cluster.get("tier")),
                 "source_count": len(cluster.get("members", [])),
                 "target_page_count": len(selected),
+                # Existing digest pages own their identity.  Otherwise the
+                # cluster anchor is stable even though its audit cluster ID is
+                # still run-local.
+                "topic_id": selected_topic_ids[0] if selected_topic_ids else cluster.get("topic_id", topic_id(cluster_source_ids)),
+                "candidate_topic_ids": selected_topic_ids,
                 "routing_rule_version": settings.routing_rule_version,
             }
         )

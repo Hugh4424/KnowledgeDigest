@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import re
-from typing import Any
+from typing import Any, Mapping
 
 
 _UNSUPPORTED_PREFIX = "unsupported:"
@@ -65,6 +65,20 @@ def normalize_claim(text: str) -> str:
 def claim_fingerprint(source_uri: str, text: str) -> str:
     payload = f"{source_uri}\n{normalize_claim(text)}".encode("utf-8")
     return hashlib.sha256(payload).hexdigest()
+
+
+def claim_entity_key(claim: Mapping[str, Any]) -> tuple[str, str, str]:
+    """Identify one source occurrence, including repeated identical lines.
+
+    ``claim_fingerprint`` intentionally represents normalized claim text, so it
+    is not enough to identify two equal lines in the same source.  History,
+    layout and provenance must use this key whenever they collapse records.
+    """
+    return (
+        str(claim.get("source_uri", "")),
+        str(claim.get("fragment_locator", "")),
+        str(claim.get("claim_fingerprint") or claim.get("claim_id") or ""),
+    )
 
 
 def _line_record(item: dict[str, Any], line_number: int, text: str) -> dict[str, Any]:
