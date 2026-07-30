@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from .config import SUPPORTED_LLM_FORMATS, resolve_settings
+from .batch_run import run_batched
 from .errors import ValidationError
 from .kb_structure import parse_roots
 from .paths import validate_paths
@@ -36,6 +37,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="JSON settings file (defaults to the KnowledgeDigest project configuration)",
     )
     parser.add_argument("--dry-run", action="store_true", help="write only a run audit report")
+    parser.add_argument("--batch-size", type=int, default=None, help="process the fixed source manifest in batches")
+    parser.add_argument("--batch-state", type=Path, default=None, help="JSON state file for batch resume")
+    parser.add_argument("--resume", action="store_true", help="resume failed or pending batches from --batch-state")
     parser.add_argument("--top-k", type=int, default=None)
     parser.add_argument("--page-match-threshold", type=float, default=None)
     parser.add_argument(
@@ -93,7 +97,21 @@ def main(argv: list[str] | None = None) -> int:
         )
         paths = validate_paths(args.new_dir, args.kb_dir)
         roots = parse_roots(paths.structure_path)
-        report_path, summary = audit_run(paths, settings, roots, dry_run=args.dry_run)
+        if args.resume and args.batch_state is None:
+            raise ValidationError("arguments", "--resume", "requires --batch-state")
+        if args.batch_size is not None or args.batch_state is not None:
+            state_path = args.batch_state or (paths.kb_dir / "_digest" / "batch-state.json")
+            report_path, summary = run_batched(
+                paths,
+                settings,
+                roots=roots,
+                batch_size=args.batch_size,
+                state_path=state_path,
+                dry_run=args.dry_run,
+                resume=args.resume,
+            )
+        else:
+            report_path, summary = audit_run(paths, settings, roots, dry_run=args.dry_run)
     except ValidationError as error:
         print(str(error), file=sys.stderr)
         return 1

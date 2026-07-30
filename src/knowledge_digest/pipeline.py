@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 from dataclasses import replace
 from pathlib import Path
@@ -17,13 +18,15 @@ from .embedding import EmbeddingError, resolve_similarity_backend
 from .ingest import ingest
 from .kb_structure import DEFAULT_ROOTS, StructureContract, inspect_structure
 from .jsonl import append_jsonl, read_jsonl, replace_jsonl, write_jsonl
+from .identity import source_id
+from .faithfulness import claim_entity_key
 from .lock import kb_lock
 from .paths import DigestPaths
 from .provenance import (
     archive_claim_records,
     audit_provenance,
-    source_index_records,
 )
+from .page_layout import build_topic_layouts
 from .queues import write_queues
 from .retrieve import retrieve
 from .text_similarity import EmbeddingScorer, JaccardScorer
@@ -339,6 +342,7 @@ def _initial_report(
                     "routing_rule_version": settings.routing_rule_version,
                     "llm_batch_max_claims": settings.llm_batch_max_claims,
                     "llm_batch_max_source_chars": settings.llm_batch_max_source_chars,
+                    "llm_enabled": settings.llm_enabled,
                     "llm_summary_enabled": settings.llm_summary_enabled,
                 },
                 "risk_rule_version": RISK_RULE_VERSION,
@@ -389,13 +393,13 @@ def _history_key(record: dict[str, object]) -> tuple[str, str]:
 def fold_claim_history(records: list[dict[str, object]]) -> list[dict[str, object]]:
     """Collapse an append-only history into the latest state of each claim.
 
-    Lines are ordered oldest-first. A later line with the same claim_fingerprint
-    supersedes the earlier state of that claim, so `supersede` marker lines
-    written after a claim's original record win.
+    Lines are ordered oldest-first. A later line for the same source occurrence
+    supersedes the earlier state, so a marker written after a claim wins without
+    collapsing another identical line from that source.
     """
-    folded: dict[str, dict[str, object]] = {}
+    folded: dict[tuple[str, str, str], dict[str, object]] = {}
     for record in records:
-        identity = str(record.get("claim_fingerprint") or record.get("claim_id"))
+        identity = claim_entity_key(record)
         previous = folded.get(identity)
         folded[identity] = {**previous, **record} if previous else dict(record)
     return list(folded.values())
@@ -422,15 +426,22 @@ def _update_claim_history(
     for draft_record in drafts:
         for claim in draft_record.get("claims", []):
             claim = dict(claim)
-            page_claim = next(
-                (
-                    page_claim
-                    for page in draft_record.get("split_pages", [])
-                    for page_claim in page.get("claims", [])
-                    if page_claim.get("claim_fingerprint") == claim.get("claim_fingerprint")
-                ),
-                None,
-            )
+            page_claims = [
+                page_claim
+                for page in draft_record.get("split_pages", [])
+                for page_claim in page.get("claims", [])
+                if page_claim.get("claim_fingerprint") == claim.get("claim_fingerprint")
+                and page_claim.get("source_uri") == claim.get("source_uri")
+                and page_claim.get("raw_id") == claim.get("raw_id")
+                and page_claim.get("fragment_locator") == claim.get("fragment_locator")
+            ]
+            if len(page_claims) != 1:
+                raise ValidationError(
+                    "history",
+                    claim.get("claim_fingerprint", "claim"),
+                    "final layout must assign every claim to exactly one topic part",
+                )
+            page_claim = page_claims[0]
             if page_claim:
                 claim["target_path"] = page_claim.get("target_path")
                 claim["page_index"] = page_claim.get("page_index", 1)
@@ -446,7 +457,12 @@ def _update_claim_history(
                 claim_fingerprint_value = claim.get("claim_fingerprint")
                 for page in draft_record.get("split_pages", []):
                     for page_claim in page.get("claims", []):
-                        if page_claim.get("claim_fingerprint") == claim_fingerprint_value:
+                        if (
+                            page_claim.get("claim_fingerprint") == claim_fingerprint_value
+                            and page_claim.get("source_uri") == claim.get("source_uri")
+                            and page_claim.get("raw_id") == claim.get("raw_id")
+                            and page_claim.get("fragment_locator") == claim.get("fragment_locator")
+                        ):
                             page_claim["supersedes"] = claim.get("supersedes")
                             page_claim["superseded_by"] = claim.get("superseded_by")
             record = {
@@ -502,9 +518,65 @@ def _merge_pending_review(
     replace_jsonl(pending_path, list(merged.values()))
 
 
-def _write_source_index(paths: DigestPaths, run_dir: Path, records: list[dict[str, object]]) -> None:
+def _write_source_index(paths: DigestPaths, run_dir: Path) -> None:
+    """Materialize one compact, link-only record for every reachable source."""
+    snapshots: dict[str, dict[str, object]] = {}
+    for snapshot in read_jsonl(paths.kb_dir / "_digest" / "source-snapshots.jsonl"):
+        uri = str(snapshot.get("source_uri", ""))
+        if uri:
+            snapshots[uri] = dict(snapshot)
+    active_history = fold_claim_history(read_jsonl(paths.kb_dir / "_digest" / "claim-history.jsonl"))
+    links_by_source: dict[str, set[str]] = {}
+    for record in active_history:
+        if record.get("verification_status") in {"removed", "superseded", "pending_review"} or record.get("superseded_by"):
+            continue
+        uri = str(record.get("source_uri", ""))
+        target = str(record.get("target_path") or record.get("page_path") or "")
+        if uri and target:
+            links_by_source.setdefault(uri, set()).add(target)
+    duplicate_of: dict[str, str] = {}
+    for duplicate in read_jsonl(paths.kb_dir / "_digest" / "duplicates.jsonl"):
+        uri = str(duplicate.get("source_uri", ""))
+        canonical = str(duplicate.get("canonical_source_uri", ""))
+        if uri and canonical:
+            duplicate_of[uri] = canonical
+    records: list[dict[str, object]] = []
+    for uri, snapshot in sorted(snapshots.items()):
+        if str(snapshot.get("validation_status", "")).lower() not in {"passed", "verified", "ok"}:
+            continue
+        canonical = duplicate_of.get(uri, uri)
+        topic_paths = sorted(links_by_source.get(uri) or links_by_source.get(canonical, set()))
+        if not topic_paths:
+            continue
+        records.append(
+            {
+                "source_id": source_id(uri),
+                "source_uri": uri,
+                "topic_paths": topic_paths,
+            }
+        )
     write_jsonl(run_dir / "s6" / "source-index.jsonl", records)
+    if not records and not (paths.kb_dir / "_digest" / "source-index.jsonl").exists():
+        return
     write_jsonl(paths.kb_dir / "_digest" / "source-index.jsonl", records)
+    lines = ["# Source Index", ""]
+    for record in records:
+        lines.append(f"- `{record['source_uri']}`")
+        for target in record["topic_paths"]:
+            relative = Path(os.path.relpath(paths.kb_dir / str(target), paths.kb_dir / "_digest")).as_posix()
+            lines.append(f"  - [{Path(str(target)).name}]({relative})")
+    (run_dir / "s6" / "source-index.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (paths.kb_dir / "_digest" / "source-index.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _write_layout_artifacts(run_dir: Path, drafts: list[dict[str, Any]]) -> None:
+    """Replace provisional S4 paths with the final, auditable layout mapping."""
+    write_jsonl(run_dir / "s4" / "final-layouts.jsonl", drafts)
+    write_jsonl(run_dir / "s4" / "drafts.jsonl", drafts)
+    write_jsonl(
+        run_dir / "s4" / "coverage-mapping.jsonl",
+        [row for draft_record in drafts for row in draft_record.get("coverage_mapping", [])],
+    )
 
 
 def _finalize_report(
@@ -562,13 +634,12 @@ def _commit_outputs(
         for member in cluster.get("members", [])
     }
     processable_items = [item for item in raw_items if item.get("raw_id") in processable_raw_ids]
-    processable_input_paths = {str(item.get("input_path")) for item in processable_items}
-    snapshots = [
-        snapshot
-        for snapshot in read_jsonl(run_dir / "s1" / "source-snapshots.jsonl")
-        if str(snapshot.get("input_path")) in processable_input_paths
-    ]
+    snapshots = read_jsonl(run_dir / "s1" / "source-snapshots.jsonl")
     append_jsonl(paths.kb_dir / "_digest" / "source-snapshots.jsonl", snapshots)
+    append_jsonl(
+        paths.kb_dir / "_digest" / "duplicates.jsonl",
+        read_jsonl(run_dir / "s1" / "duplicates.jsonl"),
+    )
     queue_root = roots[2] if len(roots) >= 3 else "_queues"
     write_queues(
         paths.kb_dir,
@@ -578,11 +649,13 @@ def _commit_outputs(
     )
 
     writes = writeback(drafts, run_dir, paths, roots)
-    audit_provenance(drafts, writes, processable_items, run_dir)
-    if processable_items:
-        _write_source_index(paths, run_dir, source_index_records(processable_items, run_dir))
-    else:
-        write_jsonl(run_dir / "s6" / "source-index.jsonl", [])
+    audit_provenance(
+        drafts,
+        writes,
+        processable_items,
+        run_dir,
+        source_snapshots=read_jsonl(paths.kb_dir / "_digest" / "source-snapshots.jsonl"),
+    )
     for draft_record in drafts:
         removed = draft_record.get("removed_claims", [])
         if removed:
@@ -604,6 +677,7 @@ def _commit_outputs(
         if processable_items or failed_snapshots or drafts
         else []
     )
+    _write_source_index(paths, run_dir)
     return writes, pending, []
 
 
@@ -614,10 +688,22 @@ def audit_run(
     *,
     dry_run: bool,
     generator: Any = None,
+    allowed_content_paths: set[str] | None = None,
+    cluster_plan: list[dict[str, Any]] | None = None,
+    global_duplicates: dict[str, dict[str, str]] | None = None,
 ) -> tuple[Path, str]:
     """Run S1-S6 under a single-writer lock on the knowledge base."""
     with kb_lock(paths.kb_dir):
-        return _audit_run_locked(paths, settings, roots, dry_run=dry_run, generator=generator)
+        return _audit_run_locked(
+            paths,
+            settings,
+            roots,
+            dry_run=dry_run,
+            generator=generator,
+            allowed_content_paths=allowed_content_paths,
+            cluster_plan=cluster_plan,
+            global_duplicates=global_duplicates,
+        )
 
 
 def _audit_run_locked(
@@ -627,6 +713,9 @@ def _audit_run_locked(
     *,
     dry_run: bool,
     generator: Any = None,
+    allowed_content_paths: set[str] | None = None,
+    cluster_plan: list[dict[str, Any]] | None = None,
+    global_duplicates: dict[str, dict[str, str]] | None = None,
 ) -> tuple[Path, str]:
     """Run S1-S6 and write the formal outputs directly into the knowledge base."""
     audit_root = paths.kb_dir / "_digest"
@@ -637,8 +726,10 @@ def _audit_run_locked(
     structure = inspect_structure(paths.structure_path)
     source_notes = sum(
         1
-        for path in paths.items_dir.rglob("*")
-        if path.is_file() and path.suffix.lower() in {".md", ".txt", ".json"}
+            for path in paths.items_dir.rglob("*")
+            if path.is_file()
+            and path.suffix.lower() in {".md", ".txt", ".json"}
+            and (allowed_content_paths is None or path.relative_to(paths.items_dir).as_posix() in allowed_content_paths)
     )
     run_id = f"run-{uuid4().hex}"
     effective_run_id = run_id if not dry_run else f"{run_id}-dry"
@@ -655,7 +746,13 @@ def _audit_run_locked(
     )
 
     if not dry_run and not structure.allow_official_write:
-        raw_items = ingest(paths, run_dir, persist_snapshot=False)
+        raw_items = ingest(
+            paths,
+            run_dir,
+            persist_snapshot=False,
+            allowed_content_paths=allowed_content_paths,
+            global_duplicates=global_duplicates,
+        )
         failed_snapshots = _read_failed_snapshots(run_dir)
         _finalize_report(
             report_path,
@@ -676,6 +773,8 @@ def _audit_run_locked(
                 paths,
                 planning_dir,
                 persist_snapshot=False,
+                allowed_content_paths=allowed_content_paths,
+                global_duplicates=global_duplicates,
             )
             clusters, decisions, similarity_audit = _run_similarity_stages(
                 raw_items, planning_dir, paths, roots, settings
@@ -707,14 +806,46 @@ def _audit_run_locked(
         )
         return report_path, summary
 
-    raw_items = ingest(paths, run_dir, persist_snapshot=False)
+    raw_items = ingest(
+        paths,
+        run_dir,
+        persist_snapshot=False,
+        allowed_content_paths=allowed_content_paths,
+        global_duplicates=global_duplicates,
+    )
     failed_snapshots = _read_failed_snapshots(run_dir)
     clusters, decisions, similarity_audit = _run_similarity_stages(
         raw_items, run_dir, paths, roots, settings
     )
+    if cluster_plan is not None:
+        by_id = {str(item["raw_id"]): item for item in raw_items}
+        planned_clusters: list[dict[str, Any]] = []
+        planned_members: set[str] = set()
+        for planned in cluster_plan:
+            members = [str(member) for member in planned.get("members", []) if str(member) in by_id]
+            if not members:
+                continue
+            planned_members.update(members)
+            planned_clusters.append(
+                {
+                    **planned,
+                    "members": members,
+                    "source_uris": [str(by_id[member]["source_uri"]) for member in members],
+                    "source_ids": [str(by_id[member].get("source_id", "")) for member in members],
+                    "source_count": len(members),
+                }
+            )
+        unplanned = sorted(set(by_id) - planned_members)
+        if unplanned:
+            raise ValidationError("batch", ", ".join(unplanned), "batch source is absent from the fixed topic plan")
+        clusters = planned_clusters
+        write_jsonl(run_dir / "s2" / "clusters.jsonl", clusters)
+        decisions = retrieve(clusters, raw_items, run_dir, paths, roots, settings)
     for decision in decisions:
         decision["page_root"] = roots[0]
     drafts = draft(decisions, clusters, raw_items, run_dir, settings, generator=generator)
+    drafts = build_topic_layouts(drafts, paths, roots, max_lines=settings.max_lines)
+    _write_layout_artifacts(run_dir, drafts)
     coverage = [row for draft_record in drafts for row in draft_record.get("coverage_mapping", [])]
     covered = {(row.get("raw_id"), row.get("input_fragment")) for row in coverage}
     all_claims = {

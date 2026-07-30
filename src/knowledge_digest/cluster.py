@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import DigestSettings
+from .identity import source_id, topic_id
 from .jsonl import write_jsonl
 from .paths import DigestPaths
 from .queues import write_queues
@@ -28,7 +29,7 @@ def cluster(
 ) -> list[dict[str, Any]]:
     """Group raw items into complete-linkage clusters and assign tiers."""
     active_scorer = scorer or JaccardScorer()
-    pending = list(raw_items)
+    pending = sorted(raw_items, key=lambda item: (str(item.get("source_id", "")), str(item["raw_id"])))
     clusters: list[dict[str, Any]] = []
     while pending:
         seed = pending.pop(0)
@@ -49,15 +50,21 @@ def cluster(
             tier, reason = "needs_review", f"complete-linkage minimum {min_pair:.2f} needs review"
         else:
             tier, reason = "insufficient_signal", f"complete-linkage minimum {min_pair:.2f} below review threshold"
+        member_source_ids = [
+            str(member.get("source_id") or source_id(str(member["source_uri"])))
+            for member in members
+        ]
         clusters.append(
             {
                 "cluster_id": f"cluster-{len(clusters) + 1}",
+                "topic_id": topic_id(member_source_ids),
                 "tier": tier,
                 "cluster_tier": tier,
                 "members": [member["raw_id"] for member in members],
                 "min_pair_similarity": min_pair,
                 "decision_reason": reason,
                 "source_uris": [member["source_uri"] for member in members],
+                "source_ids": sorted(member_source_ids),
             }
         )
     write_jsonl(run_dir / "s2" / "clusters.jsonl", clusters)

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from .errors import ValidationError
+from .identity import source_id
 from .jsonl import append_jsonl, read_jsonl, write_jsonl
 from .paths import DigestPaths
 from .provenance import retention_deadline
@@ -132,6 +133,8 @@ def ingest(
     run_dir: Path,
     *,
     persist_snapshot: bool = True,
+    allowed_content_paths: set[str] | None = None,
+    global_duplicates: dict[str, dict[str, str]] | None = None,
 ) -> list[dict[str, Any]]:
     """Read local notes and retain a snapshot for every source, including failures.
     """
@@ -140,9 +143,13 @@ def ingest(
     duplicates: list[dict[str, Any]] = []
     failures: list[dict[str, Any]] = []
     snapshots: list[dict[str, Any]] = []
-    seen: dict[str, str] = {}
+    seen: dict[str, dict[str, str]] = {}
+    seen_uri_content: dict[str, tuple[str, str]] = {}
     for path in sorted(paths.items_dir.rglob("*")):
         if not path.is_file() or path.suffix.lower() not in INGESTIBLE_SUFFIXES:
+            continue
+        relative_path = path.relative_to(paths.items_dir).as_posix()
+        if allowed_content_paths is not None and relative_path not in allowed_content_paths:
             continue
         source = _source_for(
             path,
@@ -196,23 +203,59 @@ def ingest(
             )
             continue
 
-        if content_fingerprint in seen:
+        previous_uri_content = seen_uri_content.get(source["source_uri"])
+        if previous_uri_content and previous_uri_content[0] != content_fingerprint:
+            raise ValidationError(
+                "ingest",
+                source["source_uri"],
+                "the same source_uri declares conflicting content at "
+                f"{previous_uri_content[1]} and {path}",
+            )
+        seen_uri_content.setdefault(source["source_uri"], (content_fingerprint, str(path)))
+
+        global_duplicate = (global_duplicates or {}).get(relative_path)
+        if global_duplicate is not None:
             duplicates.append(
                 {
                     "path": str(path),
                     "content_hash": content_fingerprint,
-                    "duplicate_of": seen[content_fingerprint],
+                    "duplicate_of": global_duplicate["duplicate_of"],
                     "source_uri": source["source_uri"],
+                    "source_id": source_id(source["source_uri"]),
+                    "canonical_source_uri": global_duplicate["canonical_source_uri"],
+                    "canonical_source_id": global_duplicate["canonical_source_id"],
                     "snapshot_id": snapshot["snapshot_id"],
                 }
             )
             continue
 
-        raw_id = f"raw-{len(raw_items) + 1}"
-        seen[content_fingerprint] = raw_id
+        if content_fingerprint in seen:
+            canonical = seen[content_fingerprint]
+            duplicates.append(
+                {
+                    "path": str(path),
+                    "content_hash": content_fingerprint,
+                    "duplicate_of": canonical["raw_id"],
+                    "source_uri": source["source_uri"],
+                    "source_id": source_id(source["source_uri"]),
+                    "canonical_source_uri": canonical["source_uri"],
+                    "canonical_source_id": canonical["source_id"],
+                    "snapshot_id": snapshot["snapshot_id"],
+                }
+            )
+            continue
+
+        stable_source_id = source_id(source["source_uri"])
+        raw_id = f"raw-{stable_source_id.removeprefix('source-')}"
+        seen[content_fingerprint] = {
+            "raw_id": raw_id,
+            "source_uri": source["source_uri"],
+            "source_id": stable_source_id,
+        }
         raw_items.append(
             {
                 "raw_id": raw_id,
+                "source_id": stable_source_id,
                 "content_hash": content_fingerprint,
                 "content_fingerprint": content_fingerprint,
                 "text": text,

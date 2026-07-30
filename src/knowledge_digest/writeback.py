@@ -59,20 +59,6 @@ def _atomic_write(path: Path, content: str) -> None:
         raise ValidationError("s5", path, f"atomic write failed: {error}") from error
 
 
-def _render_page(draft: dict[str, Any]) -> str:
-    body = str(draft["final_body"]).strip()
-    provenance_lines = []
-    for claim in draft.get("claims", []):
-        provenance_lines.append(
-            "- "
-            f"{claim['text']} — {claim['source_uri']} "
-            f"(fragment_locator={claim.get('fragment_locator', '')}; "
-            f"content_fingerprint={claim.get('content_fingerprint', '')})"
-        )
-    provenance = "\n".join(provenance_lines)
-    return f"{body}\n\n## Provenance\n{provenance}\n"
-
-
 def _split_existing_page(content: str) -> tuple[str, str, str]:
     """Separate an exact leading YAML frontmatter block from page content."""
     frontmatter = ""
@@ -282,6 +268,18 @@ def writeback(
     page_root = roots[0]
     archive_root = roots[1] if len(roots) >= 2 else "_archive"
     pages = [page for draft in drafts for page in _expanded_pages(draft, page_root)]
+    for draft in drafts:
+        for target_path in draft.get("obsolete_target_paths", []):
+            pages.append(
+                {
+                    "draft_id": draft["draft_id"],
+                    "page_index": 0,
+                    "target_path": str(target_path),
+                    "action": "remove",
+                    "claims": [],
+                    "remove_only": True,
+                }
+            )
     grouped: dict[str, dict[str, Any]] = {}
     for page in pages:
         target = _safe_relative(str(page["target_path"]), paths.kb_dir)
@@ -311,9 +309,60 @@ def writeback(
     for group in grouped.values():
         target = _safe_relative(str(group["target_path"]), paths.kb_dir)
         target_path = paths.kb_dir / target
+        if target_path.is_symlink():
+            raise ValidationError("s5", target_path, "target page must not be a symlink")
         if target_path.exists() and not target_path.is_file():
             raise ValidationError("s5", target_path, "target page must be a regular file")
         before = target_path.read_text(encoding="utf-8") if target_path.exists() else ""
+        if any(page.get("remove_only") for page in group["pages"]):
+            if len(group["pages"]) != 1:
+                raise ValidationError("s5", target, "removed topic part cannot receive new content")
+            aggregate = dict(group)
+            aggregate.update(
+                {
+                    "remove_only": True,
+                    "claims": [],
+                    "before_content": before or None,
+                    "final_body": "",
+                    "frontmatter": "",
+                    "existing_provenance": "",
+                    "new_provenance": [],
+                }
+            )
+            aggregates.append(aggregate)
+            continue
+        if any(page.get("layout_finalized") for page in group["pages"]):
+            if len(group["pages"]) != 1 or not group["pages"][0].get("layout_finalized"):
+                raise ValidationError("s5", target, "final topic layout must own one complete target page")
+            page = group["pages"][0]
+            page_claims = page.get("claims", [])
+            if not isinstance(page_claims, list) or any(
+                not claim.get("text")
+                or not claim.get("source_uri")
+                or not claim.get("claim_fingerprint")
+                or not claim.get("content_fingerprint")
+                or not claim.get("fragment_locator")
+                for claim in page_claims
+            ):
+                raise ValidationError("s5", target, "final topic layout requires complete claim provenance")
+            rendered = page.get("rendered_content")
+            if not isinstance(rendered, str) or not rendered.strip():
+                raise ValidationError("s5", target, "final topic layout is missing rendered content")
+            aggregate = dict(group)
+            aggregate.update(
+                {
+                    "claims": [dict(claim, target_path=target.as_posix()) for claim in page_claims],
+                    "before_content": before or None,
+                    "frontmatter": "",
+                    "existing_provenance": "",
+                    "new_provenance": [],
+                    "final_body": str(page.get("final_body", "")),
+                    "rendered_content": rendered,
+                    "layout_finalized": True,
+                }
+            )
+            aggregates.append(aggregate)
+            continue
         frontmatter, existing_body, existing_provenance = _split_existing_page(before)
         existing_lines = {_claim_line_key(line) for line in existing_body.splitlines() if line.strip()}
         seen_claims: set[str] = set()
@@ -429,8 +478,15 @@ def writeback(
             _atomic_write(archive_path, str(archive_record["full_content"]))
     write_jsonl(run_dir / "s5" / "archive-records.jsonl", archive_records)
     append_jsonl(paths.kb_dir / archive_root / "records.jsonl", archive_records)
+    rendered_operations: list[tuple[dict[str, Any], dict[str, Any], Path, str | None]] = []
     for page, operation in zip(aggregates, operations):
         target_path = paths.kb_dir / operation["target_path"]
+        if page.get("remove_only"):
+            rendered_operations.append((page, operation, target_path, None))
+            continue
+        if page.get("layout_finalized"):
+            rendered_operations.append((page, operation, target_path, str(page["rendered_content"])))
+            continue
         provenance = []
         if page.get("existing_provenance"):
             provenance.append(str(page["existing_provenance"]).strip())
@@ -440,8 +496,40 @@ def writeback(
         prefix = str(page.get("frontmatter", ""))
         if prefix and not prefix.endswith("\n"):
             prefix += "\n"
-        rendered = f"{prefix}{page['final_body']}\n\n## Provenance\n{provenance_text}\n"
-        _atomic_write(target_path, rendered)
+        rendered_operations.append(
+            (page, operation, target_path, f"{prefix}{page['final_body']}\n\n## Provenance\n{provenance_text}\n")
+        )
+
+    written: list[tuple[dict[str, Any], dict[str, Any], Path]] = []
+    try:
+        for page, operation, target_path, rendered in rendered_operations:
+            if rendered is None:
+                if target_path.exists():
+                    target_path.unlink()
+            else:
+                _atomic_write(target_path, rendered)
+            written.append((page, operation, target_path))
+    except (OSError, ValidationError) as error:
+        rollback_error: Exception | None = None
+        for written_page, written_operation, written_path in reversed(written):
+            try:
+                before = written_page.get("before_content")
+                if before is None:
+                    written_path.unlink(missing_ok=True)
+                else:
+                    _atomic_write(written_path, str(before))
+                written_operation["status"] = "rolled_back"
+            except (OSError, ValidationError) as restore_error:
+                rollback_error = restore_error
+                written_operation["status"] = "rollback_failed"
+        for _page, operation, _target, _rendered in rendered_operations[len(written) :]:
+            operation["status"] = "failed"
+        write_jsonl(run_dir / "s5" / "write-report.jsonl", operations)
+        if rollback_error is not None:
+            raise ValidationError("s5", "writeback", f"write failed ({error}); rollback also failed ({rollback_error})") from error
+        raise ValidationError("s5", "writeback", f"write failed; restored prior formal pages ({error})") from error
+
+    for _page, operation, _target in written:
         operation["status"] = "success"
 
     write_jsonl(run_dir / "s5" / "write-report.jsonl", operations)
