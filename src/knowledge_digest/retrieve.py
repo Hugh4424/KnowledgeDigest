@@ -8,15 +8,27 @@ from typing import Any
 from .config import DigestSettings
 from .identity import source_id, topic_id
 from .jsonl import write_jsonl
+from .kb_structure import inspect_structure
+from .page_layout import declared_managed_topics
 from .paths import DigestPaths
 from .text_similarity import JaccardScorer, SimilarityScorer
 
 
-def _page_records(kb_dir: Path, page_root: str) -> list[tuple[Path, str]]:
-    root = kb_dir / page_root
-    if not root.exists():
+def _page_records(paths: DigestPaths, page_root: str) -> list[tuple[Path, str]]:
+    """Expose only declared, internally-consistent managed topic pages to S3."""
+    # Legacy direct-call tests exercise S2/S3 in isolation without a structure
+    # contract. The formal pipeline reaches this function only after validating
+    # one, so this compatibility branch cannot widen formal publication scope.
+    if not paths.structure_path.is_file():
+        root = paths.kb_dir / page_root
+        return [(path, path.read_text(encoding="utf-8")) for path in sorted(root.rglob("*.md")) if path.is_file()] if root.exists() else []
+    structure = inspect_structure(paths.structure_path)
+    if structure.publication is None:
         return []
-    return [(path, path.read_text(encoding="utf-8")) for path in sorted(root.rglob("*.md")) if path.is_file()]
+    return [
+        (record["path"], record["path"].read_text(encoding="utf-8"))
+        for record in declared_managed_topics(paths, structure.publication)
+    ]
 
 
 def _stored_topic_id(page_text: str) -> str | None:
@@ -50,7 +62,7 @@ def retrieve(
     """
     active_scorer = scorer or JaccardScorer()
     by_id = {item["raw_id"]: item for item in raw_items}
-    pages = _page_records(paths.kb_dir, roots[0])
+    pages = _page_records(paths, roots[0])
     decisions: list[dict[str, Any]] = []
     for cluster in clusters:
         if cluster.get("tier", cluster.get("cluster_tier")) == "insufficient_signal":

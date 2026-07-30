@@ -2,12 +2,49 @@
 
 from __future__ import annotations
 
+import os
+import re
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .errors import ValidationError
+
 
 DEFAULT_ROOTS = ("pages", "_archive", "_queues")
+DEFAULT_PUBLICATION_HOME = "Home.md"
+DEFAULT_PUBLICATION_INDEX_ROOT = "indexes"
+DEFAULT_PENDING_CATEGORY_ID = "pending"
+DEFAULT_PENDING_CATEGORY_TITLE = "待归类"
+DEFAULT_PENDING_TOPIC_DIR = "pages/待归类"
+
+
+@dataclass(frozen=True)
+class PublicationCategory:
+    """One reader-visible category declared by the knowledge-base owner."""
+
+    category_id: str
+    title: str
+    topic_dir: str
+
+
+@dataclass(frozen=True)
+class PublicationContract:
+    """The small, explicit range in which KnowledgeDigest may publish readers pages."""
+
+    home_path: str
+    index_root: str
+    categories: tuple[PublicationCategory, ...]
+
+    @property
+    def pending_category(self) -> PublicationCategory:
+        return next(category for category in self.categories if category.category_id == DEFAULT_PENDING_CATEGORY_ID)
+
+    def category_index_path(self, category_id: str) -> str:
+        if category_id not in {category.category_id for category in self.categories}:
+            raise ValidationError("publication", category_id, "category is not declared")
+        return f"{self.index_root}/{category_id}.md"
 
 
 @dataclass(frozen=True)
@@ -19,6 +56,8 @@ class StructureContract:
     version_field: str | None
     missing_fields: tuple[str, ...]
     suggestions: tuple[str, ...]
+    publication: PublicationContract | None
+    publication_errors: tuple[str, ...]
     allow_official_write: bool
 
     def as_dict(self) -> dict[str, Any]:
@@ -28,6 +67,23 @@ class StructureContract:
             "version_field": self.version_field,
             "missing_fields": list(self.missing_fields),
             "suggestions": list(self.suggestions),
+            "publication": (
+                {
+                    "home_path": self.publication.home_path,
+                    "index_root": self.publication.index_root,
+                    "categories": [
+                        {
+                            "id": category.category_id,
+                            "title": category.title,
+                            "topic_dir": category.topic_dir,
+                        }
+                        for category in self.publication.categories
+                    ],
+                }
+                if self.publication is not None
+                else None
+            ),
+            "publication_errors": list(self.publication_errors),
             "allow_official_write": self.allow_official_write,
         }
 
@@ -61,6 +117,258 @@ def _frontmatter_values(text: str) -> dict[str, str]:
         key, _, value = stripped.partition(":")
         values[key.strip()] = _unquote(value)
     return values
+
+
+def _safe_relative_path(value: str, *, field: str, directory: bool) -> str:
+    candidate = _unquote(value)
+    path = Path(candidate)
+    if (
+        not candidate
+        or path.is_absolute()
+        or "\\" in candidate
+        or any(part in {"", ".", ".."} for part in path.parts)
+    ):
+        raise ValidationError("publication", field, "must be a safe relative path")
+    if directory and path.suffix:
+        raise ValidationError("publication", field, "must name a directory, not a file")
+    if not directory and path.suffix.lower() != ".md":
+        raise ValidationError("publication", field, "must name a Markdown file")
+    return path.as_posix()
+
+
+def _is_same_or_parent(left: str, right: str) -> bool:
+    left_parts = Path(left).parts
+    right_parts = Path(right).parts
+    return len(left_parts) <= len(right_parts) and left_parts == right_parts[: len(left_parts)]
+
+
+def _publication_category_rows(frontmatter: list[str] | None) -> list[dict[str, str]]:
+    if frontmatter is None:
+        return []
+    start = next(
+        (index for index, line in enumerate(frontmatter) if line.strip() == "publication_categories:"),
+        None,
+    )
+    if start is None:
+        return []
+    rows: list[dict[str, str]] = []
+    current: dict[str, str] | None = None
+    for line in frontmatter[start + 1 :]:
+        if line and not line[0].isspace():
+            break
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped.startswith("- "):
+            if current is not None:
+                rows.append(current)
+            current = {}
+            stripped = stripped[2:].strip()
+        elif current is None:
+            raise ValidationError("publication", "publication_categories", "must contain a YAML list")
+        if ":" not in stripped:
+            raise ValidationError("publication", "publication_categories", "contains an invalid category entry")
+        key, _, value = stripped.partition(":")
+        key = key.strip()
+        value = _unquote(value)
+        if key not in {"id", "title", "topic_dir"}:
+            raise ValidationError("publication", key, "is not a supported publication category field")
+        if key in current:
+            raise ValidationError("publication", key, "is repeated in one publication category")
+        current[key] = value
+    if current is not None:
+        rows.append(current)
+    return rows
+
+
+def _publication_contract(text: str) -> tuple[PublicationContract | None, tuple[str, ...]]:
+    """Parse publication fields without guessing a legacy knowledge-base layout."""
+    frontmatter = _frontmatter_lines(text)
+    values = _frontmatter_values(text)
+    errors: list[str] = []
+    raw_home = values.get("publication_home")
+    raw_index_root = values.get("publication_index_root")
+    if not raw_home:
+        errors.append("publication_home is missing")
+    if not raw_index_root:
+        errors.append("publication_index_root is missing")
+    try:
+        rows = _publication_category_rows(frontmatter)
+    except ValidationError as error:
+        rows = []
+        errors.append(error.reason)
+    if not rows and not any(error.startswith("publication_categories") for error in errors):
+        errors.append("publication_categories is missing or empty")
+    if errors:
+        return None, tuple(errors)
+
+    try:
+        home_path = _safe_relative_path(str(raw_home), field="publication_home", directory=False)
+        index_root = _safe_relative_path(
+            str(raw_index_root), field="publication_index_root", directory=True
+        )
+        categories: list[PublicationCategory] = []
+        category_ids: set[str] = set()
+        for row in rows:
+            missing = sorted({"id", "title", "topic_dir"} - set(row))
+            if missing:
+                raise ValidationError(
+                    "publication",
+                    "publication_categories",
+                    f"category is missing field(s): {', '.join(missing)}",
+                )
+            category_id = row["id"].strip()
+            title = row["title"].strip()
+            if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]*", category_id):
+                raise ValidationError(
+                    "publication",
+                    "publication_categories.id",
+                    "category id must contain only letters, numbers, underscores, or hyphens",
+                )
+            if not title:
+                raise ValidationError("publication", "publication_categories", "category title must be non-empty")
+            if category_id in category_ids:
+                raise ValidationError("publication", category_id, "category id is duplicated")
+            category_ids.add(category_id)
+            categories.append(
+                PublicationCategory(
+                    category_id=category_id,
+                    title=title,
+                    topic_dir=_safe_relative_path(
+                        row["topic_dir"], field=f"publication_categories.{category_id}.topic_dir", directory=True
+                    ),
+                )
+            )
+        pending = [category for category in categories if category.category_id == DEFAULT_PENDING_CATEGORY_ID]
+        if len(pending) != 1:
+            raise ValidationError("publication", "publication_categories", "must declare exactly one pending category")
+        if pending[0].title != DEFAULT_PENDING_CATEGORY_TITLE:
+            raise ValidationError(
+                "publication",
+                "publication_categories.pending.title",
+                "must be 待归类",
+            )
+        locations = [index_root, *(category.topic_dir for category in categories)]
+        if any(_is_same_or_parent(home_path, location) or _is_same_or_parent(location, home_path) for location in locations):
+            raise ValidationError("publication", "publication_home", "must not overlap an index or topic directory")
+        for index, first in enumerate(locations):
+            for second in locations[index + 1 :]:
+                if _is_same_or_parent(first, second) or _is_same_or_parent(second, first):
+                    raise ValidationError("publication", first, "publication directories must not overlap")
+    except ValidationError as error:
+        return None, (error.reason,)
+    return PublicationContract(home_path, index_root, tuple(categories)), ()
+
+
+def default_publication_structure() -> str:
+    """Return the only initial declaration that KnowledgeDigest may create itself."""
+    return "\n".join(
+        (
+            "---",
+            "roots: [pages, _archive, _queues]",
+            "why_field: why",
+            "version_field: version",
+            f"publication_home: {DEFAULT_PUBLICATION_HOME}",
+            f"publication_index_root: {DEFAULT_PUBLICATION_INDEX_ROOT}",
+            "publication_categories:",
+            f"  - id: {DEFAULT_PENDING_CATEGORY_ID}",
+            f"    title: {DEFAULT_PENDING_CATEGORY_TITLE}",
+            f"    topic_dir: {DEFAULT_PENDING_TOPIC_DIR}",
+            "---",
+            "",
+            "# KnowledgeDigest structure",
+            "",
+        )
+    )
+
+
+def _write_initial_document(path: Path, content: str) -> Path:
+    descriptor, temporary_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+    return temporary
+
+
+def _fsync_directory(directory: Path) -> None:
+    descriptor = os.open(directory, os.O_RDONLY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def initialize_default_publication(kb_dir: Path) -> PublicationContract:
+    """Create the owned first-run reader files after the caller holds the KB lock.
+
+    This function never upgrades a non-empty directory.  Callers must recheck
+    that boundary under the lock before invoking it.
+    """
+    structure = default_publication_structure()
+    contract, errors = _publication_contract(structure)
+    if contract is None:
+        raise AssertionError(f"built-in publication contract is invalid: {errors!r}")
+    documents = {
+        kb_dir / "kb.structure.md": structure,
+        kb_dir / contract.home_path: "---\nmanaged_by: KnowledgeDigest\ndigest_kind: home\n---\n\n# Knowledge Digest\n\n- [待归类](indexes/pending.md)\n",
+        kb_dir / contract.category_index_path(DEFAULT_PENDING_CATEGORY_ID): "---\nmanaged_by: KnowledgeDigest\ndigest_kind: category\ndigest_category_id: pending\n---\n\n# 待归类\n",
+    }
+    existing = [path for path in documents if path.exists() or path.is_symlink()]
+    if existing:
+        raise ValidationError("publication", existing[0], "new knowledge base already contains a publication file")
+
+    created_directories: list[Path] = []
+    for directory in sorted(
+        {path.parent for path in documents},
+        key=lambda value: (len(value.parts), value.as_posix()),
+    ):
+        if directory.exists():
+            if directory.is_symlink() or not directory.is_dir():
+                raise ValidationError("publication", directory, "initial publication directory must be a regular directory")
+            continue
+        missing: list[Path] = []
+        cursor = directory
+        while not cursor.exists():
+            missing.append(cursor)
+            cursor = cursor.parent
+        if cursor.is_symlink() or not cursor.is_dir():
+            raise ValidationError("publication", cursor, "initial publication parent must be a regular directory")
+        for missing_directory in reversed(missing):
+            missing_directory.mkdir(exist_ok=False)
+            created_directories.append(missing_directory)
+
+    temporary_documents: list[tuple[Path, Path, str]] = []
+    written: list[tuple[Path, str]] = []
+    try:
+        for target, content in documents.items():
+            temporary_documents.append((target, _write_initial_document(target, content), content))
+        for target, temporary, content in temporary_documents:
+            os.replace(temporary, target)
+            _fsync_directory(target.parent)
+            written.append((target, content))
+    except (OSError, ValidationError) as error:
+        for _target, temporary, _content in temporary_documents:
+            temporary.unlink(missing_ok=True)
+        for target, content in reversed(written):
+            try:
+                if target.is_file() and target.read_text(encoding="utf-8") == content:
+                    target.unlink()
+                    _fsync_directory(target.parent)
+            except OSError:
+                pass
+        for directory in sorted(created_directories, key=lambda value: len(value.parts), reverse=True):
+            try:
+                directory.rmdir()
+            except OSError:
+                pass
+        raise ValidationError("publication", kb_dir, f"new knowledge-base initialization failed ({error})") from error
+    return contract
 
 
 def parse_roots(structure_path: Path) -> tuple[str, ...]:
@@ -126,6 +434,7 @@ def inspect_structure(structure_path: Path) -> StructureContract:
         suggestions.append(
             "在 kb.structure.md frontmatter 增加非空 version_field，例如 version_field: version"
         )
+    publication, publication_errors = _publication_contract(text)
     roots = parse_roots(structure_path)
     return StructureContract(
         roots=roots,
@@ -133,7 +442,9 @@ def inspect_structure(structure_path: Path) -> StructureContract:
         version_field=version_field,
         missing_fields=tuple(missing),
         suggestions=tuple(suggestions),
-        allow_official_write=not missing,
+        publication=publication,
+        publication_errors=publication_errors,
+        allow_official_write=not missing and not publication_errors,
     )
 
 

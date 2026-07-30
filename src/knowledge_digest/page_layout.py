@@ -9,14 +9,17 @@ tested without a model provider.
 
 from __future__ import annotations
 
+import os
+import re
 from collections import defaultdict, deque
 from pathlib import Path
 from typing import Any, Iterable
 
 from .errors import ValidationError
 from .faithfulness import claim_entity_key, normalize_claim
-from .identity import topic_id, topic_part_path
+from .identity import publication_topic_part_path, published_part_path, topic_id, topic_part_path
 from .jsonl import read_jsonl
+from .kb_structure import PublicationContract
 from .paths import DigestPaths
 
 
@@ -37,6 +40,123 @@ def _topic_paths(kb_dir: Path, page_root: str, stable_topic_id: str) -> list[Pat
     first = directory / f"{stable_topic_id}.md"
     parts = sorted(directory.glob(f"{stable_topic_id}.part-*.md")) if directory.exists() else []
     return [path for path in [first, *parts] if path.is_file()]
+
+
+def _frontmatter_values(content: str) -> dict[str, str]:
+    lines = content.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return {}
+    values: dict[str, str] = {}
+    for line in lines[1:]:
+        if line.strip() in {"---", "..."}:
+            break
+        key, separator, value = line.partition(":")
+        if separator:
+            values[key.strip()] = value.strip().strip("\"'")
+    return values
+
+
+def _page_h1(content: str) -> str | None:
+    for line in content.splitlines():
+        match = re.match(r"^#\s+(.+?)\s*$", line)
+        if match and match.group(1).strip():
+            return match.group(1).strip()
+    return None
+
+
+def declared_managed_topics(paths: DigestPaths, publication: PublicationContract) -> list[dict[str, Any]]:
+    """Return only legal managed topics under the owner-declared directories.
+
+    A handwritten file is never a publication candidate.  Conversely, a file
+    that claims KnowledgeDigest ownership must be internally consistent before
+    any new publication is written, so a stale or forged header cannot be
+    silently adopted into reader navigation.
+    """
+    records: list[dict[str, Any]] = []
+    for category in publication.categories:
+        directory = paths.kb_dir / category.topic_dir
+        if not directory.exists():
+            continue
+        if not directory.is_dir() or directory.is_symlink():
+            raise ValidationError("publication", directory, "declared topic directory must be a real directory")
+        for path in sorted(directory.rglob("*.md")):
+            if path.is_symlink():
+                raise ValidationError("publication", path, "managed topic page must not be a symlink")
+            if not path.is_file():
+                continue
+            values = _frontmatter_values(path.read_text(encoding="utf-8"))
+            if values.get("managed_by") != "KnowledgeDigest":
+                continue
+            if values.get("digest_kind") != "topic":
+                raise ValidationError("publication", path, "managed file in a topic directory must have digest_kind: topic")
+            stable_topic_id = values.get("digest_topic_id")
+            if not stable_topic_id:
+                raise ValidationError("publication", path, "managed topic is missing digest_topic_id")
+            actual_path = path.relative_to(paths.kb_dir).as_posix()
+            if values.get("digest_published_path") != actual_path:
+                raise ValidationError(
+                    "publication",
+                    path,
+                    "managed topic digest_published_path must match its actual path",
+                )
+            try:
+                part_number = int(values.get("digest_part", ""))
+            except ValueError as error:
+                raise ValidationError("publication", path, "managed topic digest_part must be a positive integer") from error
+            if part_number < 1:
+                raise ValidationError("publication", path, "managed topic digest_part must be a positive integer")
+            title = _page_h1(path.read_text(encoding="utf-8"))
+            if not title:
+                raise ValidationError("publication", path, "managed topic is missing its H1 title")
+            records.append(
+                {
+                    "path": path,
+                    "target_path": actual_path,
+                    "topic_id": stable_topic_id,
+                    "part_number": part_number,
+                    "title": title,
+                    "category_id": category.category_id,
+                }
+            )
+    return sorted(records, key=lambda record: (record["category_id"], record["topic_id"], record["part_number"], record["target_path"]))
+
+
+def _managed_topic_records(
+    paths: DigestPaths,
+    publication: PublicationContract,
+    stable_topic_id: str,
+) -> list[dict[str, Any]]:
+    return [
+        record
+        for record in declared_managed_topics(paths, publication)
+        if record["topic_id"] == stable_topic_id
+    ]
+
+
+def _first_existing_path(existing_paths: list[Path], *, kb_dir: Path) -> str | None:
+    for path in existing_paths:
+        values = _frontmatter_values(path.read_text(encoding="utf-8"))
+        if values.get("digest_part", "1") != "1":
+            continue
+        published = values.get("digest_published_path")
+        return published or path.relative_to(kb_dir).as_posix()
+    return None
+
+
+def _existing_topic_title(existing_paths: list[Path]) -> str | None:
+    for path in existing_paths:
+        title = _page_h1(path.read_text(encoding="utf-8"))
+        if title:
+            return title
+    return None
+
+
+def _source_title(topic_drafts: list[dict[str, Any]], stable_topic_id: str) -> str:
+    for draft in topic_drafts:
+        for value in draft.get("publication_title_candidates", []):
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+    return stable_topic_id
 
 
 def _body_from_rendered_page(content: str) -> list[str]:
@@ -149,6 +269,8 @@ def _provenance_line(claim: dict[str, Any]) -> str:
 
 def _render_page(
     stable_topic_id: str,
+    title: str,
+    published_path: str,
     part_number: int,
     evidence_lines: list[str],
     claims: list[dict[str, Any]],
@@ -156,11 +278,14 @@ def _render_page(
     provenance = [_provenance_line(claim) for claim in claims]
     lines = [
         "---",
+        "managed_by: KnowledgeDigest",
+        "digest_kind: topic",
         f"digest_topic_id: {stable_topic_id}",
+        f"digest_published_path: {published_path}",
         f"digest_part: {part_number}",
         "---",
         "",
-        f"# Knowledge Digest: {stable_topic_id}",
+        f"# {title}",
         "",
         "## Summary",
         f"- 已验证来源证据；第 {part_number} 部分。",
@@ -203,6 +328,8 @@ def _output_locators(rendered_lines: list[str], claims: list[dict[str, Any]]) ->
 
 def _partition(
     stable_topic_id: str,
+    title: str,
+    first_path: str,
     entries: list[tuple[list[str], list[dict[str, Any]]]],
     *,
     max_lines: int,
@@ -218,7 +345,14 @@ def _partition(
     for entry_lines, entry_claims in entries:
         candidate_evidence = [*evidence, *entry_lines]
         candidate_claims = [*claims, *entry_claims]
-        candidate = _render_page(stable_topic_id, len(result) + 1, candidate_evidence, candidate_claims)
+        candidate = _render_page(
+            stable_topic_id,
+            title,
+            published_part_path(first_path, len(result) + 1),
+            len(result) + 1,
+            candidate_evidence,
+            candidate_claims,
+        )
         if len(candidate.splitlines()) <= limit:
             evidence, claims = candidate_evidence, candidate_claims
             continue
@@ -230,7 +364,14 @@ def _partition(
             )
         result.append((evidence, claims))
         evidence, claims = list(entry_lines), list(entry_claims)
-        single = _render_page(stable_topic_id, len(result) + 1, evidence, claims)
+        single = _render_page(
+            stable_topic_id,
+            title,
+            published_part_path(first_path, len(result) + 1),
+            len(result) + 1,
+            evidence,
+            claims,
+        )
         if len(single.splitlines()) > limit:
             raise ValidationError(
                 "layout",
@@ -326,12 +467,128 @@ def _incoming_entries(
     return result
 
 
+def build_publication_navigation(
+    layouts: list[dict[str, Any]],
+    paths: DigestPaths,
+    publication: PublicationContract,
+) -> list[dict[str, Any]]:
+    """Build reader navigation records for writeback's single publication transaction."""
+    for target in [publication.home_path, *(publication.category_index_path(category.category_id) for category in publication.categories)]:
+        path = paths.kb_dir / target
+        if path.is_symlink():
+            raise ValidationError("publication", path, "existing navigation page must not be a symlink")
+        if path.exists() and "managed_by: KnowledgeDigest" not in path.read_text(encoding="utf-8"):
+            raise ValidationError("publication", path, "existing navigation page must declare managed_by: KnowledgeDigest")
+    layouts_by_category: dict[str, dict[str, list[dict[str, Any]]]] = {
+        category.category_id: {} for category in publication.categories
+    }
+    for record in declared_managed_topics(paths, publication):
+        layouts_by_category[record["category_id"]].setdefault(record["topic_id"], []).append(record)
+    # New topics use the declared pending category.  Replacing the current
+    # topic's list intentionally hides stale old parts after a shrink, while
+    # leaving those files untouched on disk for recovery.
+    for layout in layouts:
+        category_id = str(layout.get("publication_category_id") or publication.pending_category.category_id)
+        layouts_by_category[category_id][layout["topic_id"]] = [
+            {
+                "target_path": page["target_path"],
+                "part_number": int(page.get("page_index", 1)),
+                "title": layout["title"],
+            }
+            for page in layout.get("split_pages", [])
+        ]
+
+    home_lines = [
+        "---",
+        "managed_by: KnowledgeDigest",
+        "digest_kind: home",
+        "---",
+        "",
+        "# Knowledge Digest",
+        "",
+        "## 分类",
+    ]
+    for category in publication.categories:
+        home_lines.append(f"- [{category.title}]({publication.category_index_path(category.category_id)})")
+    records: list[dict[str, Any]] = [
+        {
+            "draft_id": "navigation-home",
+            "action": "publish_navigation",
+            "digest_kind": "home",
+            "target_path": publication.home_path,
+            "rendered_content": "\n".join([*home_lines, ""]),
+            "claims": [],
+            "layout_finalized": True,
+            "publication_audit_scope": "none",
+            "target_paths": [publication.home_path],
+            "split_pages": [
+                {
+                    "target_path": publication.home_path,
+                    "rendered_content": "\n".join([*home_lines, ""]),
+                    "final_body": "",
+                    "claims": [],
+                    "layout_finalized": True,
+                    "digest_kind": "home",
+                    "publication_audit_scope": "none",
+                }
+            ],
+        }
+    ]
+    for category in publication.categories:
+        target = publication.category_index_path(category.category_id)
+        lines = [
+            "---",
+            "managed_by: KnowledgeDigest",
+            "digest_kind: category",
+            f"digest_category_id: {category.category_id}",
+            "---",
+            "",
+            f"# {category.title}",
+            "",
+            "## 主题",
+        ]
+        for _topic_id, pages in sorted(layouts_by_category[category.category_id].items()):
+            for page in sorted(pages, key=lambda item: (int(item.get("part_number", 1)), str(item["target_path"]))):
+                path = str(page["target_path"])
+                relative = Path(os.path.relpath(path, start=Path(target).parent)).as_posix()
+                part_number = int(page.get("part_number", page.get("page_index", 1)))
+                suffix = "" if part_number == 1 else f"（第 {part_number} 部分）"
+                lines.append(f"- [{page['title']}{suffix}]({relative})")
+        rendered = "\n".join([*lines, ""])
+        records.append(
+            {
+                "draft_id": f"navigation-category-{category.category_id}",
+                "action": "publish_navigation",
+                "digest_kind": "category",
+                "target_path": target,
+                "rendered_content": rendered,
+                "claims": [],
+                "layout_finalized": True,
+                "publication_audit_scope": "none",
+                "target_paths": [target],
+                "split_pages": [
+                    {
+                        "target_path": target,
+                        "rendered_content": rendered,
+                        "final_body": "",
+                        "claims": [],
+                        "layout_finalized": True,
+                        "digest_kind": "category",
+                        "publication_audit_scope": "none",
+                    }
+                ],
+            }
+        )
+    return records
+
+
 def build_topic_layouts(
     drafts: list[dict[str, Any]],
     paths: DigestPaths,
     roots: tuple[str, ...],
     *,
     max_lines: int,
+    publication: PublicationContract | None = None,
 ) -> list[dict[str, Any]]:
     """Return canonical, final-layout drafts ready for safe writeback.
 
@@ -353,9 +610,23 @@ def build_topic_layouts(
         by_topic[stable_topic_id].append(draft)
 
     layouts: list[dict[str, Any]] = []
+    reserved_paths: set[str] = set()
+    if publication is not None:
+        directory = paths.kb_dir / publication.pending_category.topic_dir
+        if directory.is_dir():
+            reserved_paths = {path.relative_to(paths.kb_dir).as_posix() for path in directory.rglob("*.md")}
     for stable_topic_id in sorted(by_topic):
         topic_drafts = by_topic[stable_topic_id]
-        existing_paths = _topic_paths(paths.kb_dir, page_root, stable_topic_id)
+        existing_records = _managed_topic_records(paths, publication, stable_topic_id) if publication is not None else []
+        existing_paths = [record["path"] for record in existing_records] if publication is not None else _topic_paths(
+            paths.kb_dir, page_root, stable_topic_id
+        )
+        existing_categories = {record["category_id"] for record in existing_records}
+        if len(existing_categories) > 1:
+            raise ValidationError("publication", stable_topic_id, "managed topic appears in more than one declared category")
+        publication_category_id = (
+            next(iter(existing_categories)) if existing_categories else publication.pending_category.category_id
+        ) if publication is not None else None
         for draft in topic_drafts:
             for target in draft.get("target_paths", []):
                 candidate = paths.kb_dir / str(target)
@@ -410,13 +681,35 @@ def build_topic_layouts(
             ),
         ]
 
-        groups = _partition(stable_topic_id, entries, max_lines=max_lines)
+        existing_title = _existing_topic_title(existing_paths) if publication is not None else None
+        title = existing_title or _source_title(topic_drafts, stable_topic_id)
+        first_path = _first_existing_path(existing_paths, kb_dir=paths.kb_dir) if publication is not None else None
+        if publication is not None and first_path is None:
+            first_path = publication_topic_part_path(
+                publication.pending_category.topic_dir,
+                title,
+                stable_topic_id,
+                1,
+            )
+            if first_path in reserved_paths:
+                first_path = publication_topic_part_path(
+                    publication.pending_category.topic_dir,
+                    title,
+                    stable_topic_id,
+                    1,
+                    disambiguate=True,
+                )
+        if first_path is None:
+            first_path = topic_part_path(page_root, stable_topic_id, 1)
+        reserved_paths.add(first_path)
+
+        groups = _partition(stable_topic_id, title, first_path, entries, max_lines=max_lines)
         pages: list[dict[str, Any]] = []
         coverage: list[dict[str, Any]] = []
         for part_number, (evidence, page_claims) in enumerate(groups, start=1):
-            target = topic_part_path(page_root, stable_topic_id, part_number)
+            target = published_part_path(first_path, part_number)
             enriched_claims = [dict(claim, page_index=part_number, target_path=target) for claim in page_claims]
-            rendered = _render_page(stable_topic_id, part_number, evidence, enriched_claims)
+            rendered = _render_page(stable_topic_id, title, target, part_number, evidence, enriched_claims)
             if len(rendered.splitlines()) > 300:
                 raise ValidationError("layout", target, "final page exceeds the configured line limit")
             pages.append(
@@ -427,6 +720,9 @@ def build_topic_layouts(
                     "rendered_content": rendered,
                     "claims": enriched_claims,
                     "layout_finalized": True,
+                    "digest_kind": "topic",
+                    "digest_topic_id": stable_topic_id,
+                    "digest_published_path": target,
                 }
             )
             rendered_lines = rendered.splitlines()
@@ -450,6 +746,10 @@ def build_topic_layouts(
                 "draft_id": f"layout-{stable_topic_id}",
                 "cluster_id": ",".join(sorted(str(draft.get("cluster_id")) for draft in topic_drafts)),
                 "topic_id": stable_topic_id,
+                "digest_kind": "topic",
+                "publication_category_id": publication_category_id,
+                "title": title,
+                "published_path": first_path,
                 "action": "layout",
                 "target_paths": [page["target_path"] for page in pages],
                 "final_body": "\n".join(page["final_body"] for page in pages),
@@ -460,7 +760,10 @@ def build_topic_layouts(
                 "coverage_mapping": coverage,
                 "component_coverage": [],
                 "layout_finalized": True,
-                "obsolete_target_paths": sorted(existing_relative - {page["target_path"] for page in pages}),
+                # A reader may retain an old part after a topic shrinks.  It is
+                # omitted from the freshly built navigation, never deleted or
+                # overwritten by this incremental publication run.
+                "obsolete_target_paths": [],
                 "rounds": [round_record for draft in topic_drafts for round_record in draft.get("rounds", [])],
                 "selected_round": None,
                 "round_count": sum(int(draft.get("round_count", 0)) for draft in topic_drafts),

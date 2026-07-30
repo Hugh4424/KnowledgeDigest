@@ -47,6 +47,12 @@ def make_case(tmp_path: Path) -> tuple[Path, Path]:
         "roots: [pages, _archive, _queues]",
         "why_field: why",
         "version_field: version",
+        "publication_home: Home.md",
+        "publication_index_root: indexes",
+        "publication_categories:",
+        "  - id: pending",
+        "    title: 待归类",
+        "    topic_dir: pages/待归类",
     ]
     (kb_dir / STRUCTURE_FILENAME).write_text("---\n" + "\n".join(fields) + "\n---\n", encoding="utf-8")
     return new_dir, kb_dir

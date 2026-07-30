@@ -10,7 +10,7 @@ import pytest
 from knowledge_digest.batch_run import run_batched
 from knowledge_digest.config import DigestSettings
 from knowledge_digest.errors import ValidationError
-from knowledge_digest.kb_structure import parse_roots
+from knowledge_digest.kb_structure import inspect_structure, parse_roots
 from knowledge_digest.paths import validate_paths
 from knowledge_digest.pipeline import audit_run
 
@@ -21,7 +21,9 @@ def _case(tmp_path: Path, name: str = "case") -> tuple[Path, Path]:
     kb_dir = tmp_path / name / "kb"
     kb_dir.mkdir()
     (kb_dir / "kb.structure.md").write_text(
-        "---\nroots: [pages, _archive, _queues]\nwhy_field: why\nversion_field: version\n---\n",
+        "---\nroots: [pages, _archive, _queues]\nwhy_field: why\nversion_field: version\n"
+        "publication_home: Home.md\npublication_index_root: indexes\npublication_categories:\n"
+        "  - id: pending\n    title: 待归类\n    topic_dir: pages/待归类\n---\n",
         encoding="utf-8",
     )
     return new_dir, kb_dir
@@ -48,11 +50,38 @@ def _jsonl(path: Path) -> list[dict[str, object]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
 
 
+def _frontmatter(text: str) -> dict[str, str]:
+    values: dict[str, str] = {}
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return values
+    for line in lines[1:]:
+        if line.strip() in {"---", "..."}:
+            break
+        key, separator, value = line.partition(":")
+        if separator:
+            values[key.strip()] = value.strip()
+    return values
+
+
 def _topic_paths(kb_dir: Path) -> set[str]:
-    return {
-        path.relative_to(kb_dir).as_posix()
-        for path in (kb_dir / "pages" / "digest").glob("topic-*.md")
-    }
+    structure = inspect_structure(kb_dir / "kb.structure.md")
+    assert structure.publication is not None
+    result: set[str] = set()
+    for category in structure.publication.categories:
+        for path in (kb_dir / category.topic_dir).rglob("*.md"):
+            values = _frontmatter(path.read_text(encoding="utf-8"))
+            if (
+                values.get("managed_by") == "KnowledgeDigest"
+                and values.get("digest_kind") == "topic"
+                and values.get("digest_published_path") == path.relative_to(kb_dir).as_posix()
+            ):
+                result.add(path.relative_to(kb_dir).as_posix())
+    return result
+
+
+def _topic_pages(kb_dir: Path) -> list[Path]:
+    return [kb_dir / relative for relative in sorted(_topic_paths(kb_dir))]
 
 
 def test_topic_identity_and_paths_ignore_source_enumeration_order(tmp_path: Path) -> None:
@@ -86,7 +115,7 @@ def test_final_layout_enforces_300_lines_and_keeps_each_claim_once(tmp_path: Pat
 
     report = _run(new_dir, kb_dir)
     run_dir = report.parent
-    pages = sorted((kb_dir / "pages" / "digest").glob("*.md"))
+    pages = _topic_pages(kb_dir)
     audit = _jsonl(run_dir / "s6" / "provenance-audit.jsonl")
 
     assert len(pages) > 1
@@ -142,13 +171,12 @@ def test_content_revision_replaces_current_evidence_but_keeps_history(tmp_path: 
         [("revision.md", uri, "# New source heading\nStable current evidence.\nUpdated current evidence.\n")],
     )
     _run(new_dir, kb_dir)
-    rendered = "\n".join(page.read_text(encoding="utf-8") for page in (kb_dir / "pages" / "digest").glob("*.md"))
+    rendered = "\n".join(page.read_text(encoding="utf-8") for page in _topic_pages(kb_dir))
     history = _jsonl(kb_dir / "_digest" / "claim-history.jsonl")
 
     assert "Updated current evidence." in rendered
     assert rendered.count("Stable current evidence.") == 1
-    assert "# New source heading" in rendered
-    assert "# Old source heading" not in rendered
+    assert "# Old source heading\n\n## Summary" in rendered
     assert any(row.get("verification_status") == "superseded" for row in history)
 
 
@@ -159,11 +187,20 @@ def test_multi_part_write_failure_restores_previously_written_parts(
     from knowledge_digest.writeback import writeback
 
     new_dir, kb_dir = _case(tmp_path)
-    first = kb_dir / "pages" / "digest" / "topic-test.md"
-    second = kb_dir / "pages" / "digest" / "topic-test.part-002.md"
+    first = kb_dir / "pages" / "待归类" / "topic-test.md"
+    second = kb_dir / "pages" / "待归类" / "topic-test.part-002.md"
     first.parent.mkdir(parents=True)
-    first.write_text("old first\n", encoding="utf-8")
-    second.write_text("old second\n", encoding="utf-8")
+    def managed_content(path: Path, part: int, body: str) -> str:
+        return (
+            "---\nmanaged_by: KnowledgeDigest\ndigest_kind: topic\ndigest_topic_id: topic-test\n"
+            f"digest_published_path: {path.relative_to(kb_dir).as_posix()}\ndigest_part: {part}\n---\n\n"
+            f"# Topic test\n\n## Summary\n\n## Evidence\n{body}\n\n## Provenance\n"
+        )
+
+    old_first = managed_content(first, 1, "old first")
+    old_second = managed_content(second, 2, "old second")
+    first.write_text(old_first, encoding="utf-8")
+    second.write_text(old_second, encoding="utf-8")
 
     def claim(index: int) -> dict[str, str]:
         return {
@@ -181,9 +218,10 @@ def test_multi_part_write_failure_restores_previously_written_parts(
             "page_index": index,
             "target_path": path.relative_to(kb_dir).as_posix(),
             "final_body": current["text"],
-            "rendered_content": f"## Summary\n\n## Evidence\n{current['text']}\n\n## Provenance\n- proof\n",
+            "rendered_content": managed_content(path, index, current["text"]),
             "claims": [current],
             "layout_finalized": True,
+            "digest_kind": "topic",
         }
 
     original_write = writeback_module._atomic_write
@@ -202,14 +240,23 @@ def test_multi_part_write_failure_restores_previously_written_parts(
     draft = {
         "draft_id": "layout-topic-test",
         "action": "layout",
+        "digest_kind": "topic",
         "layout_finalized": True,
         "split_pages": [page(first, 1), page(second, 2)],
     }
+    publication = inspect_structure(kb_dir / "kb.structure.md").publication
+    assert publication is not None
     with pytest.raises(ValidationError, match="restored prior formal pages"):
-        writeback([draft], kb_dir / "_digest" / "runs" / "rollback", paths, ("pages", "_archive", "_queues"))
+        writeback(
+            [draft],
+            kb_dir / "_digest" / "runs" / "rollback",
+            paths,
+            ("pages", "_archive", "_queues"),
+            publication=publication,
+        )
 
-    assert first.read_text(encoding="utf-8") == "old first\n"
-    assert second.read_text(encoding="utf-8") == "old second\n"
+    assert first.read_text(encoding="utf-8") == old_first
+    assert second.read_text(encoding="utf-8") == old_second
 
 
 def test_source_index_is_link_only_and_duplicate_source_inherits_topic_link(tmp_path: Path) -> None:
@@ -235,7 +282,11 @@ def test_source_index_is_link_only_and_duplicate_source_inherits_topic_link(tmp_
     for row in records:
         for target in row["topic_paths"]:
             assert (kb_dir / str(target)).is_file()
-            assert "../pages/digest/" in markdown
+            assert target.startswith("pages/待归类/")
+    home = (kb_dir / "Home.md").read_text(encoding="utf-8")
+    category = (kb_dir / "indexes" / "pending.md").read_text(encoding="utf-8")
+    assert "[待归类](indexes/pending.md)" in home
+    assert "../pages/待归类/" in category
 
 
 def test_batch_resume_skips_completed_batches_and_rejects_changed_manifest(

@@ -16,17 +16,22 @@ from .draft import draft
 from .errors import ValidationError
 from .embedding import EmbeddingError, resolve_similarity_backend
 from .ingest import ingest
-from .kb_structure import DEFAULT_ROOTS, StructureContract, inspect_structure
+from .kb_structure import (
+    DEFAULT_ROOTS,
+    StructureContract,
+    initialize_default_publication,
+    inspect_structure,
+)
 from .jsonl import append_jsonl, read_jsonl, replace_jsonl, write_jsonl
 from .identity import source_id
 from .faithfulness import claim_entity_key
 from .lock import kb_lock
-from .paths import DigestPaths
+from .paths import DigestPaths, is_new_kb_container
 from .provenance import (
     archive_claim_records,
     audit_provenance,
 )
-from .page_layout import build_topic_layouts
+from .page_layout import build_publication_navigation, build_topic_layouts, declared_managed_topics
 from .queues import write_queues
 from .retrieve import retrieve
 from .text_similarity import EmbeddingScorer, JaccardScorer
@@ -44,7 +49,12 @@ def _run_similarity_stages(
     paths: DigestPaths,
     roots: tuple[str, ...],
     settings: DigestSettings,
+    *,
+    publication: Any = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    effective_publication = publication
+    if effective_publication is None and paths.structure_path.is_file():
+        effective_publication = inspect_structure(paths.structure_path).publication
     try:
         resolution = resolve_similarity_backend(settings)
     except EmbeddingError as error:
@@ -101,12 +111,18 @@ def _run_similarity_stages(
                 for item in clusters
                 if item.get("tier", item.get("cluster_tier")) != "insufficient_signal"
             ]
-            page_root = paths.kb_dir / roots[0]
-            pages = [
-                path.read_text(encoding="utf-8")
-                for path in sorted(page_root.rglob("*.md"))
-                if path.is_file()
-            ] if page_root.exists() else []
+            if effective_publication is None:
+                page_root = paths.kb_dir / roots[0]
+                pages = [
+                    path.read_text(encoding="utf-8")
+                    for path in sorted(page_root.rglob("*.md"))
+                    if path.is_file()
+                ] if page_root.exists() else []
+            else:
+                pages = [
+                    record["path"].read_text(encoding="utf-8")
+                    for record in declared_managed_topics(paths, effective_publication)
+                ]
             scorer.prefetch(composite + pages)
         decisions = retrieve(
             clusters,
@@ -569,7 +585,11 @@ def _write_source_index(paths: DigestPaths, run_dir: Path) -> None:
     (paths.kb_dir / "_digest" / "source-index.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def _write_layout_artifacts(run_dir: Path, drafts: list[dict[str, Any]]) -> None:
+def _write_layout_artifacts(
+    run_dir: Path,
+    drafts: list[dict[str, Any]],
+    publication_navigation: list[dict[str, Any]],
+) -> None:
     """Replace provisional S4 paths with the final, auditable layout mapping."""
     write_jsonl(run_dir / "s4" / "final-layouts.jsonl", drafts)
     write_jsonl(run_dir / "s4" / "drafts.jsonl", drafts)
@@ -577,6 +597,9 @@ def _write_layout_artifacts(run_dir: Path, drafts: list[dict[str, Any]]) -> None
         run_dir / "s4" / "coverage-mapping.jsonl",
         [row for draft_record in drafts for row in draft_record.get("coverage_mapping", [])],
     )
+    # Keep the exact records used by the owned-file, archive-before-write
+    # publication transaction for replay and audit.
+    write_jsonl(run_dir / "s4" / "publication-navigation.jsonl", publication_navigation)
 
 
 def _finalize_report(
@@ -612,7 +635,9 @@ def _finalize_report(
 
 def _commit_outputs(
     *,
-    drafts: list[dict[str, Any]],
+    topic_drafts: list[dict[str, Any]],
+    navigation_records: list[dict[str, Any]],
+    publication: Any,
     clusters: list[dict[str, Any]],
     raw_items: list[dict[str, Any]],
     failed_snapshots: list[dict[str, Any]],
@@ -648,15 +673,21 @@ def _commit_outputs(
         [item for item in clusters if item.get("cluster_tier", item.get("tier")) == "insufficient_signal"],
     )
 
-    writes = writeback(drafts, run_dir, paths, roots)
+    writes = writeback(
+        [*topic_drafts, *navigation_records],
+        run_dir,
+        paths,
+        roots,
+        publication=publication,
+    )
     audit_provenance(
-        drafts,
+        topic_drafts,
         writes,
         processable_items,
         run_dir,
         source_snapshots=read_jsonl(paths.kb_dir / "_digest" / "source-snapshots.jsonl"),
     )
-    for draft_record in drafts:
+    for draft_record in topic_drafts:
         removed = draft_record.get("removed_claims", [])
         if removed:
             archive_claim_records(
@@ -670,11 +701,11 @@ def _commit_outputs(
     pending = (
         _update_claim_history(
             paths,
-            drafts,
+            topic_drafts,
             run_id=run_id,
             failed_snapshots=failed_snapshots,
         )
-        if processable_items or failed_snapshots or drafts
+        if processable_items or failed_snapshots or topic_drafts
         else []
     )
     _write_source_index(paths, run_dir)
@@ -718,12 +749,25 @@ def _audit_run_locked(
     global_duplicates: dict[str, dict[str, str]] | None = None,
 ) -> tuple[Path, str]:
     """Run S1-S6 and write the formal outputs directly into the knowledge base."""
+    if paths.initialize_new_kb:
+        if dry_run:
+            raise ValidationError("publication", paths.kb_dir, "dry-run must not initialize a new knowledge base")
+        if not is_new_kb_container(paths.kb_dir):
+            raise ValidationError("publication", paths.kb_dir, "new knowledge-base container is not empty")
+        initialize_default_publication(paths.kb_dir)
     audit_root = paths.kb_dir / "_digest"
     if audit_root.is_symlink():
         raise ValidationError("audit_run", audit_root, "_digest must not be a symlink")
     if audit_root.exists() and not audit_root.is_dir():
         raise ValidationError("audit_run", audit_root, "_digest must be a directory")
     structure = inspect_structure(paths.structure_path)
+    if structure.publication_errors:
+        raise ValidationError(
+            "publication",
+            paths.structure_path,
+            "; ".join(structure.publication_errors),
+        )
+    roots = structure.roots
     source_notes = sum(
         1
             for path in paths.items_dir.rglob("*")
@@ -777,7 +821,7 @@ def _audit_run_locked(
                 global_duplicates=global_duplicates,
             )
             clusters, decisions, similarity_audit = _run_similarity_stages(
-                raw_items, planning_dir, paths, roots, settings
+                raw_items, planning_dir, paths, roots, settings, publication=structure.publication
             )
             for decision in decisions:
                 decision["page_root"] = roots[0]
@@ -815,7 +859,7 @@ def _audit_run_locked(
     )
     failed_snapshots = _read_failed_snapshots(run_dir)
     clusters, decisions, similarity_audit = _run_similarity_stages(
-        raw_items, run_dir, paths, roots, settings
+        raw_items, run_dir, paths, roots, settings, publication=structure.publication
     )
     if cluster_plan is not None:
         by_id = {str(item["raw_id"]): item for item in raw_items}
@@ -844,8 +888,17 @@ def _audit_run_locked(
     for decision in decisions:
         decision["page_root"] = roots[0]
     drafts = draft(decisions, clusters, raw_items, run_dir, settings, generator=generator)
-    drafts = build_topic_layouts(drafts, paths, roots, max_lines=settings.max_lines)
-    _write_layout_artifacts(run_dir, drafts)
+    if structure.publication is None:
+        raise ValidationError("publication", paths.structure_path, "publication contract is unavailable")
+    drafts = build_topic_layouts(
+        drafts,
+        paths,
+        roots,
+        max_lines=settings.max_lines,
+        publication=structure.publication,
+    )
+    publication_navigation = build_publication_navigation(drafts, paths, structure.publication) if drafts else []
+    _write_layout_artifacts(run_dir, drafts, publication_navigation)
     coverage = [row for draft_record in drafts for row in draft_record.get("coverage_mapping", [])]
     covered = {(row.get("raw_id"), row.get("input_fragment")) for row in coverage}
     all_claims = {
@@ -869,7 +922,9 @@ def _audit_run_locked(
         return report_path, "audit blocked: coverage mapping is incomplete; no formal knowledge-base files written"
 
     writes, pending, cleanup = _commit_outputs(
-        drafts=drafts,
+        topic_drafts=drafts,
+        navigation_records=publication_navigation,
+        publication=structure.publication,
         clusters=clusters,
         raw_items=raw_items,
         failed_snapshots=failed_snapshots,

@@ -9,7 +9,7 @@ from pathlib import Path
 from .config import SUPPORTED_LLM_FORMATS, resolve_settings
 from .batch_run import run_batched
 from .errors import ValidationError
-from .kb_structure import parse_roots
+from .kb_structure import DEFAULT_ROOTS, parse_roots
 from .paths import validate_paths
 from .pipeline import audit_run
 
@@ -95,10 +95,25 @@ def main(argv: list[str] | None = None) -> int:
             llm_batch_max_source_chars=args.llm_batch_max_source_chars,
             llm_batch_concurrency=args.llm_batch_concurrency,
         )
-        paths = validate_paths(args.new_dir, args.kb_dir)
-        roots = parse_roots(paths.structure_path)
         if args.resume and args.batch_state is None:
             raise ValidationError("arguments", "--resume", "requires --batch-state")
+        if (
+            (args.batch_size is not None or args.batch_state is not None)
+            and not args.kb_dir.exists()
+        ):
+            raise ValidationError(
+                "arguments",
+                "batch-state",
+                "new knowledge-base initialization requires one non-batch digest run",
+            )
+        paths = validate_paths(args.new_dir, args.kb_dir, allow_new_kb=not args.dry_run)
+        roots = DEFAULT_ROOTS if paths.initialize_new_kb else parse_roots(paths.structure_path)
+        if paths.initialize_new_kb and (args.batch_size is not None or args.batch_state is not None):
+            raise ValidationError(
+                "arguments",
+                "batch-state",
+                "new knowledge-base initialization requires one non-batch digest run",
+            )
         if args.batch_size is not None or args.batch_state is not None:
             state_path = args.batch_state or (paths.kb_dir / "_digest" / "batch-state.json")
             report_path, summary = run_batched(

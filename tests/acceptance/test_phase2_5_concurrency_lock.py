@@ -26,6 +26,12 @@ def _case(tmp_path: Path) -> tuple[Path, Path]:
         "roots: [pages, _archive, _queues]\n"
         "why_field: why\n"
         "version_field: version\n"
+        "publication_home: Home.md\n"
+        "publication_index_root: indexes\n"
+        "publication_categories:\n"
+        "  - id: pending\n"
+        "    title: 待归类\n"
+        "    topic_dir: pages/待归类\n"
         "---\n",
         encoding="utf-8",
     )

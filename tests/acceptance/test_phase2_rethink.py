@@ -35,7 +35,9 @@ def _case(tmp_path: Path) -> tuple[Path, Path]:
     kb_dir = tmp_path / "kb"
     kb_dir.mkdir()
     (kb_dir / "kb.structure.md").write_text(
-        "---\ncontract_version: phase2\nroots: [pages, _archive, _queues]\nwhy_field: why\nversion_field: version\n---\n",
+        "---\ncontract_version: phase2\nroots: [pages, _archive, _queues]\nwhy_field: why\nversion_field: version\n"
+        "publication_home: Home.md\npublication_index_root: indexes\npublication_categories:\n"
+        "  - id: pending\n    title: 待归类\n    topic_dir: pages/待归类\n---\n",
         encoding="utf-8",
     )
     return new_dir, kb_dir
@@ -154,7 +156,7 @@ def test_writeback_lands_pages_directly_in_the_real_kb(tmp_path: Path) -> None:
         if path.is_file() and "_digest/runs/" not in path.relative_to(kb_dir).as_posix()
     }
     assert after_formal != before
-    digest_pages = list((kb_dir / "pages" / "digest").glob("topic-*.md"))
+    digest_pages = list((kb_dir / "pages" / "待归类").glob("*.md"))
     assert len(digest_pages) == 1
     assert "digest_topic_id:" in digest_pages[0].read_text(encoding="utf-8")
     assert (kb_dir / "_digest" / "claim-history.jsonl").is_file()

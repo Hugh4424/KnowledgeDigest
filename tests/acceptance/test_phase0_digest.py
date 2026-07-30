@@ -14,6 +14,41 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
+_PUBLICATION_DECLARATION = (
+    "publication_home: Home.md\n"
+    "publication_index_root: indexes\n"
+    "publication_categories:\n"
+    "  - id: pending\n"
+    "    title: 待归类\n"
+    "    topic_dir: pages/待归类\n"
+)
+
+
+def _with_publication_declaration(structure: str) -> str:
+    """Add the reader-publication contract to a legacy structure fixture."""
+    return structure.replace("\n---", "\n" + _PUBLICATION_DECLARATION + "---", 1)
+
+
+def _write_managed_topic(kb_dir: Path, name: str, content: str, *, stable_topic_id: str | None = None) -> Path:
+    """Create a legal managed fixture topic in the declared publication directory."""
+    target = kb_dir / "pages" / "待归类" / name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    relative = target.relative_to(kb_dir).as_posix()
+    topic = stable_topic_id or f"topic-{target.stem}"
+    target.write_text(
+        "---\n"
+        "managed_by: KnowledgeDigest\n"
+        "digest_kind: topic\n"
+        f"digest_topic_id: {topic}\n"
+        f"digest_published_path: {relative}\n"
+        "digest_part: 1\n"
+        "---\n\n"
+        + content,
+        encoding="utf-8",
+    )
+    return target
+
+
 def run_digest(*args: str) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     source_root = str(PROJECT_ROOT / "src")
@@ -40,6 +75,7 @@ def copy_fixture_layout(tmp_path: Path) -> tuple[Path, Path]:
     structure_text = structure_text.replace(
         "---\n", "---\nwhy_field: why\nversion_field: version\n", 1
     )
+    structure_text = _with_publication_declaration(structure_text)
     (kb_dir / "kb.structure.md").write_text(structure_text, encoding="utf-8")
     declare_sources(new_dir)
     return new_dir, kb_dir
@@ -285,8 +321,10 @@ def test_digest_cli_contract_accepts_required_threshold_option_names_and_config_
 def test_digest_cli_contract_reads_page_archive_and_queue_root_keys(tmp_path: Path) -> None:
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
     (kb_dir / "kb.structure.md").write_text(
-        "---\npage_root: pages-custom\narchive_root: archive-custom\n"
-        "queue_root: queue-custom\nwhy_field: why\nversion_field: version\n---\n",
+        _with_publication_declaration(
+            "---\npage_root: pages-custom\narchive_root: archive-custom\n"
+            "queue_root: queue-custom\nwhy_field: why\nversion_field: version\n---\n"
+        ),
         encoding="utf-8",
     )
 
@@ -377,7 +415,9 @@ def test_digest_runs_s1_through_s4_with_traceable_outputs(tmp_path: Path) -> Non
     """The runnable slice keeps source material through ingest, decisions, and drafts."""
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
     (kb_dir / "kb.structure.md").write_text(
-        "---\npage_root: pages\nwhy_field: why\nversion_field: version\n---\n",
+        _with_publication_declaration(
+            "---\npage_root: pages\nwhy_field: why\nversion_field: version\n---\n"
+        ),
         encoding="utf-8",
     )
     items = new_dir / "items"
@@ -408,12 +448,12 @@ def test_digest_runs_s1_through_s4_with_traceable_outputs(tmp_path: Path) -> Non
         "empty-shell.md",
         "long-release.md",
     )
-    pages = kb_dir / "pages" / "goinsight"
-    pages.mkdir(parents=True)
-    (pages / "filtering.md").write_text("# Filtering\nfilter field and status options\n", encoding="utf-8")
-    (pages / "chart-types.md").write_text("# Chart types\nchart type options and rules\n", encoding="utf-8")
+    _write_managed_topic(kb_dir, "filtering.md", "# Filtering\nfilter field and status options\n")
+    _write_managed_topic(kb_dir, "chart-types.md", "# Chart types\nchart type options and rules\n")
 
-    result = run_digest(str(new_dir), str(kb_dir), "--max-doc-lines", "3")
+    result = run_digest(
+        str(new_dir), str(kb_dir), "--max-doc-lines", "3", "--page-match-threshold", "0.05"
+    )
 
     assert result.returncode == 0, result.stderr
     run_dir = next((kb_dir / "_digest" / "runs").iterdir())
@@ -676,10 +716,8 @@ def test_s3_covers_new_revise_merge_multiple_and_respects_top_k(tmp_path: Path) 
     from knowledge_digest.retrieve import retrieve
 
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
-    pages = kb_dir / "pages"
-    pages.mkdir()
-    (pages / "alpha.md").write_text("alpha beta common\n", encoding="utf-8")
-    (pages / "beta.md").write_text("beta gamma common\n", encoding="utf-8")
+    _write_managed_topic(kb_dir, "alpha.md", "# Alpha\nalpha beta common\n")
+    _write_managed_topic(kb_dir, "beta.md", "# Beta\nbeta gamma common\n")
     raw_items = [
         {"raw_id": "raw-new", "text": "zeta eta theta", "source_uri": "source:new"},
         {"raw_id": "raw-revise", "text": "alpha", "source_uri": "source:revise"},
@@ -703,7 +741,7 @@ def test_s3_covers_new_revise_merge_multiple_and_respects_top_k(tmp_path: Path) 
         run_dir,
         paths,
         ("pages", "_archive", "_queues"),
-        DigestSettings(top_k=2),
+        DigestSettings(top_k=2, page_match_threshold=0.05),
     )
 
     assert {decision["action"] for decision in decisions} == {"new", "revise", "merge_multiple"}
@@ -717,10 +755,8 @@ def test_s3_keeps_weak_positive_candidates_without_treating_them_as_targets(tmp_
     from knowledge_digest.retrieve import retrieve
 
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
-    pages = kb_dir / "pages"
-    pages.mkdir()
-    (pages / "alpha.md").write_text("alpha page unrelated details\n", encoding="utf-8")
-    (pages / "beta.md").write_text("beta page unrelated details\n", encoding="utf-8")
+    _write_managed_topic(kb_dir, "alpha.md", "# Alpha\nalpha page unrelated details\n")
+    _write_managed_topic(kb_dir, "beta.md", "# Beta\nbeta page unrelated details\n")
     raw_items = [{
         "raw_id": "raw-weak",
         "text": "alpha beta new material with many distinct tokens",
@@ -743,7 +779,7 @@ def test_s3_keeps_weak_positive_candidates_without_treating_them_as_targets(tmp_
         DigestSettings(top_k=2),
     )
 
-    assert decisions[0]["candidate_paths"] == ["pages/alpha.md", "pages/beta.md"]
+    assert decisions[0]["candidate_paths"] == ["pages/待归类/alpha.md", "pages/待归类/beta.md"]
     assert all(score > 0 for score in decisions[0]["candidate_scores"])
     assert decisions[0]["action"] == "new"
     assert decisions[0]["target_paths"] == []
@@ -755,10 +791,8 @@ def test_s3_excludes_incidental_second_candidate_from_revise_targets(tmp_path: P
     from knowledge_digest.retrieve import retrieve
 
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
-    pages = kb_dir / "pages"
-    pages.mkdir()
-    (pages / "primary.md").write_text("alpha beta gamma delta\n", encoding="utf-8")
-    (pages / "incidental.md").write_text("alpha unrelated one two three four five six\n", encoding="utf-8")
+    _write_managed_topic(kb_dir, "primary.md", "# Primary\nalpha beta gamma delta\n")
+    _write_managed_topic(kb_dir, "incidental.md", "# Incidental\nalpha unrelated one two three four five six\n")
     raw_items = [{
         "raw_id": "raw-primary",
         "text": "alpha beta gamma delta update",
@@ -781,9 +815,9 @@ def test_s3_excludes_incidental_second_candidate_from_revise_targets(tmp_path: P
         DigestSettings(top_k=2),
     )
 
-    assert decisions[0]["candidate_paths"] == ["pages/primary.md", "pages/incidental.md"]
+    assert decisions[0]["candidate_paths"] == ["pages/待归类/primary.md", "pages/待归类/incidental.md"]
     assert decisions[0]["action"] == "revise"
-    assert decisions[0]["target_paths"] == ["pages/primary.md"]
+    assert decisions[0]["target_paths"] == ["pages/待归类/primary.md"]
 
 
 def test_s3_page_match_threshold_includes_exact_boundary_only(tmp_path: Path) -> None:
@@ -792,10 +826,8 @@ def test_s3_page_match_threshold_includes_exact_boundary_only(tmp_path: Path) ->
     from knowledge_digest.retrieve import retrieve
 
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
-    pages = kb_dir / "pages"
-    pages.mkdir()
-    (pages / "boundary.md").write_text("alpha delta epsilon\n", encoding="utf-8")
-    (pages / "below.md").write_text("alpha delta epsilon zeta\n", encoding="utf-8")
+    _write_managed_topic(kb_dir, "boundary.md", "# Boundary\nalpha delta epsilon\n")
+    _write_managed_topic(kb_dir, "below.md", "# Below\nalpha delta epsilon zeta\n")
     raw_items = [{
         "raw_id": "raw-boundary",
         "text": "alpha beta gamma",
@@ -814,12 +846,12 @@ def test_s3_page_match_threshold_includes_exact_boundary_only(tmp_path: Path) ->
         kb_dir / "_digest" / "runs" / "s3-boundary",
         paths,
         ("pages", "_archive", "_queues"),
-        DigestSettings(top_k=2, page_match_threshold=0.20),
+        DigestSettings(top_k=2, page_match_threshold=0.052632),
     )
 
-    assert decisions[0]["candidate_scores"] == [0.2, 0.166667]
+    assert decisions[0]["candidate_scores"] == [0.052632, 0.05]
     assert decisions[0]["action"] == "revise"
-    assert decisions[0]["target_paths"] == ["pages/boundary.md"]
+    assert decisions[0]["target_paths"] == ["pages/待归类/boundary.md"]
     assert decisions[0]["routing_rule_version"] == "routing-jaccard-v2"
 
 
@@ -933,10 +965,8 @@ def test_dry_run_report_contains_stable_write_plan_snapshot(tmp_path: Path) -> N
 
 def test_revise_write_archives_exact_before_snapshot_with_reason(tmp_path: Path) -> None:
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
-    page = kb_dir / "notes" / "existing.md"
-    page.parent.mkdir()
-    original = "# Existing\n\nalpha beta existing behavior\n"
-    page.write_text(original, encoding="utf-8")
+    page = _write_managed_topic(kb_dir, "existing.md", "# Existing\n\nalpha beta existing behavior\n")
+    original = page.read_text(encoding="utf-8")
     (new_dir / "items" / "revision.md").write_text(
         "# Revision\nalpha beta existing behavior now includes gamma.\n", encoding="utf-8"
     )
@@ -1138,10 +1168,9 @@ def test_cross_target_contributions_are_merged_per_page(tmp_path: Path) -> None:
 
 def test_end_to_end_s3_to_s6_consolidates_multiple_candidates_into_one_stable_topic(tmp_path: Path) -> None:
     new_dir, kb_dir = copy_fixture_layout(tmp_path)
-    pages = kb_dir / "notes"
-    pages.mkdir(parents=True)
+    pages = kb_dir / "pages" / "待归类"
     for name in ("page1.md", "page2.md"):
-        (pages / name).write_text("# Shared page\nshared routing topic\n", encoding="utf-8")
+        _write_managed_topic(kb_dir, name, "# Shared page\nshared routing topic\n")
     (new_dir / "items" / "shared.md").write_text(
         "# Shared\nshared routing topic\nA repeated claim.\nA repeated claim.\n",
         encoding="utf-8",
@@ -1156,17 +1185,17 @@ def test_end_to_end_s3_to_s6_consolidates_multiple_candidates_into_one_stable_to
     drafts = _read_jsonl(run_dir / "s4" / "drafts.jsonl")
     writes = _read_jsonl(run_dir / "s5" / "write-report.jsonl")
     audit = _read_jsonl(run_dir / "s6" / "provenance-audit.jsonl")
-    assert decisions[0]["target_paths"] == ["notes/page1.md", "notes/page2.md"]
+    assert decisions[0]["target_paths"] == ["pages/待归类/page1.md", "pages/待归类/page2.md"]
     topic_targets = drafts[0]["target_paths"]
     assert len(topic_targets) == 1
-    assert topic_targets[0].startswith("notes/digest/topic-")
+    assert topic_targets == ["pages/待归类/page1.md"]
     assert topic_targets[0] in {row["target_path"] for row in writes}
     assert {row["target_path"] for row in audit} == set(topic_targets)
     claim_locations = {(row["claim_fingerprint"], row["fragment_locator"]) for row in audit}
     assert len(audit) == len(claim_locations)
     assert {row["output_page"] for row in drafts[0]["coverage_mapping"]} == set(topic_targets)
-    assert not (kb_dir / "notes" / "page1.md").exists()
-    assert not (kb_dir / "notes" / "page2.md").exists()
+    assert (kb_dir / "pages" / "待归类" / "page1.md").is_file()
+    assert (kb_dir / "pages" / "待归类" / "page2.md").is_file()
 
 
 def test_aggregated_writeback_keeps_existing_frontmatter_at_file_start(tmp_path: Path) -> None:

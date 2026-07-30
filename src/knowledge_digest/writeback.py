@@ -10,6 +10,7 @@ from typing import Any
 
 from .errors import ValidationError
 from .jsonl import append_jsonl, write_jsonl
+from .kb_structure import PublicationContract
 from .paths import DigestPaths
 from .provenance import now_utc, retention_deadline
 
@@ -31,6 +32,65 @@ def _safe_relative(path: str, kb_dir: Path) -> Path:
     except ValueError as error:
         raise ValidationError("s5", path, "target page is outside kb_dir") from error
     return candidate
+
+
+def _frontmatter_values(content: str) -> dict[str, str]:
+    lines = content.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return {}
+    values: dict[str, str] = {}
+    for line in lines[1:]:
+        if line.strip() in {"---", "..."}:
+            break
+        key, separator, value = line.partition(":")
+        if separator:
+            values[key.strip()] = value.strip().strip("\"'")
+    return values
+
+
+def _publication_target_kind(target: Path, publication: PublicationContract) -> tuple[str, str | None]:
+    if target.as_posix() == publication.home_path:
+        return "home", None
+    for category in publication.categories:
+        if target.as_posix() == publication.category_index_path(category.category_id):
+            return "category", category.category_id
+        topic_dir = Path(category.topic_dir)
+        if topic_dir in target.parents:
+            return "topic", category.category_id
+    raise ValidationError("publication", target, "target is outside the declared publication paths")
+
+
+def _validate_publication_header(
+    *,
+    target: Path,
+    content: str,
+    expected_kind: str,
+    category_id: str | None,
+    existing: bool,
+) -> None:
+    values = _frontmatter_values(content)
+    subject = "existing managed page" if existing else "publication content"
+    if values.get("managed_by") != "KnowledgeDigest":
+        raise ValidationError("publication", target, f"{subject} must declare managed_by: KnowledgeDigest")
+    if values.get("digest_kind") != expected_kind:
+        raise ValidationError("publication", target, f"{subject} has an invalid digest_kind")
+    if expected_kind == "topic":
+        if not values.get("digest_topic_id"):
+            raise ValidationError("publication", target, f"{subject} is missing digest_topic_id")
+        if values.get("digest_published_path") != target.as_posix():
+            raise ValidationError(
+                "publication",
+                target,
+                f"{subject} digest_published_path must match its actual path",
+            )
+        try:
+            part = int(values.get("digest_part", ""))
+        except ValueError as error:
+            raise ValidationError("publication", target, f"{subject} digest_part must be a positive integer") from error
+        if part < 1:
+            raise ValidationError("publication", target, f"{subject} digest_part must be a positive integer")
+    if expected_kind == "category" and values.get("digest_category_id") != category_id:
+        raise ValidationError("publication", target, f"{subject} has an invalid digest_category_id")
 
 
 def _atomic_write(path: Path, content: str) -> None:
@@ -177,7 +237,15 @@ def targets_for_draft(draft: dict[str, Any], page_root: str) -> list[Path]:
 def _expanded_pages(draft: dict[str, Any], page_root: str) -> list[dict[str, Any]]:
     pages = draft.get("split_pages")
     if isinstance(pages, list) and pages:
-        return [dict(page, draft_id=draft["draft_id"], action=draft["action"]) for page in pages]
+        return [
+            dict(
+                page,
+                draft_id=draft["draft_id"],
+                action=draft["action"],
+                digest_kind=page.get("digest_kind", draft.get("digest_kind")),
+            )
+            for page in pages
+        ]
     targets = targets_for_draft(draft, page_root)
     return [
         {
@@ -263,6 +331,8 @@ def writeback(
     run_dir: Path,
     paths: DigestPaths,
     roots: tuple[str, ...],
+    *,
+    publication: PublicationContract | None = None,
 ) -> list[dict[str, Any]]:
     """Validate the complete batch, then materialize all formal pages."""
     page_root = roots[0]
@@ -270,6 +340,8 @@ def writeback(
     pages = [page for draft in drafts for page in _expanded_pages(draft, page_root)]
     for draft in drafts:
         for target_path in draft.get("obsolete_target_paths", []):
+            if publication is not None:
+                raise ValidationError("publication", target_path, "incremental publication does not delete old topic parts")
             pages.append(
                 {
                     "draft_id": draft["draft_id"],
@@ -283,6 +355,13 @@ def writeback(
     grouped: dict[str, dict[str, Any]] = {}
     for page in pages:
         target = _safe_relative(str(page["target_path"]), paths.kb_dir)
+        if publication is not None:
+            if target.suffix.lower() != ".md":
+                raise ValidationError("publication", target, "publication target must be a Markdown file")
+            expected_kind, category_id = _publication_target_kind(target, publication)
+            if page.get("digest_kind") != expected_kind:
+                raise ValidationError("publication", target, "publication record has an invalid digest_kind")
+            page["publication_category_id"] = category_id
         target_key = target.as_posix()
         group = grouped.setdefault(
             target_key,
@@ -309,11 +388,25 @@ def writeback(
     for group in grouped.values():
         target = _safe_relative(str(group["target_path"]), paths.kb_dir)
         target_path = paths.kb_dir / target
+        parent = target_path.parent
+        while parent != paths.kb_dir:
+            if parent.is_symlink():
+                raise ValidationError("s5", parent, "target parent directory must not be a symlink")
+            parent = parent.parent
         if target_path.is_symlink():
             raise ValidationError("s5", target_path, "target page must not be a symlink")
         if target_path.exists() and not target_path.is_file():
             raise ValidationError("s5", target_path, "target page must be a regular file")
         before = target_path.read_text(encoding="utf-8") if target_path.exists() else ""
+        if publication is not None and target_path.exists():
+            expected_kind, category_id = _publication_target_kind(target, publication)
+            _validate_publication_header(
+                target=target,
+                content=before,
+                expected_kind=expected_kind,
+                category_id=category_id,
+                existing=True,
+            )
         if any(page.get("remove_only") for page in group["pages"]):
             if len(group["pages"]) != 1:
                 raise ValidationError("s5", target, "removed topic part cannot receive new content")
@@ -336,7 +429,39 @@ def writeback(
                 raise ValidationError("s5", target, "final topic layout must own one complete target page")
             page = group["pages"][0]
             page_claims = page.get("claims", [])
-            if not isinstance(page_claims, list) or any(
+            rendered = page.get("rendered_content")
+            if not isinstance(rendered, str) or not rendered.strip():
+                raise ValidationError("s5", target, "final topic layout is missing rendered content")
+            if publication is not None:
+                expected_kind, category_id = _publication_target_kind(target, publication)
+                if target_path.exists():
+                    _validate_publication_header(
+                        target=target,
+                        content=before,
+                        expected_kind=expected_kind,
+                        category_id=category_id,
+                        existing=True,
+                    )
+                _validate_publication_header(
+                    target=target,
+                    content=rendered,
+                    expected_kind=expected_kind,
+                    category_id=category_id,
+                    existing=False,
+                )
+                if expected_kind in {"home", "category"}:
+                    if page_claims != []:
+                        raise ValidationError("publication", target, "navigation publication must not contain claims")
+                elif not isinstance(page_claims, list) or any(
+                    not claim.get("text")
+                    or not claim.get("source_uri")
+                    or not claim.get("claim_fingerprint")
+                    or not claim.get("content_fingerprint")
+                    or not claim.get("fragment_locator")
+                    for claim in page_claims
+                ):
+                    raise ValidationError("s5", target, "final topic layout requires complete claim provenance")
+            elif not isinstance(page_claims, list) or any(
                 not claim.get("text")
                 or not claim.get("source_uri")
                 or not claim.get("claim_fingerprint")
@@ -345,9 +470,6 @@ def writeback(
                 for claim in page_claims
             ):
                 raise ValidationError("s5", target, "final topic layout requires complete claim provenance")
-            rendered = page.get("rendered_content")
-            if not isinstance(rendered, str) or not rendered.strip():
-                raise ValidationError("s5", target, "final topic layout is missing rendered content")
             aggregate = dict(group)
             aggregate.update(
                 {
