@@ -83,4 +83,4 @@ docs/              # 设计、决策、历史报告
 
 ## 更新规则
 
-当修改 CLI、文件结构、正式输出、质量门禁或开发命令时，同步更新本文件和对应 acceptance 测试。保留 `docs/plans/universal-knowledge-digest-design.md` 作为原始设计；当前知识发布合同的规格、计划和任务记录位于 `specs/knowledge-digest-publication-contract/`，已交付架构优化记录归档于 `specs/archive/knowledge-digest-architecture-optimization/`。
+当修改 CLI、文件结构、正式输出、质量门禁或开发命令时，同步更新本文件和对应 acceptance 测试。保留 `docs/plans/universal-knowledge-digest-design.md` 作为原始设计；已交付的知识发布合同记录归档于 `specs/archive/knowledge-digest-publication-contract/`，架构优化记录归档于 `specs/archive/knowledge-digest-architecture-optimization/`。
