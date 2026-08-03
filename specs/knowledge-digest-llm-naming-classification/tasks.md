@@ -1094,6 +1094,32 @@ README/AGENTS 解释结果目录；固定 manifest、结构/无损/导航证据�
 **r10 full gate**：`uv run --frozen pytest -q` → `312 passed in 17.39s`；`git diff --check` → `0`。
 **r10 boundary**：最终 qwen 结果真实完成但超过 60 分钟安全线；固定语料只有 17 个可抽样主题；Codex agent-assisted reader audit 不能替代独立人工阅读。以上三点均在最终对比报告中保留，未伪造全部 AC 通过。
 
+### T037 — GREEN：跨批次稳定主题身份
+
+- **design_state**：ready；**verification_role**：GREEN；**paired_task**：T017/T018
+- **goal**：固定全量主题计划拥有稳定 `topic_id`；相似度候选只能提供检索提示，不能把新来源并入旧主题页面。
+- **FR / AC**：SCOPE-001 / AC-004、AC-005
+- **exact_files**：`src/knowledge_digest/retrieve.py`、`src/knowledge_digest/pipeline.py`、`src/knowledge_digest/page_layout.py`、`tests/acceptance/test_task2_batch_recovery.py`
+- **gate_cmd / expected_exit**：`uv run --frozen pytest -q tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_publication.py` / `0`
+- **oracle**：固定计划主题 ID 不被旧页面相似候选覆盖；相关测试 `31 passed`。
+- **actual_changes**：批次路径调用 `retrieve(..., preserve_cluster_identity=True)`；布局读取候选页头并拒绝跨主题目标；补充回归测试。
+- **evidence_path**：`evidence/build-code/task2/T037-green.txt`
+- **review_fact**：未调用新的 provider review；历史官方 review unavailable 仍保持原样。
+- **completed_at**：2026-08-04T01:00:00+08:00
+
+### T038 — GREEN：最终 qwen 全量分批发布
+
+- **design_state**：ready；**verification_role**：GREEN；**paired_task**：T033/T034/T036/T037
+- **goal**：使用用户指定的 qwen3.6 与 jina-embeddings 配置，对 89 个来源逐批完成发布；失败来源可见，成功批次不重复执行。
+- **FR / AC**：FR-LLM-001/004/005 / AC-001～AC-008
+- **exact_files**：`/Users/Hugh/Downloads/KnowledgeDigest-task2-qwen-final9-20260804`
+- **gate_cmd / expected_exit**：批次命令退出 `0`；随后 `uv run --frozen pytest -q` → `316 passed in 16.82s`。
+- **oracle**：89/89 批成功落盘；9,288 Claim entity、7,796 fingerprint、88 source-index URI、86 stable topics、120 topic pages、页长≤300；176 planned/observed calls、30 failed provider calls、1 replay、fallback ratio 0.471591、2,690.861 秒。
+- **boundary**：jina 探测失败，整次运行回退 Jaccard；不混用分数。固定语料只有 17/20 个可抽样主题；Codex agent-assisted reader review 不能替代独立人工确认。
+- **evidence_path**：`/Users/Hugh/Downloads/KnowledgeDigest-task2-qwen-final9-20260804/comparison/COMPARISON.json`
+- **review_fact**：官方 WorkflowHub `wh-review` 仍因 `host bridge requires exactly one response after request` unavailable；未伪造 close receipt。
+- **completed_at**：2026-08-04T01:50:00+08:00
+
 ## 7. Dependencies and Traceability
 
 ```text

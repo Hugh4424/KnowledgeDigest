@@ -540,6 +540,63 @@ def test_topic_index_records_published_topic_identity(tmp_path: Path) -> None:
     assert all(row["published_path"].startswith("pages/") for row in value["topics"])
 
 
+def test_fixed_batch_plan_keeps_topic_identity_when_similarity_finds_old_page(tmp_path: Path) -> None:
+    """A cross-batch candidate must not steal the planned topic identity."""
+    from knowledge_digest.config import DigestSettings, SimilaritySettings
+    from knowledge_digest.identity import source_id
+    from knowledge_digest.kb_structure import initialize_default_publication
+    from knowledge_digest.paths import validate_paths
+    from knowledge_digest.retrieve import retrieve
+
+    new_dir = tmp_path / "new"
+    items = new_dir / "items"
+    items.mkdir(parents=True)
+    (items / "merchant.md").write_text("# Merchant processor\n\nSupports reseller operations.\n", encoding="utf-8")
+    (new_dir / "sources.jsonl").write_text(
+        json.dumps({"content_path": "items/merchant.md", "source_uri": "confluence://merchant"}) + "\n",
+        encoding="utf-8",
+    )
+    kb_dir = tmp_path / "kb"
+    kb_dir.mkdir()
+    initialize_default_publication(kb_dir)
+    old_page = kb_dir / "pages" / "customers" / "old.md"
+    old_page.parent.mkdir(parents=True)
+    old_page.write_text(
+        "---\nmanaged_by: KnowledgeDigest\ndigest_kind: topic\ndigest_topic_id: topic-old\n"
+        "digest_published_path: pages/customers/old.md\ndigest_part: 1\n---\n"
+        "# Old topic\n\nMerchant processor content.\n",
+        encoding="utf-8",
+    )
+    paths = validate_paths(new_dir, kb_dir)
+    settings = DigestSettings(
+        llm_enabled=False,
+        llm_summary_enabled=False,
+        page_match_threshold=0.01,
+        similarity=SimilaritySettings(backend="jaccard"),
+    )
+    raw_item = {
+        "raw_id": "raw-merchant",
+        "source_uri": "confluence://merchant",
+        "source_id": source_id("confluence://merchant"),
+        "text": "# Merchant processor\n\nSupports reseller operations.\n",
+    }
+    decisions = retrieve(
+        [{
+            "cluster_id": "cluster-21",
+            "topic_id": "topic-planned",
+            "tier": "auto",
+            "members": ["raw-merchant"],
+        }],
+        [raw_item],
+        tmp_path / "run",
+        paths,
+        ("pages", "_archive", "_queues"),
+        settings,
+        preserve_cluster_identity=True,
+    )
+    assert decisions[0]["topic_id"] == "topic-planned"
+
+
 def test_source_index_fails_closed_when_snapshot_manifest_is_missing(tmp_path: Path) -> None:
     from knowledge_digest.errors import ValidationError
     from knowledge_digest.pipeline import _source_index_for_navigation

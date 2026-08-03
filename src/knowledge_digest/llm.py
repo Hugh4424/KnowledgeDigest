@@ -32,6 +32,11 @@ DEFAULT_TIMEOUT_SECONDS = 60
 # object that references a large claim batch; the parser still rejects any
 # non-JSON or truncated final content.
 DEFAULT_MAX_TOKENS = 8192
+# qwen3.6 may spend part of the completion budget on hidden reasoning even
+# when the publication prompt asks for compact JSON.  Keep enough room for the
+# contract instead of treating a truncated empty content field as a semantic
+# result.
+PUBLICATION_MAX_TOKENS = 8192
 TIMEOUT_ENV = "KD_LLM_TIMEOUT_SECONDS"
 RETRY_ENV = "KD_LLM_RETRY_ATTEMPTS"
 DEFAULT_RETRY_ATTEMPTS = 0
@@ -126,19 +131,33 @@ def _endpoint(base_url: str, api_format: str) -> str:
     return f"{root}/v1/messages"
 
 
-def _request_payload(api_format: str, model: str, prompt: str) -> dict[str, Any]:
+def _request_payload(
+    api_format: str,
+    model: str,
+    prompt: str,
+    *,
+    max_tokens: int = DEFAULT_MAX_TOKENS,
+) -> dict[str, Any]:
     messages = [{"role": "user", "content": prompt}]
     if api_format == OPENAI_FORMAT:
         # Bound provider output for OpenAI-compatible endpoints. Without an
         # explicit cap, qwen3.6 may spend the entire transport deadline on
         # unbounded reasoning/output before it can return the JSON contract.
-        return {
+        payload = {
             "model": model,
             "messages": messages,
             "temperature": 0,
-            "max_tokens": DEFAULT_MAX_TOKENS,
+            "max_tokens": max_tokens,
         }
-    return {"model": model, "max_tokens": DEFAULT_MAX_TOKENS, "messages": messages}
+        if model == PUBLICATION_LLM_MODEL:
+            # The approved qwen OpenAI bridge understands JSON mode.  It does
+            # not expose reasoning_content to the client, but the explicit
+            # contract prevents an empty content field when thinking consumes
+            # the entire completion budget.
+            payload["response_format"] = {"type": "json_object"}
+            payload["enable_thinking"] = False
+        return payload
+    return {"model": model, "max_tokens": max_tokens, "messages": messages}
 
 
 def _extract_text(api_format: str, payload: Any) -> str:
@@ -312,21 +331,27 @@ def validate_publication_provider_identity(*, model: str, base_url: str) -> None
 
 def publication_prompt_sections(context: dict[str, Any]) -> str:
     """Return the four fixed prompt sections for semantic publication."""
+    # Publication metadata is a bounded semantic hint, not a second copy of
+    # the complete evidence ledger.  The deterministic pipeline still keeps
+    # every claim and attaches full trusted references after validation.  A
+    # small excerpt prevents qwen's reasoning budget from being consumed by a
+    # huge repeated claim list on long source pages.
+    source_claims = context.get("publication_claims") or context.get("claims", [])
     evidence = [
         {
             "claim_fingerprint": claim.get("claim_fingerprint"),
-            "text": claim.get("text"),
+            "text": str(claim.get("text", ""))[:280],
             "source_uri": claim.get("source_uri"),
             "fragment_locator": claim.get("fragment_locator"),
         }
-        for claim in context.get("claims", [])
+        for claim in list(source_claims)[:8]
     ]
     taxonomy = context.get("allowed_taxonomy", [])
     return "\n\n".join(
         (
             "ROLE:\nYou provide semantic publication suggestions only. Do not create facts, paths, permissions, or taxonomy entries.",
-            "EVIDENCE:\n" + json.dumps(evidence, ensure_ascii=False, indent=2),
-            "ALLOWED TAXONOMY:\n" + json.dumps(taxonomy, ensure_ascii=False, indent=2),
+            "EVIDENCE:\n" + json.dumps(evidence, ensure_ascii=False, separators=(",", ":")),
+            "ALLOWED TAXONOMY:\n" + json.dumps(taxonomy, ensure_ascii=False, separators=(",", ":")),
             "OUTPUT SCHEMA:\n" + _PUBLICATION_OUTPUT_SCHEMA + "\nReturn only final JSON content; never include reasoning_content or <think> text.",
         )
     )
@@ -341,6 +366,7 @@ def call_llm(
     api_key: str,
     model: str,
     timeout: int = DEFAULT_TIMEOUT_SECONDS,
+    max_tokens: int = DEFAULT_MAX_TOKENS,
 ) -> str:
     """POST one completion request and return the raw assistant text."""
     if api_format not in SUPPORTED_FORMATS:
@@ -349,7 +375,9 @@ def call_llm(
         if not value:
             raise ValidationError("llm", env_name, f"{env_name} is required")
 
-    body = _request_payload(api_format, model, prompt)
+    if max_tokens <= 0:
+        raise ValidationError("llm", "max_tokens", "must be greater than zero")
+    body = _request_payload(api_format, model, prompt, max_tokens=max_tokens)
     headers = {"content-type": "application/json"}
     if api_format == OPENAI_FORMAT:
         headers["authorization"] = f"Bearer {api_key}"
@@ -425,9 +453,9 @@ def build_prompt(context: dict[str, Any], *, target_page: str) -> str:
             f"{summary_contract}\n\n"
             "INPUT:\n"
             + json.dumps(
-                {"target_page": target_page, "claims": claims},
+                {"target_page": target_page},
                 ensure_ascii=False,
-                indent=2,
+                separators=(",", ":"),
             )
         )
     summary_enabled = bool(context.get("summary_enabled", False))
@@ -554,6 +582,13 @@ def build_generator(
         if context.get("publication_provider_enforced"):
             validate_publication_provider_identity(model=model, base_url=base_url)
         prompt = build_prompt(context, target_page=str(context.get("target_page", "")))
+        # The approved qwen endpoint enables thinking by default.  Its
+        # OpenAI-compatible bridge accepts the documented soft switch in the
+        # user prompt; without it, reasoning consumes the response budget and
+        # frequently truncates the required JSON contract.  The client still
+        # reads only message.content, never reasoning_content.
+        if model == PUBLICATION_LLM_MODEL and api_format == OPENAI_FORMAT:
+            prompt = "/no_think\n" + prompt
         for attempt in range(1, retry_attempts + 2):
             try:
                 result = _restore_source_lineage(
@@ -565,6 +600,11 @@ def build_generator(
                             api_key=api_key,
                             model=model,
                             timeout=timeout,
+                            max_tokens=(
+                                PUBLICATION_MAX_TOKENS
+                                if context.get("publication_only")
+                                else DEFAULT_MAX_TOKENS
+                            ),
                         ),
                         require_final_body=not bool(context.get("publication_only")),
                     ),

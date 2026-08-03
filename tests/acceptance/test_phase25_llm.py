@@ -140,6 +140,19 @@ def test_anthropic_format_sends_expected_request_and_parses_response(monkeypatch
     assert body["messages"] == [{"role": "user", "content": "prompt text"}]
 
 
+def test_qwen_openai_payload_requests_json_and_no_thinking() -> None:
+    body = llm._request_payload(
+        "openai",
+        llm.PUBLICATION_LLM_MODEL,
+        "prompt text",
+        max_tokens=llm.PUBLICATION_MAX_TOKENS,
+    )
+
+    assert body["response_format"] == {"type": "json_object"}
+    assert body["enable_thinking"] is False
+    assert body["max_tokens"] == llm.PUBLICATION_MAX_TOKENS
+
+
 def test_four_concurrent_real_requests_cross_the_transport_boundary() -> None:
     server = ThreadingHTTPServer(("127.0.0.1", 0), _LocalOpenAIHandler)
     server_thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -315,6 +328,58 @@ def test_generator_does_not_retry_invalid_provider_output(monkeypatch: pytest.Mo
         generator({"target_page": "pages/one.md", "initial_body": "body", "claims": []})
 
     assert calls == 1
+
+
+def test_qwen_generator_disables_hidden_thinking_without_persisting_reasoning(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    seen: list[str] = []
+
+    def fake_call_llm(prompt: str, **_kwargs: Any) -> str:
+        seen.append(prompt)
+        return json.dumps({"final_body": "body"})
+
+    monkeypatch.setattr(llm, "call_llm", fake_call_llm)
+    generator = llm.build_generator(
+        api_format="openai",
+        base_url=llm.PUBLICATION_LLM_BASE_URL,
+        api_key="secret-key",
+        model=llm.PUBLICATION_LLM_MODEL,
+    )
+
+    result = generator({"target_page": "pages/one.md", "initial_body": "body", "claims": []})
+
+    assert result["final_body"] == "body"
+    assert seen and seen[0].startswith("/no_think\n")
+
+
+def test_publication_only_generator_uses_bounded_output_budget(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    seen: list[int] = []
+
+    def fake_call_llm(_prompt: str, **kwargs: Any) -> str:
+        seen.append(int(kwargs["max_tokens"]))
+        return json.dumps({"publication": {}})
+
+    monkeypatch.setattr(llm, "call_llm", fake_call_llm)
+    generator = llm.build_generator(
+        api_format="openai",
+        base_url=llm.PUBLICATION_LLM_BASE_URL,
+        api_key="secret-key",
+        model=llm.PUBLICATION_LLM_MODEL,
+    )
+
+    generator(
+        {
+            "target_page": "pages/one.md",
+            "initial_body": "body",
+            "claims": [],
+            "publication_only": True,
+        }
+    )
+
+    assert seen == [llm.PUBLICATION_MAX_TOKENS]
 
 
 def test_hard_deadline_interrupts_a_blocking_read() -> None:

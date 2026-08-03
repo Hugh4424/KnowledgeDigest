@@ -1,6 +1,7 @@
 # Task2 corrective closure
 
 本记录只记录当前 Task2 修复后的真实证据，不把失败运行包装成成功。
+历史段落保留失败现场；文末“最新最终分批验收”是当前结论。
 
 ## 已修复
 
@@ -72,3 +73,20 @@ AC-008 当前仍为 partial：失败批次已经有统一的失败/重放/耗时
 本次代码修复后的完整测试：`312 passed`；`git diff --check` 通过。另有一次为验证更大批次性能而启动的第三版运行在首批未完成前停止，状态和日志保留在 `KnowledgeDigest-task2-qwen-batched-final3-20260804-000841`，不计入最终成功产物。
 
 随后又验证了 89-source 单批方案；它在约 11 分钟仍未完成首批 provider 处理，现场保留在 `KnowledgeDigest-task2-qwen-single-batch-20260804-001918`，同样不计入最终产物。两次现场共同说明：瓶颈主要是 qwen/embedding provider 响应延迟，不能靠简单改 batch-size 宣称达到 60 分钟安全线。
+
+## 最新最终分批验收（2026-08-04）
+
+以上旧现场是历史记录，不能覆盖下面这次最新运行：
+
+`/Users/Hugh/Downloads/KnowledgeDigest-task2-qwen-final9-20260804`
+
+- 89/89 来源批次完成；固定主题身份冲突已修复，未再出现跨批次来源重复归属。
+- 9,288 Claim entity、7,796 fingerprint、88 source-index URI、86 stable topics、120 physical topic pages；每页不超过 300 行。
+- qwen3.6：176 planned/observed calls；30 failed provider calls；1 replay；fallback ratio `0.471591`；耗时 `2,690.861s`，未超过 3,600 秒安全线。
+- jina 探测失败，整次运行一致回退 Jaccard；没有混用 embedding/Jaccard，也没有调用 DeepSeek。
+- 全量测试：`316 passed in 16.82s`。
+- CompanyBrain 对比仍是 Codex agent-assisted reader review；固定语料只有 17/20 个可用样本，`human_review_required=true`，不把辅助审查冒充独立人工确认。
+
+最新机器/辅助对比：
+
+`/Users/Hugh/Downloads/KnowledgeDigest-task2-qwen-final9-20260804/comparison/COMPARISON.md`

@@ -22,6 +22,7 @@ from .identity import (
     publication_topic_part_path,
     published_part_path,
     resolve_topic_identity,
+    source_id,
     topic_id,
     topic_part_path,
 )
@@ -602,6 +603,7 @@ def build_topic_layouts(
                 topic_index = loaded
     for stable_topic_id in sorted(by_topic):
         topic_drafts = by_topic[stable_topic_id]
+        topic_index_entry: dict[str, Any] | None = None
         existing_records = _managed_topic_records(paths, publication, stable_topic_id) if publication is not None else []
         existing_paths = [record["path"] for record in existing_records] if publication is not None else _topic_paths(
             paths.kb_dir, page_root, stable_topic_id
@@ -622,6 +624,18 @@ def build_topic_layouts(
         for draft in topic_drafts:
             for target in draft.get("target_paths", []):
                 candidate = paths.kb_dir / str(target)
+                if not candidate.is_file() or candidate in existing_paths:
+                    continue
+                # Retrieval candidates are hints, not identity.  A candidate
+                # page that belongs to another stable topic must never be
+                # adopted as this topic's history; otherwise two independent
+                # sources become one topic during sequential batch recovery.
+                try:
+                    values = _frontmatter_values(candidate.read_text(encoding="utf-8"))
+                except (OSError, UnicodeDecodeError) as error:
+                    raise ValidationError("layout", candidate, f"managed target cannot be read ({error})") from error
+                if publication is not None and values.get("digest_topic_id") != stable_topic_id:
+                    continue
                 if candidate.is_file() and candidate not in existing_paths:
                     existing_paths.append(candidate)
         existing_paths.sort()
@@ -689,11 +703,17 @@ def build_topic_layouts(
             resolved = resolve_topic_identity(
                 topic_index,
                 stable_topic_id=stable_topic_id,
-                source_ids=[str(claim.get("source_id", "")) for claim in all_claims],
+                source_ids=[
+                    str(claim.get("source_id") or source_id(str(claim.get("source_uri", ""))))
+                    for claim in all_claims
+                    if claim.get("source_id") or claim.get("source_uri")
+                ],
                 category_id=category.category_id,
                 title=title,
                 topic_dir=category.topic_dir,
             )
+            if isinstance(resolved.get("topic_index_entry"), dict):
+                topic_index_entry = dict(resolved["topic_index_entry"])
             first_path = str(resolved["published_path"])
             publication_category_id = str(resolved["category_id"])
             if first_path in reserved_paths:
@@ -703,6 +723,30 @@ def build_topic_layouts(
                     stable_topic_id,
                     1,
                     disambiguate=True,
+                )
+            if topic_index_entry is not None:
+                topic_index_entry["published_path"] = first_path
+        if topic_index_entry is None and publication is not None:
+            existing_entry = next(
+                (
+                    row
+                    for row in topic_index.get("topics", [])
+                    if isinstance(row, dict) and row.get("topic_id") == stable_topic_id
+                ),
+                None,
+            )
+            if isinstance(existing_entry, dict):
+                topic_index_entry = dict(existing_entry)
+                incoming_source_ids = {
+                    str(claim.get("source_id") or source_id(str(claim.get("source_uri"))))
+                    for claim in incoming_claims
+                    if claim.get("source_id") or claim.get("source_uri")
+                }
+                topic_index_entry["source_ids"] = sorted(
+                    {
+                        *[str(item) for item in topic_index_entry.get("source_ids", []) if item],
+                        *incoming_source_ids,
+                    }
                 )
         if first_path is None:
             first_path = topic_part_path(page_root, stable_topic_id, 1)
@@ -766,6 +810,7 @@ def build_topic_layouts(
                 "draft_id": f"layout-{stable_topic_id}",
                 "cluster_id": ",".join(sorted(str(draft.get("cluster_id")) for draft in topic_drafts)),
                 "topic_id": stable_topic_id,
+                "topic_index_entry": topic_index_entry,
                 "digest_kind": "topic",
                 "publication_category_id": publication_category_id,
                 "publication": publication_metadata,

@@ -1,0 +1,14 @@
+Task2 T038 GREEN
+
+Final real run:
+/Users/Hugh/Downloads/KnowledgeDigest-task2-qwen-final9-20260804
+
+Input: 89 declared Confluence sources.
+LLM: qwen3.6 at the user-specified endpoint; no DeepSeek request.
+Embedding: jina-embeddings probe failed, so the whole run used Jaccard fallback.
+Batch result: 89/89 source batches succeeded and remained resumable.
+Output: 9,288 Claim entities; 7,796 fingerprints; 88 source-index URIs; 86 stable topics; 120 topic pages; every topic page <=300 lines.
+Cost: 176 planned/observed provider calls; 30 failed provider calls; 1 replay; fallback ratio 0.471591; elapsed 2,690.861 seconds.
+Machine comparison:
+/Users/Hugh/Downloads/KnowledgeDigest-task2-qwen-final9-20260804/comparison/COMPARISON.json
+Full test: 316 passed in 16.82s.

@@ -1140,7 +1140,15 @@ def _audit_run_locked(
             raise ValidationError("batch", ", ".join(unplanned), "batch source is absent from the fixed topic plan")
         clusters = planned_clusters
         write_jsonl(run_dir / "s2" / "clusters.jsonl", clusters)
-        decisions = retrieve(clusters, raw_items, run_dir, paths, roots, settings)
+        decisions = retrieve(
+            clusters,
+            raw_items,
+            run_dir,
+            paths,
+            roots,
+            settings,
+            preserve_cluster_identity=True,
+        )
     for decision in decisions:
         decision["page_root"] = roots[0]
     topic_universe = {

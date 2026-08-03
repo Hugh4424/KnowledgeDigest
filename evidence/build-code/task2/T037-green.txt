@@ -1,0 +1,11 @@
+Task2 T037 GREEN
+
+Command:
+uv run --frozen pytest -q tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_publication.py
+
+Result: 31 passed in 0.30s
+
+Contract checked:
+- fixed batch plans preserve their planned topic_id;
+- similarity candidates cannot steal a different managed topic;
+- page layout rejects cross-topic candidate paths.
