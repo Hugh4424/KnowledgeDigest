@@ -34,6 +34,8 @@ exit 0
 
 正式 close 也未执行：`task-close prepare` 在读取当前 TaskHandle 时返回 `ENOENT`（缺少 `results` 记录目录）。因此没有创建 close plan、确认记录、合并、推送或删除 worktree；不伪造 close receipt。
 
+本次 close 预检对应当前任务提交 `31418262fa354b9f59fa751d255c241a28386d54`；错误仍为同一 `ENOENT`，不是项目代码或测试失败。
+
 ## 总结
 
 代码、离线无损、可读发布结构、失败恢复和实时成本预算已验证。AC-007 按规格记录了当前语料只有 17/20 个可用分层样本，Codex agent-assisted review 为通过，但独立人工阅读仍需用户确认。因此本报告不把辅助审查冒充人工验收，也不伪造正式 WorkflowHub close receipt。最终 qwen 产物和完整机器对比保留在：
