@@ -121,6 +121,7 @@ def test_openai_format_sends_expected_request_and_parses_response(monkeypatch: p
     assert body["model"] == "test-model"
     assert body["messages"] == [{"role": "user", "content": "prompt text"}]
     assert body["temperature"] == 0
+    assert body["max_tokens"] == llm.DEFAULT_MAX_TOKENS
 
 
 def test_anthropic_format_sends_expected_request_and_parses_response(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -1334,6 +1335,30 @@ def test_invalid_llm_batch_falls_back_for_the_whole_draft(tmp_path: Path) -> Non
     assert all(f"Claim {index}." in result["final_body"] for index in range(1, 6))
 
 
+def test_provider_validation_error_keeps_deterministic_source_and_marks_review(
+    tmp_path: Path,
+) -> None:
+    """A provider failure must not discard this source or pretend it passed."""
+    def generator(_context: dict[str, Any]) -> dict[str, Any]:
+        raise ValidationError("llm", "provider", "malformed JSON")
+
+    result = draft(
+        _decision(),
+        _cluster(),
+        _items(),
+        tmp_path,
+        DigestSettings(llm_enabled=True, llm_batch_max_claims=1),
+        generator=generator,
+    )[0]
+
+    assert result["rethink_status"] == "fallback"
+    assert result["provider_failure"] is True
+    assert result["provider_failures"][0]["kind"] == "provider_error"
+    assert result["fallback_reason"] == "no valid round; used claim fallback"
+    assert "Claim one." in result["final_body"]
+    assert "Claim two." in result["final_body"]
+
+
 def test_llm_batch_concurrency_is_bounded_and_merge_order_is_stable(tmp_path: Path) -> None:
     items = [
         {
@@ -1620,6 +1645,40 @@ def test_end_to_end_fallback_page_keeps_every_source_line(
     written = "\n".join(page.read_text(encoding="utf-8") for page in pages)
     for line in ("Claim one.", "Claim two."):
         assert line in written
+
+
+def test_end_to_end_provider_error_publishes_source_and_pending_review(
+    tmp_path: Path,
+) -> None:
+    """A transport/JSON failure keeps deterministic output and a replay queue."""
+    new_dir, kb_dir = _kb_case(tmp_path)
+    paths = validate_paths(new_dir, kb_dir)
+    roots = parse_roots(paths.structure_path)
+
+    def generator(_context: dict[str, Any]) -> dict[str, Any]:
+        raise ValidationError("llm", "provider", "malformed JSON")
+
+    audit_run(
+        paths,
+        DigestSettings(llm_enabled=True),
+        roots,
+        dry_run=False,
+        generator=generator,
+    )
+
+    pages = list((kb_dir / "pages").rglob("*.md"))
+    assert pages
+    written = "\n".join(page.read_text(encoding="utf-8") for page in pages)
+    assert "Claim one." in written and "Claim two." in written
+    pending = (kb_dir / "_digest" / "pending-review.jsonl").read_text(encoding="utf-8")
+    assert "malformed JSON" in pending
+    from knowledge_digest.kb_structure import parse_source_index_markdown
+
+    source_index = parse_source_index_markdown((kb_dir / "_digest" / "source-index.md").read_text(encoding="utf-8"))
+    assert source_index["entries"][0]["status"] == "needs-review"
+    assert "https://source.example/llm" in (kb_dir / "_queues" / "needs_review.md").read_text(encoding="utf-8")
+    report = json.loads(next((kb_dir / "_digest").glob("runs/*/report.json")).read_text(encoding="utf-8"))
+    assert report["pending_review"]
 
 
 def test_end_to_end_retention_gate_keeps_a_dropped_claim_on_the_committed_page(

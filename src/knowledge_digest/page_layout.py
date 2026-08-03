@@ -9,6 +9,7 @@ tested without a model provider.
 
 from __future__ import annotations
 
+import json
 import os
 import re
 from collections import defaultdict, deque
@@ -17,7 +18,13 @@ from typing import Any, Iterable
 
 from .errors import ValidationError
 from .faithfulness import claim_entity_key, normalize_claim
-from .identity import publication_topic_part_path, published_part_path, topic_id, topic_part_path
+from .identity import (
+    publication_topic_part_path,
+    published_part_path,
+    resolve_topic_identity,
+    topic_id,
+    topic_part_path,
+)
 from .jsonl import read_jsonl
 from .kb_structure import PublicationContract
 from .paths import DigestPaths
@@ -153,6 +160,12 @@ def _existing_topic_title(existing_paths: list[Path]) -> str | None:
 
 def _source_title(topic_drafts: list[dict[str, Any]], stable_topic_id: str) -> str:
     for draft in topic_drafts:
+        publication = draft.get("publication")
+        if isinstance(publication, dict):
+            value = publication.get("title")
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+    for draft in topic_drafts:
         for value in draft.get("publication_title_candidates", []):
             if isinstance(value, str) and value.strip():
                 return value.strip()
@@ -207,6 +220,17 @@ def _legacy_body(content: str) -> list[str]:
 def _evidence_lines(body: str) -> list[str]:
     """Use deterministic source-backed evidence, not a provider's repeated shell."""
     lines = body.splitlines()
+    if lines and lines[0].strip() == "## Summary":
+        try:
+            evidence_start = next(index for index, line in enumerate(lines) if line.strip() == "## Evidence") + 1
+            evidence_end = next(
+                index
+                for index in range(evidence_start, len(lines))
+                if lines[index].strip() == "## Provenance"
+            )
+        except StopIteration:
+            evidence_end = len(lines)
+        return _trim_blank_lines(lines[evidence_start:evidence_end])
     is_canonical_page = (
         len(lines) >= 4
         and lines[0].strip() == "---"
@@ -274,8 +298,38 @@ def _render_page(
     part_number: int,
     evidence_lines: list[str],
     claims: list[dict[str, Any]],
+    publication_metadata: dict[str, Any] | None = None,
 ) -> str:
     provenance = [_provenance_line(claim) for claim in claims]
+    metadata = publication_metadata or {}
+    field_status = metadata.get("field_status") if isinstance(metadata.get("field_status"), dict) else {}
+    field_refs = metadata.get("field_refs") if isinstance(metadata.get("field_refs"), dict) else {}
+
+    def field_value(name: str, fallback: str) -> str:
+        value = metadata.get(name)
+        return str(value).strip() if isinstance(value, str) and value.strip() else fallback
+
+    def field_reference(name: str) -> str | None:
+        fallback = {
+            "summary": "来源未提供摘要；请阅读 Evidence。",
+            "why": "来源未说明",
+            "version": "未提供版本信息",
+        }.get(name, "")
+        if field_status.get(name) == "fallback" and field_value(name, fallback) == fallback:
+            return None
+        refs = field_refs.get(name)
+        if not isinstance(refs, (list, tuple)):
+            return None
+        values = [str(value).strip() for value in refs if str(value).strip()]
+        return f"<!-- field_refs.{name}: {', '.join(values)} -->" if values else None
+
+    related_topics = metadata.get("related_topics")
+    related = (
+        [str(value).strip() for value in related_topics if str(value).strip()]
+        if isinstance(related_topics, (list, tuple))
+        else []
+    )
+    related_lines = [f"- `{value}`" for value in related] or ["- 暂无已验证的相关主题。"]
     lines = [
         "---",
         "managed_by: KnowledgeDigest",
@@ -288,7 +342,20 @@ def _render_page(
         f"# {title}",
         "",
         "## Summary",
+        f"- {field_value('summary', '来源未提供摘要；请阅读 Evidence。')}",
+        *(reference for reference in [field_reference("summary")] if reference),
         f"- 已验证来源证据；第 {part_number} 部分。",
+        "",
+        "## Why",
+        f"- {field_value('why', '来源未说明')}",
+        *(reference for reference in [field_reference("why")] if reference),
+        "",
+        "## Version",
+        f"- {field_value('version', '未提供版本信息')}",
+        *(reference for reference in [field_reference("version")] if reference),
+        "",
+        "## Related topics",
+        *related_lines,
         "",
         "## Evidence",
         *evidence_lines,
@@ -333,6 +400,7 @@ def _partition(
     entries: list[tuple[list[str], list[dict[str, Any]]]],
     *,
     max_lines: int,
+    publication_metadata: dict[str, Any] | None = None,
 ) -> list[tuple[list[str], list[dict[str, Any]]]]:
     """Partition complete evidence entries; no claim can cross a topic part."""
     # This architecture contract fixes formal topic pages at 300 lines.  The
@@ -352,6 +420,7 @@ def _partition(
             len(result) + 1,
             candidate_evidence,
             candidate_claims,
+            publication_metadata,
         )
         if len(candidate.splitlines()) <= limit:
             evidence, claims = candidate_evidence, candidate_claims
@@ -371,6 +440,7 @@ def _partition(
             len(result) + 1,
             evidence,
             claims,
+            publication_metadata,
         )
         if len(single.splitlines()) > limit:
             raise ValidationError(
@@ -471,115 +541,20 @@ def build_publication_navigation(
     layouts: list[dict[str, Any]],
     paths: DigestPaths,
     publication: PublicationContract,
+    *,
+    topic_universe: set[str] | None = None,
+    source_index: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
-    """Build reader navigation records for writeback's single publication transaction."""
-    for target in [publication.home_path, *(publication.category_index_path(category.category_id) for category in publication.categories)]:
-        path = paths.kb_dir / target
-        if path.is_symlink():
-            raise ValidationError("publication", path, "existing navigation page must not be a symlink")
-        if path.exists() and "managed_by: KnowledgeDigest" not in path.read_text(encoding="utf-8"):
-            raise ValidationError("publication", path, "existing navigation page must declare managed_by: KnowledgeDigest")
-    layouts_by_category: dict[str, dict[str, list[dict[str, Any]]]] = {
-        category.category_id: {} for category in publication.categories
-    }
-    for record in declared_managed_topics(paths, publication):
-        layouts_by_category[record["category_id"]].setdefault(record["topic_id"], []).append(record)
-    # New topics use the declared pending category.  Replacing the current
-    # topic's list intentionally hides stale old parts after a shrink, while
-    # leaving those files untouched on disk for recovery.
-    for layout in layouts:
-        category_id = str(layout.get("publication_category_id") or publication.pending_category.category_id)
-        layouts_by_category[category_id][layout["topic_id"]] = [
-            {
-                "target_path": page["target_path"],
-                "part_number": int(page.get("page_index", 1)),
-                "title": layout["title"],
-            }
-            for page in layout.get("split_pages", [])
-        ]
+    """Compatibility delegate; reader rendering lives in ``navigation.py``."""
+    from .navigation import build_publication_navigation as build_navigation
 
-    home_lines = [
-        "---",
-        "managed_by: KnowledgeDigest",
-        "digest_kind: home",
-        "---",
-        "",
-        "# Knowledge Digest",
-        "",
-        "## 分类",
-    ]
-    for category in publication.categories:
-        home_lines.append(f"- [{category.title}]({publication.category_index_path(category.category_id)})")
-    records: list[dict[str, Any]] = [
-        {
-            "draft_id": "navigation-home",
-            "action": "publish_navigation",
-            "digest_kind": "home",
-            "target_path": publication.home_path,
-            "rendered_content": "\n".join([*home_lines, ""]),
-            "claims": [],
-            "layout_finalized": True,
-            "publication_audit_scope": "none",
-            "target_paths": [publication.home_path],
-            "split_pages": [
-                {
-                    "target_path": publication.home_path,
-                    "rendered_content": "\n".join([*home_lines, ""]),
-                    "final_body": "",
-                    "claims": [],
-                    "layout_finalized": True,
-                    "digest_kind": "home",
-                    "publication_audit_scope": "none",
-                }
-            ],
-        }
-    ]
-    for category in publication.categories:
-        target = publication.category_index_path(category.category_id)
-        lines = [
-            "---",
-            "managed_by: KnowledgeDigest",
-            "digest_kind: category",
-            f"digest_category_id: {category.category_id}",
-            "---",
-            "",
-            f"# {category.title}",
-            "",
-            "## 主题",
-        ]
-        for _topic_id, pages in sorted(layouts_by_category[category.category_id].items()):
-            for page in sorted(pages, key=lambda item: (int(item.get("part_number", 1)), str(item["target_path"]))):
-                path = str(page["target_path"])
-                relative = Path(os.path.relpath(path, start=Path(target).parent)).as_posix()
-                part_number = int(page.get("part_number", page.get("page_index", 1)))
-                suffix = "" if part_number == 1 else f"（第 {part_number} 部分）"
-                lines.append(f"- [{page['title']}{suffix}]({relative})")
-        rendered = "\n".join([*lines, ""])
-        records.append(
-            {
-                "draft_id": f"navigation-category-{category.category_id}",
-                "action": "publish_navigation",
-                "digest_kind": "category",
-                "target_path": target,
-                "rendered_content": rendered,
-                "claims": [],
-                "layout_finalized": True,
-                "publication_audit_scope": "none",
-                "target_paths": [target],
-                "split_pages": [
-                    {
-                        "target_path": target,
-                        "rendered_content": rendered,
-                        "final_body": "",
-                        "claims": [],
-                        "layout_finalized": True,
-                        "digest_kind": "category",
-                        "publication_audit_scope": "none",
-                    }
-                ],
-            }
-        )
-    return records
+    return build_navigation(
+        layouts,
+        paths,
+        publication,
+        topic_universe=topic_universe,
+        source_index=source_index,
+    )
 
 
 def build_topic_layouts(
@@ -611,10 +586,20 @@ def build_topic_layouts(
 
     layouts: list[dict[str, Any]] = []
     reserved_paths: set[str] = set()
+    topic_index: dict[str, object] = {"schema_version": "1.0.0", "topics": []}
     if publication is not None:
-        directory = paths.kb_dir / publication.pending_category.topic_dir
-        if directory.is_dir():
-            reserved_paths = {path.relative_to(paths.kb_dir).as_posix() for path in directory.rglob("*.md")}
+        for category in publication.categories:
+            directory = paths.kb_dir / category.topic_dir
+            if directory.is_dir():
+                reserved_paths.update(path.relative_to(paths.kb_dir).as_posix() for path in directory.rglob("*.md"))
+        topic_index_path = paths.kb_dir / "_digest" / "topic-index.json"
+        if topic_index_path.is_file():
+            try:
+                loaded = json.loads(topic_index_path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+                raise ValidationError("layout", topic_index_path, f"topic-index cannot be read ({error})") from error
+            if isinstance(loaded, dict) and isinstance(loaded.get("topics"), list):
+                topic_index = loaded
     for stable_topic_id in sorted(by_topic):
         topic_drafts = by_topic[stable_topic_id]
         existing_records = _managed_topic_records(paths, publication, stable_topic_id) if publication is not None else []
@@ -624,9 +609,16 @@ def build_topic_layouts(
         existing_categories = {record["category_id"] for record in existing_records}
         if len(existing_categories) > 1:
             raise ValidationError("publication", stable_topic_id, "managed topic appears in more than one declared category")
-        publication_category_id = (
-            next(iter(existing_categories)) if existing_categories else publication.pending_category.category_id
-        ) if publication is not None else None
+        publication_category_id = next(iter(existing_categories)) if existing_categories else None
+        if publication is not None and publication_category_id is None:
+            declared_ids = {item.category_id for item in publication.categories}
+            suggested_categories = {
+                str(draft.get("publication", {}).get("category_id"))
+                for draft in topic_drafts
+                if isinstance(draft.get("publication"), dict)
+                and str(draft.get("publication", {}).get("category_id")) in declared_ids
+            }
+            publication_category_id = next(iter(suggested_categories), publication.pending_category.category_id)
         for draft in topic_drafts:
             for target in draft.get("target_paths", []):
                 candidate = paths.kb_dir / str(target)
@@ -683,17 +675,30 @@ def build_topic_layouts(
 
         existing_title = _existing_topic_title(existing_paths) if publication is not None else None
         title = existing_title or _source_title(topic_drafts, stable_topic_id)
+        publication_metadata = next(
+            (
+                draft.get("publication")
+                for draft in topic_drafts
+                if isinstance(draft.get("publication"), dict)
+            ),
+            None,
+        )
         first_path = _first_existing_path(existing_paths, kb_dir=paths.kb_dir) if publication is not None else None
         if publication is not None and first_path is None:
-            first_path = publication_topic_part_path(
-                publication.pending_category.topic_dir,
-                title,
-                stable_topic_id,
-                1,
+            category = next(item for item in publication.categories if item.category_id == publication_category_id)
+            resolved = resolve_topic_identity(
+                topic_index,
+                stable_topic_id=stable_topic_id,
+                source_ids=[str(claim.get("source_id", "")) for claim in all_claims],
+                category_id=category.category_id,
+                title=title,
+                topic_dir=category.topic_dir,
             )
+            first_path = str(resolved["published_path"])
+            publication_category_id = str(resolved["category_id"])
             if first_path in reserved_paths:
                 first_path = publication_topic_part_path(
-                    publication.pending_category.topic_dir,
+                    category.topic_dir,
                     title,
                     stable_topic_id,
                     1,
@@ -703,13 +708,28 @@ def build_topic_layouts(
             first_path = topic_part_path(page_root, stable_topic_id, 1)
         reserved_paths.add(first_path)
 
-        groups = _partition(stable_topic_id, title, first_path, entries, max_lines=max_lines)
+        groups = _partition(
+            stable_topic_id,
+            title,
+            first_path,
+            entries,
+            max_lines=max_lines,
+            publication_metadata=publication_metadata,
+        )
         pages: list[dict[str, Any]] = []
         coverage: list[dict[str, Any]] = []
         for part_number, (evidence, page_claims) in enumerate(groups, start=1):
             target = published_part_path(first_path, part_number)
             enriched_claims = [dict(claim, page_index=part_number, target_path=target) for claim in page_claims]
-            rendered = _render_page(stable_topic_id, title, target, part_number, evidence, enriched_claims)
+            rendered = _render_page(
+                stable_topic_id,
+                title,
+                target,
+                part_number,
+                evidence,
+                enriched_claims,
+                publication_metadata,
+            )
             if len(rendered.splitlines()) > 300:
                 raise ValidationError("layout", target, "final page exceeds the configured line limit")
             pages.append(
@@ -748,6 +768,7 @@ def build_topic_layouts(
                 "topic_id": stable_topic_id,
                 "digest_kind": "topic",
                 "publication_category_id": publication_category_id,
+                "publication": publication_metadata,
                 "title": title,
                 "published_path": first_path,
                 "action": "layout",
@@ -768,7 +789,21 @@ def build_topic_layouts(
                 "selected_round": None,
                 "round_count": sum(int(draft.get("round_count", 0)) for draft in topic_drafts),
                 "rethink_status": "layout_completed",
-                "fallback_reason": None,
+                "fallback_reason": next(
+                    (
+                        str(draft.get("fallback_reason"))
+                        for draft in topic_drafts
+                        if draft.get("fallback_reason")
+                    ),
+                    None,
+                ),
+                "provider_failure": any(bool(draft.get("provider_failure")) for draft in topic_drafts),
+                "provider_failures": [
+                    failure
+                    for draft in topic_drafts
+                    for failure in draft.get("provider_failures", [])
+                    if isinstance(failure, dict)
+                ],
                 "benefit_status": "unmeasured",
                 "planned_generator_calls": sum(int(draft.get("planned_generator_calls", 0)) for draft in topic_drafts),
                 "quality": {"coverage_ratio": 1.0, "retained_input_unit_ratio": 1.0, "unsupported_claim_rate": 0.0, "faithfulness_status": "passed"},

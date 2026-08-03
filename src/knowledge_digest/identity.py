@@ -68,8 +68,11 @@ def topic_part_path(page_root: str, stable_topic_id: str, part_number: int) -> s
 
 def readable_slug(title: str) -> str:
     """Return a stable human-readable filename stem without path semantics."""
-    normalized = unicodedata.normalize("NFKC", title).casefold().strip()
-    value = re.sub(r"[^\w]+", "-", normalized, flags=re.UNICODE).strip("-_")
+    # Paths are consumed by shells, editors and cross-platform sync tools.
+    # Keep the readable part ASCII; a title with no transliterable characters
+    # is handled by ``publication_topic_part_path`` using the stable topic ID.
+    normalized = unicodedata.normalize("NFKD", title).encode("ascii", "ignore").decode("ascii").casefold().strip()
+    value = re.sub(r"[^a-z0-9]+", "-", normalized).strip("-_")
     if not value:
         raise ValidationError("identity", "title", "topic title cannot produce an empty filename")
     return value[:80].rstrip("-_")
@@ -88,7 +91,10 @@ def publication_topic_part_path(
         raise ValidationError("identity", "part_number", "topic part number must be positive")
     if not stable_topic_id.startswith("topic-"):
         raise ValidationError("identity", "topic", "topic ID is malformed")
-    stem = readable_slug(title)
+    try:
+        stem = readable_slug(title)
+    except ValidationError:
+        stem = f"topic-{stable_topic_id.removeprefix('topic-')[:8]}"
     if disambiguate:
         stem = f"{stem}-{stable_topic_id.removeprefix('topic-')[:8]}"
     suffix = "" if part_number == 1 else f".part-{part_number:03d}"
@@ -105,3 +111,78 @@ def published_part_path(first_path: str, part_number: int) -> str:
     if path.suffix.lower() != ".md":
         raise ValidationError("identity", first_path, "published topic path must be Markdown")
     return path.with_name(f"{path.stem}.part-{part_number:03d}.md").as_posix()
+
+
+def resolve_topic_identity(
+    topic_index: dict[str, object],
+    *,
+    stable_topic_id: str,
+    source_ids: Iterable[str],
+    category_id: str,
+    title: str,
+    topic_dir: str,
+) -> dict[str, object]:
+    """Resolve one topic against the persisted identity lock.
+
+    The first published category and path are immutable.  New topics receive an
+    ASCII path; a same-category slug collision gets a stable topic suffix and is
+    marked for review rather than silently overwriting another topic.
+    """
+    if not stable_topic_id.startswith("topic-"):
+        raise ValidationError("identity", "topic_id", "topic ID is malformed")
+    if not category_id or not topic_dir:
+        raise ValidationError("identity", "topic", "category and topic directory are required")
+    rows = topic_index.get("topics", []) if isinstance(topic_index, dict) else []
+    if not isinstance(rows, list):
+        raise ValidationError("identity", "topic-index", "topics must be a list")
+    normalized_sources = sorted({str(value) for value in source_ids if str(value)})
+    existing = next(
+        (row for row in rows if isinstance(row, dict) and row.get("topic_id") == stable_topic_id),
+        None,
+    )
+    if existing is not None:
+        locked_path = str(existing.get("published_path") or "")
+        locked_category = str(existing.get("category_id") or "")
+        if not locked_path or not locked_category:
+            raise ValidationError("identity", stable_topic_id, "locked topic is missing category or published path")
+        merged_sources = sorted({*normalized_sources, *(str(value) for value in existing.get("source_ids", []))})
+        entry = {
+            "topic_id": stable_topic_id,
+            "source_ids": merged_sources,
+            "category_id": locked_category,
+            "published_path": locked_path,
+            "product_slug": existing.get("product_slug"),
+        }
+        return {
+            "topic_id": stable_topic_id,
+            "source_ids": merged_sources,
+            "category_id": locked_category,
+            "published_path": locked_path,
+            "needs_review": locked_category != category_id,
+            "topic_index_entry": entry,
+        }
+
+    candidate = publication_topic_part_path(topic_dir, title, stable_topic_id, 1)
+    used_paths = {
+        str(row.get("published_path"))
+        for row in rows
+        if isinstance(row, dict) and row.get("published_path")
+    }
+    needs_review = candidate in used_paths
+    if needs_review:
+        candidate = publication_topic_part_path(topic_dir, title, stable_topic_id, 1, disambiguate=True)
+    entry = {
+        "topic_id": stable_topic_id,
+        "source_ids": normalized_sources,
+        "category_id": category_id,
+        "published_path": candidate,
+        "product_slug": None,
+    }
+    return {
+        "topic_id": stable_topic_id,
+        "source_ids": normalized_sources,
+        "category_id": category_id,
+        "published_path": candidate,
+        "needs_review": needs_review,
+        "topic_index_entry": entry,
+    }

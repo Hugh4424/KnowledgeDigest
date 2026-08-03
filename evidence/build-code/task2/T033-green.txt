@@ -1,0 +1,6 @@
+Task: T033 planned-call hard stop and offline cost semantics
+Commands:
+  uv run --frozen pytest -q tests/acceptance/test_task2_batch_recovery.py::test_planned_generator_call_hard_stop_happens_before_provider
+  uv run --frozen pytest -q tests/acceptance/test_task2_corpus_regression.py::test_corpus_contract_is_fixed_and_structured
+Result: both tests passed.
+Evidence: full-manifest provider-free planning records planned_generator_calls; >180 pauses before provider; offline reports provider calls as 0 and deterministic_rounds separately.

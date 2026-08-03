@@ -21,6 +21,9 @@ from .kb_structure import (
     StructureContract,
     initialize_default_publication,
     inspect_structure,
+    serialize_source_index,
+    validate_source_index,
+    validate_topic_index,
 )
 from .jsonl import append_jsonl, read_jsonl, replace_jsonl, write_jsonl
 from .identity import source_id
@@ -207,6 +210,7 @@ def _digest_metrics(
     clusters: list[dict[str, object]],
     *,
     dry_run: bool,
+    llm_enabled: bool,
 ) -> dict[str, object]:
     """Project replayable round, quality, and cost facts into report.json."""
     skipped = [
@@ -250,11 +254,19 @@ def _digest_metrics(
         }
         cost: dict[str, object] = {
             "generator_calls": 0,
-            "planned_generator_calls": sum(ceilings),
+            "planned_generator_calls": sum(ceilings) if llm_enabled else 0,
+            "provider_calls_planned": sum(ceilings) if llm_enabled else 0,
+            "provider_calls_observed": 0,
+            "failed_calls": 0,
+            "replay_calls": 0,
+            "elapsed_seconds": 0.0,
+            "fallback_ratio": None,
+            "status": "dry_run",
             "total_input_chars": 0,
             "total_output_chars": 0,
             "total_provider_tokens": None,
             "round_count": 0,
+            "deterministic_rounds": 0,
             "cost_ceiling_sum": sum(ceilings),
         }
     else:
@@ -284,12 +296,31 @@ def _digest_metrics(
         cost = {
             "generator_calls": sum(
                 int(item.get("provider_call_count", 1)) for item in all_rounds
+            ) if llm_enabled else 0,
+            "planned_generator_calls": sum(ceilings) if llm_enabled else 0,
+            "provider_calls_planned": sum(ceilings) if llm_enabled else 0,
+            "provider_calls_observed": sum(
+                int(item.get("provider_call_count", 1)) for item in all_rounds
+            ) if llm_enabled else 0,
+            "failed_calls": sum(1 for item in all_rounds if item.get("status") == "invalid"),
+            "replay_calls": sum(
+                max(0, int(item.get("provider_attempt_count", 1)) - 1)
+                for item in all_rounds
             ),
-            "planned_generator_calls": sum(ceilings),
+            "elapsed_seconds": round(
+                sum(int(item.get("elapsed_ms", 0)) for item in all_rounds) / 1000,
+                3,
+            ),
+            "fallback_ratio": round(
+                sum(1 for draft_record in drafts if draft_record.get("fallback_reason")) / len(drafts),
+                6,
+            ) if drafts else 0.0,
+            "status": "completed",
             "total_input_chars": sum(int(item.get("input_chars", 0)) for item in all_rounds),
             "total_output_chars": sum(int(item.get("output_chars", 0)) for item in all_rounds),
             "total_provider_tokens": total_tokens,
             "round_count": len(all_rounds),
+            "deterministic_rounds": len(all_rounds) if not llm_enabled else 0,
             "cost_ceiling_sum": sum(ceilings),
         }
     return {
@@ -311,9 +342,10 @@ def _update_digest_report(
     clusters: list[dict[str, object]],
     *,
     dry_run: bool,
+    llm_enabled: bool,
 ) -> None:
     report = json.loads(report_path.read_text(encoding="utf-8"))
-    report.update(_digest_metrics(drafts, decisions, clusters, dry_run=dry_run))
+    report.update(_digest_metrics(drafts, decisions, clusters, dry_run=dry_run, llm_enabled=llm_enabled))
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
@@ -439,7 +471,15 @@ def _update_claim_history(
 
     new_records: list[dict[str, object]] = []
     supersede_markers: list[dict[str, object]] = []
+    provider_pending: list[dict[str, object]] = []
     for draft_record in drafts:
+        draft_provider_failures = draft_record.get("provider_failures", [])
+        has_provider_failure = bool(draft_record.get("provider_failure"))
+        provider_reason = "provider output requires review"
+        if isinstance(draft_provider_failures, list) and draft_provider_failures:
+            first_failure = draft_provider_failures[0]
+            if isinstance(first_failure, dict):
+                provider_reason = str(first_failure.get("reason") or provider_reason)
         for claim in draft_record.get("claims", []):
             claim = dict(claim)
             page_claims = [
@@ -486,9 +526,18 @@ def _update_claim_history(
                 "claim_id": f"{draft_record['draft_id']}-{len(new_records) + 1}",
                 "run_id": run_id,
                 "page_path": claim.get("target_path"),
-                "verification_status": "verified",
-                "validation_status": "passed",
+                "verification_status": "pending_review" if has_provider_failure else "verified",
+                "validation_status": "failed" if has_provider_failure else "passed",
             }
+            if has_provider_failure:
+                record.update(
+                    {
+                        "validation_reason": provider_reason,
+                        "retry_status": "retry_next_batch_run",
+                        "provider_failure": True,
+                    }
+                )
+                provider_pending.append(dict(record))
             new_records.append(record)
             active_by_key[key] = record
 
@@ -507,10 +556,15 @@ def _update_claim_history(
             supersede_markers.append(dict(record))
 
     append_jsonl(history_path, [*supersede_markers, *new_records])
+    pending.extend(provider_pending)
     _merge_pending_review(
         paths.kb_dir / "_digest" / "pending-review.jsonl",
         pending,
-        resolved={_history_key(record) for record in new_records},
+        resolved={
+            _history_key(record)
+            for record in new_records
+            if record.get("verification_status") == "verified"
+        },
     )
     return pending
 
@@ -534,7 +588,7 @@ def _merge_pending_review(
     replace_jsonl(pending_path, list(merged.values()))
 
 
-def _write_source_index(paths: DigestPaths, run_dir: Path) -> None:
+def _write_source_index(paths: DigestPaths, run_dir: Path, publication: Any = None) -> None:
     """Materialize one compact, link-only record for every reachable source."""
     snapshots: dict[str, dict[str, object]] = {}
     for snapshot in read_jsonl(paths.kb_dir / "_digest" / "source-snapshots.jsonl"):
@@ -543,13 +597,16 @@ def _write_source_index(paths: DigestPaths, run_dir: Path) -> None:
             snapshots[uri] = dict(snapshot)
     active_history = fold_claim_history(read_jsonl(paths.kb_dir / "_digest" / "claim-history.jsonl"))
     links_by_source: dict[str, set[str]] = {}
+    review_by_source: dict[str, list[str]] = {}
     for record in active_history:
-        if record.get("verification_status") in {"removed", "superseded", "pending_review"} or record.get("superseded_by"):
+        if record.get("verification_status") in {"removed", "superseded"} or record.get("superseded_by"):
             continue
         uri = str(record.get("source_uri", ""))
         target = str(record.get("target_path") or record.get("page_path") or "")
         if uri and target:
             links_by_source.setdefault(uri, set()).add(target)
+            if record.get("verification_status") == "pending_review" or record.get("provider_failure"):
+                review_by_source.setdefault(uri, []).append(str(record.get("validation_reason") or "provider output requires review"))
     duplicate_of: dict[str, str] = {}
     for duplicate in read_jsonl(paths.kb_dir / "_digest" / "duplicates.jsonl"):
         uri = str(duplicate.get("source_uri", ""))
@@ -569,20 +626,190 @@ def _write_source_index(paths: DigestPaths, run_dir: Path) -> None:
                 "source_id": source_id(uri),
                 "source_uri": uri,
                 "topic_paths": topic_paths,
+                "needs_review": uri in review_by_source,
             }
         )
     write_jsonl(run_dir / "s6" / "source-index.jsonl", records)
-    if not records and not (paths.kb_dir / "_digest" / "source-index.jsonl").exists():
+    if publication is None:
+        if not records and not (paths.kb_dir / "_digest" / "source-index.jsonl").exists():
+            return
+        write_jsonl(paths.kb_dir / "_digest" / "source-index.jsonl", records)
+        lines = ["# Source Index", ""]
+        for record in records:
+            lines.append(f"- `{record['source_uri']}`")
+            for target in record["topic_paths"]:
+                relative = Path(os.path.relpath(paths.kb_dir / str(target), paths.kb_dir / "_digest")).as_posix()
+                lines.append(f"  - [{Path(str(target)).name}]({relative})")
+        (run_dir / "s6" / "source-index.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        (paths.kb_dir / "_digest" / "source-index.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
         return
-    write_jsonl(paths.kb_dir / "_digest" / "source-index.jsonl", records)
-    lines = ["# Source Index", ""]
-    for record in records:
-        lines.append(f"- `{record['source_uri']}`")
-        for target in record["topic_paths"]:
-            relative = Path(os.path.relpath(paths.kb_dir / str(target), paths.kb_dir / "_digest")).as_posix()
-            lines.append(f"  - [{Path(str(target)).name}]({relative})")
-    (run_dir / "s6" / "source-index.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    (paths.kb_dir / "_digest" / "source-index.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    snapshot_fingerprints = {
+        str(snapshot.get("source_uri")): str(snapshot.get("content_fingerprint"))
+        for snapshot in snapshots.values()
+        if snapshot.get("source_uri") and snapshot.get("content_fingerprint")
+    }
+    duplicate_status = {uri for uri, canonical in duplicate_of.items() if uri != canonical}
+    entries = [
+        {
+            "source_uri": str(record["source_uri"]),
+            "content_fingerprint": snapshot_fingerprints.get(str(record["source_uri"]), ""),
+            "status": (
+                "duplicate"
+                if str(record["source_uri"]) in duplicate_status
+                else "needs-review"
+                if record.get("needs_review")
+                else "published"
+            ),
+            "target_paths": list(record["topic_paths"]),
+        }
+        for record in records
+    ]
+    if all(len(entry["content_fingerprint"]) == 64 for entry in entries):
+        canonical = serialize_source_index({"schema_version": "1.0.0", "entries": entries})
+        (run_dir / "s6" / "source-index.md").write_text(canonical, encoding="utf-8")
+        (paths.kb_dir / "_digest" / "source-index.md").write_text(canonical, encoding="utf-8")
+
+
+def _source_index_for_navigation(
+    drafts: list[dict[str, Any]],
+    raw_items: list[dict[str, Any]],
+    run_dir: Path,
+    *,
+    persisted_root: Path | None = None,
+) -> dict[str, Any]:
+    """Build the compact source index before navigation enters writeback.
+
+    A batch run publishes one increment at a time, so the reader-facing index
+    must combine the immutable source snapshots and active claim history from
+    prior increments with the current run.  The optional root keeps the direct
+    unit seam run-local while the pipeline uses the cumulative KB state.
+    """
+    paths_by_source: dict[str, set[str]] = {}
+    review_sources: set[str] = set()
+    for draft_record in drafts:
+        if draft_record.get("provider_failure"):
+            review_sources.update(
+                str(claim.get("source_uri", ""))
+                for claim in draft_record.get("claims", [])
+                if claim.get("source_uri")
+            )
+        for page in draft_record.get("split_pages", []):
+            target = str(page.get("target_path", ""))
+            for claim in page.get("claims", []):
+                source_uri = str(claim.get("source_uri", ""))
+                if source_uri and target:
+                    paths_by_source.setdefault(source_uri, set()).add(target)
+    duplicate_of: dict[str, str] = {}
+    for record in read_jsonl(run_dir / "s1" / "duplicates.jsonl"):
+        uri = str(record.get("source_uri", ""))
+        canonical = str(record.get("canonical_source_uri", ""))
+        if uri and canonical:
+            duplicate_of[uri] = canonical
+    history_rows: list[dict[str, Any]] = []
+    snapshot_rows: list[dict[str, Any]] = []
+    if persisted_root is not None:
+        history_rows = fold_claim_history(
+            read_jsonl(persisted_root / "_digest" / "claim-history.jsonl")
+        )
+        for record in read_jsonl(persisted_root / "_digest" / "duplicates.jsonl"):
+            uri = str(record.get("source_uri", ""))
+            canonical = str(record.get("canonical_source_uri", ""))
+            if uri and canonical:
+                duplicate_of[uri] = canonical
+        snapshot_rows.extend(read_jsonl(persisted_root / "_digest" / "source-snapshots.jsonl"))
+    current_snapshot_rows = read_jsonl(run_dir / "s1" / "source-snapshots.jsonl")
+    snapshot_rows.extend(current_snapshot_rows)
+    for record in read_jsonl(run_dir / "s1" / "duplicates.jsonl"):
+        uri = str(record.get("source_uri", ""))
+        canonical = str(record.get("canonical_source_uri", ""))
+        if uri and canonical:
+            duplicate_of[uri] = canonical
+    snapshots = {
+        str(item.get("source_uri")): str(item.get("content_fingerprint", ""))
+        for item in snapshot_rows
+        if item.get("source_uri")
+    }
+    if raw_items and not current_snapshot_rows:
+        raise ValidationError(
+            "publication",
+            run_dir / "s1" / "source-snapshots.jsonl",
+            "immutable source snapshot manifest is missing or empty",
+        )
+    for record in history_rows:
+        if record.get("verification_status") in {"removed", "superseded"}:
+            continue
+        source_uri = str(record.get("source_uri", ""))
+        if record.get("verification_status") == "pending_review" or record.get("provider_failure"):
+            review_sources.add(source_uri)
+        target = str(record.get("target_path") or record.get("page_path") or "")
+        if source_uri and target:
+            paths_by_source.setdefault(source_uri, set()).add(target)
+    entries: list[dict[str, Any]] = []
+    for source_uri, fingerprint in sorted(snapshots.items()):
+        canonical = duplicate_of.get(source_uri, source_uri)
+        target_paths = sorted(paths_by_source.get(source_uri) or paths_by_source.get(canonical, set()))
+        if not target_paths:
+            continue
+        entries.append(
+            {
+                "source_uri": source_uri,
+                "content_fingerprint": fingerprint,
+                "status": (
+                    "duplicate"
+                    if canonical != source_uri
+                    else "needs-review"
+                    if source_uri in review_sources
+                    else "published"
+                ),
+                "target_paths": target_paths,
+            }
+        )
+    return validate_source_index({"schema_version": "1.0.0", "entries": entries})
+
+
+def _write_topic_index(paths: DigestPaths, drafts: list[dict[str, Any]], run_dir: Path) -> None:
+    """Persist the stable topic/category/path lock separately from reader pages."""
+    target = paths.kb_dir / "_digest" / "topic-index.json"
+    existing: dict[str, Any] = {"schema_version": "1.0.0", "topics": []}
+    if target.is_file():
+        try:
+            existing = validate_topic_index(json.loads(target.read_text(encoding="utf-8")))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValidationError) as error:
+            raise ValidationError("publication", target, f"topic-index is invalid ({error})") from error
+    by_topic = {str(row["topic_id"]): dict(row) for row in existing["topics"]}
+    for draft_record in drafts:
+        entry = draft_record.get("topic_index_entry")
+        if not isinstance(entry, dict) and draft_record.get("topic_id"):
+            entry = {
+                "topic_id": draft_record.get("topic_id"),
+                "source_ids": sorted(
+                    {
+                        str(claim.get("source_id") or source_id(str(claim.get("source_uri"))))
+                        for claim in draft_record.get("claims", [])
+                        if claim.get("source_id") or claim.get("source_uri")
+                    }
+                ),
+                "category_id": draft_record.get("publication_category_id") or "pending",
+                "published_path": draft_record.get("published_path", ""),
+                "product_slug": None,
+            }
+        if isinstance(entry, dict):
+            by_topic[str(entry["topic_id"])] = {
+                "topic_id": str(entry["topic_id"]),
+                "source_ids": sorted({str(item) for item in entry.get("source_ids", []) if item}),
+                "category_id": str(entry.get("category_id") or "pending"),
+                "published_path": str(entry.get("published_path") or draft_record.get("published_path", "")),
+                "product_slug": entry.get("product_slug"),
+            }
+    value = validate_topic_index({"schema_version": "1.0.0", "topics": sorted(by_topic.values(), key=lambda row: row["topic_id"])})
+    encoded = json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    run_target = run_dir / "s6" / "topic-index.json"
+    run_target.parent.mkdir(parents=True, exist_ok=True)
+    run_target.write_text(encoded, encoding="utf-8")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = target.with_suffix(".tmp")
+    temporary.write_text(encoded, encoding="utf-8")
+    os.replace(temporary, target)
 
 
 def _write_layout_artifacts(
@@ -708,7 +935,34 @@ def _commit_outputs(
         if processable_items or failed_snapshots or topic_drafts
         else []
     )
-    _write_source_index(paths, run_dir)
+    provider_review_sources: dict[str, dict[str, Any]] = {}
+    for record in pending:
+        if not record.get("provider_failure") and record.get("verification_status") != "pending_review":
+            continue
+        uri = str(record.get("source_uri", "")).strip()
+        if not uri:
+            continue
+        item = provider_review_sources.setdefault(
+            uri,
+            {
+                "source_uri": uri,
+                "reason": str(record.get("validation_reason") or "provider output requires review"),
+                "target_paths": [],
+            },
+        )
+        target = str(record.get("target_path") or record.get("page_path") or "")
+        if target and target not in item["target_paths"]:
+            item["target_paths"].append(target)
+    if provider_review_sources:
+        write_queues(
+            paths.kb_dir,
+            queue_root,
+            [],
+            [],
+            provider_sources=list(provider_review_sources.values()),
+        )
+    _write_source_index(paths, run_dir, publication)
+    _write_topic_index(paths, topic_drafts, run_dir)
     return writes, pending, []
 
 
@@ -838,7 +1092,9 @@ def _audit_run_locked(
             plan=plan,
             official_status="dry_run",
         )
-        _update_digest_report(report_path, drafts, decisions, clusters, dry_run=True)
+        _update_digest_report(
+            report_path, drafts, decisions, clusters, dry_run=True, llm_enabled=settings.llm_enabled
+        )
         _write_similarity_audit(report_path, similarity_audit)
         effective_thresholds = similarity_audit["effective_thresholds"]
         summary = (
@@ -887,7 +1143,21 @@ def _audit_run_locked(
         decisions = retrieve(clusters, raw_items, run_dir, paths, roots, settings)
     for decision in decisions:
         decision["page_root"] = roots[0]
-    drafts = draft(decisions, clusters, raw_items, run_dir, settings, generator=generator)
+    topic_universe = {
+        str(record.get("topic_id"))
+        for record in declared_managed_topics(paths, structure.publication)
+        if record.get("topic_id")
+    }
+    drafts = draft(
+        decisions,
+        clusters,
+        raw_items,
+        run_dir,
+        settings,
+        generator=generator,
+        publication=structure.publication,
+        topic_universe=topic_universe,
+    )
     if structure.publication is None:
         raise ValidationError("publication", paths.structure_path, "publication contract is unavailable")
     drafts = build_topic_layouts(
@@ -897,7 +1167,29 @@ def _audit_run_locked(
         max_lines=settings.max_lines,
         publication=structure.publication,
     )
-    publication_navigation = build_publication_navigation(drafts, paths, structure.publication) if drafts else []
+    topic_universe = {
+        str(record.get("topic_id"))
+        for record in declared_managed_topics(paths, structure.publication)
+        if record.get("topic_id")
+    }
+    topic_universe.update(str(draft_record.get("topic_id")) for draft_record in drafts if draft_record.get("topic_id"))
+    source_index = _source_index_for_navigation(
+        drafts,
+        raw_items,
+        run_dir,
+        persisted_root=paths.kb_dir,
+    )
+    publication_navigation = (
+        build_publication_navigation(
+            drafts,
+            paths,
+            structure.publication,
+            topic_universe=topic_universe,
+            source_index=source_index,
+        )
+        if drafts
+        else []
+    )
     _write_layout_artifacts(run_dir, drafts, publication_navigation)
     coverage = [row for draft_record in drafts for row in draft_record.get("coverage_mapping", [])]
     covered = {(row.get("raw_id"), row.get("input_fragment")) for row in coverage}
@@ -917,7 +1209,9 @@ def _audit_run_locked(
             failed_snapshots=failed_snapshots,
             official_status="blocked_coverage",
         )
-        _update_digest_report(report_path, drafts, decisions, clusters, dry_run=False)
+        _update_digest_report(
+            report_path, drafts, decisions, clusters, dry_run=False, llm_enabled=settings.llm_enabled
+        )
         _write_similarity_audit(report_path, similarity_audit)
         return report_path, "audit blocked: coverage mapping is incomplete; no formal knowledge-base files written"
 
@@ -944,7 +1238,9 @@ def _audit_run_locked(
         plan=plan,
         official_status="written",
     )
-    _update_digest_report(report_path, drafts, decisions, clusters, dry_run=False)
+    _update_digest_report(
+        report_path, drafts, decisions, clusters, dry_run=False, llm_enabled=settings.llm_enabled
+    )
     _write_similarity_audit(report_path, similarity_audit)
     effective_thresholds = similarity_audit["effective_thresholds"]
     summary = (

@@ -11,9 +11,12 @@ from pathlib import Path
 from typing import Any, Callable, Mapping
 
 from .config import DigestSettings
+from .errors import ValidationError
 from .identity import topic_part_path
 from .faithfulness import claim_entity_key, claim_fingerprint, faithfulness_check, normalize_for_gate, verify_claims
 from .jsonl import write_jsonl
+from .kb_structure import PublicationContract
+from .publication import deterministic_category_id, validate_publication_suggestion
 
 
 _HEADING_RE = re.compile(r"^\s*#{1,6}\s+")
@@ -612,12 +615,16 @@ def _candidate_from_result(
     explicit_invalid = result.get("valid") is False or result.get("status") == "invalid"
     if faithfulness_status.casefold() in {"failed", "invalid", "unfaithful"}:
         explicit_invalid = True
+    publication = result.get("publication")
+    if publication is None and any(field in result for field in ("title", "slug", "category_id", "summary", "why", "version")):
+        publication = {field: result.get(field) for field in ("title", "slug", "category_id", "summary", "why", "version", "related_topics", "claim_refs", "field_refs") if field in result}
     return {
         "final_body": evidence_body if summary_enabled and evidence_body is not None else body,
         "claims": candidate_claims,
         "coverage_mapping": coverage,
         "component_coverage": [dict(row) for row in result.get("component_coverage", []) if isinstance(row, Mapping)],
         "summary": summary,
+        "publication": publication,
         "faithfulness_status": faithfulness_status,
         "explicit_invalid": explicit_invalid,
         "invalid_reason": result.get("invalid_reason") or result.get("reason"),
@@ -945,6 +952,8 @@ def draft(
     *,
     generator: Generator | None = None,
     dry_run: bool = False,
+    publication: PublicationContract | None = None,
+    topic_universe: set[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Generate traceable drafts with bounded, auditable rethink rounds.
 
@@ -954,6 +963,7 @@ def draft(
     """
     by_id = {item["raw_id"]: item for item in raw_items}
     clusters_by_id = {cluster["cluster_id"]: cluster for cluster in clusters}
+    provider_supplied = generator is not None
     drafts: list[dict[str, Any]] = []
     unsupported_records: list[dict[str, Any]] = []
     split_suggestions: list[dict[str, Any]] = []
@@ -981,6 +991,25 @@ def draft(
             "old_target_body": str(decision.get("old_target_body", "")),
             "target_page": base_target,
             "summary_enabled": settings.llm_summary_enabled,
+            "publication_enabled": publication is not None,
+            "publication_only": publication is not None and settings.llm_enabled and not provider_supplied,
+            # Explicit test/fake generators are a supported seam.  The live
+            # Task2 CLI path must use the approved qwen endpoint, while a
+            # caller-supplied generator is validated by its own test contract.
+            "publication_provider_enforced": publication is not None and settings.llm_enabled and not provider_supplied,
+            "allowed_taxonomy": (
+                [
+                    {
+                        "id": category.category_id,
+                        "title": category.title,
+                        "parent_id": category.parent_id,
+                        "aliases": list(category.aliases),
+                    }
+                    for category in publication.categories
+                ]
+                if publication is not None
+                else []
+            ),
         }
         generation_contexts = (
             _generation_contexts(
@@ -1009,12 +1038,34 @@ def draft(
         batch_candidates: list[dict[str, Any]] = []
         batch_records: list[dict[str, Any]] = []
         failure_reason: str | None = None
+        provider_failures: list[dict[str, Any]] = []
 
         def run_batch(
             batch_index: int, context: dict[str, Any]
-        ) -> tuple[int, dict[str, Any], dict[str, Any], bool, str | None]:
+        ) -> tuple[int, dict[str, Any], dict[str, Any], bool, str | None, dict[str, Any] | None]:
             started = time.perf_counter()
-            result = _invoke_generator(generator, context)
+            provider_failure: dict[str, Any] | None = None
+            try:
+                result = _invoke_generator(generator, context)
+            except ValidationError as error:
+                # Provider output is untrusted. Preserve deterministic source
+                # evidence, but mark this source for replay instead of
+                # aborting unrelated sources in the same run.
+                provider_failure = {
+                    "kind": "provider_error",
+                    "stage": error.stage,
+                    "reason": error.reason,
+                }
+                result = {
+                    "final_body": context["initial_body"],
+                    "claims": context["claims"],
+                    "coverage_mapping": _coverage_for_claims(context["claims"], base_target),
+                    "valid": False,
+                    "invalid_reason": error.reason,
+                    "provider_input_tokens": None,
+                    "provider_output_tokens": None,
+                    "provider_attempt_count": 1,
+                }
             elapsed_ms = max(0, int((time.perf_counter() - started) * 1000))
             batch_candidate = _candidate_from_result(
                 result,
@@ -1070,7 +1121,15 @@ def draft(
                     ),
                 }
             )
-            return batch_index, batch_candidate, batch_record, batch_valid, batch_reason
+            if not batch_valid and provider_failure is None and settings.llm_enabled:
+                provider_failure = {
+                    "kind": "invalid_output",
+                    "stage": "llm",
+                    "reason": str(batch_reason or "provider output failed local validation"),
+                }
+            if provider_failure is not None:
+                batch_record["provider_failure"] = provider_failure
+            return batch_index, batch_candidate, batch_record, batch_valid, batch_reason, provider_failure
 
         worker_count = min(settings.llm_batch_concurrency, len(generation_contexts))
         with ThreadPoolExecutor(max_workers=worker_count) as executor:
@@ -1079,15 +1138,57 @@ def draft(
                 for batch_index, context in enumerate(generation_contexts, start=1)
             ]
             for future in futures:
-                batch_index, batch_candidate, batch_record, batch_valid, batch_reason = future.result()
+                batch_index, batch_candidate, batch_record, batch_valid, batch_reason, provider_failure = future.result()
                 batch_candidates.append(batch_candidate)
                 batch_records.append(batch_record)
+                if provider_failure is not None:
+                    provider_failures.append(
+                        {
+                            **provider_failure,
+                            "batch_index": batch_index,
+                            "batch_count": len(generation_contexts),
+                        }
+                    )
                 if not batch_valid and failure_reason is None:
                     failure_reason = (
                         str(batch_reason)
                         if len(generation_contexts) == 1
                         else f"batch {batch_index}: {batch_reason}"
                     )
+
+        publication_candidates = [
+            dict(batch.get("publication"))
+            for batch in batch_candidates
+            if isinstance(batch.get("publication"), Mapping)
+        ]
+        merged_publication: dict[str, Any] | None = None
+        if publication_candidates:
+            merged_publication = dict(publication_candidates[0])
+            for field in ("claim_refs", "related_topics"):
+                merged: list[str] = []
+                for publication_candidate in publication_candidates:
+                    values = publication_candidate.get(field, [])
+                    if isinstance(values, list):
+                        for value in values:
+                            item = str(value)
+                            if item and item not in merged:
+                                merged.append(item)
+                merged_publication[field] = merged
+            field_refs: dict[str, list[str]] = {}
+            for publication_candidate in publication_candidates:
+                raw_field_refs = publication_candidate.get("field_refs", {})
+                if not isinstance(raw_field_refs, Mapping):
+                    continue
+                for field, values in raw_field_refs.items():
+                    if not isinstance(values, list):
+                        continue
+                    field_refs.setdefault(str(field), [])
+                    for value in values:
+                        item = str(value)
+                        if item and item not in field_refs[str(field)]:
+                            field_refs[str(field)].append(item)
+            if field_refs:
+                merged_publication["field_refs"] = field_refs
 
         candidate = {
             "final_body": "\n\n".join(
@@ -1129,6 +1230,7 @@ def draft(
             "provider_attempt_count": sum(
                 int(batch.get("provider_attempt_count", 1)) for batch in batch_candidates
             ),
+            "publication": merged_publication,
             "summary": (
                 {
                     "status": "validated",
@@ -1141,6 +1243,7 @@ def draft(
                 if settings.llm_summary_enabled and failure_reason is None
                 else None
             ),
+            "provider_failures": provider_failures,
         }
         if settings.llm_summary_enabled and candidate.get("summary"):
             for index, segment in enumerate(candidate["summary"]["segments"], start=1):
@@ -1312,11 +1415,44 @@ def draft(
             removed.append(record)
             unsupported_records.append({"draft_id": draft_id, **record})
 
+        publication_metadata = None
+        if publication is not None:
+            publication_metadata = validate_publication_suggestion(
+                selected.get("publication"),
+                claims=final_claims,
+                publication=publication,
+                topic_universe=topic_universe,
+                fallback_title=(_publication_title_candidates(items) or [None])[0],
+                stable_topic_id=stable_topic_id,
+                fallback_category_id=(
+                    deterministic_category_id(
+                        "\n".join(
+                            " ".join(
+                                [
+                                    str(item.get("text", "")),
+                                    str(item.get("input_path", "")),
+                                    " ".join(
+                                        str(value)
+                                        for value in (item.get("source_meta") or {}).values()
+                                        if isinstance(value, (str, int, float))
+                                    ),
+                                ]
+                            )
+                            for item in items
+                        ),
+                        publication,
+                    )
+                    if len(publication.categories) > 1
+                    else None
+                ),
+            )
+
         draft_record = {
             "draft_id": draft_id,
             "cluster_id": decision["cluster_id"],
             "topic_id": stable_topic_id,
             "publication_title_candidates": _publication_title_candidates(items),
+            "publication": publication_metadata.as_dict() if publication_metadata is not None else None,
             "action": decision["action"],
             "target_paths": [page["target_path"] for page in pages],
             "final_body": final_body,
@@ -1344,6 +1480,8 @@ def draft(
             "round_count": len(rounds),
             "rethink_status": rethink_status,
             "fallback_reason": fallback_reason,
+            "provider_failure": bool(provider_failures),
+            "provider_failures": provider_failures,
             "benefit_status": "unmeasured",
             "planned_generator_calls": len(generation_contexts),
             "quality": {

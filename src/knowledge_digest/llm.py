@@ -27,10 +27,16 @@ OPENAI_FORMAT = "openai"
 ANTHROPIC_FORMAT = "anthropic"
 SUPPORTED_FORMATS = (OPENAI_FORMAT, ANTHROPIC_FORMAT)
 DEFAULT_TIMEOUT_SECONDS = 60
+# The provider spends part of its budget on hidden reasoning even though the
+# client only persists final content. Keep enough headroom for a publication
+# object that references a large claim batch; the parser still rejects any
+# non-JSON or truncated final content.
 DEFAULT_MAX_TOKENS = 8192
 TIMEOUT_ENV = "KD_LLM_TIMEOUT_SECONDS"
 RETRY_ENV = "KD_LLM_RETRY_ATTEMPTS"
 DEFAULT_RETRY_ATTEMPTS = 0
+PUBLICATION_LLM_MODEL = "qwen3.6"
+PUBLICATION_LLM_BASE_URL = "https://dashscope.in.whatspos.cn/v1"
 _ORIGINAL_URLOPEN = urllib.request.urlopen
 
 
@@ -123,7 +129,15 @@ def _endpoint(base_url: str, api_format: str) -> str:
 def _request_payload(api_format: str, model: str, prompt: str) -> dict[str, Any]:
     messages = [{"role": "user", "content": prompt}]
     if api_format == OPENAI_FORMAT:
-        return {"model": model, "messages": messages, "temperature": 0}
+        # Bound provider output for OpenAI-compatible endpoints. Without an
+        # explicit cap, qwen3.6 may spend the entire transport deadline on
+        # unbounded reasoning/output before it can return the JSON contract.
+        return {
+            "model": model,
+            "messages": messages,
+            "temperature": 0,
+            "max_tokens": DEFAULT_MAX_TOKENS,
+        }
     return {"model": model, "max_tokens": DEFAULT_MAX_TOKENS, "messages": messages}
 
 
@@ -209,7 +223,8 @@ def _request_in_child(request: urllib.request.Request, *, timeout: int) -> str:
 
     ``spawn`` is required here: forking a Python process from the batch worker
     threads is unsafe on macOS and can abort inside the Objective-C runtime.
-    """
+"""
+
     context = multiprocessing.get_context("spawn")
     parent_connection, child_connection = context.Pipe(duplex=False)
     process = context.Process(
@@ -273,6 +288,49 @@ def _request_in_child(request: urllib.request.Request, *, timeout: int) -> str:
             str(result.get("reason", "provider request failed")),
         )
     return str(result["raw"])
+
+_PUBLICATION_OUTPUT_SCHEMA = """{
+  "publication": {
+    "title": "4-80 character reader title",
+    "slug": "lowercase ascii suggestion",
+    "category_id": "one allowed leaf category id",
+    "summary": "verified one-paragraph summary",
+    "why": "reader use or explicit missing marker",
+    "version": "version/history or explicit missing marker",
+    "related_topics": ["known topic ids only"],
+    "claim_refs": ["claim fingerprints"],
+    "field_refs": {"title": ["claim fingerprints"], "category_id": ["claim fingerprints"], "summary": ["claim fingerprints"], "why": ["claim fingerprints"], "version": ["claim fingerprints"]}
+  }
+}"""
+
+
+def validate_publication_provider_identity(*, model: str, base_url: str) -> None:
+    """Reject providers outside the user-approved Task2 publication seam."""
+    if model != PUBLICATION_LLM_MODEL or base_url.rstrip("/") != PUBLICATION_LLM_BASE_URL:
+        raise ValidationError("llm", model or base_url, "Task2 publication allows only qwen3.6 at the approved endpoint")
+
+
+def publication_prompt_sections(context: dict[str, Any]) -> str:
+    """Return the four fixed prompt sections for semantic publication."""
+    evidence = [
+        {
+            "claim_fingerprint": claim.get("claim_fingerprint"),
+            "text": claim.get("text"),
+            "source_uri": claim.get("source_uri"),
+            "fragment_locator": claim.get("fragment_locator"),
+        }
+        for claim in context.get("claims", [])
+    ]
+    taxonomy = context.get("allowed_taxonomy", [])
+    return "\n\n".join(
+        (
+            "ROLE:\nYou provide semantic publication suggestions only. Do not create facts, paths, permissions, or taxonomy entries.",
+            "EVIDENCE:\n" + json.dumps(evidence, ensure_ascii=False, indent=2),
+            "ALLOWED TAXONOMY:\n" + json.dumps(taxonomy, ensure_ascii=False, indent=2),
+            "OUTPUT SCHEMA:\n" + _PUBLICATION_OUTPUT_SCHEMA + "\nReturn only final JSON content; never include reasoning_content or <think> text.",
+        )
+    )
+
 
 
 def call_llm(
@@ -346,13 +404,56 @@ def build_prompt(context: dict[str, Any], *, target_page: str) -> str:
         "existing_target_body": context.get("old_target_body", ""),
         "claims": claims,
     }
+    if context.get("publication_enabled") and context.get("publication_only"):
+        publication = publication_prompt_sections(context)
+        summary_contract = (
+            " Return an additional `summary` object exactly shaped as "
+            "{\"status\":\"validated\",\"segments\":[{\"summary_id\":\"summary-1\","
+            "\"text\":\"...\",\"supports\":[{\"claim_fingerprint\":\"...\"}]}]}; "
+            "every supplied claim fingerprint must be referenced at least once."
+            if context.get("summary_enabled")
+            else ""
+        )
+        return (
+            "ROLE: You provide compact semantic publication metadata only. "
+            "This is publication-only mode; Do not return final_body, rewritten "
+            "claims, paths, permissions, or new taxonomy entries.\n\n"
+            f"{publication}\n\n"
+            "OUTPUT CONTRACT: Return one JSON object containing the required "
+            "top-level `publication` object. It must use only the supplied claim "
+            "fingerprints and allowed taxonomy."
+            f"{summary_contract}\n\n"
+            "INPUT:\n"
+            + json.dumps(
+                {"target_page": target_page, "claims": claims},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
     summary_enabled = bool(context.get("summary_enabled", False))
     payload["summary_enabled"] = summary_enabled
     rules = _SUMMARY_PROMPT_RULES if summary_enabled else _PROMPT_RULES
-    return f"{rules}\n\nINPUT:\n{json.dumps(payload, ensure_ascii=False, indent=2)}"
+    publication = publication_prompt_sections(context) if context.get("publication_enabled") else ""
+    publication_requirement = (
+        "\n\nMANDATORY OUTPUT CONTRACT: The top-level JSON object MUST include the "
+        "top-level publication object shown above. Do not omit it, move its "
+        "fields to the root, or return the legacy schema alone. Keep final_body, "
+        "claims, coverage_mapping, and summary as required by the loss-prevention contract."
+        if publication
+        else ""
+    )
+    prefix = f"{rules}\n\n{publication}{publication_requirement}\n\n" if publication else f"{rules}\n\n"
+    final_reminder = (
+        "\n\nFINAL REMINDER: Return one JSON object now. It MUST contain a non-empty "
+        "top-level `publication` object with title, slug, category_id, summary, "
+        "why, version, related_topics, claim_refs, and field_refs."
+        if publication
+        else ""
+    )
+    return f"{prefix}INPUT:\n{json.dumps(payload, ensure_ascii=False, indent=2)}{final_reminder}"
 
 
-def parse_response(text: str) -> dict[str, Any]:
+def parse_response(text: str, *, require_final_body: bool = True) -> dict[str, Any]:
     """Parse the provider text into the candidate mapping draft.py expects."""
     stripped = text.strip()
     if stripped.startswith("```"):
@@ -363,7 +464,7 @@ def parse_response(text: str) -> dict[str, Any]:
         parsed = json.loads(stripped)
     except json.JSONDecodeError as error:
         raise ValidationError("llm", "response", f"provider output is not JSON ({error})") from error
-    if not isinstance(parsed, dict) or "final_body" not in parsed:
+    if not isinstance(parsed, dict) or (require_final_body and "final_body" not in parsed):
         raise ValidationError("llm", "response", "provider output must be an object with final_body")
     return parsed
 
@@ -450,6 +551,8 @@ def build_generator(
     """Return a ``generator(context)`` callable backed by a live provider."""
 
     def generator(context: dict[str, Any]) -> dict[str, Any]:
+        if context.get("publication_provider_enforced"):
+            validate_publication_provider_identity(model=model, base_url=base_url)
         prompt = build_prompt(context, target_page=str(context.get("target_page", "")))
         for attempt in range(1, retry_attempts + 2):
             try:
@@ -462,7 +565,8 @@ def build_generator(
                             api_key=api_key,
                             model=model,
                             timeout=timeout,
-                        )
+                        ),
+                        require_final_body=not bool(context.get("publication_only")),
                     ),
                     context,
                 )

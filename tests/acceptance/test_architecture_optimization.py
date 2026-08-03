@@ -10,7 +10,7 @@ import pytest
 from knowledge_digest.batch_run import run_batched
 from knowledge_digest.config import DigestSettings
 from knowledge_digest.errors import ValidationError
-from knowledge_digest.kb_structure import inspect_structure, parse_roots
+from knowledge_digest.kb_structure import inspect_structure, parse_roots, parse_source_index_markdown
 from knowledge_digest.paths import validate_paths
 from knowledge_digest.pipeline import audit_run
 
@@ -62,6 +62,19 @@ def _frontmatter(text: str) -> dict[str, str]:
         if separator:
             values[key.strip()] = value.strip()
     return values
+
+
+def _source_index(kb_dir: Path) -> list[dict[str, object]]:
+    value = parse_source_index_markdown(
+        (kb_dir / "_digest" / "source-index.md").read_text(encoding="utf-8")
+    )
+    return [
+        {
+            "source_uri": entry["source_uri"],
+            "topic_paths": entry["target_paths"],
+        }
+        for entry in value["entries"]
+    ]
 
 
 def _topic_paths(kb_dir: Path) -> set[str]:
@@ -272,7 +285,7 @@ def test_source_index_is_link_only_and_duplicate_source_inherits_topic_link(tmp_
     )
 
     _run(new_dir, kb_dir)
-    records = _jsonl(kb_dir / "_digest" / "source-index.jsonl")
+    records = _source_index(kb_dir)
     markdown = (kb_dir / "_digest" / "source-index.md").read_text(encoding="utf-8")
 
     assert [row["source_uri"] for row in records] == ["https://source.example/one", "https://source.example/two"]
@@ -363,7 +376,7 @@ def test_batch_runner_preserves_full_manifest_topics_and_global_duplicates(tmp_p
     assert len(_jsonl(report.parent / "s6" / "provenance-audit.jsonl")) == len(
         _jsonl(full_report.parent / "s6" / "provenance-audit.jsonl")
     )
-    assert {row["source_uri"] for row in _jsonl(kb_dir / "_digest" / "source-index.jsonl")} == {
+    assert {row["source_uri"] for row in _source_index(kb_dir)} == {
         "https://source.example/one",
         "https://source.example/two",
         "https://source.example/duplicate",
