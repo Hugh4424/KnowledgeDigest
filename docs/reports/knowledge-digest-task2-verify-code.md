@@ -1,6 +1,6 @@
 # Task2 verify-code 结论
 
-验证对象：当前 Task2 worktree `task/KnowledgeDigest/knowledge-digest-llm-naming-classification`，提交 `007c970`。
+验证对象：当前 Task2 worktree `task/KnowledgeDigest/knowledge-digest-llm-naming-classification`，提交 `ecf3c2c`。
 
 读取材料：`decision-log.md`、`spec.md`、`plan.md`、`tasks.md`。
 
