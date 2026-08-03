@@ -1,6 +1,6 @@
 # Task2 verify-code 结论
 
-验证对象：当前 Task2 worktree `task/KnowledgeDigest/knowledge-digest-llm-naming-classification`。
+验证对象：当前 Task2 worktree `task/KnowledgeDigest/knowledge-digest-llm-naming-classification`，提交 `1dd81fd`。
 
 读取材料：`decision-log.md`、`spec.md`、`plan.md`、`tasks.md`。
 
@@ -8,7 +8,7 @@
 
 ```text
 uv run --frozen pytest -q
-316 passed in 16.82s
+316 passed in 15.58s
 git diff --check
 exit 0
 ```
