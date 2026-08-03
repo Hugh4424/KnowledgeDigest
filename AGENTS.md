@@ -100,4 +100,4 @@ scripts/task2_publication_comparison.py # 只读生成 Task1/Task2/CompanyBrain 
 
 ## 更新规则
 
-当修改 CLI、文件结构、正式输出、质量门禁或开发命令时，同步更新本文件和对应 acceptance 测试。保留 `docs/plans/universal-knowledge-digest-design.md` 作为原始设计；已交付的知识发布合同记录归档于 `specs/archive/knowledge-digest-publication-contract/`，架构优化记录归档于 `specs/archive/knowledge-digest-architecture-optimization/`。
+当修改 CLI、文件结构、正式输出、质量门禁或开发命令时，同步更新本文件和对应 acceptance 测试。保留 `docs/plans/universal-knowledge-digest-design.md` 作为原始设计；已交付的知识发布合同记录归档于 `specs/archive/knowledge-digest-publication-contract/`，架构优化记录归档于 `specs/archive/knowledge-digest-architecture-optimization/`，Task2 知识发布架构记录归档于 `specs/archive/knowledge-digest-llm-naming-classification/`。
