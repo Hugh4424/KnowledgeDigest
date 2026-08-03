@@ -8,7 +8,7 @@
 
 ```text
 uv run --frozen pytest -q
-316 passed in 16.26s
+316 passed in 17.14s
 git diff --check
 exit 0
 ```
