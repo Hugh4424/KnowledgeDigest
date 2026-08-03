@@ -1,0 +1,4 @@
+Task: T035 provider failure source-index and readable queue
+Command: uv run --frozen pytest -q tests/acceptance/test_phase25_llm.py::test_end_to_end_provider_error_publishes_source_and_pending_review
+Result: 1 passed
+Evidence: failed provider source is published deterministically, source-index status is needs-review, and _queues/needs_review.md contains the source URI.

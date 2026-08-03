@@ -1,0 +1,6 @@
+Task: T036 full qwen batch evidence and cost ledger
+Command: uv run --frozen pytest -q
+Result: 312 passed in 17.39s
+Runtime evidence: /Users/Hugh/Downloads/KnowledgeDigest-task2-qwen-batched-final-kxlAw1/comparison-final-r3/COMPARISON.json
+Runtime facts: 89 snapshots; 9,288 claim entities; 7,796 claim fingerprints; 88 source-index URIs; 74 stable topics; all topic pages <=300 lines; qwen3.6 plus jina-embeddings only; 172 observed provider calls; 80 failed/fallback calls; 2 replay calls.
+Boundary: elapsed_seconds=3688.666 exceeds the 3600-second safety line; 17 fixed sample topics were available; agent-assisted reader audit does not replace independent human review.

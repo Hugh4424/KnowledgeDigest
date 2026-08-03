@@ -62,11 +62,19 @@ def normalize_endpoint_identity(base_url: str) -> str:
 
 
 class OpenAIEmbeddingClient:
-    def __init__(self, settings: EmbeddingSettings, *, api_key: str | None = None, timeout: float = 180.0):
+    def __init__(self, settings: EmbeddingSettings, *, api_key: str | None = None, timeout: float | None = None):
         self.endpoint_identity = normalize_endpoint_identity(settings.base_url)
         self.model = settings.model
         self.dimension = settings.expected_dimension
         self._api_key = api_key
+        if timeout is None:
+            timeout_text = os.environ.get("KD_EMBEDDING_TIMEOUT_SECONDS")
+            try:
+                timeout = float(timeout_text) if timeout_text is not None else 180.0
+            except ValueError as error:
+                raise EmbeddingError("KD_EMBEDDING_TIMEOUT_SECONDS must be numeric") from error
+        if timeout <= 0:
+            raise EmbeddingError("KD_EMBEDDING_TIMEOUT_SECONDS must be greater than zero")
         self._timeout = timeout
         context = ssl.create_default_context()
         self._opener = build_opener(ProxyHandler({}), _RejectRedirects(), HTTPSHandler(context=context))

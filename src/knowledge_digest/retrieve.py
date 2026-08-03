@@ -54,6 +54,7 @@ def retrieve(
     settings: DigestSettings,
     *,
     scorer: SimilarityScorer | None = None,
+    preserve_cluster_identity: bool = False,
 ) -> list[dict[str, Any]]:
     """For each processable cluster, decide whether to merge, revise, or create a page.
 
@@ -106,10 +107,16 @@ def retrieve(
                 "cluster_tier": cluster.get("cluster_tier", cluster.get("tier")),
                 "source_count": len(cluster.get("members", [])),
                 "target_page_count": len(selected),
-                # Existing digest pages own their identity.  Otherwise the
-                # cluster anchor is stable even though its audit cluster ID is
-                # still run-local.
-                "topic_id": selected_topic_ids[0] if selected_topic_ids else cluster.get("topic_id", topic_id(cluster_source_ids)),
+                # A fixed full-run batch plan owns topic identity. Without
+                # that contract, an existing page may retain its identity
+                # when a source is being revised. Never let a similarity
+                # candidate overwrite a precomputed cross-batch topic: doing
+                # so can merge unrelated sources into the candidate page.
+                "topic_id": (
+                    cluster.get("topic_id", topic_id(cluster_source_ids))
+                    if preserve_cluster_identity
+                    else selected_topic_ids[0] if selected_topic_ids else cluster.get("topic_id", topic_id(cluster_source_ids))
+                ),
                 "candidate_topic_ids": selected_topic_ids,
                 "routing_rule_version": settings.routing_rule_version,
             }

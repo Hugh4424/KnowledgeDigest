@@ -1,0 +1,5 @@
+Task: T031 batch failure and cost ledger
+Command: uv run --frozen pytest -q tests/acceptance/test_task2_batch_recovery.py
+Result: 14 passed, 1 deselected (batch recovery, failure ledger, and planned-call hard-stop subset)
+Evidence: provider failure writes batch-failure-report.v1; failed run is marked failed_provider; observed calls and tokens remain null; replay remains pending.
+Boundary: no provider call was made by this test; no DeepSeek fallback.

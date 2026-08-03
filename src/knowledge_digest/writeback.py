@@ -49,11 +49,18 @@ def _frontmatter_values(content: str) -> dict[str, str]:
 
 
 def _publication_target_kind(target: Path, publication: PublicationContract) -> tuple[str, str | None]:
-    if target.as_posix() == publication.home_path:
+    target_text = target.as_posix()
+    if target_text == "README.md":
+        return "readme", None
+    if target_text == publication.source_index_path:
+        return "source-index", None
+    if target_text == publication.home_path:
         return "home", None
     for category in publication.categories:
         if target.as_posix() == publication.category_index_path(category.category_id):
             return "category", category.category_id
+        if category.parent_id and target_text == f"{publication.index_root}/{category.parent_id}.md":
+            return "parent-index", category.parent_id
         topic_dir = Path(category.topic_dir)
         if topic_dir in target.parents:
             return "topic", category.category_id
@@ -70,6 +77,11 @@ def _validate_publication_header(
 ) -> None:
     values = _frontmatter_values(content)
     subject = "existing managed page" if existing else "publication content"
+    if expected_kind == "readme" and not values and content.lstrip().startswith("# Knowledge Digest"):
+        return
+    if expected_kind == "source-index" and not values:
+        if content.lstrip().startswith("# Source Index") or "digest_kind: source-index" in content:
+            return
     if values.get("managed_by") != "KnowledgeDigest":
         raise ValidationError("publication", target, f"{subject} must declare managed_by: KnowledgeDigest")
     if values.get("digest_kind") != expected_kind:
@@ -91,6 +103,8 @@ def _validate_publication_header(
             raise ValidationError("publication", target, f"{subject} digest_part must be a positive integer")
     if expected_kind == "category" and values.get("digest_category_id") != category_id:
         raise ValidationError("publication", target, f"{subject} has an invalid digest_category_id")
+    if expected_kind == "parent-index" and values.get("digest_parent_id") != category_id:
+        raise ValidationError("publication", target, f"{subject} has an invalid digest_parent_id")
 
 
 def _atomic_write(path: Path, content: str) -> None:
@@ -449,7 +463,7 @@ def writeback(
                     category_id=category_id,
                     existing=False,
                 )
-                if expected_kind in {"home", "category"}:
+                if expected_kind in {"readme", "home", "category", "parent-index", "source-index"}:
                     if page_claims != []:
                         raise ValidationError("publication", target, "navigation publication must not contain claims")
                 elif not isinstance(page_claims, list) or any(

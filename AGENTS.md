@@ -37,6 +37,20 @@ uv run --frozen digest NEW_DIR KB_DIR --batch-state KB_DIR/_digest/batch-state.j
 
 状态文件会锁定来源相对路径、URI、内容指纹和首次生成的主题/重复来源计划；来源变了必须新建状态文件，不能强行续跑。
 
+发布结果目录的阅读顺序：先读 `README.md`，再从 `Home.md` 进入 `indexes/<parent>.md` 和叶分类页，最后打开 `pages/<领域>/<分类>/<主题>.md`。`_digest/source-index.md` 只保存来源、指纹、状态和主题页链接；`_digest/runs/` 是运行审计；`_archive/` 是历史快照，不是当前阅读入口。
+
+生成固定对比报告（只读，不调用模型）：
+
+```bash
+uv run python scripts/task2_publication_comparison.py \
+  --task1 /path/to/task1/company-kb \
+  --task2 /path/to/task2/company-kb \
+  --companybrain /Users/Hugh/Hugh/Knowledge/CompanyBrain \
+  --output /path/to/task2-comparison
+```
+
+需要语义发布时只允许使用项目配置约定的 `qwen3.6`（`https://dashscope.in.whatspos.cn/v1`）和 `jina-embeddings`（`https://llm.paxszapp.com/v1`）；凭据必须通过环境变量传入，禁止写入代码、结果或报告。离线回归使用 `--no-llm` + Jaccard，不触碰任何 provider。
+
 ## 实际文件结构
 
 ```text
@@ -46,6 +60,8 @@ src/knowledge_digest/
   cluster.py       # S2：聚类；cluster-N 只是运行审计 ID
   retrieve.py      # S3：检索候选主题页
   draft.py         # S4：Claim、保真检查、可选 LLM 草稿
+  publication.py   # 语义标题/分类/摘要建议校验与 fail-closed fallback
+  navigation.py    # README/Home/分类索引/来源索引的读者渲染
   page_layout.py   # 最终主题分页、可读路径和 Home/分类导航记录
   writeback.py     # S5：Home/分类/主题同批归档后原子发布，不删除旧 part
   provenance.py    # S6：来源、Claim、归档溯源
@@ -55,6 +71,7 @@ src/knowledge_digest/
 tests/acceptance/  # 可运行的行为与回归测试
 config/            # 默认配置；真实密钥只放环境变量
 docs/              # 设计、决策、历史报告
+scripts/task2_publication_comparison.py # 只读生成 Task1/Task2/CompanyBrain 对比报告
 ```
 
 核心代码放在 `src/knowledge_digest` 是标准 Python `src-layout`：打包时只导入已安装的项目代码，避免从仓库根目录误导入同名文件，也让测试和正式命令使用同一包。不要把它搬到项目根目录，也不要复制一份 `knowledge_digest` 目录。
@@ -83,4 +100,4 @@ docs/              # 设计、决策、历史报告
 
 ## 更新规则
 
-当修改 CLI、文件结构、正式输出、质量门禁或开发命令时，同步更新本文件和对应 acceptance 测试。保留 `docs/plans/universal-knowledge-digest-design.md` 作为原始设计；已交付的知识发布合同记录归档于 `specs/archive/knowledge-digest-publication-contract/`，架构优化记录归档于 `specs/archive/knowledge-digest-architecture-optimization/`。
+当修改 CLI、文件结构、正式输出、质量门禁或开发命令时，同步更新本文件和对应 acceptance 测试。保留 `docs/plans/universal-knowledge-digest-design.md` 作为原始设计；已交付的知识发布合同记录归档于 `specs/archive/knowledge-digest-publication-contract/`，架构优化记录归档于 `specs/archive/knowledge-digest-architecture-optimization/`，Task2 知识发布架构记录归档于 `specs/archive/knowledge-digest-llm-naming-classification/`。

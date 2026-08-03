@@ -365,7 +365,7 @@ def test_navigation_records_are_artifacts_not_direct_formal_writes(tmp_path: Pat
         json.loads(line)
         for line in (run_dirs[-1] / "s4" / "publication-navigation.jsonl").read_text(encoding="utf-8").splitlines()
     ]
-    assert [record["digest_kind"] for record in records] == ["home", "category"]
+    assert [record["digest_kind"] for record in records] == ["home", "category", "source-index"]
     assert records[0]["target_path"] == "Home.md"
     assert "[待归类](indexes/pending.md)" in records[0]["rendered_content"]
     assert records[1]["target_path"] == "indexes/pending.md"
@@ -609,12 +609,13 @@ def test_provenance_and_history_exclude_navigation_records(tmp_path: Path) -> No
     ]
     assert history
     assert all(record["target_path"].startswith("pages/待归类/") for record in history)
-    source_index = [
-        json.loads(line)
-        for line in (kb_dir / "_digest" / "source-index.jsonl").read_text(encoding="utf-8").splitlines()
-    ]
-    assert source_index and all(
+    from knowledge_digest.kb_structure import parse_source_index_markdown
+
+    source_index = parse_source_index_markdown(
+        (kb_dir / "_digest" / "source-index.md").read_text(encoding="utf-8")
+    )
+    assert source_index["entries"] and all(
         path.startswith("pages/待归类/")
-        for record in source_index
-        for path in record["topic_paths"]
+        for record in source_index["entries"]
+        for path in record["target_paths"]
     )

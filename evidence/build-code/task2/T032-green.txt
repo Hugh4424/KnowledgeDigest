@@ -1,0 +1,5 @@
+Task: T032 comparison failure-ledger consumption
+Command: uv run --frozen pytest -q tests/acceptance/test_task2_corpus_regression.py -k comparison
+Result: 2 passed
+Evidence: latest run is selected by report freshness, and batch cost_summary preserves planned versus observed provider calls.
+Boundary: comparison remains read-only; no raw source, baseline, credential, or provider mutation.

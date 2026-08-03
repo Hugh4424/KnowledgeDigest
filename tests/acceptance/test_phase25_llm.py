@@ -121,6 +121,7 @@ def test_openai_format_sends_expected_request_and_parses_response(monkeypatch: p
     assert body["model"] == "test-model"
     assert body["messages"] == [{"role": "user", "content": "prompt text"}]
     assert body["temperature"] == 0
+    assert body["max_tokens"] == llm.DEFAULT_MAX_TOKENS
 
 
 def test_anthropic_format_sends_expected_request_and_parses_response(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -137,6 +138,19 @@ def test_anthropic_format_sends_expected_request_and_parses_response(monkeypatch
     body = json.loads(request.data.decode("utf-8"))
     assert body["max_tokens"] == llm.DEFAULT_MAX_TOKENS
     assert body["messages"] == [{"role": "user", "content": "prompt text"}]
+
+
+def test_qwen_openai_payload_requests_json_and_no_thinking() -> None:
+    body = llm._request_payload(
+        "openai",
+        llm.PUBLICATION_LLM_MODEL,
+        "prompt text",
+        max_tokens=llm.PUBLICATION_MAX_TOKENS,
+    )
+
+    assert body["response_format"] == {"type": "json_object"}
+    assert body["enable_thinking"] is False
+    assert body["max_tokens"] == llm.PUBLICATION_MAX_TOKENS
 
 
 def test_four_concurrent_real_requests_cross_the_transport_boundary() -> None:
@@ -314,6 +328,58 @@ def test_generator_does_not_retry_invalid_provider_output(monkeypatch: pytest.Mo
         generator({"target_page": "pages/one.md", "initial_body": "body", "claims": []})
 
     assert calls == 1
+
+
+def test_qwen_generator_disables_hidden_thinking_without_persisting_reasoning(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    seen: list[str] = []
+
+    def fake_call_llm(prompt: str, **_kwargs: Any) -> str:
+        seen.append(prompt)
+        return json.dumps({"final_body": "body"})
+
+    monkeypatch.setattr(llm, "call_llm", fake_call_llm)
+    generator = llm.build_generator(
+        api_format="openai",
+        base_url=llm.PUBLICATION_LLM_BASE_URL,
+        api_key="secret-key",
+        model=llm.PUBLICATION_LLM_MODEL,
+    )
+
+    result = generator({"target_page": "pages/one.md", "initial_body": "body", "claims": []})
+
+    assert result["final_body"] == "body"
+    assert seen and seen[0].startswith("/no_think\n")
+
+
+def test_publication_only_generator_uses_bounded_output_budget(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    seen: list[int] = []
+
+    def fake_call_llm(_prompt: str, **kwargs: Any) -> str:
+        seen.append(int(kwargs["max_tokens"]))
+        return json.dumps({"publication": {}})
+
+    monkeypatch.setattr(llm, "call_llm", fake_call_llm)
+    generator = llm.build_generator(
+        api_format="openai",
+        base_url=llm.PUBLICATION_LLM_BASE_URL,
+        api_key="secret-key",
+        model=llm.PUBLICATION_LLM_MODEL,
+    )
+
+    generator(
+        {
+            "target_page": "pages/one.md",
+            "initial_body": "body",
+            "claims": [],
+            "publication_only": True,
+        }
+    )
+
+    assert seen == [llm.PUBLICATION_MAX_TOKENS]
 
 
 def test_hard_deadline_interrupts_a_blocking_read() -> None:
@@ -1334,6 +1400,30 @@ def test_invalid_llm_batch_falls_back_for_the_whole_draft(tmp_path: Path) -> Non
     assert all(f"Claim {index}." in result["final_body"] for index in range(1, 6))
 
 
+def test_provider_validation_error_keeps_deterministic_source_and_marks_review(
+    tmp_path: Path,
+) -> None:
+    """A provider failure must not discard this source or pretend it passed."""
+    def generator(_context: dict[str, Any]) -> dict[str, Any]:
+        raise ValidationError("llm", "provider", "malformed JSON")
+
+    result = draft(
+        _decision(),
+        _cluster(),
+        _items(),
+        tmp_path,
+        DigestSettings(llm_enabled=True, llm_batch_max_claims=1),
+        generator=generator,
+    )[0]
+
+    assert result["rethink_status"] == "fallback"
+    assert result["provider_failure"] is True
+    assert result["provider_failures"][0]["kind"] == "provider_error"
+    assert result["fallback_reason"] == "no valid round; used claim fallback"
+    assert "Claim one." in result["final_body"]
+    assert "Claim two." in result["final_body"]
+
+
 def test_llm_batch_concurrency_is_bounded_and_merge_order_is_stable(tmp_path: Path) -> None:
     items = [
         {
@@ -1620,6 +1710,40 @@ def test_end_to_end_fallback_page_keeps_every_source_line(
     written = "\n".join(page.read_text(encoding="utf-8") for page in pages)
     for line in ("Claim one.", "Claim two."):
         assert line in written
+
+
+def test_end_to_end_provider_error_publishes_source_and_pending_review(
+    tmp_path: Path,
+) -> None:
+    """A transport/JSON failure keeps deterministic output and a replay queue."""
+    new_dir, kb_dir = _kb_case(tmp_path)
+    paths = validate_paths(new_dir, kb_dir)
+    roots = parse_roots(paths.structure_path)
+
+    def generator(_context: dict[str, Any]) -> dict[str, Any]:
+        raise ValidationError("llm", "provider", "malformed JSON")
+
+    audit_run(
+        paths,
+        DigestSettings(llm_enabled=True),
+        roots,
+        dry_run=False,
+        generator=generator,
+    )
+
+    pages = list((kb_dir / "pages").rglob("*.md"))
+    assert pages
+    written = "\n".join(page.read_text(encoding="utf-8") for page in pages)
+    assert "Claim one." in written and "Claim two." in written
+    pending = (kb_dir / "_digest" / "pending-review.jsonl").read_text(encoding="utf-8")
+    assert "malformed JSON" in pending
+    from knowledge_digest.kb_structure import parse_source_index_markdown
+
+    source_index = parse_source_index_markdown((kb_dir / "_digest" / "source-index.md").read_text(encoding="utf-8"))
+    assert source_index["entries"][0]["status"] == "needs-review"
+    assert "https://source.example/llm" in (kb_dir / "_queues" / "needs_review.md").read_text(encoding="utf-8")
+    report = json.loads(next((kb_dir / "_digest").glob("runs/*/report.json")).read_text(encoding="utf-8"))
+    assert report["pending_review"]
 
 
 def test_end_to_end_retention_gate_keeps_a_dropped_claim_on_the_committed_page(

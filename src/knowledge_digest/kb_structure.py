@@ -8,6 +8,7 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote, unquote
 
 from .errors import ValidationError
 
@@ -15,9 +16,24 @@ from .errors import ValidationError
 DEFAULT_ROOTS = ("pages", "_archive", "_queues")
 DEFAULT_PUBLICATION_HOME = "Home.md"
 DEFAULT_PUBLICATION_INDEX_ROOT = "indexes"
+DEFAULT_PUBLICATION_SOURCE_INDEX = "_digest/source-index.md"
 DEFAULT_PENDING_CATEGORY_ID = "pending"
 DEFAULT_PENDING_CATEGORY_TITLE = "待归类"
 DEFAULT_PENDING_TOPIC_DIR = "pages/待归类"
+DEFAULT_TAXONOMY_VERSION = "1.0.0"
+DEFAULT_TAXONOMY_OWNER = "KnowledgeDigest maintainers"
+DEFAULT_TAXONOMY_CHANGE_POLICY = "SemVer; maintainers edit kb.structure.md"
+SOURCE_INDEX_SCHEMA_VERSION = "1.0.0"
+TOPIC_INDEX_SCHEMA_VERSION = "1.0.0"
+DEFAULT_PARENT_IDS = frozenset({"products", "engineering", "customers", "operations", "principles", "other"})
+DEFAULT_PARENT_TITLES = {
+    "products": "产品",
+    "engineering": "研发",
+    "customers": "客户",
+    "operations": "运营",
+    "principles": "原则",
+    "other": "其他",
+}
 
 
 @dataclass(frozen=True)
@@ -27,6 +43,8 @@ class PublicationCategory:
     category_id: str
     title: str
     topic_dir: str
+    parent_id: str | None = None
+    aliases: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -36,6 +54,27 @@ class PublicationContract:
     home_path: str
     index_root: str
     categories: tuple[PublicationCategory, ...]
+    taxonomy_version: str = DEFAULT_TAXONOMY_VERSION
+    taxonomy_owner: str = DEFAULT_TAXONOMY_OWNER
+    taxonomy_change_policy: str = DEFAULT_TAXONOMY_CHANGE_POLICY
+    source_index_path: str = DEFAULT_PUBLICATION_SOURCE_INDEX
+
+    @property
+    def parent_ids(self) -> tuple[str, ...]:
+        return tuple(sorted({category.parent_id for category in self.categories if category.parent_id}))
+
+    @property
+    def parent_titles(self) -> dict[str, str]:
+        return {
+            parent_id: DEFAULT_PARENT_TITLES.get(parent_id, parent_id.replace("-", " ").title())
+            for parent_id in self.parent_ids
+        }
+
+    def category(self, category_id: str) -> PublicationCategory:
+        for category in self.categories:
+            if category.category_id == category_id:
+                return category
+        raise ValidationError("publication", category_id, "category is not declared")
 
     @property
     def pending_category(self) -> PublicationCategory:
@@ -76,6 +115,8 @@ class StructureContract:
                             "id": category.category_id,
                             "title": category.title,
                             "topic_dir": category.topic_dir,
+                            "parent_id": category.parent_id,
+                            "aliases": list(category.aliases),
                         }
                         for category in self.publication.categories
                     ],
@@ -83,6 +124,10 @@ class StructureContract:
                 if self.publication is not None
                 else None
             ),
+            "taxonomy_version": self.publication.taxonomy_version if self.publication else None,
+            "taxonomy_owner": self.publication.taxonomy_owner if self.publication else None,
+            "taxonomy_change_policy": self.publication.taxonomy_change_policy if self.publication else None,
+            "publication_source_index": self.publication.source_index_path if self.publication else None,
             "publication_errors": list(self.publication_errors),
             "allow_official_write": self.allow_official_write,
         }
@@ -142,7 +187,7 @@ def _is_same_or_parent(left: str, right: str) -> bool:
     return len(left_parts) <= len(right_parts) and left_parts == right_parts[: len(left_parts)]
 
 
-def _publication_category_rows(frontmatter: list[str] | None) -> list[dict[str, str]]:
+def _publication_category_rows(frontmatter: list[str] | None) -> list[dict[str, Any]]:
     if frontmatter is None:
         return []
     start = next(
@@ -151,8 +196,8 @@ def _publication_category_rows(frontmatter: list[str] | None) -> list[dict[str, 
     )
     if start is None:
         return []
-    rows: list[dict[str, str]] = []
-    current: dict[str, str] | None = None
+    rows: list[dict[str, Any]] = []
+    current: dict[str, Any] | None = None
     for line in frontmatter[start + 1 :]:
         if line and not line[0].isspace():
             break
@@ -171,21 +216,38 @@ def _publication_category_rows(frontmatter: list[str] | None) -> list[dict[str, 
         key, _, value = stripped.partition(":")
         key = key.strip()
         value = _unquote(value)
-        if key not in {"id", "title", "topic_dir"}:
+        if key not in {"id", "title", "topic_dir", "parent_id", "aliases"}:
             raise ValidationError("publication", key, "is not a supported publication category field")
-        if key in current:
+        if key in current and key != "aliases":
             raise ValidationError("publication", key, "is repeated in one publication category")
-        current[key] = value
+        if key == "aliases":
+            current.setdefault(key, []).append(value)
+        else:
+            current[key] = value
     if current is not None:
         rows.append(current)
     return rows
 
 
-def _publication_contract(text: str) -> tuple[PublicationContract | None, tuple[str, ...]]:
+def _publication_contract(
+    text: str,
+    *,
+    require_taxonomy: bool = False,
+) -> tuple[PublicationContract | None, tuple[str, ...]]:
     """Parse publication fields without guessing a legacy knowledge-base layout."""
     frontmatter = _frontmatter_lines(text)
     values = _frontmatter_values(text)
     errors: list[str] = []
+    taxonomy_version = values.get("taxonomy_version")
+    taxonomy_owner = values.get("taxonomy_owner")
+    taxonomy_change_policy = values.get("taxonomy_change_policy")
+    raw_source_index = values.get("publication_source_index", DEFAULT_PUBLICATION_SOURCE_INDEX)
+    if require_taxonomy and not taxonomy_version:
+        errors.append("taxonomy_version is missing")
+    if require_taxonomy and not taxonomy_owner:
+        errors.append("taxonomy_owner is missing")
+    if require_taxonomy and not taxonomy_change_policy:
+        errors.append("taxonomy_change_policy is missing")
     raw_home = values.get("publication_home")
     raw_index_root = values.get("publication_index_root")
     if not raw_home:
@@ -206,6 +268,9 @@ def _publication_contract(text: str) -> tuple[PublicationContract | None, tuple[
         home_path = _safe_relative_path(str(raw_home), field="publication_home", directory=False)
         index_root = _safe_relative_path(
             str(raw_index_root), field="publication_index_root", directory=True
+        )
+        source_index_path = _safe_relative_path(
+            str(raw_source_index), field="publication_source_index", directory=False
         )
         categories: list[PublicationCategory] = []
         category_ids: set[str] = set()
@@ -230,6 +295,12 @@ def _publication_contract(text: str) -> tuple[PublicationContract | None, tuple[
             if category_id in category_ids:
                 raise ValidationError("publication", category_id, "category id is duplicated")
             category_ids.add(category_id)
+            parent_id = str(row.get("parent_id", "")).strip() or None
+            if parent_id == category_id:
+                raise ValidationError("publication", category_id, "category cannot parent itself")
+            aliases = tuple(dict.fromkeys(
+                alias.strip() for alias in row.get("aliases", []) if isinstance(alias, str) and alias.strip()
+            ))
             categories.append(
                 PublicationCategory(
                     category_id=category_id,
@@ -237,6 +308,8 @@ def _publication_contract(text: str) -> tuple[PublicationContract | None, tuple[
                     topic_dir=_safe_relative_path(
                         row["topic_dir"], field=f"publication_categories.{category_id}.topic_dir", directory=True
                     ),
+                    parent_id=parent_id,
+                    aliases=aliases,
                 )
             )
         pending = [category for category in categories if category.category_id == DEFAULT_PENDING_CATEGORY_ID]
@@ -248,7 +321,23 @@ def _publication_contract(text: str) -> tuple[PublicationContract | None, tuple[
                 "publication_categories.pending.title",
                 "must be 待归类",
             )
-        locations = [index_root, *(category.topic_dir for category in categories)]
+        parent_ids = {category.parent_id for category in categories if category.parent_id}
+        category_id_set = {category.category_id for category in categories}
+        if require_taxonomy and any(category.parent_id is None for category in categories):
+            raise ValidationError("publication", "publication_categories.parent_id", "every leaf category must declare a parent_id")
+        if require_taxonomy:
+            invalid_parents = sorted(parent_id for parent_id in parent_ids if parent_id not in DEFAULT_PARENT_IDS)
+            if invalid_parents:
+                raise ValidationError("publication", "publication_categories.parent_id", f"unknown parent id(s): {', '.join(invalid_parents)}")
+            if pending[0].parent_id != "other":
+                raise ValidationError("publication", "publication_categories.pending.parent_id", "pending must belong to other")
+        if any(category.category_id in parent_ids for category in categories):
+            raise ValidationError("publication", "publication_categories", "parent IDs must be logical nodes, not leaf category IDs")
+        if require_taxonomy and (not taxonomy_version or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", taxonomy_version)):
+            raise ValidationError("publication", "taxonomy_version", "must be SemVer")
+        if require_taxonomy and (not taxonomy_owner or not taxonomy_change_policy):
+            raise ValidationError("publication", "taxonomy", "owner and change policy must be non-empty")
+        locations = [index_root, source_index_path, *(category.topic_dir for category in categories)]
         if any(_is_same_or_parent(home_path, location) or _is_same_or_parent(location, home_path) for location in locations):
             raise ValidationError("publication", "publication_home", "must not overlap an index or topic directory")
         for index, first in enumerate(locations):
@@ -257,29 +346,62 @@ def _publication_contract(text: str) -> tuple[PublicationContract | None, tuple[
                     raise ValidationError("publication", first, "publication directories must not overlap")
     except ValidationError as error:
         return None, (error.reason,)
-    return PublicationContract(home_path, index_root, tuple(categories)), ()
+    return PublicationContract(
+        home_path,
+        index_root,
+        tuple(categories),
+        taxonomy_version=str(taxonomy_version or DEFAULT_TAXONOMY_VERSION),
+        taxonomy_owner=str(taxonomy_owner or DEFAULT_TAXONOMY_OWNER),
+        taxonomy_change_policy=str(taxonomy_change_policy or DEFAULT_TAXONOMY_CHANGE_POLICY),
+        source_index_path=source_index_path,
+    ), ()
+
+
+DEFAULT_PUBLICATION_CATEGORIES: tuple[tuple[str, str, str, str, tuple[str, ...]], ...] = (
+    ("product-overview", "产品概览", "pages/products/product-overview", "products", ("overview",)),
+    ("product-capability", "产品能力", "pages/products/product-capability", "products", ("features",)),
+    ("product-operations", "产品运营", "pages/products/product-operations", "products", ("usage",)),
+    ("product-boundary", "产品边界", "pages/products/product-boundary", "products", ("limits",)),
+    ("architecture", "架构设计", "pages/engineering/architecture", "engineering", ()),
+    ("implementation", "实现细节", "pages/engineering/implementation", "engineering", ("code",)),
+    ("operations-troubleshooting", "运维与排障", "pages/engineering/operations-troubleshooting", "engineering", ("troubleshooting",)),
+    ("development-practice", "研发实践", "pages/engineering/development-practice", "engineering", ("process",)),
+    ("customer-overview", "客户概览", "pages/customers/customer-overview", "customers", ()),
+    ("customer-case", "客户案例", "pages/customers/customer-case", "customers", ("case",)),
+    ("market-feedback", "市场反馈", "pages/customers/market-feedback", "customers", ("feedback",)),
+    ("project", "项目", "pages/operations/project", "operations", ()),
+    ("management", "管理", "pages/operations/management", "operations", ()),
+    ("people", "人员与组织", "pages/operations/people", "operations", ("team",)),
+    ("competitor", "竞品", "pages/operations/competitor", "operations", ("competition",)),
+    ("event", "事件", "pages/operations/event", "operations", ("events",)),
+    ("business-principle", "业务原则", "pages/principles/business-principle", "principles", ()),
+    ("content-standard", "内容规范", "pages/principles/content-standard", "principles", ("content",)),
+    ("delivery-standard", "交付规范", "pages/principles/delivery-standard", "principles", ("delivery",)),
+    ("unclassified", "其他", "pages/other/unclassified", "other", ("other",)),
+    (DEFAULT_PENDING_CATEGORY_ID, DEFAULT_PENDING_CATEGORY_TITLE, DEFAULT_PENDING_TOPIC_DIR, "other", ("needs-review",)),
+)
 
 
 def default_publication_structure() -> str:
-    """Return the only initial declaration that KnowledgeDigest may create itself."""
-    return "\n".join(
-        (
-            "---",
-            "roots: [pages, _archive, _queues]",
-            "why_field: why",
-            "version_field: version",
-            f"publication_home: {DEFAULT_PUBLICATION_HOME}",
-            f"publication_index_root: {DEFAULT_PUBLICATION_INDEX_ROOT}",
-            "publication_categories:",
-            f"  - id: {DEFAULT_PENDING_CATEGORY_ID}",
-            f"    title: {DEFAULT_PENDING_CATEGORY_TITLE}",
-            f"    topic_dir: {DEFAULT_PENDING_TOPIC_DIR}",
-            "---",
-            "",
-            "# KnowledgeDigest structure",
-            "",
-        )
-    )
+    """Return the complete initial declaration for a new knowledge base."""
+    lines = [
+        "---",
+        "roots: [pages, _archive, _queues]",
+        "why_field: why",
+        "version_field: version",
+        f"taxonomy_version: {DEFAULT_TAXONOMY_VERSION}",
+        f"taxonomy_owner: {DEFAULT_TAXONOMY_OWNER}",
+        f"taxonomy_change_policy: {DEFAULT_TAXONOMY_CHANGE_POLICY}",
+        f"publication_home: {DEFAULT_PUBLICATION_HOME}",
+        f"publication_index_root: {DEFAULT_PUBLICATION_INDEX_ROOT}",
+        f"publication_source_index: {DEFAULT_PUBLICATION_SOURCE_INDEX}",
+        "publication_categories:",
+    ]
+    for category_id, title, topic_dir, parent_id, aliases in DEFAULT_PUBLICATION_CATEGORIES:
+        lines.extend([f"  - id: {category_id}", f"    title: {title}", f"    topic_dir: {topic_dir}", f"    parent_id: {parent_id}"])
+        lines.extend(f"    aliases: {alias}" for alias in aliases)
+    lines.extend(["---", "", "# KnowledgeDigest structure", ""])
+    return "\n".join(lines)
 
 
 def _write_initial_document(path: Path, content: str) -> Path:
@@ -418,7 +540,7 @@ def parse_roots(structure_path: Path) -> tuple[str, ...]:
     return DEFAULT_ROOTS
 
 
-def inspect_structure(structure_path: Path) -> StructureContract:
+def inspect_structure(structure_path: Path, *, require_taxonomy: bool = False) -> StructureContract:
     """Read the roots and required Why/version declarations used by the write gate."""
     text = structure_path.read_text(encoding="utf-8")
     values = _frontmatter_values(text)
@@ -434,7 +556,7 @@ def inspect_structure(structure_path: Path) -> StructureContract:
         suggestions.append(
             "在 kb.structure.md frontmatter 增加非空 version_field，例如 version_field: version"
         )
-    publication, publication_errors = _publication_contract(text)
+    publication, publication_errors = _publication_contract(text, require_taxonomy=require_taxonomy)
     roots = parse_roots(structure_path)
     return StructureContract(
         roots=roots,
@@ -451,6 +573,195 @@ def inspect_structure(structure_path: Path) -> StructureContract:
 def validate_structure(structure_path: Path) -> dict[str, Any]:
     """Return a JSON-ready structure check without raising on missing fields."""
     return inspect_structure(structure_path).as_dict()
+
+
+def _require_string(value: Any, field: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValidationError("publication", field, "must be a non-empty string")
+    return value.strip()
+
+
+def _require_safe_target(value: Any, field: str) -> str:
+    return _safe_relative_path(_require_string(value, field), field=field, directory=False)
+
+
+def validate_topic_index(value: Any) -> dict[str, Any]:
+    """Validate the durable topic identity index used by incremental publishing."""
+    if not isinstance(value, dict):
+        raise ValidationError("publication", "topic-index", "must be an object")
+    if value.get("schema_version") != TOPIC_INDEX_SCHEMA_VERSION:
+        raise ValidationError("publication", "topic-index.schema_version", "unsupported schema version")
+    topics = value.get("topics")
+    if not isinstance(topics, list):
+        raise ValidationError("publication", "topic-index.topics", "must be a list")
+    seen_topics: set[str] = set()
+    seen_sources: set[str] = set()
+    seen_paths: set[str] = set()
+    normalized: list[dict[str, Any]] = []
+    for index, topic in enumerate(topics):
+        if not isinstance(topic, dict):
+            raise ValidationError("publication", f"topic-index.topics[{index}]", "must be an object")
+        required = {"topic_id", "source_ids", "category_id", "published_path", "product_slug"}
+        if set(topic) != required:
+            raise ValidationError("publication", f"topic-index.topics[{index}]", "has unknown or missing fields")
+        topic_key = _require_string(topic["topic_id"], "topic-index.topic_id")
+        if topic_key in seen_topics:
+            raise ValidationError("publication", topic_key, "topic ID is duplicated")
+        seen_topics.add(topic_key)
+        source_ids = topic["source_ids"]
+        if not isinstance(source_ids, list) or not source_ids or any(not isinstance(item, str) or not item for item in source_ids):
+            raise ValidationError("publication", topic_key, "source_ids must be a non-empty string list")
+        if len(set(source_ids)) != len(source_ids) or seen_sources.intersection(source_ids):
+            raise ValidationError("publication", topic_key, "source membership is duplicated")
+        seen_sources.update(source_ids)
+        category_id = _require_string(topic["category_id"], "topic-index.category_id")
+        published_path = _require_safe_target(topic["published_path"], "topic-index.published_path")
+        if published_path in seen_paths:
+            raise ValidationError("publication", published_path, "published path is duplicated")
+        seen_paths.add(published_path)
+        product_slug = topic["product_slug"]
+        if product_slug is not None:
+            product_slug = _require_string(product_slug, "topic-index.product_slug")
+        normalized.append(
+            {
+                "topic_id": topic_key,
+                "source_ids": list(source_ids),
+                "category_id": category_id,
+                "published_path": published_path,
+                "product_slug": product_slug,
+            }
+        )
+    return {"schema_version": TOPIC_INDEX_SCHEMA_VERSION, "topics": normalized}
+
+
+def validate_source_index(value: Any) -> dict[str, Any]:
+    """Validate the internal representation of the fixed Markdown source index."""
+    if not isinstance(value, dict):
+        raise ValidationError("publication", "source-index", "must be an object")
+    if value.get("schema_version") != SOURCE_INDEX_SCHEMA_VERSION:
+        raise ValidationError("publication", "source-index.schema_version", "unsupported schema version")
+    entries = value.get("entries")
+    if not isinstance(entries, list):
+        raise ValidationError("publication", "source-index.entries", "must be a list")
+    seen_uris: set[str] = set()
+    normalized: list[dict[str, Any]] = []
+    for index, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            raise ValidationError("publication", f"source-index.entries[{index}]", "must be an object")
+        required = {"source_uri", "content_fingerprint", "status", "target_paths"}
+        if set(entry) != required:
+            raise ValidationError("publication", f"source-index.entries[{index}]", "has unknown or missing fields")
+        source_uri = _require_string(entry["source_uri"], "source-index.source_uri")
+        if source_uri in seen_uris:
+            raise ValidationError("publication", source_uri, "source URI is duplicated")
+        seen_uris.add(source_uri)
+        fingerprint = _require_string(entry["content_fingerprint"], "source-index.content_fingerprint")
+        if not re.fullmatch(r"[0-9a-f]{64}", fingerprint):
+            raise ValidationError("publication", source_uri, "content fingerprint must be SHA-256")
+        status = _require_string(entry["status"], "source-index.status")
+        if status not in {"published", "needs-review", "pending", "duplicate"}:
+            raise ValidationError("publication", status, "unsupported source status")
+        paths = entry["target_paths"]
+        if not isinstance(paths, list) or any(not isinstance(path, str) for path in paths):
+            raise ValidationError("publication", source_uri, "target_paths must be a string list")
+        normalized.append(
+            {
+                "source_uri": source_uri,
+                "content_fingerprint": fingerprint,
+                "status": status,
+                "target_paths": [_require_safe_target(path, "source-index.target_paths") for path in paths],
+            }
+        )
+    return {"schema_version": SOURCE_INDEX_SCHEMA_VERSION, "entries": normalized}
+
+
+def _escape_table_cell(value: str) -> str:
+    return value.replace("\\", "\\\\").replace("|", "\\|").replace("\n", " ").strip()
+
+
+def _split_table_row(line: str) -> list[str]:
+    if not line.strip().startswith("|") or not line.rstrip().endswith("|"):
+        raise ValidationError("publication", "source-index", "row must be a Markdown table row")
+    cells: list[str] = []
+    current: list[str] = []
+    escaped = False
+    for char in line.strip()[1:-1]:
+        if char == "|" and not escaped:
+            cells.append("".join(current).strip())
+            current = []
+            continue
+        if char == "\\" and not escaped:
+            escaped = True
+            current.append(char)
+            continue
+        current.append(char)
+        escaped = False
+    cells.append("".join(current).strip())
+    return [cell.replace("\\|", "|").replace("\\\\", "\\") for cell in cells]
+
+
+def serialize_source_index(value: dict[str, Any]) -> str:
+    """Serialize source-index as the one canonical, reader-visible Markdown form."""
+    normalized = validate_source_index(value)
+    lines = [
+        "---",
+        "managed_by: KnowledgeDigest",
+        "digest_kind: source-index",
+        f"schema_version: {normalized['schema_version']}",
+        "---",
+        "",
+        "# 来源索引",
+        "",
+        "| source_uri | content_fingerprint | status | target_paths |",
+        "| --- | --- | --- | --- |",
+    ]
+    for entry in normalized["entries"]:
+        lines.append(
+            "| "
+            + " | ".join(
+                (
+                    _escape_table_cell(entry["source_uri"]),
+                    entry["content_fingerprint"],
+                    entry["status"],
+                    _escape_table_cell(",".join(quote(path, safe="/._-") for path in entry["target_paths"])),
+                )
+            )
+            + " |"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def parse_source_index_markdown(text: str) -> dict[str, Any]:
+    """Parse and validate the fixed source-index Markdown representation."""
+    if not isinstance(text, str):
+        raise ValidationError("publication", "source-index", "must be text")
+    lines = text.splitlines()
+    if "digest_kind: source-index" not in lines or not any(line.startswith("schema_version:") for line in lines):
+        raise ValidationError("publication", "source-index", "managed header is missing")
+    version = next(line.partition(":")[2].strip() for line in lines if line.startswith("schema_version:"))
+    table_start = next((index for index, line in enumerate(lines) if line.startswith("| source_uri |")), None)
+    if table_start is None or table_start + 1 >= len(lines):
+        raise ValidationError("publication", "source-index", "fixed table header is missing")
+    columns = _split_table_row(lines[table_start])
+    expected = ["source_uri", "content_fingerprint", "status", "target_paths"]
+    if columns != expected:
+        raise ValidationError("publication", "source-index", "fixed columns are invalid")
+    rows: list[dict[str, Any]] = []
+    for line in lines[table_start + 2 :]:
+        if not line.strip():
+            continue
+        cells = _split_table_row(line)
+        if len(cells) != len(expected):
+            raise ValidationError("publication", "source-index", "row column count is invalid")
+        rows.append(
+            {
+                "source_uri": cells[0],
+                "content_fingerprint": cells[1],
+                "status": cells[2],
+                "target_paths": [unquote(path.strip()) for path in cells[3].split(",") if path.strip()],
+            }
+        )
+    return validate_source_index({"schema_version": version, "entries": rows})
 
 
 # Clear aliases for callers that prefer the noun form.
