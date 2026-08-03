@@ -28,7 +28,9 @@ exit 0
 
 ## Review 事实
 
-当前 snapshot 的官方 WorkflowHub `wh-review` 尝试为 `unavailable`：宿主 bridge 返回 `host bridge requires exactly one response after request`。这不是 pass，也没有改 WorkflowHub、换 DeepSeek 或用历史 provider verdict 冒充当前结论。
+当前 snapshot `53758b68e7cda026620cc84d8f97045f698cabd8` 的官方 WorkflowHub `wh-review` 尝试（invocation key `verify-code-current-head-20260804-r2`）为 `unavailable`：宿主 bridge 返回 `host bridge requires exactly one response after request`。这不是 pass，也没有改 WorkflowHub、换 DeepSeek 或用历史 provider verdict 冒充当前结论。
+
+正式 close 也未执行：`task-close prepare` 在读取当前 TaskHandle 时返回 `ENOENT`（缺少 `results` 记录目录）。因此没有创建 close plan、确认记录、合并、推送或删除 worktree；不伪造 close receipt。
 
 ## 总结
 
