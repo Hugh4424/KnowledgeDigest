@@ -32,3 +32,11 @@
 4. 删除已合并的 Task2 worktree 和本地分支。
 
 不会删除下载目录产物、测试证据、对比报告或 WorkflowHub 历史记录。
+
+## 实际结果
+
+- 合并提交：`3da67c64d400bc25644850d1eefd7b9ce49f2ead`
+- `main` 已推送到 `origin/main`，本地与远端一致。
+- Task2 worktree 已删除。
+- Task2 本地分支已删除。
+- 合并后完整测试：`316 passed in 19.47s`。
