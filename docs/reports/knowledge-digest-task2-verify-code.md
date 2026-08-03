@@ -8,10 +8,12 @@
 
 ```text
 uv run --frozen pytest -q
-316 passed in 17.14s
+316 passed in 16.76s
 git diff --check
 exit 0
 ```
+
+`tasks.md` 的 T035–T038 完成区已补齐；本次只修改任务记录，不改变实现范围。独立产物核对仍为：120 个受管主题页、最大 300 行、0 个 `pages/digest` 路径、88 个有效 source-index URI，所有主题页均包含 Summary/Why/Version/Evidence/Provenance。
 
 ## AC 逐项事实
 
@@ -28,7 +30,7 @@ exit 0
 
 ## Review 事实
 
-当前 snapshot `53758b68e7cda026620cc84d8f97045f698cabd8` 的官方 WorkflowHub `wh-review` 尝试（invocation key `verify-code-current-head-20260804-r2`）为 `unavailable`：宿主 bridge 返回 `host bridge requires exactly one response after request`。这不是 pass，也没有改 WorkflowHub、换 DeepSeek 或用历史 provider verdict 冒充当前结论。
+当前 snapshot `1d3b14daf16a14c405c4590db6686b76459b7172` 的官方 WorkflowHub `wh-review` 尝试（invocation key `verify-code-current-head-20260804-r3`）为 `unavailable`：宿主 bridge 返回 `host bridge requires exactly one response after request`。这不是 pass，也没有改 WorkflowHub、换 DeepSeek 或用历史 provider verdict 冒充当前结论。
 
 正式 close 也未执行：`task-close prepare` 在读取当前 TaskHandle 时返回 `ENOENT`（缺少 `results` 记录目录）。因此没有创建 close plan、确认记录、合并、推送或删除 worktree；不伪造 close receipt。
 

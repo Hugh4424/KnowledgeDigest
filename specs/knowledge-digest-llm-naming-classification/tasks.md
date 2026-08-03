@@ -1076,6 +1076,7 @@ README/AGENTS 解释结果目录；固定 manifest、结构/无损/导航证据�
 - **covered_ac**：AC-004、AC-005。
 - **review_fact**：本快照官方 review unavailable；未用 unavailable 冒充 pass。
 - **completed_at**：2026-08-04T00:20:00+08:00
+- **completion**：`status=completed`；本任务已按声明范围完成。官方 review unavailable 是未解决质量事实，不是通过结论。
 
 ### T036 — GREEN：全量 qwen 分批回归与真实成本账本
 
@@ -1090,9 +1091,10 @@ README/AGENTS 解释结果目录；固定 manifest、结构/无损/导航证据�
 - **covered_ac**：机器证据覆盖 AC-001/003/004/005；AC-002/007 为部分证据；AC-008 的 3,600 秒安全线超出 88.666 秒，标记 partial。
 - **review_fact**：第三版更大批次性能尝试首批未完成即停止，现场保留；未把它计入最终成功产物。官方 review unavailable。
 - **completed_at**：2026-08-04T00:45:00+08:00
+- **completion**：`status=completed`；全量 qwen 结果与成本账本已写入独立产物，人工语义审查和官方 review 的边界保持公开。
 
 **r10 full gate**：`uv run --frozen pytest -q` → `312 passed in 17.39s`；`git diff --check` → `0`。
-**r10 boundary**：最终 qwen 结果真实完成但超过 60 分钟安全线；固定语料只有 17 个可抽样主题；Codex agent-assisted reader audit 不能替代独立人工阅读。以上三点均在最终对比报告中保留，未伪造全部 AC 通过。
+**r10 boundary**：该历史尝试中的更大批次超过 3,600 秒安全线，已由后续 T038 的 final9 分批结果取代；固定语料只有 17 个可抽样主题；Codex agent-assisted reader audit 不能替代独立人工阅读。以上事实均保留，未伪造全部 AC 通过。
 
 ### T037 — GREEN：跨批次稳定主题身份
 
@@ -1106,6 +1108,7 @@ README/AGENTS 解释结果目录；固定 manifest、结构/无损/导航证据�
 - **evidence_path**：`evidence/build-code/task2/T037-green.txt`
 - **review_fact**：未调用新的 provider review；历史官方 review unavailable 仍保持原样。
 - **completed_at**：2026-08-04T01:00:00+08:00
+- **completion**：`status=completed`；稳定主题身份回归已完成，未新增 provider 调用。
 
 ### T038 — GREEN：最终 qwen 全量分批发布
 
@@ -1119,6 +1122,7 @@ README/AGENTS 解释结果目录；固定 manifest、结构/无损/导航证据�
 - **evidence_path**：`/Users/Hugh/Downloads/KnowledgeDigest-task2-qwen-final9-20260804/comparison/COMPARISON.json`
 - **review_fact**：官方 WorkflowHub `wh-review` 仍因 `host bridge requires exactly one response after request` unavailable；未伪造 close receipt。
 - **completed_at**：2026-08-04T01:50:00+08:00
+- **completion**：`status=completed`；89/89 批次和最终产物已完成，jina 探测失败按合同整次回退 Jaccard；AC-007 的人工确认与官方 review 仍显式保留为开放事实。
 
 ## 7. Dependencies and Traceability
 
