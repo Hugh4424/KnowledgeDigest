@@ -17,4 +17,6 @@
 
 当前实现：`uv run pytest tests/ -q` → **131 passed**；提交 `c075570` @ `cursor/phase2.5-slim-llm-closeout`。
 
+当前知识发布架构任务入口：[`knowledge-digest-knowledge-publication-prd.md`](./knowledge-digest-knowledge-publication-prd.md)。它统一记录今天的调研结论、任务路线和验收标准。
+
 仍待拍板：[`open-questions.md`](./open-questions.md)
