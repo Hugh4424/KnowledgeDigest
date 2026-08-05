@@ -16,7 +16,7 @@ from .errors import ValidationError
 DEFAULT_ROOTS = ("pages", "_archive", "_queues")
 DEFAULT_PUBLICATION_HOME = "Home.md"
 DEFAULT_PUBLICATION_INDEX_ROOT = "indexes"
-DEFAULT_PUBLICATION_SOURCE_INDEX = "_digest/source-index.md"
+DEFAULT_PUBLICATION_SOURCE_INDEX = "indexes/sources.md"
 DEFAULT_PENDING_CATEGORY_ID = "pending"
 DEFAULT_PENDING_CATEGORY_TITLE = "待归类"
 DEFAULT_PENDING_TOPIC_DIR = "pages/待归类"
@@ -272,6 +272,8 @@ def _publication_contract(
         source_index_path = _safe_relative_path(
             str(raw_source_index), field="publication_source_index", directory=False
         )
+        if source_index_path == "_digest/source-index.md":
+            source_index_path = DEFAULT_PUBLICATION_SOURCE_INDEX
         categories: list[PublicationCategory] = []
         category_ids: set[str] = set()
         for row in rows:
@@ -337,9 +339,15 @@ def _publication_contract(
             raise ValidationError("publication", "taxonomy_version", "must be SemVer")
         if require_taxonomy and (not taxonomy_owner or not taxonomy_change_policy):
             raise ValidationError("publication", "taxonomy", "owner and change policy must be non-empty")
-        locations = [index_root, source_index_path, *(category.topic_dir for category in categories)]
+        locations = [index_root, *(category.topic_dir for category in categories)]
         if any(_is_same_or_parent(home_path, location) or _is_same_or_parent(location, home_path) for location in locations):
             raise ValidationError("publication", "publication_home", "must not overlap an index or topic directory")
+        if any(
+            _is_same_or_parent(topic_dir, source_index_path)
+            or _is_same_or_parent(source_index_path, topic_dir)
+            for topic_dir in (category.topic_dir for category in categories)
+        ):
+            raise ValidationError("publication", "publication_source_index", "must not overlap a topic directory")
         for index, first in enumerate(locations):
             for second in locations[index + 1 :]:
                 if _is_same_or_parent(first, second) or _is_same_or_parent(second, first):
@@ -438,8 +446,7 @@ def initialize_default_publication(kb_dir: Path) -> PublicationContract:
         raise AssertionError(f"built-in publication contract is invalid: {errors!r}")
     documents = {
         kb_dir / "kb.structure.md": structure,
-        kb_dir / contract.home_path: "---\nmanaged_by: KnowledgeDigest\ndigest_kind: home\n---\n\n# Knowledge Digest\n\n- [待归类](indexes/pending.md)\n",
-        kb_dir / contract.category_index_path(DEFAULT_PENDING_CATEGORY_ID): "---\nmanaged_by: KnowledgeDigest\ndigest_kind: category\ndigest_category_id: pending\n---\n\n# 待归类\n",
+        kb_dir / contract.home_path: "---\nmanaged_by: KnowledgeDigest\ndigest_kind: home\n---\n\n# Knowledge Digest\n",
     }
     existing = [path for path in documents if path.exists() or path.is_symlink()]
     if existing:
@@ -700,9 +707,10 @@ def _split_table_row(line: str) -> list[str]:
     return [cell.replace("\\|", "|").replace("\\\\", "\\") for cell in cells]
 
 
-def serialize_source_index(value: dict[str, Any]) -> str:
+def serialize_source_index(value: dict[str, Any], *, source_index_path: str = DEFAULT_PUBLICATION_SOURCE_INDEX) -> str:
     """Serialize source-index as the one canonical, reader-visible Markdown form."""
     normalized = validate_source_index(value)
+    index_parent = Path(source_index_path).parent
     lines = [
         "---",
         "managed_by: KnowledgeDigest",
@@ -716,6 +724,10 @@ def serialize_source_index(value: dict[str, Any]) -> str:
         "| --- | --- | --- | --- |",
     ]
     for entry in normalized["entries"]:
+        target_links = []
+        for path in entry["target_paths"]:
+            relative = Path(os.path.relpath(path, start=index_parent)).as_posix()
+            target_links.append(f"[{_escape_table_cell(path)}]({quote(relative, safe='/._-')})")
         lines.append(
             "| "
             + " | ".join(
@@ -723,7 +735,7 @@ def serialize_source_index(value: dict[str, Any]) -> str:
                     _escape_table_cell(entry["source_uri"]),
                     entry["content_fingerprint"],
                     entry["status"],
-                    _escape_table_cell(",".join(quote(path, safe="/._-") for path in entry["target_paths"])),
+                    _escape_table_cell(", ".join(target_links)),
                 )
             )
             + " |"
@@ -731,7 +743,11 @@ def serialize_source_index(value: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def parse_source_index_markdown(text: str) -> dict[str, Any]:
+def parse_source_index_markdown(
+    text: str,
+    *,
+    source_index_path: str = DEFAULT_PUBLICATION_SOURCE_INDEX,
+) -> dict[str, Any]:
     """Parse and validate the fixed source-index Markdown representation."""
     if not isinstance(text, str):
         raise ValidationError("publication", "source-index", "must be text")
@@ -746,6 +762,7 @@ def parse_source_index_markdown(text: str) -> dict[str, Any]:
     expected = ["source_uri", "content_fingerprint", "status", "target_paths"]
     if columns != expected:
         raise ValidationError("publication", "source-index", "fixed columns are invalid")
+    index_parent = Path(source_index_path).parent
     rows: list[dict[str, Any]] = []
     for line in lines[table_start + 2 :]:
         if not line.strip():
@@ -753,12 +770,22 @@ def parse_source_index_markdown(text: str) -> dict[str, Any]:
         cells = _split_table_row(line)
         if len(cells) != len(expected):
             raise ValidationError("publication", "source-index", "row column count is invalid")
+        target_cell = cells[3]
+        linked_targets = re.findall(r"\]\(([^)#]+)(?:#[^)]+)?\)", target_cell)
+        if linked_targets:
+            target_paths = [
+                Path(os.path.normpath(os.path.join(index_parent, unquote(path)))).as_posix()
+                for path in linked_targets
+            ]
+        else:
+            # Read older projections whose target_paths were root-relative text.
+            target_paths = [unquote(path.strip()) for path in target_cell.split(",") if path.strip()]
         rows.append(
             {
                 "source_uri": cells[0],
                 "content_fingerprint": cells[1],
                 "status": cells[2],
-                "target_paths": [unquote(path.strip()) for path in cells[3].split(",") if path.strip()],
+                "target_paths": target_paths,
             }
         )
     return validate_source_index({"schema_version": version, "entries": rows})

@@ -300,6 +300,7 @@ def _render_page(
     evidence_lines: list[str],
     claims: list[dict[str, Any]],
     publication_metadata: dict[str, Any] | None = None,
+    source_index_path: str | None = None,
 ) -> str:
     provenance = [_provenance_line(claim) for claim in claims]
     metadata = publication_metadata or {}
@@ -331,6 +332,12 @@ def _render_page(
         else []
     )
     related_lines = [f"- `{value}`" for value in related] or ["- 暂无已验证的相关主题。"]
+    source_index_lines: list[str] = []
+    if source_index_path:
+        source_index_link = Path(
+            os.path.relpath(source_index_path, start=Path(published_path).parent)
+        ).as_posix()
+        source_index_lines = [f"- [来源索引]({source_index_link})"]
     lines = [
         "---",
         "managed_by: KnowledgeDigest",
@@ -362,6 +369,7 @@ def _render_page(
         *evidence_lines,
         "",
         "## Provenance",
+        *source_index_lines,
         *provenance,
         "",
     ]
@@ -402,6 +410,7 @@ def _partition(
     *,
     max_lines: int,
     publication_metadata: dict[str, Any] | None = None,
+    source_index_path: str | None = None,
 ) -> list[tuple[list[str], list[dict[str, Any]]]]:
     """Partition complete evidence entries; no claim can cross a topic part."""
     # This architecture contract fixes formal topic pages at 300 lines.  The
@@ -422,6 +431,7 @@ def _partition(
             candidate_evidence,
             candidate_claims,
             publication_metadata,
+            source_index_path,
         )
         if len(candidate.splitlines()) <= limit:
             evidence, claims = candidate_evidence, candidate_claims
@@ -442,6 +452,7 @@ def _partition(
             evidence,
             claims,
             publication_metadata,
+            source_index_path,
         )
         if len(single.splitlines()) > limit:
             raise ValidationError(
@@ -759,6 +770,7 @@ def build_topic_layouts(
             entries,
             max_lines=max_lines,
             publication_metadata=publication_metadata,
+            source_index_path=publication.source_index_path if publication is not None else None,
         )
         pages: list[dict[str, Any]] = []
         coverage: list[dict[str, Any]] = []
@@ -773,6 +785,7 @@ def build_topic_layouts(
                 evidence,
                 enriched_claims,
                 publication_metadata,
+                publication.source_index_path if publication is not None else None,
             )
             if len(rendered.splitlines()) > 300:
                 raise ValidationError("layout", target, "final page exceeds the configured line limit")

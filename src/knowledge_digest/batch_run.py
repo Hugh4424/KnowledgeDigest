@@ -30,25 +30,53 @@ def _sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _declared_sources(new_dir: Path) -> dict[str, dict[str, Any]]:
-    result: dict[str, dict[str, Any]] = {}
-    for record in read_jsonl(new_dir / "sources.jsonl"):
-        content_path = record.get("content_path")
-        if isinstance(content_path, str) and content_path:
-            result[content_path.replace("\\", "/").removeprefix("items/")] = record
-    return result
+def _source_rows(paths: DigestPaths) -> list[dict[str, str]]:
+    """Freeze the declared input set before S1 is allowed to process it."""
+    declared: dict[str, dict[str, Any]] = {}
+    declared_uris: dict[str, str] = {}
+    for record in read_jsonl(paths.new_dir / "sources.jsonl"):
+        raw_path = record.get("content_path")
+        if not isinstance(raw_path, str) or not raw_path.strip():
+            raise ValidationError("manifest", "sources.jsonl", "content_path must be a non-empty string")
+        content_path = raw_path.replace("\\", "/").removeprefix("items/")
+        path = Path(content_path)
+        if not content_path or path.is_absolute() or ".." in path.parts or "." in path.parts:
+            raise ValidationError("manifest", raw_path, "content_path must stay inside new_dir/items")
+        if content_path in declared:
+            raise ValidationError("manifest", content_path, "source declaration is duplicated")
+        source_uri = record.get("source_uri")
+        if not isinstance(source_uri, str):
+            source_uri = ""
+        if source_uri and source_uri in declared_uris:
+            raise ValidationError(
+                "manifest",
+                source_uri,
+                f"source URI is declared for both {declared_uris[source_uri]} and {content_path}",
+            )
+        declared[content_path] = record
+        if source_uri:
+            declared_uris[source_uri] = content_path
 
-
-def _manifest(paths: DigestPaths, batch_size: int) -> dict[str, Any]:
-    if batch_size < 1:
-        raise ValidationError("batch", "batch_size", "must be at least 1")
-    declared = _declared_sources(paths.new_dir)
-    sources: list[dict[str, str]] = []
+    actual: dict[str, Path] = {}
     for path in sorted(paths.items_dir.rglob("*")):
-        if not path.is_file() or path.suffix.lower() not in _INGESTIBLE_SUFFIXES:
-            continue
-        content_path = path.relative_to(paths.items_dir).as_posix()
-        source_uri = str(declared.get(content_path, {}).get("source_uri", ""))
+        if path.is_file() and path.suffix.lower() in _INGESTIBLE_SUFFIXES:
+            actual[path.relative_to(paths.items_dir).as_posix()] = path
+    actual_paths = set(actual)
+    declared_paths = set(declared)
+    missing = sorted(actual_paths - declared_paths)
+    extra = sorted(declared_paths - actual_paths)
+    if missing or extra:
+        details: list[str] = []
+        if missing:
+            details.append(f"missing declarations: {', '.join(missing)}")
+        if extra:
+            details.append(f"extra declarations: {', '.join(extra)}")
+        raise ValidationError("manifest", paths.new_dir / "sources.jsonl", "; ".join(details))
+
+    sources: list[dict[str, str]] = []
+    for content_path, path in actual.items():
+        record = declared[content_path]
+        source_uri = str(record.get("source_uri") or "")
         identity = source_id(source_uri) if source_uri else f"invalid-{hashlib.sha256(content_path.encode('utf-8')).hexdigest()[:20]}"
         sources.append(
             {
@@ -59,6 +87,84 @@ def _manifest(paths: DigestPaths, batch_size: int) -> dict[str, Any]:
             }
         )
     sources.sort(key=lambda row: (row["source_id"], row["content_path"]))
+    return sources
+
+
+def build_input_manifest(
+    paths: DigestPaths,
+    *,
+    run_id: str,
+    config_identity: str,
+    snapshots: list[dict[str, Any]],
+    duplicates: list[dict[str, Any]],
+    allowed_content_paths: set[str] | None = None,
+) -> dict[str, Any]:
+    """Join the frozen input rows with the S1 facts for one run."""
+    rows = [
+        row for row in _source_rows(paths)
+        if allowed_content_paths is None or row["content_path"] in allowed_content_paths
+    ]
+    snapshots_by_path: dict[str, dict[str, Any]] = {}
+    for row in snapshots:
+        raw_path = row.get("content_path") or row.get("input_path")
+        if not raw_path:
+            continue
+        candidate = Path(str(raw_path))
+        try:
+            content_path = (
+                candidate.relative_to(paths.items_dir).as_posix()
+                if candidate.is_absolute()
+                else candidate.as_posix().removeprefix("items/")
+            )
+        except ValueError as error:
+            raise ValidationError("manifest", raw_path, "snapshot path is outside input items") from error
+        snapshots_by_path[content_path] = row
+    duplicates_by_path = {
+        Path(str(row.get("path", ""))).relative_to(paths.items_dir).as_posix(): row
+        for row in duplicates
+        if row.get("path")
+    }
+    sources: list[dict[str, Any]] = []
+    for row in rows:
+        snapshot = snapshots_by_path.get(row["content_path"])
+        if snapshot is None:
+            raise ValidationError("manifest", row["content_path"], "source snapshot is missing")
+        if snapshot.get("validation_status") not in {"failed", "degraded"} and snapshot.get("content_fingerprint") != row["content_fingerprint"]:
+            raise ValidationError("manifest", row["content_path"], "snapshot fingerprint differs from input manifest")
+        duplicate = duplicates_by_path.get(row["content_path"])
+        fingerprint = snapshot.get("content_fingerprint") or row["content_fingerprint"]
+        sources.append(
+            {
+                **row,
+                "content_fingerprint": fingerprint,
+                "snapshot_id": snapshot.get("snapshot_id"),
+                "validated_at": snapshot.get("validated_at"),
+                "validation_status": snapshot.get("validation_status"),
+                "validation_reason": snapshot.get("validation_reason"),
+                "duplicate_of": duplicate.get("duplicate_of") if duplicate else None,
+                "canonical_source_uri": duplicate.get("canonical_source_uri") if duplicate else None,
+                "canonical_source_id": duplicate.get("canonical_source_id") if duplicate else None,
+            }
+        )
+    canonical = json.dumps(
+        {"config_identity": config_identity, "sources": sources},
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return {
+        "schema_version": "input-manifest.v1",
+        "run_id": run_id,
+        "config_identity": config_identity,
+        "manifest_sha256": hashlib.sha256(canonical.encode("utf-8")).hexdigest(),
+        "sources": sources,
+    }
+
+
+def _manifest(paths: DigestPaths, batch_size: int) -> dict[str, Any]:
+    if batch_size < 1:
+        raise ValidationError("batch", "batch_size", "must be at least 1")
+    sources = _source_rows(paths)
     canonical = json.dumps(sources, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     batches = [
         {

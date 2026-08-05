@@ -66,7 +66,7 @@ def _frontmatter(text: str) -> dict[str, str]:
 
 def _source_index(kb_dir: Path) -> list[dict[str, object]]:
     value = parse_source_index_markdown(
-        (kb_dir / "_digest" / "source-index.md").read_text(encoding="utf-8")
+        (kb_dir / "indexes" / "sources.md").read_text(encoding="utf-8")
     )
     return [
         {
@@ -164,7 +164,7 @@ def test_conflicting_content_for_the_same_source_uri_fails_before_write(tmp_path
         ],
     )
 
-    with pytest.raises(ValidationError, match="same source_uri declares conflicting content"):
+    with pytest.raises(ValidationError, match="source URI is declared for both"):
         _run(new_dir, kb_dir)
 
     assert not (kb_dir / "pages").exists()
@@ -286,7 +286,7 @@ def test_source_index_is_link_only_and_duplicate_source_inherits_topic_link(tmp_
 
     _run(new_dir, kb_dir)
     records = _source_index(kb_dir)
-    markdown = (kb_dir / "_digest" / "source-index.md").read_text(encoding="utf-8")
+    markdown = (kb_dir / "indexes" / "sources.md").read_text(encoding="utf-8")
 
     assert [row["source_uri"] for row in records] == ["https://source.example/one", "https://source.example/two"]
     assert all(len(row["topic_paths"]) == 1 for row in records)

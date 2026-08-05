@@ -55,7 +55,7 @@ def test_navigation_and_source_index_share_one_writeback_transaction(tmp_path: P
     assert {row["status"] for row in writes} == {"success"}
     assert (paths.kb_dir / "README.md").is_file()
     assert (paths.kb_dir / publication.home_path).is_file()
-    assert (paths.kb_dir / publication.source_index_path).is_file()
+    assert not (paths.kb_dir / publication.source_index_path).exists()
 
 
 def test_batch_manifest_is_v3_with_resume_identity_and_budget_fields(tmp_path: Path) -> None:
@@ -472,7 +472,7 @@ def test_source_index_keeps_duplicate_alias_from_snapshot_manifest(tmp_path: Pat
     kb_dir.mkdir()
     paths = validate_paths(new_dir, kb_dir, allow_new_kb=True)
     audit_run(paths, DigestSettings(), dry_run=False)
-    source_index = parse_source_index_markdown((kb_dir / "_digest/source-index.md").read_text(encoding="utf-8"))
+    source_index = parse_source_index_markdown((kb_dir / "indexes/sources.md").read_text(encoding="utf-8"))
     assert {row["source_uri"] for row in source_index["entries"]} == {"confluence://canonical", "confluence://alias"}
 
 
@@ -509,7 +509,7 @@ def test_batched_source_index_keeps_prior_sources(tmp_path: Path) -> None:
     )
 
     source_index = parse_source_index_markdown(
-        (kb_dir / "_digest/source-index.md").read_text(encoding="utf-8")
+        (kb_dir / "indexes/sources.md").read_text(encoding="utf-8")
     )
     assert {row["source_uri"] for row in source_index["entries"]} == {
         "confluence://one.md",

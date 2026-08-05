@@ -30,6 +30,16 @@
 
 **来源索引**：从每个有效来源指向承载其 Claim 的主题页或主题分页的导航清单。它不复制原文、Claim 或 Evidence，也不替代正式 Provenance。
 
+**Reader Package**：用户默认阅读的交付包，只包含 `README.md`、`Home.md`、现有结构/分类导航索引、正式主题页和 `indexes/sources.md`。新运行不生成 `_digest/source-index.md`；历史结果不迁移、不重写。
+
+**Audit/Archive Package**：用于审计、恢复和排查的交付包，包含 input manifest、source snapshot、Claim、Evidence、原文归档、失败原因、运行报告和配置/provider hash。它不作为日常阅读入口。
+
+**页级发布状态**：页级只允许 `published` 或 `degraded`。`published` 表示通过机器门，可以进入候选 Reader Package；`degraded` 表示失败、冲突、缺证据或人工修改冲突，不进入正式导航。
+
+**交付级发布状态**：交付级只允许 `released` 或 `not_released`。Task 0–2 只能是 `not_released`；只有 Task 3 同时通过机器门、读者门和交付门，才能是 `released`。
+
+**业务结果幂等**：同一输入快照和配置重跑时，Reader/Audit 中的来源、Claim、页面、duplicate 和 archive 内容不能重复增长；运行记录可以追加，用于保留审计历史。
+
 **待复核清单**：待复核论断在每次运行报告和待处理清单中可见，供后续手动运行再次校验。本期不设告警、数量上限或人工复核产品流程。
 
 **Why（决策背景）**：解释某项设计或规则为何存在的来源内容，不能只保留结果描述。
@@ -49,5 +59,5 @@
 - 公司 Confluence 正文只能发送给本机 embedding 服务，不得发送到外部 API
 - 每个有效来源至少由一条**来源索引**记录指向承载其 Claim 的**主题页**或**主题分页**
 - **主题分页**合计保留该主题的全部 Claim，并继续满足 Evidence 与 Provenance 门禁
-- 每个**托管知识页**属于一个**发布结构**；**读者入口**只链接其可读路径，审计数据继续留在 `_digest` 与 `_queues`
-- 新主题默认进入 `pending` 分类；离线标题依次取既有托管标题、来源 metadata title/H1、文件名，稳定主题身份仍只由来源决定
+- 每个**托管知识页**属于一个**发布结构**；**读者入口**只链接其可读路径，审计数据继续留在 Audit/Archive Package 的 `_digest` 与 `_queues`，不进入 Reader Package
+- 只有存在真实、非空、可导航的待处理项时才生成 `pending`；离线标题依次取既有托管标题、来源 metadata title/H1、文件名，稳定主题身份仍只由来源决定

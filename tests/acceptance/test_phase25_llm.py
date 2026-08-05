@@ -1712,13 +1712,16 @@ def test_end_to_end_fallback_page_keeps_every_source_line(
         assert line in written
 
 
-def test_end_to_end_provider_error_publishes_source_and_pending_review(
-    tmp_path: Path,
+def test_end_to_end_provider_error_keeps_source_in_audit_and_pending_review(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
 ) -> None:
-    """A transport/JSON failure keeps deterministic output and a replay queue."""
+    """An allowlisted provider failure keeps evidence but never enters Reader."""
     new_dir, kb_dir = _kb_case(tmp_path)
     paths = validate_paths(new_dir, kb_dir)
     roots = parse_roots(paths.structure_path)
+    monkeypatch.setenv("KD_LLM_MODEL", llm.PUBLICATION_LLM_MODEL)
+    monkeypatch.setenv("KD_LLM_BASE_URL", llm.PUBLICATION_LLM_BASE_URL)
+    monkeypatch.setenv("KD_LLM_API_KEY", "test-provider-key")
 
     def generator(_context: dict[str, Any]) -> dict[str, Any]:
         raise ValidationError("llm", "provider", "malformed JSON")
@@ -1732,14 +1735,12 @@ def test_end_to_end_provider_error_publishes_source_and_pending_review(
     )
 
     pages = list((kb_dir / "pages").rglob("*.md"))
-    assert pages
-    written = "\n".join(page.read_text(encoding="utf-8") for page in pages)
-    assert "Claim one." in written and "Claim two." in written
+    assert not pages
     pending = (kb_dir / "_digest" / "pending-review.jsonl").read_text(encoding="utf-8")
     assert "malformed JSON" in pending
     from knowledge_digest.kb_structure import parse_source_index_markdown
 
-    source_index = parse_source_index_markdown((kb_dir / "_digest" / "source-index.md").read_text(encoding="utf-8"))
+    source_index = parse_source_index_markdown((kb_dir / "indexes" / "sources.md").read_text(encoding="utf-8"))
     assert source_index["entries"][0]["status"] == "needs-review"
     assert "https://source.example/llm" in (kb_dir / "_queues" / "needs_review.md").read_text(encoding="utf-8")
     report = json.loads(next((kb_dir / "_digest").glob("runs/*/report.json")).read_text(encoding="utf-8"))

@@ -13,6 +13,9 @@ from .jsonl import append_jsonl, read_jsonl, write_jsonl
 
 _DISALLOWED_SOURCE_STATUSES = {"empty", "empty_shell", "failed", "shell", "invalid", "inconsistent", "no_body"}
 ARCHIVE_RETENTION_DAYS = 90
+_VALID_PAGE_STATUSES = {"published", "degraded"}
+_VALID_DELIVERY_STATUSES = {"released", "not_released"}
+_VALID_SOURCE_STATUSES = {"passed", "verified", "ok", "failed", "pending", "degraded"}
 
 
 def now_utc() -> str:
@@ -29,6 +32,139 @@ def retention_deadline(started_at: str | None = None) -> str:
     else:
         start = datetime.now(UTC)
     return (start + timedelta(days=ARCHIVE_RETENTION_DAYS)).isoformat().replace("+00:00", "Z")
+
+
+def _content_path(value: object) -> str:
+    return str(value or "").replace("\\", "/").removeprefix("items/")
+
+
+def _planned_targets(planned_writes: Iterable[dict[str, Any]]) -> set[str]:
+    targets: set[str] = set()
+    for record in planned_writes:
+        direct = record.get("target_path")
+        if direct:
+            targets.add(str(direct))
+        for page in record.get("split_pages", []) if isinstance(record.get("split_pages"), list) else []:
+            if isinstance(page, dict) and page.get("target_path"):
+                targets.add(str(page["target_path"]))
+        for target in record.get("target_paths", []) if isinstance(record.get("target_paths"), list) else []:
+            if target:
+                targets.add(str(target))
+    return targets
+
+
+def _is_reader_target(target: str) -> bool:
+    path = Path(target)
+    return (
+        target in {"README.md", "Home.md"}
+        or (len(path.parts) == 2 and path.parts[0] == "indexes")
+        or (len(path.parts) >= 2 and path.parts[0] == "pages")
+    )
+
+
+def validate_prewrite_provenance(
+    source_manifest: dict[str, Any],
+    snapshots: list[dict[str, Any]],
+    source_audit_ledger: list[dict[str, Any]],
+    claims: list[dict[str, Any]],
+    planned_writes: list[dict[str, Any]],
+) -> None:
+    """Fail closed before any durable source, queue, archive, or page write."""
+    if not isinstance(source_manifest, dict) or source_manifest.get("schema_version") != "input-manifest.v1":
+        raise ValidationError("prewrite", "source-manifest", "input manifest is missing or unsupported")
+    manifest_sources = source_manifest.get("sources")
+    if not isinstance(manifest_sources, list):
+        raise ValidationError("prewrite", "source-manifest.sources", "must contain the frozen source set")
+    by_path: dict[str, dict[str, Any]] = {}
+    for source in manifest_sources:
+        if not isinstance(source, dict):
+            raise ValidationError("prewrite", "source-manifest.sources", "source row must be an object")
+        path = _content_path(source.get("content_path"))
+        if not path or path in by_path:
+            raise ValidationError("prewrite", path or "source", "source path is missing or duplicated")
+        if not source.get("source_id") or not source.get("content_fingerprint"):
+            raise ValidationError("prewrite", path, "source identity and fingerprint are required")
+        by_path[path] = source
+
+    snapshot_by_path: dict[str, dict[str, Any]] = {}
+    for snapshot in snapshots:
+        path = _content_path(snapshot.get("content_path") or snapshot.get("input_path"))
+        if path:
+            if path in snapshot_by_path:
+                raise ValidationError("prewrite", path, "source snapshot is duplicated in the current run")
+            snapshot_by_path[path] = snapshot
+    if set(snapshot_by_path) != set(by_path):
+        raise ValidationError("prewrite", "source-snapshots", "snapshot source set differs from input manifest")
+    for path, source in by_path.items():
+        snapshot = snapshot_by_path[path]
+        if snapshot.get("source_uri") != source.get("source_uri"):
+            raise ValidationError("prewrite", path, "snapshot source URI differs from input manifest")
+        if snapshot.get("content_fingerprint") != source.get("content_fingerprint"):
+            raise ValidationError("prewrite", path, "snapshot fingerprint differs from input manifest")
+        if not snapshot.get("validated_at"):
+            raise ValidationError("prewrite", path, "snapshot validated_at is required")
+        source_status = str(snapshot.get("validation_status", "")).lower()
+        if source_status not in _VALID_SOURCE_STATUSES:
+            raise ValidationError("prewrite", path, f"unsupported source status: {source_status}")
+
+    ledger_by_path: dict[str, dict[str, Any]] = {}
+    for row in source_audit_ledger:
+        path = _content_path(row.get("content_path"))
+        if not path or path in ledger_by_path:
+            raise ValidationError("prewrite", path or "source-audit-ledger", "source ledger row is missing or duplicated")
+        ledger_by_path[path] = row
+    if set(ledger_by_path) != set(by_path):
+        raise ValidationError("prewrite", "source-audit-ledger", "ledger source set differs from input manifest")
+    for path, source in by_path.items():
+        row = ledger_by_path[path]
+        if row.get("source_uri") != source.get("source_uri"):
+            raise ValidationError("prewrite", path, "ledger source URI differs from input manifest")
+        if row.get("source_id") != source.get("source_id") or row.get("content_fingerprint") != source.get("content_fingerprint"):
+            raise ValidationError("prewrite", path, "ledger identity differs from input manifest")
+
+    targets = _planned_targets(planned_writes)
+    if not targets and claims:
+        raise ValidationError("prewrite", "planned_writes", "formal write plan is empty")
+    for target in targets:
+        path = Path(target)
+        if path.is_absolute() or ".." in path.parts or not target.endswith(".md"):
+            raise ValidationError("prewrite", target, "planned target is not a safe Markdown path")
+        if not _is_reader_target(target):
+            raise ValidationError("prewrite", target, "audit or provider material cannot enter Reader Package")
+
+    for record in [*planned_writes, *claims]:
+        page_status = record.get("page_status")
+        if page_status is not None and page_status not in _VALID_PAGE_STATUSES:
+            raise ValidationError("prewrite", "page_status", f"unsupported page status: {page_status}")
+        if page_status == "degraded":
+            for target in _planned_targets([record]):
+                if _is_reader_target(target):
+                    raise ValidationError("prewrite", target, "degraded page cannot enter Reader Package")
+        delivery_status = record.get("delivery_status")
+        if delivery_status is not None and delivery_status not in _VALID_DELIVERY_STATUSES:
+            raise ValidationError("prewrite", "delivery_status", f"unsupported delivery status: {delivery_status}")
+        if delivery_status == "released":
+            raise ValidationError("prewrite", "delivery_status", "Task0 cannot release a delivery package")
+
+    for claim in claims:
+        source_uri = str(claim.get("source_uri") or "")
+        content_fingerprint = claim.get("content_fingerprint")
+        matching = [
+            (path, source)
+            for path, source in by_path.items()
+            if source.get("source_uri") == source_uri
+        ]
+        if not matching:
+            raise ValidationError("prewrite", source_uri or "claim", "claim source is absent from input manifest")
+        if not claim.get("text") or not claim.get("claim_fingerprint") or not claim.get("fragment_locator"):
+            raise ValidationError("prewrite", source_uri, "claim provenance is incomplete")
+        path, source = matching[0]
+        snapshot = snapshot_by_path[path]
+        if content_fingerprint != source.get("content_fingerprint"):
+            raise ValidationError("prewrite", source_uri, "claim fingerprint does not match source snapshot")
+        target = str(claim.get("target_path") or claim.get("page_path") or "")
+        if target and target not in targets:
+            raise ValidationError("prewrite", target, "claim target is absent from the write plan")
 
 
 def _source_statuses(raw_items: list[dict[str, Any]], run_dir: Path) -> dict[str, dict[str, Any]]:
