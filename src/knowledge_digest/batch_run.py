@@ -572,6 +572,14 @@ def run_batched(
     """Run only failed/pending batches against an immutable input manifest."""
     if dry_run:
         raise ValidationError("batch", "dry_run", "batch recovery requires a real run")
+    from .topic_axis import read_topic_axis_settings
+
+    if read_topic_axis_settings(paths.structure_path)["enabled"]:
+        raise ValidationError(
+            "batch",
+            paths.structure_path,
+            "Task1 topic-axis runs use one fixed manifest; batch mode is not supported",
+        )
     state = _load_or_create_state(paths, state_path, batch_size, settings, resume=resume)
     budget = state.setdefault(
         "budget",

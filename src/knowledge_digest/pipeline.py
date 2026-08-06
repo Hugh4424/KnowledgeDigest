@@ -44,6 +44,7 @@ from .queues import write_queues
 from .retrieve import retrieve
 from .text_similarity import EmbeddingScorer, JaccardScorer
 from .writeback import targets_for_draft, writeback
+from .topic_axis import read_topic_axis_settings, run_topic_axis
 
 
 def _formal_changes(writes: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -1329,13 +1330,44 @@ def _source_index_for_navigation(
 def _write_topic_index(paths: DigestPaths, drafts: list[dict[str, Any]], run_dir: Path) -> None:
     """Persist the stable topic/category/path lock separately from reader pages."""
     target = paths.kb_dir / "_digest" / "topic-index.json"
-    existing: dict[str, Any] = {"schema_version": "1.0.0", "topics": []}
+    raw_existing: dict[str, Any] | None = None
     if target.is_file():
         try:
-            existing = validate_topic_index(json.loads(target.read_text(encoding="utf-8")))
+            raw_existing = json.loads(target.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise ValidationError("publication", target, f"topic-index cannot be read ({error})") from error
+        if raw_existing.get("schema_version") == "2.0.0":
+            # Task1 owns the semantic index.  The older reader pipeline must
+            # not rebuild it from five legacy fields and silently erase axes.
+            validated = validate_topic_index(raw_existing)
+            encoded = json.dumps(validated, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+            run_target = run_dir / "s6" / "topic-index.json"
+            run_target.parent.mkdir(parents=True, exist_ok=True)
+            run_target.write_text(encoded, encoding="utf-8")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            temporary = target.with_suffix(".tmp")
+            temporary.write_text(encoded, encoding="utf-8")
+            os.replace(temporary, target)
+            return
+    existing: dict[str, Any] = {"schema_version": "1.0.0", "topics": []}
+    if raw_existing is not None:
+        try:
+            existing = validate_topic_index(raw_existing)
         except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValidationError) as error:
             raise ValidationError("publication", target, f"topic-index is invalid ({error})") from error
-    by_topic = {str(row["topic_id"]): dict(row) for row in existing["topics"]}
+    # Convert the normalized migration view back to the old reader shape for
+    # this legacy-only pipeline.  This preserves old path locks while keeping
+    # the Task1 2.0.0 projection protected above.
+    by_topic = {
+        str(row["topic_id"]): {
+            "topic_id": str(row["topic_id"]),
+            "source_ids": sorted({str(item) for item in row.get("source_ids", row.get("source_members", [])) if item}),
+            "category_id": str(row.get("category_id") or "pending"),
+            "published_path": str(row.get("legacy_published_path") or row.get("published_path") or ""),
+            "product_slug": row.get("product_slug"),
+        }
+        for row in existing["topics"]
+    }
     for draft_record in drafts:
         entry = draft_record.get("topic_index_entry")
         if not isinstance(entry, dict) and draft_record.get("topic_id"):
@@ -1360,8 +1392,9 @@ def _write_topic_index(paths: DigestPaths, drafts: list[dict[str, Any]], run_dir
                 "published_path": str(entry.get("published_path") or draft_record.get("published_path", "")),
                 "product_slug": entry.get("product_slug"),
             }
-    value = validate_topic_index({"schema_version": "1.0.0", "topics": sorted(by_topic.values(), key=lambda row: row["topic_id"])})
-    encoded = json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    legacy_value = {"schema_version": "1.0.0", "topics": sorted(by_topic.values(), key=lambda row: row["topic_id"])}
+    validate_topic_index(legacy_value)
+    encoded = json.dumps(legacy_value, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     run_target = run_dir / "s6" / "topic-index.json"
     run_target.parent.mkdir(parents=True, exist_ok=True)
     run_target.write_text(encoded, encoding="utf-8")
@@ -1714,6 +1747,12 @@ def _audit_run_locked(
             paths.structure_path,
             "; ".join(structure.publication_errors),
         )
+    topic_axis_settings = read_topic_axis_settings(paths.structure_path)
+    if not dry_run and topic_axis_settings["enabled"]:
+        # Task1 is an explicit opt-in structural run.  It writes only the
+        # four rebuildable _digest projections and never enters the reader
+        # publication pipeline.
+        return run_topic_axis(paths, topic_root=topic_axis_settings.get("topic_root"))
     roots = structure.roots
     source_notes = sum(
         1

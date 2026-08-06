@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import json
 import re
 import tempfile
 from dataclasses import dataclass
@@ -24,7 +25,8 @@ DEFAULT_TAXONOMY_VERSION = "1.0.0"
 DEFAULT_TAXONOMY_OWNER = "KnowledgeDigest maintainers"
 DEFAULT_TAXONOMY_CHANGE_POLICY = "SemVer; maintainers edit kb.structure.md"
 SOURCE_INDEX_SCHEMA_VERSION = "1.0.0"
-TOPIC_INDEX_SCHEMA_VERSION = "1.0.0"
+TOPIC_INDEX_SCHEMA_VERSION = "2.0.0"
+LEGACY_TOPIC_INDEX_SCHEMA_VERSION = "1.0.0"
 DEFAULT_PARENT_IDS = frozenset({"products", "engineering", "customers", "operations", "principles", "other"})
 DEFAULT_PARENT_TITLES = {
     "products": "产品",
@@ -592,53 +594,172 @@ def _require_safe_target(value: Any, field: str) -> str:
     return _safe_relative_path(_require_string(value, field), field=field, directory=False)
 
 
-def validate_topic_index(value: Any) -> dict[str, Any]:
-    """Validate the durable topic identity index used by incremental publishing."""
+def _validate_topic_evidence(value: Any, field: str, *, allow_legacy: bool = False) -> list[dict[str, Any]]:
+    if not isinstance(value, list) or not value:
+        raise ValidationError("publication", field, "must be a non-empty evidence list")
+    normalized: list[dict[str, Any]] = []
+    for index, item in enumerate(value):
+        if not isinstance(item, dict):
+            raise ValidationError("publication", f"{field}[{index}]", "must be an object")
+        if allow_legacy and item.get("legacy_digest_topic_id"):
+            normalized.append(dict(item))
+            continue
+        source_uri = item.get("source_uri")
+        fingerprint = item.get("content_fingerprint")
+        line_number = item.get("line_number")
+        if not isinstance(source_uri, str) or not source_uri.strip():
+            raise ValidationError("publication", f"{field}[{index}].source_uri", "must be non-empty")
+        if not isinstance(fingerprint, str) or not re.fullmatch(r"[0-9a-f]{64}", fingerprint):
+            raise ValidationError("publication", f"{field}[{index}].content_fingerprint", "must be SHA-256")
+        if not isinstance(line_number, int) or line_number < 1:
+            raise ValidationError("publication", f"{field}[{index}].line_number", "must be a positive integer")
+        normalized.append({**item, "source_uri": source_uri.strip(), "content_fingerprint": fingerprint, "line_number": line_number})
+    return normalized
+
+
+def migrate_topic_index(value: Any) -> dict[str, Any]:
+    """Normalize legacy 1.0.0 rows without recalculating identity or paths."""
     if not isinstance(value, dict):
         raise ValidationError("publication", "topic-index", "must be an object")
-    if value.get("schema_version") != TOPIC_INDEX_SCHEMA_VERSION:
+    version = value.get("schema_version")
+    if version == LEGACY_TOPIC_INDEX_SCHEMA_VERSION:
+        topics = value.get("topics")
+        if not isinstance(topics, list):
+            raise ValidationError("publication", "topic-index.topics", "must be a list")
+        migrated: list[dict[str, Any]] = []
+        for index, topic in enumerate(topics):
+            if not isinstance(topic, dict):
+                raise ValidationError("publication", f"topic-index.topics[{index}]", "must be an object")
+            required = {"topic_id", "source_ids", "category_id", "published_path", "product_slug"}
+            if not required.issubset(topic):
+                raise ValidationError("publication", f"topic-index.topics[{index}]", "has unknown or missing fields")
+            old_id = _require_string(topic["topic_id"], "topic-index.topic_id")
+            source_ids = topic["source_ids"]
+            if not isinstance(source_ids, list) or not source_ids or any(not isinstance(item, str) or not item for item in source_ids):
+                raise ValidationError("publication", old_id, "source_ids must be a non-empty string list")
+            published_path = topic["published_path"]
+            if published_path is not None:
+                published_path = _require_safe_target(published_path, "topic-index.published_path")
+            product_slug = topic["product_slug"]
+            if product_slug is not None:
+                product_slug = _require_string(product_slug, "topic-index.product_slug")
+            migrated.append(
+                {
+                    "topic_key": f"legacy/{old_id}",
+                    "knowledge_type": "unknown",
+                    # Legacy rows did not carry semantic axes.  Keep the old
+                    # path available to Task2's page-layout code, but mark the
+                    # semantic projection degraded so it cannot enter the new
+                    # formal navigation axis.
+                    "product": None,
+                    "module": None,
+                    "object_intent": None,
+                    "source_members": list(source_ids),
+                    "published_path": None,
+                    "legacy_published_path": published_path,
+                    "old_path_mapping": (
+                        [{"old_path": published_path, "relation": "unmappable", "evidence_refs": [{"legacy_digest_topic_id": old_id}]}]
+                        if published_path
+                        else []
+                    ),
+                    "status": "degraded",
+                    "legacy_compat": True,
+                    "topic_plan_version": "legacy-1.0.0",
+                    "reason": "migrated from legacy TopicIndex",
+                    "evidence_refs": [{"legacy_digest_topic_id": old_id}],
+                    "digest_topic_id": old_id,
+                    # Compatibility aliases are intentionally retained for the
+                    # existing page-layout and incremental update code.
+                    "topic_id": old_id,
+                    "source_ids": list(source_ids),
+                    "category_id": topic["category_id"],
+                    "product_slug": product_slug,
+                }
+            )
+        return {"schema_version": TOPIC_INDEX_SCHEMA_VERSION, "topics": migrated, "migration": {"from": version, "preserved": True}}
+    if version != TOPIC_INDEX_SCHEMA_VERSION:
         raise ValidationError("publication", "topic-index.schema_version", "unsupported schema version")
-    topics = value.get("topics")
+    return value
+
+
+def validate_topic_index(value: Any) -> dict[str, Any]:
+    """Validate the current TopicIndex and migrate the legacy 1.0.0 shape."""
+    normalized = migrate_topic_index(value)
+    topics = normalized.get("topics")
     if not isinstance(topics, list):
         raise ValidationError("publication", "topic-index.topics", "must be a list")
     seen_topics: set[str] = set()
     seen_sources: set[str] = set()
     seen_paths: set[str] = set()
-    normalized: list[dict[str, Any]] = []
+    validated: list[dict[str, Any]] = []
+    required = {
+        "topic_key", "knowledge_type", "product", "module", "object_intent", "source_members", "published_path",
+        "old_path_mapping", "status", "topic_plan_version", "reason", "evidence_refs",
+    }
     for index, topic in enumerate(topics):
         if not isinstance(topic, dict):
             raise ValidationError("publication", f"topic-index.topics[{index}]", "must be an object")
-        required = {"topic_id", "source_ids", "category_id", "published_path", "product_slug"}
-        if set(topic) != required:
-            raise ValidationError("publication", f"topic-index.topics[{index}]", "has unknown or missing fields")
-        topic_key = _require_string(topic["topic_id"], "topic-index.topic_id")
+        missing = required - set(topic)
+        if missing:
+            raise ValidationError("publication", f"topic-index.topics[{index}]", f"missing fields: {', '.join(sorted(missing))}")
+        topic_key = _require_string(topic["topic_key"], "topic-index.topic_key")
+        _require_string(topic["knowledge_type"], "topic-index.knowledge_type")
         if topic_key in seen_topics:
-            raise ValidationError("publication", topic_key, "topic ID is duplicated")
+            raise ValidationError("publication", topic_key, "topic key is duplicated")
         seen_topics.add(topic_key)
-        source_ids = topic["source_ids"]
-        if not isinstance(source_ids, list) or not source_ids or any(not isinstance(item, str) or not item for item in source_ids):
-            raise ValidationError("publication", topic_key, "source_ids must be a non-empty string list")
-        if len(set(source_ids)) != len(source_ids) or seen_sources.intersection(source_ids):
+        status = topic["status"]
+        if status not in {"published", "degraded"}:
+            raise ValidationError("publication", topic_key, "unsupported topic status")
+        members = topic["source_members"]
+        if not isinstance(members, list) or not members or any(not isinstance(item, str) or not item for item in members):
+            raise ValidationError("publication", topic_key, "source_members must be a non-empty string list")
+        if len(set(members)) != len(members) or seen_sources.intersection(members):
             raise ValidationError("publication", topic_key, "source membership is duplicated")
-        seen_sources.update(source_ids)
-        category_id = _require_string(topic["category_id"], "topic-index.category_id")
-        published_path = _require_safe_target(topic["published_path"], "topic-index.published_path")
-        if published_path in seen_paths:
-            raise ValidationError("publication", published_path, "published path is duplicated")
-        seen_paths.add(published_path)
-        product_slug = topic["product_slug"]
-        if product_slug is not None:
-            product_slug = _require_string(product_slug, "topic-index.product_slug")
-        normalized.append(
-            {
-                "topic_id": topic_key,
-                "source_ids": list(source_ids),
-                "category_id": category_id,
-                "published_path": published_path,
-                "product_slug": product_slug,
-            }
-        )
-    return {"schema_version": TOPIC_INDEX_SCHEMA_VERSION, "topics": normalized}
+        seen_sources.update(members)
+        axis_fields = ("product", "module", "object_intent")
+        if status == "published" and any(not isinstance(topic[field], str) or not topic[field].strip() for field in axis_fields):
+            raise ValidationError("publication", topic_key, "published axis fields must be non-empty")
+        if status == "degraded" and any(topic[field] is not None for field in axis_fields):
+            raise ValidationError("publication", topic_key, "degraded axis fields must be JSON null")
+        path = topic["published_path"]
+        if status == "published":
+            path = _require_safe_target(path, "topic-index.published_path")
+            if path in seen_paths:
+                raise ValidationError("publication", path, "published path is duplicated")
+            seen_paths.add(path)
+        elif path is not None:
+            raise ValidationError("publication", topic_key, "degraded published_path must be JSON null")
+        mappings = topic["old_path_mapping"]
+        if not isinstance(mappings, list):
+            raise ValidationError("publication", topic_key, "old_path_mapping must be a list")
+        normalized_mappings: list[dict[str, Any]] = []
+        for mapping in mappings:
+            if not isinstance(mapping, dict) or set(mapping) != {"old_path", "relation", "evidence_refs"}:
+                raise ValidationError("publication", topic_key, "old_path_mapping has invalid fields")
+            old_path = _require_safe_target(mapping["old_path"], "topic-index.old_path_mapping.old_path")
+            if mapping["relation"] not in {"rename", "merge", "split", "unmappable"}:
+                raise ValidationError("publication", topic_key, "old_path_mapping relation is unsupported")
+            mapping_evidence = _validate_topic_evidence(
+                mapping["evidence_refs"],
+                f"topic-index.topics[{index}].old_path_mapping.evidence_refs",
+                allow_legacy=bool(topic.get("legacy_compat")),
+            )
+            normalized_mappings.append({"old_path": old_path, "relation": mapping["relation"], "evidence_refs": mapping_evidence})
+        evidence_refs = topic["evidence_refs"]
+        evidence_refs = _validate_topic_evidence(evidence_refs, f"topic-index.topics[{index}].evidence_refs", allow_legacy=bool(topic.get("legacy_compat")))
+        row = dict(topic)
+        row["topic_key"] = topic_key
+        row["source_members"] = sorted(members)
+        row["published_path"] = path
+        row["old_path_mapping"] = sorted(normalized_mappings, key=lambda item: (item["old_path"], item["relation"]))
+        row["evidence_refs"] = sorted(evidence_refs, key=lambda item: json.dumps(item, ensure_ascii=False, sort_keys=True)) if isinstance(evidence_refs, list) else evidence_refs
+        # Keep old consumers working when they read a current index.
+        row.setdefault("topic_id", row.get("digest_topic_id") or topic_key)
+        row.setdefault("source_ids", list(row["source_members"]))
+        row.setdefault("category_id", None)
+        row.setdefault("product_slug", row.get("product"))
+        validated.append(row)
+    return {**normalized, "schema_version": TOPIC_INDEX_SCHEMA_VERSION, "topics": sorted(validated, key=lambda row: row["topic_key"])}
 
 
 def validate_source_index(value: Any) -> dict[str, Any]:

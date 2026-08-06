@@ -1,0 +1,54 @@
+{
+  "task": "T28",
+  "phase": "phase-4-real-corpus-boundary",
+  "verification_role": "GREEN",
+  "commands": [
+    {
+      "command": "export KNOWLEDGEDIGEST_TASK1_RAW_CORPUS='/Users/Hugh/Downloads/confluence 原始数据' && uv run --frozen pytest tests/acceptance/test_task1_topic_axis.py -k 'examples or failure_matrix or single_source_predicates or real_corpus' -q",
+      "exit_code": 0,
+      "observed": "3 passed, 43 deselected"
+    },
+    {
+      "command": "uv run --frozen pytest tests/acceptance -q",
+      "exit_code": 0,
+      "observed": "388 passed, 2 skipped"
+    },
+    {
+      "command": "python -m py_compile src/knowledge_digest/topic_axis.py",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "canonical_test_receipt": {
+    "ref": "quality/tests/build-code-task1-phase4-full-v8.json",
+    "sha256": "33c70bce6535250c7a84c3135b7146b62d50ed53f232cd582daf68f50df7a3e5",
+    "snapshot_tree": "98fab4d090fb3218872c2d50ec771e08ffc1afa6",
+    "exit_code": 0
+  },
+  "real_corpus": {
+    "source_root": "/Users/Hugh/Downloads/confluence 原始数据",
+    "source_count": 89,
+    "knowledge_type": "products",
+    "execution": "isolated temporary new_dir and kb_dir",
+    "raw_source_modified": false,
+    "baseline_reader_modified": false,
+    "companybrain_runtime_dependency": false,
+    "status": "not_released"
+  },
+  "oracle_assertions": [
+    "89 sources are declared, fingerprinted and structurally inventoried",
+    "ProductGazetteer is generated from the current raw corpus and remains candidate-only with source_refs",
+    "12 to 20 deterministic examples are present",
+    "all five single-source predicates have true and per-check failure evidence",
+    "source-inventory, topic-plan, topic-index and run report are written below _digest",
+    "Home.md and the pre-existing reader page retain identical bytes"
+  ],
+  "coverage_limits": [
+    "candidate vocabulary is not canonical confirmation",
+    "Task1 does not publish Home, topic正文 or released reader pages",
+    "the raw corpus is product material and does not prove other knowledge types"
+  ]
+}

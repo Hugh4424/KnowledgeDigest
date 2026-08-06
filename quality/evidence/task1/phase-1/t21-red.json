@@ -1,0 +1,13 @@
+{
+  "task": "T21",
+  "verification_role": "RED",
+  "command": "uv run --frozen pytest tests/acceptance/test_task1_topic_axis.py -k 'knowledge_type or inventory or schema or topic_index' -q",
+  "exit_code": 1,
+  "observed": "3 failed, 10 passed, 29 deselected",
+  "failures": [
+    "inventory lacks knowledge_type",
+    "missing knowledge_type does not fail",
+    "current TopicIndex accepts missing knowledge_type"
+  ],
+  "oracle": "OR-TYPE-FIRST"
+}

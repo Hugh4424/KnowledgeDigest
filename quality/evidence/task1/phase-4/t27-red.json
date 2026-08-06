@@ -1,0 +1,10 @@
+{
+  "task": "T27",
+  "phase": "phase-4-real-corpus-boundary",
+  "verification_role": "RED",
+  "command": "uv run --frozen pytest tests/acceptance/test_task1_topic_axis.py -k \"examples or failure_matrix or single_source_predicates or real_corpus\" -q && uv run --frozen pytest tests/acceptance -q",
+  "exit_code": 1,
+  "result": "failed as designed",
+  "failure": "The real raw directory is not yet staged into the declared new_dir/items plus sources.jsonl contract; validate_paths fails closed with new_dir/items is missing.",
+  "scope": "The raw directory was copied to a temporary location only; no user source or baseline KB was modified."
+}

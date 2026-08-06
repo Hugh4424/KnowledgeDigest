@@ -1,0 +1,9 @@
+{
+  "similarity": {
+    "backend": "jaccard"
+  },
+  "llm_enabled": false,
+  "llm_summary_enabled": false,
+  "max_lines": 300
+}
+

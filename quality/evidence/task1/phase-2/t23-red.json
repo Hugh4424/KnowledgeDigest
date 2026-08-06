@@ -1,0 +1,11 @@
+{
+  "task": "T23",
+  "verification_role": "RED",
+  "command": "uv run --frozen pytest tests/acceptance/test_task1_topic_axis.py -k 'topic_key_v2' -q",
+  "exit_code": 1,
+  "observed": "ImportError: cannot import name 'topic_key_v2'; 1 failed, 43 deselected",
+  "failures": [
+    "knowledge-type-first v2 identity function is not implemented"
+  ],
+  "oracle": "OR-PRODUCTS-NESTED"
+}
