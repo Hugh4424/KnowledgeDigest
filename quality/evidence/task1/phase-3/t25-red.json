@@ -1,0 +1,11 @@
+{
+  "task": "T25",
+  "verification_role": "RED",
+  "command": "uv run --frozen pytest tests/acceptance/test_task1_topic_axis.py -k 'batch_invariance or affected_set or rebuild or managed_conflict or override or offline' -q",
+  "exit_code": 1,
+  "observed": "test_managed_conflict_and_override failed: invalid manifest_sha256 was accepted as MANAGED_CONTENT_OVERRIDE",
+  "failures": [
+    "override manifest hash was not bound to the submitted override row"
+  ],
+  "oracle": "OR-BOUNDARY-PROTECTION"
+}

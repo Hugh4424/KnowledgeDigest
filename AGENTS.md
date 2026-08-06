@@ -20,6 +20,16 @@ uv run --frozen digest NEW_DIR KB_DIR --config config/knowledge-digest.json
 uv run --frozen digest NEW_DIR KB_DIR --config offline.json --no-llm
 ```
 
+Task1 主题轴是 `kb.structure.md` 中 `topic_axis_enabled: true` 的显式 opt-in 结构运行：
+
+```bash
+uv run --frozen digest NEW_DIR KB_DIR --config offline.json --no-llm
+```
+
+它只写 `_digest/source-inventory.jsonl`、`_digest/topic-plan.json`、`_digest/topic-index.json` 和 `_digest/runs/<run_id>.json`，状态为 `not_released`，不写 Home、分类页或主题正文；Task1 opt-in 不支持旧的逐批正文写入。
+
+真实 89 条语料的验收不会提交原始文件；需要显式设置 `KNOWLEDGEDIGEST_TASK1_RAW_CORPUS` 指向本机原始目录。`kb.structure.md` 的 Task1 设置读取受控 frontmatter 中的单行标量（`key: value`，可用简单单引号或双引号）；不支持行内注释、嵌套 YAML 或复杂值，遇到不支持的格式应先修正输入。
+
 `offline.json` 至少包含：
 
 ```json
@@ -63,6 +73,7 @@ src/knowledge_digest/
   publication.py   # 语义标题/分类/摘要建议校验与 fail-closed fallback
   navigation.py    # README/Home/分类索引/来源索引的读者渲染
   page_layout.py   # 最终主题分页、可读路径和 Home/分类导航记录
+  topic_axis.py    # Task1：结构 inventory、ProductGazetteer、TopicPlan/Index、affected/conflict 审计
   writeback.py     # S5：Home/分类/主题同批归档后原子发布，不删除旧 part
   provenance.py    # S6：来源、Claim、归档溯源
   batch_run.py     # 固定清单、批次状态、失败恢复
@@ -96,6 +107,7 @@ scripts/task2_publication_comparison.py # 只读生成 Task1/Task2/CompanyBrain 
 - 写入前先归档；Home、分类和主题页同一事务发布。只允许 `kb.structure.md` 声明路径；手写文件、路径逃逸、软链接、页头路径不符、缺失溯源、页面超限和清单变化必须明确失败。
 - 旧知识库只新增或更新，不删除旧主题页或旧分页；主题收缩时旧 part 保留归档价值，但不再出现在当前分类导航。
 - embedding 不可用时整次回退 Jaccard，不能混用分数。`--no-llm` 不能发出任何 LLM 请求。
+- Task1 主题轴在 provider 前冻结；canonical 词表、语义 key、旧路径映射、affected set 和人工 hash 冲突均需可追溯，degraded 不得伪装成已发布。
 - `agentmemory`、调度器、CAS、数据库、向量库不进入正式 `pipeline.py` 或 `digest` CLI，除非先有新的已确认规格。
 
 ## 更新规则

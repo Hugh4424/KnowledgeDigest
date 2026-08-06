@@ -141,7 +141,7 @@ def resolve_topic_identity(
         None,
     )
     if existing is not None:
-        locked_path = str(existing.get("published_path") or "")
+        locked_path = str(existing.get("published_path") or existing.get("legacy_published_path") or "")
         locked_category = str(existing.get("category_id") or "")
         if not locked_path or not locked_category:
             raise ValidationError("identity", stable_topic_id, "locked topic is missing category or published path")

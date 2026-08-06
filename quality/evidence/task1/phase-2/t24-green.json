@@ -1,0 +1,37 @@
+{
+  "task": "T24",
+  "verification_role": "GREEN",
+  "commands": [
+    {
+      "command": "uv run --frozen pytest tests/acceptance/test_task1_topic_axis.py -k 'gazetteer or canonical_gate or identity or topic_plan or topic_index or path or old_schema or migration or old_path_mapping or provider_boundary or provider_failure or examples or inventory_89_fixture or cli_offline_fixture' -q",
+      "exit_code": 0,
+      "observed": "17 passed, 27 deselected"
+    },
+    {
+      "command": "uv run --frozen pytest tests/acceptance/test_task1_topic_axis.py -q",
+      "exit_code": 0,
+      "observed": "44 passed"
+    },
+    {
+      "command": "python -m py_compile src/knowledge_digest/topic_axis.py src/knowledge_digest/kb_structure.py",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "delivered": [
+    "Products-only ProductGazetteer matching with non-Products null degradation",
+    "knowledge-type-first topic_key_v2 and published path",
+    "old v1 topic identity and path mapping preservation",
+    "PUBLISHED_PATH_COLLISION fail-closed behavior",
+    "stable unknown example coverage and two-axis 89-source fixture",
+    "removed unused identity wrappers after independent review"
+  ],
+  "source_count": 89,
+  "current_receipt": {
+    "ref": "quality/tests/build-code-task1-phase2-green-v2.json",
+    "sha256": "f7f26d88228aad108f0920fbbe2771fbad10038bc09f1f024d542c5ea28b89a5"
+  }
+}
