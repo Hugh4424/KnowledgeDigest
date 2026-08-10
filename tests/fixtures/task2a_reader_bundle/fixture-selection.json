@@ -1,0 +1,50 @@
+{
+  "schema_version": "task2a-fixture-selection.v1",
+  "selection_id": "task2a-real-fixtures-20260809",
+  "provenance_mode": "manual_selection_from_task0_snapshots",
+  "source_snapshot_ref": "quality/evidence/task2-entry/task0-real-corpus-20260806.json",
+  "fixtures": [
+    {
+      "sample_id": "fixture-product-overview",
+      "fixture_path": "product-overview.md",
+      "fixture_sha256": "9ea173944ccaba4ddec3bdf10d424123c4e94f552a88997338579d05e33e0072",
+      "topic_id": "v2/products/goinsight/12-goinsight-dc/12-goinsight-dc",
+      "object_intent": "12. GoInsight DC部署方案",
+      "mapping_role": "product_overview",
+      "digest_page_type": "product_overview",
+      "source_id": "source-43e930851b8bb3f5bdef",
+      "source_fragment_id": "src-43-dc",
+      "content_fingerprint": "a80a7f39ecb214ef4bcd7ff216314d48cc5bb80ec4141ae4d91baee90bbda51b",
+      "claim_ids": ["layout-topic-43e930851b8bb3f5bdef-1594"],
+      "selection_reason": "部署方式和受控 DC 注册事实能代表产品边界，且 source/claim locator 可回查。"
+    },
+    {
+      "sample_id": "fixture-module-capability",
+      "fixture_path": "module-capability.md",
+      "fixture_sha256": "d292b2914be70b4c8fd6e9d8e1fad7f0939ff95f535e30396d6751240c44de50",
+      "topic_id": "v2/products/goinsight/16/16",
+      "object_intent": "16 问数自动识别数据集",
+      "mapping_role": "module_or_capability",
+      "digest_page_type": "module_or_capability",
+      "source_id": "source-3ffd8813c930b3e1efe1",
+      "source_fragment_id": "src-16-dataset",
+      "content_fingerprint": "c37d40c8b16b6640ed09813572e69e280ffb404446952e8bde96c74d78c52973",
+      "claim_ids": ["layout-topic-3ffd8813c930b3e1efe1-1574"],
+      "selection_reason": "逻辑设计中的数据集识别能力是明确 module/capability 事实，且 claim locator 唯一。"
+    },
+    {
+      "sample_id": "fixture-procedure-rule",
+      "fixture_path": "procedure-rule.md",
+      "fixture_sha256": "aed6599205667c3d6779398ae0922c9430ae67a8689adfdbf35f25b10413fc5f",
+      "topic_id": "v2/products/goinsight/17/17",
+      "object_intent": "17  智能搭建",
+      "mapping_role": "procedure_or_rule",
+      "digest_page_type": "procedure_or_rule",
+      "source_id": "source-520b6110d7a4abd4dd8b",
+      "source_fragment_id": "src-17-build",
+      "content_fingerprint": "f13a606b8e3905db2b0cf5ae94d8e61f0ae79b0f26cfba02074b61986ec6e96f",
+      "claim_ids": ["layout-topic-520b6110d7a4abd4dd8b-1722"],
+      "selection_reason": "方案设计段落适合作为流程/规则归因探针，不把它宣称为完整正文质量。"
+    }
+  ]
+}

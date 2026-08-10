@@ -1,0 +1,6 @@
+Command: UV_CACHE_DIR=/tmp/knowledge-digest-uv-cache-task2a-aggregate-final4 uv run --frozen pytest tests/acceptance/test_task2a_reader_frontmatter.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task2a_okf_smoke.py tests/acceptance/test_task0_reader_package.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task1_topic_axis.py -q
+Exit: 0
+Result: 123 passed, 1 skipped in 4.13s
+Skip: test_real_89_source_corpus_contract — KNOWLEDGEDIGEST_TASK1_RAW_CORPUS 未设置
+Coverage: frontmatter, Task 2-A Bundle/trust signals, OKF smoke, Task 0 Reader package, publication contract, Task 1 topic axis
+Limits: no semantic entailment, human reader gate, full raw corpus contract, formal release, or current WorkflowHub provider verdict

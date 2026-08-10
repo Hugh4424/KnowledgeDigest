@@ -1,0 +1,5 @@
+attempt_ref: test-existing-cli-offline-path
+argv_sha256: 985ec57c7282620d43daf39cd2d63b1c71d597cbef2aa5a7328697dc4b836252
+guard_mode: deny-only
+connect_attempts: 0
+scope: test-boundary only; no production counter or context

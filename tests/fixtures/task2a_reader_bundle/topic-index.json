@@ -1,0 +1,59 @@
+{
+  "schema_version": "2.0.0",
+  "topics": [
+    {
+      "category_id": null,
+      "digest_topic_id": "digest-topic-product-overview",
+      "evidence_refs": [
+        {
+          "content_fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "line_number": 1,
+          "source_uri": "raw://fixture/product-overview.md"
+        }
+      ],
+      "knowledge_type": "products",
+      "merge_mode": "single",
+      "module": null,
+      "object_intent": "product overview",
+      "old_path_mapping": [],
+      "product": "Fixture Product",
+      "product_slug": "fixture-product",
+      "published_path": "pages/topics/products/fixture-product/product-overview.md",
+      "reason": "",
+      "description": "The product overview defines the reader-facing product boundary.",
+      "source_ids": ["source-fixture-product"],
+      "source_members": ["source-fixture-product"],
+      "status": "published",
+      "topic_id": "digest-topic-product-overview",
+      "topic_key": "v2/products/fixture-product/product-overview",
+      "topic_plan_version": "1.0.0"
+    },
+    {
+      "category_id": null,
+      "digest_topic_id": "digest-topic-module",
+      "evidence_refs": [
+        {
+          "content_fingerprint": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "line_number": 2,
+          "source_uri": "raw://fixture/module-capability.md"
+        }
+      ],
+      "knowledge_type": "products",
+      "merge_mode": "single",
+      "module": "Fixture Module",
+      "object_intent": "module capability",
+      "old_path_mapping": [],
+      "product": "Fixture Product",
+      "product_slug": "fixture-product",
+      "published_path": "pages/topics/products/fixture-product/fixture-module/module-capability.md",
+      "reason": "",
+      "description": "The module capability describes a concrete product entry point.",
+      "source_ids": ["source-fixture-module"],
+      "source_members": ["source-fixture-module"],
+      "status": "published",
+      "topic_id": "digest-topic-module",
+      "topic_key": "v2/products/fixture-product/fixture-module/module-capability",
+      "topic_plan_version": "1.0.0"
+    }
+  ]
+}

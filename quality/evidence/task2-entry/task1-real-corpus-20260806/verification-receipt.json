@@ -1,0 +1,40 @@
+{
+  "schema_version": "task1-real-corpus-verification.v1",
+  "receipt_id": "task1-real-corpus-20260806",
+  "status": "verified_control_plane_not_released",
+  "provenance_mode": "recomputed_backfill",
+  "generated_by_commit": "07fcc0aa5a62af168e4ddb73cd930bb2f4abae61",
+  "input": {
+    "source_root_id": "confluence-raw-20260806",
+    "source_count": 89,
+    "source_declarations": {"path": "source-declarations.jsonl", "sha256": "7575788c3397d3602722759c1fbe294a628633097051f56e472905420e45270f"},
+    "config": {"path": "offline-config.json", "sha256": "691198e97ac885d0401d676d81f515b84664abd3229fc7683c550b0c9c66fb8b"}
+  },
+  "command": {
+    "run": "uv run --frozen digest <isolated-new-dir> <isolated-kb-dir> --config offline-config.json --no-llm",
+    "exit_code": 0,
+    "provider_calls": {"llm": 0, "embedding": 0},
+    "delivery_status": "not_released"
+  },
+  "outputs": {
+    "source_inventory": {"path": "source-inventory.jsonl", "sha256": "1e770ca33d865f5f3ceb0f5e8236e9daa49dda7a8f62faa97d9be7b0f1f17f52"},
+    "topic_plan": {"path": "topic-plan.json", "sha256": "8b3b3ce5716751f044cf09835bd4be85956a4a77d1d8beed51491467c3db96a8"},
+    "topic_index": {"path": "topic-index.json", "sha256": "78ab433084e782d8753d1399f5d85714a572ddaa0c1c3b7f29f535a7105b1c7c"},
+    "run_report": {"path": "run-report.json", "sha256": "532e6ce4794beb9245b63f8d6a15617a8a8169e667814b52bc4f76ddbb063412"},
+    "kb_structure": {"path": "kb.structure.md", "sha256": "7ddaa6d58eda9cb7e1713c982938400ede4e333b017d9b5afb4a026282fe83b3"}
+  },
+  "observed": {
+    "topic_count": 54,
+    "published_topic_count": 31,
+    "degraded_topic_count": 23,
+    "knowledge_type_registry_entry_count": 1,
+    "gazetteer_entry_count": 93,
+    "example_count": 20,
+    "reader_package_changed": false
+  },
+  "machine_gate": {
+    "command": "KNOWLEDGEDIGEST_TASK1_RAW_CORPUS=<raw-corpus> uv run --frozen pytest tests/acceptance/test_task1_topic_axis.py -k 'examples or failure_matrix or single_source_predicates or real_corpus' -q",
+    "exit_code": 0,
+    "observed": "3 passed, 44 deselected"
+  }
+}

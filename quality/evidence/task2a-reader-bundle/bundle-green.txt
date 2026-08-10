@@ -1,0 +1,13 @@
+command: UV_CACHE_DIR=<task-local> uv run --frozen pytest tests/acceptance/test_task2a_reader_bundle.py -q
+exit_code: 0
+test_count: 24
+pytest_collection: 24 items, including parametrized rejection cases
+oracle: ORACLE-BUNDLE-TREE ORACLE-STATUS ORACLE-LINKS ORACLE-REPLAY ORACLE-OFFLINE-RELEASE ORACLE-ARTIFACT-CONTAINMENT ORACLE-INPUT-ADAPTER ORACLE-ENTRY-READBACK ORACLE-ENTRY-BACKFILL ORACLE-CLI-OFFLINE
+bundle_validation: passed
+real_entry_refs: readback and backfill covered
+real_fixture_claims: 3
+source_count: 66
+claim_count: 3
+release_status: not_released
+cli_guard: quality/evidence/task2a-reader-bundle/cli-offline-guard.txt
+coverage_limit: structure, selected fixture attribution, and offline boundary only; no parser compatibility or semantic reader-quality claim

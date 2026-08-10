@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "evidence_kind": "skill-analysis",
+  "skill": "fullstack-slice-testing",
+  "skill_version": "1.0.0",
+  "stage": "build-code",
+  "invocation_key": "fullstack-slice-testing",
+  "task_id": "task2a-knowledge-publication-reader-bundle",
+  "worktree_root": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task2a-knowledge-publication-reader-bundle",
+  "request_bundle_hash": "5a9ac25c2a9173bf72c907d0f80917ee1f6354ac4febe6b09e9e0ccdd0123d46",
+  "request_snapshot_tree": "41c974a680ff559cf7e443b68c9a925891cf19b2",
+  "skill_file_sha256": "7787ca078e067c88b77e83474a9cc6a7d404edad045fa2f997140f3b94a313e1",
+  "skill_bundle_file_sha256": "7c2246fca699e5a6f1579117c7b4ff385acf13ea1b56ab911731d142dc5a3868",
+  "current_worktree_snapshot": {
+    "head": "07fcc0aa5a62af168e4ddb73cd930bb2f4abae61",
+    "status_all_entries_before_evidence": 45,
+    "status_all_sha256_before_evidence": "93a5573a389d18ca825843813d6ebc2663b7ab20baa9ff7ee79eae3aa4accf63",
+    "request_snapshot_tree_verification": "not independently recomputed"
+  },
+  "changed_runtime_paths_reviewed": [
+    "src/knowledge_digest/reader_bundle.py",
+    "src/knowledge_digest/reader_frontmatter.py",
+    "tests/acceptance/test_task2a_reader_bundle.py",
+    "tests/acceptance/test_task2a_reader_frontmatter.py",
+    "tests/fixtures/task2a_reader_bundle/topic-index.json",
+    "tests/fixtures/task2a_reader_bundle/source-inventory.jsonl",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "routing": {
+    "decision": "advisory_no_fullstack_slice",
+    "reason": "真实 changed runtime paths 是本地 Python frontmatter parser、隔离的本地文件 Bundle projection/validator、acceptance fixture 和 PyYAML dependency；没有 frontend、HTTP/API、backend service、database、authentication、external protocol 或 concurrent service seam。"
+  },
+  "local_filesystem_slice": {
+    "applicable": false,
+    "fixture": "tests/fixtures/task2a_reader_bundle/topic-index.json + source-inventory.jsonl",
+    "input_schema": "TopicIndex 2.0.0 JSON; source inventory task1-real-corpus-verification.v1 JSONL; ArtifactRef SHA-256",
+    "service": "none",
+    "startup_health": "N/A",
+    "request": "direct project_reader_bundle(...) call in acceptance test",
+    "persistence": "tmp_path artifact-root with staging -> bundle/audit/reports atomic projection",
+    "return_state": "BundleReport.release_status=not_released; validate_reader_bundle(...).status=passed asserted by targeted test",
+    "reader_surface": "README.md, Home.md, index.md, product indexes, concept Markdown and references/sources.md; browser N/A",
+    "failure_recovery": "product-only rejection codes degrade; missing entry refs remain backfill_required; replay index bytes stay stable; no service recovery applicable"
+  },
+  "commands": [
+    {
+      "command": "sha256sum /Users/Hugh/Hugh/Project/workflowhub/skills/fullstack-slice-testing/SKILL.md /Users/Hugh/Hugh/Project/workflowhub/skills/fullstack-slice-testing/skill-bundle.json",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "oracle": "skill bundle readback",
+      "result": "SKILL.md and skill-bundle.json read; individual hashes recorded above"
+    },
+    {
+      "command": "git status --short --untracked-files=all | sha256sum",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "oracle": "current worktree snapshot",
+      "result": "pre-evidence status hash 93a5573a389d18ca825843813d6ebc2663b7ab20baa9ff7ee79eae3aa4accf63"
+    },
+    {
+      "command": "git diff --check",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "oracle": "no whitespace errors",
+      "result": "passed"
+    },
+    {
+      "command": "if rg -n 'FastAPI|Flask|Django|/api/|sqlite|sqlalchemy|postgres|redis|oauth|websocket|ThreadingHTTPServer|socket\\.connect|database|frontend|React|requests\\.|httpx\\.|urllib\\.request' src/knowledge_digest/reader_bundle.py src/knowledge_digest/reader_frontmatter.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task2a_reader_frontmatter.py pyproject.toml uv.lock; then exit 1; else echo 'no service/API/database/auth/network markers in changed Task 2-A paths'; fi",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "oracle": "changed-file seam routing heuristic",
+      "result": "no service/API/database/auth/network markers in changed Task 2-A paths",
+      "coverage_limit": "heuristic only; does not prove unrelated existing modules"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/knowledge-digest-uv-cache-fullstack-20260809 uv run --frozen pytest tests/acceptance/test_task2a_reader_frontmatter.py tests/acceptance/test_task2a_reader_bundle.py -q",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "oracle": "ORACLE-FM-ROUNDTRIP + local Bundle structure/status/replay/offline checks",
+      "result": "17 passed in 0.14s",
+      "output_sha256": "7de84fcf8cac8a8e31b8be2e99e0df320443f5a038f3ae64467686ce6ba13fc5"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/knowledge-digest-uv-cache-fullstack-20260809 uv run --frozen pytest tests/acceptance/test_task2a_reader_bundle.py -k 'bundle_projection_writes_canonical_root_and_no_nested_log or validator_checks_status_layers_and_artifact_containment or projection_is_replay_stable_and_verified_mutations_degrade or existing_cli_offline_path_is_zero_provider' -q",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "oracle": "local filesystem slice risk evidence",
+      "result": "4 passed, 6 deselected in 0.15s",
+      "output_sha256": "1ff1cd121d7440b3cc2e3319e8b35913e8bb2dd6ded86bcbb5a938bf5fba8fa8"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/knowledge-digest-uv-cache-lock-20260809 uv lock --check",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "oracle": "frozen lock consistency",
+      "result": "Resolved 8 packages in 1ms",
+      "output_sha256": "d4ce3a7a74366c7352b65ba40cd6b367438b9549e2cc5c7d2040bda4bf66f661"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/knowledge-digest-uv-cache-dependency-20260809 uv run --frozen python -c \"import pathlib, tomllib, yaml; p=tomllib.loads(pathlib.Path('pyproject.toml').read_text()); assert p['project']['dependencies'].count('PyYAML==6.0.2') == 1; assert yaml.__version__ == '6.0.2'; print('PyYAML lock metadata OK', yaml.__version__)\"",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "oracle": "PyYAML dependency gate",
+      "result": "PyYAML lock metadata OK 6.0.2",
+      "output_sha256": "267d1a97b023b01914354fcb81fa07fb59fa02f2574ac5465f04b064266fcdd0"
+    }
+  ],
+  "fixture_service_protocol": {
+    "fixture": "repository fixture files plus pytest tmp_path",
+    "service": "none",
+    "persistent_store": "temporary local filesystem only; no database",
+    "network": "not exercised by application tests; no network protocol exists in changed paths",
+    "browser": "N/A"
+  },
+  "cleanup": {
+    "temporary_cache_roots": [
+      "/private/tmp/knowledge-digest-uv-cache-fullstack-20260809",
+      "/private/tmp/knowledge-digest-uv-cache-lock-20260809",
+      "/private/tmp/knowledge-digest-uv-cache-dependency-20260809"
+    ],
+    "cleanup_command": "uv cache clean --force with each explicit UV_CACHE_DIR",
+    "actual_result": "all three caches cleared; temporary pytest roots self-cleaned; no service/process started",
+    "review_packet_writes": "none"
+  },
+  "coverage_limits": [
+    "没有 fullstack user-observable service slice：无启动/健康检查/真实 HTTP request/response、frontend render 或 persistent service store。",
+    "本证据只覆盖 frontmatter round-trip/hash、isolated local Bundle projection/validator、product-only degraded/replay 和 PyYAML lock；不覆盖 external OKF parser smoke、完整 AC-01–AC-08、正文语义、Task 2-B/2-C 或正式 release。",
+    "CLI --no-llm 测试只断言命令成功；本次未独立读取 runtime_audit counters，也未运行 deny-only socket guard。",
+    "没有修改 task record、provider/model、commit、push、merge 或 task status。"
+  ],
+  "findings": [
+    "按当前真实 changed files，fullstack-slice-testing 是 advisory；没有 fullstack pass。",
+    "本地文件 seam 的定向风险测试通过：4 passed；frontmatter + Bundle acceptance 合计 17 passed。",
+    "PyYAML==6.0.2 与 frozen uv.lock 一致；lock check 通过。",
+    "没有发现 service/API/database/auth/network markers；该判断是路由启发式，不替代完整行为证明。"
+  ],
+  "next_step": "若后续 build-code 把 Bundle 接入 CLI 之外的真实服务/API、数据库、认证、协议或并发边界，按同一 FR/AC 重新执行启动/健康/输入/请求/处理/持久化/返回/呈现/失败恢复 slice；当前证据仅供 verify-code 做风险参考，不作为 fullstack 或正式发布通过。"
+}

@@ -1,0 +1,35 @@
+{
+  "schema_version": "task1-receipt-reconciliation.v1",
+  "artifact_id": "task1-receipt-reconciliation-20260806",
+  "status": "reconciled_for_task2a_entry",
+  "provenance_mode": "current_backfill_supersedes_unavailable_receipt",
+  "current_code_commit": "07fcc0aa5a62af168e4ddb73cd930bb2f4abae61",
+  "historical_receipt": {
+    "path": "quality/evidence/task1/phase-4/t28-green.json",
+    "role": "historical_summary",
+    "usable_as_current_exit": false,
+    "reasons": [
+      "Its canonical test receipt path is not present in the repository.",
+      "Its candidate-only wording predates the current source-derived registry behavior.",
+      "Its verify record retained AC-02 as an open product-maintainer confirmation."
+    ]
+  },
+  "current_authority": {
+    "real_corpus_test_command": "KNOWLEDGEDIGEST_TASK1_RAW_CORPUS=<raw-corpus> uv run --frozen pytest tests/acceptance/test_task1_topic_axis.py -k 'examples or failure_matrix or single_source_predicates or real_corpus' -q",
+    "exit_code": 0,
+    "observed": "3 passed, 44 deselected",
+    "artifact_dir": "quality/evidence/task2-entry/task1-real-corpus-20260806",
+    "run_report_sha256": "532e6ce4794beb9245b63f8d6a15617a8a8169e667814b52bc4f76ddbb063412",
+    "source_count": 89,
+    "topic_count": 54,
+    "gazetteer_entry_count": 93,
+    "delivery_status": "not_released"
+  },
+  "scope_resolution": {
+    "gazetteer_status": "source_derived_for_current_run",
+    "product_maintainer_canonical_confirmation": "deferred",
+    "task2a_use": "allowed as deterministic TopicIndex/Gazetteer control-plane input",
+    "released_semantic_publication": "not_allowed"
+  },
+  "decision": "The fresh, hashed backfill is authoritative for Task 2-A deterministic projection. The historical receipt remains immutable audit material and is not used as current evidence. The unresolved business-canonical question remains outside Task 2-A and keeps the package not_released."
+}

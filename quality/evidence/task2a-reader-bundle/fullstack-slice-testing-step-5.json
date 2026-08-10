@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "evidence_kind": "skill-analysis",
+  "skill": "fullstack-slice-testing",
+  "skill_version": "1.0.0",
+  "stage": "build-code",
+  "invocation_key": "step-5",
+  "task_id": "task2a-knowledge-publication-reader-bundle",
+  "worktree_root": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task2a-knowledge-publication-reader-bundle",
+  "skill_file_sha256": "7787ca078e067c88b77e83474a9cc6a7d404edad045fa2f997140f3b94a313e1",
+  "routing": {
+    "decision": "advisory_no_fullstack_slice",
+    "reason": "实际运行时代码变更只涉及本地 Python frontmatter parser、其 acceptance test 和 PyYAML project/lock；没有前端、HTTP/API、后端服务、数据库、认证、协议、并发或跨边界持久化 seam。"
+  },
+  "changed_runtime_paths_reviewed": [
+    "src/knowledge_digest/reader_frontmatter.py",
+    "tests/acceptance/test_task2a_reader_frontmatter.py",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "current_worktree_snapshot": {
+    "head": "07fcc0aa5a62af168e4ddb73cd930bb2f4abae61",
+    "status_entry_count": 35,
+    "request_snapshot_tree": "242dcbef0987adf1ea5d784b4758aaad852f1bbf",
+    "request_snapshot_tree_verification": "not independently recomputed"
+  },
+  "commands": [
+    {
+      "command": "sha256sum /Users/Hugh/Hugh/Project/workflowhub/skills/fullstack-slice-testing/SKILL.md /Users/Hugh/Hugh/Project/workflowhub/skills/fullstack-slice-testing/skill-bundle.json",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "oracle": "skill bundle hash",
+      "result": "SKILL.md matched bundled hash; skill-bundle.json was read."
+    },
+    {
+      "command": "git diff --check",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "oracle": "no whitespace errors",
+      "result": "passed; no output"
+    },
+    {
+      "command": "if rg -n \"FastAPI|Flask|Django|/api/|sqlite|sqlalchemy|postgres|redis|oauth|websocket|ThreadingHTTPServer|socket\\.connect|database|frontend|React\" src/knowledge_digest/reader_frontmatter.py tests/acceptance/test_task2a_reader_frontmatter.py pyproject.toml uv.lock; then exit 1; else echo \"no cross-boundary markers in changed Task 2-A code\"; fi",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "oracle": "changed-file seam routing heuristic",
+      "result": "no cross-boundary markers in changed Task 2-A code",
+      "coverage_limit": "heuristic only; does not prove behavior of unrelated existing modules"
+    },
+    {
+      "command": "uv run --frozen pytest tests/acceptance/test_task2a_reader_frontmatter.py -q",
+      "expected_exit": 0,
+      "actual_exit": 2,
+      "oracle": "ORACLE-FM-ROUNDTRIP",
+      "result": "blocked before pytest: uv could not initialize /Users/Hugh/.cache/uv because of PermissionError"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/knowledge-digest-uv-cache-step-5 uv run --frozen pytest tests/acceptance/test_task2a_reader_frontmatter.py -q",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "oracle": "ORACLE-FM-ROUNDTRIP",
+      "result": "2 passed in 0.02s"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/knowledge-digest-uv-cache-step-5 uv run --frozen python -c \"import pathlib, tomllib, yaml; p=tomllib.loads(pathlib.Path('pyproject.toml').read_text()); assert p['project']['dependencies'].count('PyYAML==6.0.2') == 1; assert yaml.__version__ == '6.0.2'; print('PyYAML lock metadata OK', yaml.__version__)\"",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "oracle": "PyYAML dependency gate",
+      "result": "PyYAML lock metadata OK 6.0.2"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/knowledge-digest-uv-cache-step-5 uv lock --check",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "oracle": "frozen lock consistency",
+      "result": "Resolved 8 packages in 2ms"
+    }
+  ],
+  "fixture_service_protocol": {
+    "fixture": "tests/acceptance/test_task2a_reader_frontmatter.py",
+    "service": "none",
+    "persistent_store": "none",
+    "network": "not used by executed parser/dependency checks",
+    "browser": "N/A"
+  },
+  "cleanup": {
+    "temporary_path": "/private/tmp/knowledge-digest-uv-cache-step-5",
+    "required_action": "remove after evidence capture",
+    "actual_result": "removed; no symlinks found under the explicit task-local path",
+    "review_packet_writes": "none"
+  },
+  "coverage_limits": [
+    "本次未执行 fullstack user-observable slice，因为没有可贯通的服务/API/持久化/前端边界。",
+    "证据只覆盖 frontmatter round-trip/hash 与 PyYAML lock；不覆盖 Bundle AC-01–AC-08、正文语义、Task 2-B/2-C、正式 release。",
+    "未修改 task record、provider/model、commit、push、merge 或 task status。"
+  ],
+  "findings": [
+    "fullstack-slice-testing 在实际 changed-file 路由中属于 advisory，不产生 fullstack pass。",
+    "默认 uv gate 的首次失败是受限缓存目录权限，不是测试断言失败；改用 task-local UV_CACHE_DIR 后同一 gate 通过。",
+    "当前 frontmatter acceptance gate 真实结果为 2 passed；PyYAML 版本和 frozen lock 检查均通过。"
+  ],
+  "next_step": "后续 build-code 若进入 Phase 2，应先按 T003 的同一 RED gate 判断是否首次出现真实 Bundle/API/持久化 seam；出现后再执行最小真实 slice。"
+}

@@ -1,0 +1,13 @@
+{
+  "stage": "build-plan",
+  "action": "review.invoke",
+  "component": "simplicity-guard",
+  "invocation_key": "build-plan-simplicity-20260810-final-snapshot",
+  "command": "WORKFLOWHUB_HOST_BRIDGE=codex node tools/cli/stage-runtime.mjs review --action=invoke --stage=build-plan --project=KnowledgeDigest --task=task2a-knowledge-publication-reader-bundle --name=simplicity-guard --invocation-key=build-plan-simplicity-20260810-final-snapshot",
+  "exit_code": 1,
+  "status": "unavailable",
+  "reason_code": "WORKFLOWHUB_BUNDLE_SHA256_MISMATCH",
+  "error": "bundle sha256 mismatch: scripts/review-materials.mjs",
+  "semantic_verdict": null,
+  "disposition": "retain unavailable; do not rewrite as pass"
+}

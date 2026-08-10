@@ -1,0 +1,1263 @@
+{
+  "affected_set": {
+    "affected_source_ids": [
+      "source-00492e5c9215fcf5de8c",
+      "source-098ffe620dfb034f8f87",
+      "source-0cef16424a4144324818",
+      "source-0d3521f85e4411b86970",
+      "source-11e8a03ef46004fb4a63",
+      "source-18bc4881d30f90555699",
+      "source-19534f24c5e7589c55f0",
+      "source-1c2b60dd060650439b6c",
+      "source-1c4be075f46dc23844cb",
+      "source-1edde7f1dd61714e4a77",
+      "source-1f45433f4e141fd74a6a",
+      "source-2676d428a6e7f5d231e6",
+      "source-2b45271f38e5c46cbde4",
+      "source-2eb7386d28a4a8b6d1b7",
+      "source-2fdb95a3a2b12d2e62e7",
+      "source-30513f9b557d32d0bfc3",
+      "source-358b8ba5840d953d26fd",
+      "source-3648324ab3e0854de0d5",
+      "source-38c492bf77665cd777bb",
+      "source-3b726e8ebbba2c447686",
+      "source-3ca3cc8391cde158b149",
+      "source-3efebf9aa7621a861cd7",
+      "source-3f20ed2b7cbe1be8fd46",
+      "source-3ffd8813c930b3e1efe1",
+      "source-41b6c1c0cc3b2dc06c89",
+      "source-43e930851b8bb3f5bdef",
+      "source-456205eb4d6cb4e34cde",
+      "source-4e426e31bd241ccf26fb",
+      "source-520b6110d7a4abd4dd8b",
+      "source-52fd48eb115a8b803c24",
+      "source-56a636e8e8e13fc76881",
+      "source-58d24ae693946f22b79d",
+      "source-5a7f0340e4be417d225c",
+      "source-5becbc1e8a792df3f07e",
+      "source-5d367f8ea9a53a365ef3",
+      "source-5d60c2a981bc4339265f",
+      "source-609948d566f8d4644c93",
+      "source-609ba15c6685bee1eb35",
+      "source-61030fcaac6b03e5a7c8",
+      "source-6a94f5b61a57383ef8de",
+      "source-6ee8fd0c5b9957bb48c2",
+      "source-6fa108ea0683ab4f9962",
+      "source-718c6b882cd48560330e",
+      "source-720294b760f4057e9cc1",
+      "source-75df606818882cb728b5",
+      "source-83c7a6f21306f07acbb6",
+      "source-86fefa61619537280727",
+      "source-87644445b62186d4e081",
+      "source-8951f08f6a8c08c6d18a",
+      "source-89b02b9779ecf91fc422",
+      "source-8c2fffaf5551c4bf5721",
+      "source-8d0f9a4a5db8afa093b5",
+      "source-91a69e34c6371730b81d",
+      "source-93c24a970bfc152c7598",
+      "source-97784e842b666d2ad7e1",
+      "source-996e264df0a367126a87",
+      "source-a0625e4603f5815d6709",
+      "source-a39fba6e76179d910e02",
+      "source-acf1439e40c888851bf9",
+      "source-ad794023a19f0c2800a2",
+      "source-af125add2e89eb36b122",
+      "source-b0211212f9b00f3baa47",
+      "source-b2fa69d1165db204004f",
+      "source-b37cb28f998e54a8d058",
+      "source-b40bcb017d3597a28a2e",
+      "source-b44a159e3396565bfb25",
+      "source-b54c48ce204863dc908d",
+      "source-b86cbab065aae3048e82",
+      "source-bf661b33c272b22ee9cc",
+      "source-c219d9805e9b9f7d0de6",
+      "source-c46d4c70e7933041cb00",
+      "source-cb9e7ffd04e56a48ed51",
+      "source-d4cdbc519607aca540d4",
+      "source-d5f5490a59dd4a114501",
+      "source-d645e427aba9b5f8bfb3",
+      "source-d666f75bb70231266f37",
+      "source-d8a8621d56ff4e6bacfb",
+      "source-df9cb021dcd191c466d3",
+      "source-e5ad9a0103a892274c09",
+      "source-e88caff8c399c539da0d",
+      "source-ec81342745ab6c0df55a",
+      "source-edf48b80ba75d4faa7af",
+      "source-f63b7568cd7b5842afcb",
+      "source-f8283622e22ab21c743c",
+      "source-fad1ea0656b60f4e9c50",
+      "source-fbb5935288bf436c10ad",
+      "source-fd6546834c75e5507bf9",
+      "source-fe297f7be2bc8706f18a",
+      "source-ff80c9be3397b562f8f7"
+    ],
+    "affected_topic_keys": [
+      "degraded/emm-for-android-u5168-u7ba1-u7406-u76f8-u5173-u8bbe-u5907-u914d-u7f6e-u9879-u6ce8-u91ca-u66f4-u52a8-md",
+      "degraded/emm-for-android-u96f6-u63a5-u89e6-u76f8-u5173-u6d41-u7a0b-md",
+      "degraded/goinsight-u4f4d-u7f6e-u5b57-u6bb5-u7b5b-u9009-md",
+      "degraded/goinsight-u521b-u5efa-u8bbe-u5907-u62a5-u544a-md",
+      "degraded/goinsight-u56fe-u8868-u7c7b-u578b-md",
+      "degraded/goinsight-u5e02-u573a-u62a5-u544a-u5feb-u7167-md",
+      "degraded/goinsight-u6307-u6807-u8be6-u60c5-u9875-md",
+      "degraded/goinsight-u6536-u8d39-u5e94-u7528-u5b89-u88c5-u7edf-u8ba1-md",
+      "degraded/goinsight-u6570-u636e-u5206-u6790-md",
+      "degraded/goinsight-u65b0-u5efa-u8fc1-u79fb-u4efb-u52a1-md",
+      "degraded/goinsight-u65e5-u5fd7-u7ba1-u7406-md",
+      "degraded/goinsight-u667a-u80fd-u5220-u9664-u56fe-u8868-md",
+      "degraded/goinsight-u667a-u80fd-u67e5-u8be2-u6587-u6863-md",
+      "degraded/goinsight-u6dfb-u52a0-u5173-u8054-u6570-u636e-md",
+      "degraded/goinsight-u6dfb-u52a0-u6307-u6807-u9875-md",
+      "degraded/goinsight-u7d2f-u8ba1-u8ba1-u7b97-md",
+      "degraded/goinsight-u8bbe-u5907-u4f4d-u7f6e-u5386-u53f2-u6570-u636e-u96c6-md",
+      "degraded/goinsight-u8fc1-u79fb-u4efb-u52a1-u5217-u8868-md",
+      "degraded/merchant-system-dashboard-merchantportal-md",
+      "degraded/merchant-system-dashboard-resellerportal-md",
+      "degraded/merchant-system-u521d-u59cb-u5316-u7b56-u7565-u9a8c-u8bc1-md",
+      "degraded/merchant-system-u5546-u6237-u7cfb-u7edf-u89c4-u8303-u8981-u6c42-md",
+      "degraded/merchant-system-u5c0f-u7968-u7ade-u54c1-u5206-u6790-md",
+      "v2/products/emm-for-android/ae-airviewer/ae-airviewer",
+      "v2/products/emm-for-android/ae-emm/ae-emm",
+      "v2/products/emm-for-android/ae-goinsight/ae-goinsight",
+      "v2/products/emm-for-android/ae/ae",
+      "v2/products/emm-for-android/emm-airviewer/emm-airviewer",
+      "v2/products/emm-for-android/emm-for-android-sdk/emm-for-android-sdk",
+      "v2/products/emm-for-android/emm/emm",
+      "v2/products/emm-for-android/emm/q-a",
+      "v2/products/emm-for-android/global/global",
+      "v2/products/emm-for-ios/ios/ios",
+      "v2/products/emm-for-ios/ipad/ipad",
+      "v2/products/emm-for-ios/payment-settings-merchant-management-reseller-portal/payment-settings-merchant-management-reseller-portal",
+      "v2/products/emm-for-ios/sso-sso-global-system/sso-sso-global-system",
+      "v2/products/emm-for-ios/store-app/store-app",
+      "v2/products/emm-for-ios/uptrillion/uptrillion",
+      "v2/products/goinsight/12-goinsight-dc/12-goinsight-dc",
+      "v2/products/goinsight/16/16",
+      "v2/products/goinsight/17/17",
+      "v2/products/goinsight/2021-annual-leave-plan/2021-annual-leave-plan",
+      "v2/products/goinsight/goinsight-v2-2-0-bug-analysis/goinsight-v2-2-0-bug-analysis",
+      "v2/products/goinsight/sprint-116-retrospective-meeting/sprint-116-retrospective-meeting",
+      "v2/products/merchant-system/app-management-global-system/app-management-global-system",
+      "v2/products/merchant-system/apple/apple",
+      "v2/products/merchant-system/email-activity-audit-log-global-system/email-activity-audit-log-global-system",
+      "v2/products/merchant-system/global-system/global-system",
+      "v2/products/merchant-system/merchant-management-reseller-portal/merchant-management-reseller-portal",
+      "v2/products/merchant-system/merchant-processor-merchant-management-reseller-portal/merchant-processor-merchant-management-reseller-portal",
+      "v2/products/merchant-system/merchantportal/merchantportal",
+      "v2/products/merchant-system/resellerportal/resellerportal",
+      "v2/products/merchant-system/sso-sso-global-system/sso-sso-global-system",
+      "v2/products/merchant-system/terminal-merchant-management-reseller-portal/terminal-merchant-management-reseller-portal"
+    ],
+    "changed_source_uris": [
+      "raw://confluence/GoInsight/12. GoInsight DC部署方案.md",
+      "raw://confluence/GoInsight/16 问数自动识别数据集.md",
+      "raw://confluence/GoInsight/17  智能搭建.md",
+      "raw://confluence/GoInsight/2021 Annual Leave Plan.md",
+      "raw://confluence/GoInsight/GoInsight V2.2.0 bug analysis.md",
+      "raw://confluence/GoInsight/Sprint 116 Retrospective meeting.md",
+      "raw://confluence/GoInsight/位置字段筛选.md",
+      "raw://confluence/GoInsight/创建设备报告.md",
+      "raw://confluence/GoInsight/图表类型.md",
+      "raw://confluence/GoInsight/市场报告快照.md",
+      "raw://confluence/GoInsight/指标详情页.md",
+      "raw://confluence/GoInsight/收费应用安装统计.md",
+      "raw://confluence/GoInsight/数据分析.md",
+      "raw://confluence/GoInsight/新建迁移任务.md",
+      "raw://confluence/GoInsight/日志管理.md",
+      "raw://confluence/GoInsight/智能删除图表.md",
+      "raw://confluence/GoInsight/智能查询文档.md",
+      "raw://confluence/GoInsight/添加关联数据.md",
+      "raw://confluence/GoInsight/添加指标页.md",
+      "raw://confluence/GoInsight/累计计算.md",
+      "raw://confluence/GoInsight/设备位置历史数据集.md",
+      "raw://confluence/GoInsight/迁移任务列表.md",
+      "raw://confluence/emm for android /AE - AirViewer厂商管理.md",
+      "raw://confluence/emm for android /AE - GoInsight数据收集.md",
+      "raw://confluence/emm for android /AE - 应用定向发布.md",
+      "raw://confluence/emm for android /AE - 应用详情.md",
+      "raw://confluence/emm for android /AE - 设备详情页远程控制.md",
+      "raw://confluence/emm for android /AE-分组管理.md",
+      "raw://confluence/emm for android /AE-参数推送.md",
+      "raw://confluence/emm for android /AE-应用参数配置.md",
+      "raw://confluence/emm for android /AE-开发者上传应用.md",
+      "raw://confluence/emm for android /AE-通信和网络配置.md",
+      "raw://confluence/emm for android /EMM for Android应用数据SDK.md",
+      "raw://confluence/emm for android /EMM- 企业类型升级及管理.md",
+      "raw://confluence/emm for android /EMM-AirViewer插件包设置.md",
+      "raw://confluence/emm for android /EMM介绍文档.md",
+      "raw://confluence/emm for android /EMM售前确认.md",
+      "raw://confluence/emm for android /EMM客户端页面.md",
+      "raw://confluence/emm for android /EMM客户端：隐私协议.md",
+      "raw://confluence/emm for android /EMM服务定价.md",
+      "raw://confluence/emm for android /EMM设备AirViewer服务适配新厂商.md",
+      "raw://confluence/emm for android /EMM设备数据收集范围.md",
+      "raw://confluence/emm for android /Global-开发者服务账号管理.md",
+      "raw://confluence/emm for android /[AE] EMM服务订阅及企业注册.md",
+      "raw://confluence/emm for android /[AE] 市场列表及操作.md",
+      "raw://confluence/emm for android /[AE] 弹窗输入标识符注册设备.md",
+      "raw://confluence/emm for android /[AE]创建二维码注册设备.md",
+      "raw://confluence/emm for android /全管理相关设备配置项注释更动.md",
+      "raw://confluence/emm for android /零接触相关流程.md",
+      "raw://confluence/emm for ios/Payment Settings_商户配置_商户管理_Merchant Management_Reseller Portal.md",
+      "raw://confluence/emm for ios/SSO列表_SSO_身份与域名配置_通用设置_Global System.md",
+      "raw://confluence/emm for ios/Store App应用策略配置效果.md",
+      "raw://confluence/emm for ios/Uptrillion日志管理.md",
+      "raw://confluence/emm for ios/iOS - 代理商和商户迁移.md",
+      "raw://confluence/emm for ios/iOS - 提示邮件汇总.md",
+      "raw://confluence/emm for ios/iOS-子市场用量管理.md",
+      "raw://confluence/emm for ios/iOS-市场管理.md",
+      "raw://confluence/emm for ios/iOS-应用添加及移除.md",
+      "raw://confluence/emm for ios/iOS-开发者上传企业应用.md",
+      "raw://confluence/emm for ios/iOS-开发者应用列表.md",
+      "raw://confluence/emm for ios/iOS-开发者应用详情.md",
+      "raw://confluence/emm for ios/iOS-日志汇总.md",
+      "raw://confluence/emm for ios/iOS-策略-安全配置.md",
+      "raw://confluence/emm for ios/iOS-策略-系统配置.md",
+      "raw://confluence/emm for ios/iOS-策略-通用规则.md",
+      "raw://confluence/emm for ios/iOS-终端管理.md",
+      "raw://confluence/emm for ios/iOS-账单.md",
+      "raw://confluence/emm for ios/iOS-资产列表.md",
+      "raw://confluence/emm for ios/ipad支持展示的机型图.md",
+      "raw://confluence/merchant system/App Management_Global System.md",
+      "raw://confluence/merchant system/Apple设备零接触注册流程.md",
+      "raw://confluence/merchant system/Dashboard_MerchantPortal.md",
+      "raw://confluence/merchant system/Dashboard_ResellerPortal.md",
+      "raw://confluence/merchant system/Email Activity_Audit Log_日志管理_Global System.md",
+      "raw://confluence/merchant system/apple接口调用方式.md",
+      "raw://confluence/merchant system/初始化策略验证.md",
+      "raw://confluence/merchant system/商户系统规范要求.md",
+      "raw://confluence/merchant system/小票_商户管理_Merchant Management_Reseller Portal.md",
+      "raw://confluence/merchant system/小票竞品分析.md",
+      "raw://confluence/merchant system/新建SSO_SSO_身份与域名配置_通用设置_Global System.md",
+      "raw://confluence/merchant system/新建角色_角色管理_ResellerPortal.md",
+      "raw://confluence/merchant system/权限分类_角色管理_MerchantPortal.md",
+      "raw://confluence/merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md",
+      "raw://confluence/merchant system/系统邮件模板_系统邮件管理_邮件管理_Global System.md",
+      "raw://confluence/merchant system/终端列表_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md",
+      "raw://confluence/merchant system/编辑&删除_Merchant Processor_商户管理_Merchant Management_Reseller Portal.md",
+      "raw://confluence/merchant system/编辑&删除制造商_制造商管理_机型管理_Global System.md",
+      "raw://confluence/merchant system/编辑&删除终端_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md",
+      "raw://confluence/merchant system/重置密码&更改邮箱_用户_Merchant Management_Reseller Portal.md"
+    ],
+    "empty": false,
+    "rebuild": false,
+    "related_source_ids": [],
+    "schema_version": "1.0.0"
+  },
+  "artifact_sha256": {
+    "source_inventory": "1e770ca33d865f5f3ceb0f5e8236e9daa49dda7a8f62faa97d9be7b0f1f17f52",
+    "topic_index": "78ab433084e782d8753d1399f5d85714a572ddaa0c1c3b7f29f535a7105b1c7c",
+    "topic_plan": "8b3b3ce5716751f044cf09835bd4be85956a4a77d1d8beed51491467c3db96a8"
+  },
+  "artifacts": {
+    "source_inventory": "_digest/source-inventory.jsonl",
+    "topic_index": "_digest/topic-index.json",
+    "topic_plan": "_digest/topic-plan.json"
+  },
+  "conflicts": [],
+  "delivery_status": "not_released",
+  "examples": [
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "b1871b739d9afa5a1765ffa139bacc42cc810355e68724c2aacd5e895935147a",
+          "line_number": 1,
+          "source_uri": "raw://confluence/emm for android /AE - 应用定向发布.md"
+        },
+        {
+          "content_fingerprint": "214a12f2c5efc529a6698e41d2465bdca30491c36c527342adea8f88b92b1ca5",
+          "line_number": 1,
+          "source_uri": "raw://confluence/emm for android /AE - 应用详情.md"
+        },
+        {
+          "content_fingerprint": "8ce21dbc0c51898ed650c157b542c243bdc78e310dfd7c714c4610ccd76fb741",
+          "line_number": 1,
+          "source_uri": "raw://confluence/emm for android /AE - 设备详情页远程控制.md"
+        },
+        {
+          "content_fingerprint": "553f5543380401c8e2997acb462db10062f3a242e8e82a5353c1493ba02dba62",
+          "line_number": 1,
+          "source_uri": "raw://confluence/emm for android /AE-分组管理.md"
+        },
+        {
+          "content_fingerprint": "294d0283bd61b93e35ef31565c9da0630dfe3906f562e2545537bb9454a04b10",
+          "line_number": 1,
+          "source_uri": "raw://confluence/emm for android /AE-参数推送.md"
+        },
+        {
+          "content_fingerprint": "dfb520f863e41225e111d5647d7c057570f8520200953e44c9a6f36f23f91642",
+          "line_number": 1,
+          "source_uri": "raw://confluence/emm for android /AE-应用参数配置.md"
+        },
+        {
+          "content_fingerprint": "3b158a0c34e651f00eef921f3290796b6e784d35d27cb98947b03ea536ceb422",
+          "line_number": 1,
+          "source_uri": "raw://confluence/emm for android /AE-开发者上传应用.md"
+        },
+        {
+          "content_fingerprint": "c066483e58bfc8c26d2f737fbadd97e83850967b4db1f90377d4dd3d8b47dce0",
+          "line_number": 1,
+          "source_uri": "raw://confluence/emm for android /AE-通信和网络配置.md"
+        },
+        {
+          "content_fingerprint": "3498dc285cb577d1bed9df948ab437b0b7ee387ace3a75548693e8e463ad9e50",
+          "line_number": 1,
+          "source_uri": "raw://confluence/emm for android /[AE] 市场列表及操作.md"
+        },
+        {
+          "content_fingerprint": "868eecc7e6077969eb5e256e68becc819d2a3043123ab6b53aa487d4d2bd270d",
+          "line_number": 1,
+          "source_uri": "raw://confluence/emm for android /[AE] 弹窗输入标识符注册设备.md"
+        },
+        {
+          "content_fingerprint": "392eca6a1dbd9f885ec0b157ff694ef284423bb1d5dfb528aaf90b780c93f8f1",
+          "line_number": 1,
+          "source_uri": "raw://confluence/emm for android /[AE]创建二维码注册设备.md"
+        }
+      ],
+      "example_id": "example-merge",
+      "kind": "normal_merge",
+      "source_members": [
+        "source-0d3521f85e4411b86970",
+        "source-1c2b60dd060650439b6c",
+        "source-2eb7386d28a4a8b6d1b7",
+        "source-5d60c2a981bc4339265f",
+        "source-609ba15c6685bee1eb35",
+        "source-a39fba6e76179d910e02",
+        "source-acf1439e40c888851bf9",
+        "source-b40bcb017d3597a28a2e",
+        "source-d4cdbc519607aca540d4",
+        "source-d5f5490a59dd4a114501",
+        "source-ff80c9be3397b562f8f7"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "b1871b739d9afa5a1765ffa139bacc42cc810355e68724c2aacd5e895935147a",
+            "line_number": 1,
+            "source_uri": "raw://confluence/emm for android /AE - 应用定向发布.md"
+          },
+          {
+            "content_fingerprint": "214a12f2c5efc529a6698e41d2465bdca30491c36c527342adea8f88b92b1ca5",
+            "line_number": 1,
+            "source_uri": "raw://confluence/emm for android /AE - 应用详情.md"
+          },
+          {
+            "content_fingerprint": "8ce21dbc0c51898ed650c157b542c243bdc78e310dfd7c714c4610ccd76fb741",
+            "line_number": 1,
+            "source_uri": "raw://confluence/emm for android /AE - 设备详情页远程控制.md"
+          },
+          {
+            "content_fingerprint": "553f5543380401c8e2997acb462db10062f3a242e8e82a5353c1493ba02dba62",
+            "line_number": 1,
+            "source_uri": "raw://confluence/emm for android /AE-分组管理.md"
+          },
+          {
+            "content_fingerprint": "294d0283bd61b93e35ef31565c9da0630dfe3906f562e2545537bb9454a04b10",
+            "line_number": 1,
+            "source_uri": "raw://confluence/emm for android /AE-参数推送.md"
+          },
+          {
+            "content_fingerprint": "dfb520f863e41225e111d5647d7c057570f8520200953e44c9a6f36f23f91642",
+            "line_number": 1,
+            "source_uri": "raw://confluence/emm for android /AE-应用参数配置.md"
+          },
+          {
+            "content_fingerprint": "3b158a0c34e651f00eef921f3290796b6e784d35d27cb98947b03ea536ceb422",
+            "line_number": 1,
+            "source_uri": "raw://confluence/emm for android /AE-开发者上传应用.md"
+          },
+          {
+            "content_fingerprint": "c066483e58bfc8c26d2f737fbadd97e83850967b4db1f90377d4dd3d8b47dce0",
+            "line_number": 1,
+            "source_uri": "raw://confluence/emm for android /AE-通信和网络配置.md"
+          },
+          {
+            "content_fingerprint": "3498dc285cb577d1bed9df948ab437b0b7ee387ace3a75548693e8e463ad9e50",
+            "line_number": 1,
+            "source_uri": "raw://confluence/emm for android /[AE] 市场列表及操作.md"
+          },
+          {
+            "content_fingerprint": "868eecc7e6077969eb5e256e68becc819d2a3043123ab6b53aa487d4d2bd270d",
+            "line_number": 1,
+            "source_uri": "raw://confluence/emm for android /[AE] 弹窗输入标识符注册设备.md"
+          },
+          {
+            "content_fingerprint": "392eca6a1dbd9f885ec0b157ff694ef284423bb1d5dfb528aaf90b780c93f8f1",
+            "line_number": 1,
+            "source_uri": "raw://confluence/emm for android /[AE]创建二维码注册设备.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "merge",
+        "module": "AE - 应用定向发布",
+        "object_intent": "AE - 应用定向发布",
+        "old_path_mapping": [],
+        "product": "emm for android",
+        "published_path": "pages/topics/products/emm-for-android/ae/ae.md",
+        "reason": "",
+        "single_source_checks": null,
+        "source_members": [
+          "source-0d3521f85e4411b86970",
+          "source-1c2b60dd060650439b6c",
+          "source-2eb7386d28a4a8b6d1b7",
+          "source-5d60c2a981bc4339265f",
+          "source-609ba15c6685bee1eb35",
+          "source-a39fba6e76179d910e02",
+          "source-acf1439e40c888851bf9",
+          "source-b40bcb017d3597a28a2e",
+          "source-d4cdbc519607aca540d4",
+          "source-d5f5490a59dd4a114501",
+          "source-ff80c9be3397b562f8f7"
+        ],
+        "status": "published",
+        "topic_key": "v2/products/emm-for-android/ae/ae",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "a80a7f39ecb214ef4bcd7ff216314d48cc5bb80ec4141ae4d91baee90bbda51b",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/12. GoInsight DC部署方案.md"
+        }
+      ],
+      "example_id": "example-002",
+      "kind": "normal",
+      "source_members": [
+        "source-43e930851b8bb3f5bdef"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "a80a7f39ecb214ef4bcd7ff216314d48cc5bb80ec4141ae4d91baee90bbda51b",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/12. GoInsight DC部署方案.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "single",
+        "module": "12. GoInsight DC部署方案",
+        "object_intent": "12. GoInsight DC部署方案",
+        "old_path_mapping": [],
+        "product": "GoInsight",
+        "published_path": "pages/topics/products/goinsight/12-goinsight-dc/12-goinsight-dc.md",
+        "reason": "",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-43e930851b8bb3f5bdef"
+        ],
+        "status": "published",
+        "topic_key": "v2/products/goinsight/12-goinsight-dc/12-goinsight-dc",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "c37d40c8b16b6640ed09813572e69e280ffb404446952e8bde96c74d78c52973",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/16 问数自动识别数据集.md"
+        }
+      ],
+      "example_id": "example-003",
+      "kind": "normal",
+      "source_members": [
+        "source-3ffd8813c930b3e1efe1"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "c37d40c8b16b6640ed09813572e69e280ffb404446952e8bde96c74d78c52973",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/16 问数自动识别数据集.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "single",
+        "module": "16 问数自动识别数据集",
+        "object_intent": "16 问数自动识别数据集",
+        "old_path_mapping": [],
+        "product": "GoInsight",
+        "published_path": "pages/topics/products/goinsight/16/16.md",
+        "reason": "",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-3ffd8813c930b3e1efe1"
+        ],
+        "status": "published",
+        "topic_key": "v2/products/goinsight/16/16",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "f13a606b8e3905db2b0cf5ae94d8e61f0ae79b0f26cfba02074b61986ec6e96f",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/17  智能搭建.md"
+        }
+      ],
+      "example_id": "example-004",
+      "kind": "normal",
+      "source_members": [
+        "source-520b6110d7a4abd4dd8b"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "f13a606b8e3905db2b0cf5ae94d8e61f0ae79b0f26cfba02074b61986ec6e96f",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/17  智能搭建.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "single",
+        "module": "17 智能搭建",
+        "object_intent": "17  智能搭建",
+        "old_path_mapping": [],
+        "product": "GoInsight",
+        "published_path": "pages/topics/products/goinsight/17/17.md",
+        "reason": "",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-520b6110d7a4abd4dd8b"
+        ],
+        "status": "published",
+        "topic_key": "v2/products/goinsight/17/17",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "a6acfd18d29e89756e0ec09a2e845887d63258805e70a79205c69b7a416ceba7",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/2021 Annual Leave Plan.md"
+        }
+      ],
+      "example_id": "example-005",
+      "kind": "normal",
+      "source_members": [
+        "source-0cef16424a4144324818"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "a6acfd18d29e89756e0ec09a2e845887d63258805e70a79205c69b7a416ceba7",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/2021 Annual Leave Plan.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "single",
+        "module": "2021 Annual Leave Plan",
+        "object_intent": "2021 Annual Leave Plan",
+        "old_path_mapping": [],
+        "product": "GoInsight",
+        "published_path": "pages/topics/products/goinsight/2021-annual-leave-plan/2021-annual-leave-plan.md",
+        "reason": "",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-0cef16424a4144324818"
+        ],
+        "status": "published",
+        "topic_key": "v2/products/goinsight/2021-annual-leave-plan/2021-annual-leave-plan",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "5c11720af889bccc74877c5be1035ed6e1f43d442cb3630d858cadd886812263",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/GoInsight V2.2.0 bug analysis.md"
+        }
+      ],
+      "example_id": "example-006",
+      "kind": "normal",
+      "source_members": [
+        "source-30513f9b557d32d0bfc3"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "5c11720af889bccc74877c5be1035ed6e1f43d442cb3630d858cadd886812263",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/GoInsight V2.2.0 bug analysis.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "single",
+        "module": "GoInsight V2.2.0 bug analysis",
+        "object_intent": "GoInsight V2.2.0 bug analysis",
+        "old_path_mapping": [],
+        "product": "GoInsight",
+        "published_path": "pages/topics/products/goinsight/goinsight-v2-2-0-bug-analysis/goinsight-v2-2-0-bug-analysis.md",
+        "reason": "",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-30513f9b557d32d0bfc3"
+        ],
+        "status": "published",
+        "topic_key": "v2/products/goinsight/goinsight-v2-2-0-bug-analysis/goinsight-v2-2-0-bug-analysis",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "676177b722393ce8ce743e0182c8d147e1a4f0ceca824e124476454b8231e527",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/Sprint 116 Retrospective meeting.md"
+        }
+      ],
+      "example_id": "example-007",
+      "kind": "normal",
+      "source_members": [
+        "source-1edde7f1dd61714e4a77"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "676177b722393ce8ce743e0182c8d147e1a4f0ceca824e124476454b8231e527",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/Sprint 116 Retrospective meeting.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "single",
+        "module": "Sprint 116 Retrospective meeting",
+        "object_intent": "Sprint 116 Retrospective meeting",
+        "old_path_mapping": [],
+        "product": "GoInsight",
+        "published_path": "pages/topics/products/goinsight/sprint-116-retrospective-meeting/sprint-116-retrospective-meeting.md",
+        "reason": "",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-1edde7f1dd61714e4a77"
+        ],
+        "status": "published",
+        "topic_key": "v2/products/goinsight/sprint-116-retrospective-meeting/sprint-116-retrospective-meeting",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "32b3c01b03a44727c6a692e9b10e3ee71106abec1f90c45272cbd75c9bce32b1",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/位置字段筛选.md"
+        }
+      ],
+      "example_id": "example-008",
+      "kind": "degraded",
+      "source_members": [
+        "source-89b02b9779ecf91fc422"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "32b3c01b03a44727c6a692e9b10e3ee71106abec1f90c45272cbd75c9bce32b1",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/位置字段筛选.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "degraded",
+        "module": null,
+        "object_intent": null,
+        "old_path_mapping": [],
+        "product": null,
+        "published_path": null,
+        "reason": "topic key cannot escape a reserved-word collision",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-89b02b9779ecf91fc422"
+        ],
+        "status": "degraded",
+        "topic_key": "degraded/goinsight-u4f4d-u7f6e-u5b57-u6bb5-u7b5b-u9009-md",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "c1ee20845ae9abee8b130a8fe7bd3cfd7264f4a2304686fc9f9bec558e5b222e",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/创建设备报告.md"
+        }
+      ],
+      "example_id": "example-009",
+      "kind": "degraded",
+      "source_members": [
+        "source-86fefa61619537280727"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "c1ee20845ae9abee8b130a8fe7bd3cfd7264f4a2304686fc9f9bec558e5b222e",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/创建设备报告.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "degraded",
+        "module": null,
+        "object_intent": null,
+        "old_path_mapping": [],
+        "product": null,
+        "published_path": null,
+        "reason": "topic key cannot escape a reserved-word collision",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-86fefa61619537280727"
+        ],
+        "status": "degraded",
+        "topic_key": "degraded/goinsight-u521b-u5efa-u8bbe-u5907-u62a5-u544a-md",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "2fb085f12322ed8a45563aabd8172f69ca9722a99af6890f756655f9f9217ad3",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/图表类型.md"
+        }
+      ],
+      "example_id": "example-010",
+      "kind": "degraded",
+      "source_members": [
+        "source-b0211212f9b00f3baa47"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "2fb085f12322ed8a45563aabd8172f69ca9722a99af6890f756655f9f9217ad3",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/图表类型.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "degraded",
+        "module": null,
+        "object_intent": null,
+        "old_path_mapping": [],
+        "product": null,
+        "published_path": null,
+        "reason": "topic key cannot escape a reserved-word collision",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-b0211212f9b00f3baa47"
+        ],
+        "status": "degraded",
+        "topic_key": "degraded/goinsight-u56fe-u8868-u7c7b-u578b-md",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "fd020de7dd9ac3ea800c02723ab06089476f65257858937b713f488ec185c811",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/市场报告快照.md"
+        }
+      ],
+      "example_id": "example-011",
+      "kind": "degraded",
+      "source_members": [
+        "source-3648324ab3e0854de0d5"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "fd020de7dd9ac3ea800c02723ab06089476f65257858937b713f488ec185c811",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/市场报告快照.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "degraded",
+        "module": null,
+        "object_intent": null,
+        "old_path_mapping": [],
+        "product": null,
+        "published_path": null,
+        "reason": "topic key cannot escape a reserved-word collision",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-3648324ab3e0854de0d5"
+        ],
+        "status": "degraded",
+        "topic_key": "degraded/goinsight-u5e02-u573a-u62a5-u544a-u5feb-u7167-md",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "1e3758853a89257fcf0b2d99c5d5f08cc95f968b7d70079c85299123a3f6fae7",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/指标详情页.md"
+        }
+      ],
+      "example_id": "example-012",
+      "kind": "degraded",
+      "source_members": [
+        "source-098ffe620dfb034f8f87"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "1e3758853a89257fcf0b2d99c5d5f08cc95f968b7d70079c85299123a3f6fae7",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/指标详情页.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "degraded",
+        "module": null,
+        "object_intent": null,
+        "old_path_mapping": [],
+        "product": null,
+        "published_path": null,
+        "reason": "topic key cannot escape a reserved-word collision",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-098ffe620dfb034f8f87"
+        ],
+        "status": "degraded",
+        "topic_key": "degraded/goinsight-u6307-u6807-u8be6-u60c5-u9875-md",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "5234687971c2941d8de787cff01187edb9a7227e54ef7eb64608a0011908023b",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/收费应用安装统计.md"
+        }
+      ],
+      "example_id": "example-013",
+      "kind": "degraded",
+      "source_members": [
+        "source-5a7f0340e4be417d225c"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "5234687971c2941d8de787cff01187edb9a7227e54ef7eb64608a0011908023b",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/收费应用安装统计.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "degraded",
+        "module": null,
+        "object_intent": null,
+        "old_path_mapping": [],
+        "product": null,
+        "published_path": null,
+        "reason": "topic key cannot escape a reserved-word collision",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-5a7f0340e4be417d225c"
+        ],
+        "status": "degraded",
+        "topic_key": "degraded/goinsight-u6536-u8d39-u5e94-u7528-u5b89-u88c5-u7edf-u8ba1-md",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "52abb4c14c9beb1f0752bb6c50a8da9bef225237fc46e76f5f9c471e87c42668",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/数据分析.md"
+        }
+      ],
+      "example_id": "example-014",
+      "kind": "degraded",
+      "source_members": [
+        "source-3efebf9aa7621a861cd7"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "52abb4c14c9beb1f0752bb6c50a8da9bef225237fc46e76f5f9c471e87c42668",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/数据分析.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "degraded",
+        "module": null,
+        "object_intent": null,
+        "old_path_mapping": [],
+        "product": null,
+        "published_path": null,
+        "reason": "topic key cannot escape a reserved-word collision",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-3efebf9aa7621a861cd7"
+        ],
+        "status": "degraded",
+        "topic_key": "degraded/goinsight-u6570-u636e-u5206-u6790-md",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "d1e600db386a4002eee43a69fc8e94e32af8fb33ac55399bc4789da0e7f8bb28",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/新建迁移任务.md"
+        }
+      ],
+      "example_id": "example-015",
+      "kind": "degraded",
+      "source_members": [
+        "source-f63b7568cd7b5842afcb"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "d1e600db386a4002eee43a69fc8e94e32af8fb33ac55399bc4789da0e7f8bb28",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/新建迁移任务.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "degraded",
+        "module": null,
+        "object_intent": null,
+        "old_path_mapping": [],
+        "product": null,
+        "published_path": null,
+        "reason": "topic key cannot escape a reserved-word collision",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-f63b7568cd7b5842afcb"
+        ],
+        "status": "degraded",
+        "topic_key": "degraded/goinsight-u65b0-u5efa-u8fc1-u79fb-u4efb-u52a1-md",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "370fc8f996de01d759bfc1b438992a5e5827ae57c6791b25d74aa47e524f0b1c",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/日志管理.md"
+        }
+      ],
+      "example_id": "example-016",
+      "kind": "degraded",
+      "source_members": [
+        "source-11e8a03ef46004fb4a63"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "370fc8f996de01d759bfc1b438992a5e5827ae57c6791b25d74aa47e524f0b1c",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/日志管理.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "degraded",
+        "module": null,
+        "object_intent": null,
+        "old_path_mapping": [],
+        "product": null,
+        "published_path": null,
+        "reason": "topic key cannot escape a reserved-word collision",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-11e8a03ef46004fb4a63"
+        ],
+        "status": "degraded",
+        "topic_key": "degraded/goinsight-u65e5-u5fd7-u7ba1-u7406-md",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "80a176eb1cfb6ef10be82c7c11201ab7d39296db0d6897537ce41e07926add62",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/智能删除图表.md"
+        }
+      ],
+      "example_id": "example-017",
+      "kind": "degraded",
+      "source_members": [
+        "source-718c6b882cd48560330e"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "80a176eb1cfb6ef10be82c7c11201ab7d39296db0d6897537ce41e07926add62",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/智能删除图表.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "degraded",
+        "module": null,
+        "object_intent": null,
+        "old_path_mapping": [],
+        "product": null,
+        "published_path": null,
+        "reason": "topic key cannot escape a reserved-word collision",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-718c6b882cd48560330e"
+        ],
+        "status": "degraded",
+        "topic_key": "degraded/goinsight-u667a-u80fd-u5220-u9664-u56fe-u8868-md",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "23f9e16c27bf3fdd139668a3b5ea7a372f21f53dfd230bc769a77d8055b9a756",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/智能查询文档.md"
+        }
+      ],
+      "example_id": "example-018",
+      "kind": "degraded",
+      "source_members": [
+        "source-00492e5c9215fcf5de8c"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "23f9e16c27bf3fdd139668a3b5ea7a372f21f53dfd230bc769a77d8055b9a756",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/智能查询文档.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "degraded",
+        "module": null,
+        "object_intent": null,
+        "old_path_mapping": [],
+        "product": null,
+        "published_path": null,
+        "reason": "topic key cannot escape a reserved-word collision",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-00492e5c9215fcf5de8c"
+        ],
+        "status": "degraded",
+        "topic_key": "degraded/goinsight-u667a-u80fd-u67e5-u8be2-u6587-u6863-md",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "e669ce76f46b613b308ecdabf60d7ad2f96a5efc57ac4503f29e1fc553dd3ae5",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/添加关联数据.md"
+        }
+      ],
+      "example_id": "example-019",
+      "kind": "degraded",
+      "source_members": [
+        "source-58d24ae693946f22b79d"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "e669ce76f46b613b308ecdabf60d7ad2f96a5efc57ac4503f29e1fc553dd3ae5",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/添加关联数据.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "degraded",
+        "module": null,
+        "object_intent": null,
+        "old_path_mapping": [],
+        "product": null,
+        "published_path": null,
+        "reason": "topic key cannot escape a reserved-word collision",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-58d24ae693946f22b79d"
+        ],
+        "status": "degraded",
+        "topic_key": "degraded/goinsight-u6dfb-u52a0-u5173-u8054-u6570-u636e-md",
+        "topic_plan_version": "1.0.0"
+      }
+    },
+    {
+      "evidence_refs": [
+        {
+          "content_fingerprint": "66544230f10923384ed88723ab0467a86c508295597af05706b576e0241bf0d0",
+          "line_number": 1,
+          "source_uri": "raw://confluence/GoInsight/添加指标页.md"
+        }
+      ],
+      "example_id": "example-020",
+      "kind": "degraded",
+      "source_members": [
+        "source-720294b760f4057e9cc1"
+      ],
+      "topic": {
+        "evidence_refs": [
+          {
+            "content_fingerprint": "66544230f10923384ed88723ab0467a86c508295597af05706b576e0241bf0d0",
+            "line_number": 1,
+            "source_uri": "raw://confluence/GoInsight/添加指标页.md"
+          }
+        ],
+        "knowledge_type": "products",
+        "merge_mode": "degraded",
+        "module": null,
+        "object_intent": null,
+        "old_path_mapping": [],
+        "product": null,
+        "published_path": null,
+        "reason": "topic key cannot escape a reserved-word collision",
+        "single_source_checks": {
+          "fact_conflict_free": true,
+          "meaningful_structure": true,
+          "required_evidence": true,
+          "topic_axis_explicit": true,
+          "资料完整": true
+        },
+        "source_members": [
+          "source-720294b760f4057e9cc1"
+        ],
+        "status": "degraded",
+        "topic_key": "degraded/goinsight-u6dfb-u52a0-u6307-u6807-u9875-md",
+        "topic_plan_version": "1.0.0"
+      }
+    }
+  ],
+  "gazetteer_entry_count": 93,
+  "gazetteer_generated": true,
+  "knowledge_type_registry_entry_count": 1,
+  "provider_boundary": "before_provider",
+  "reader_package_changed": false,
+  "run_id": "run-topic-axis-bd47a2e7a52700d4",
+  "schema_version": "1.0.0",
+  "source_count": 89,
+  "task": "task1-knowledge-publication-topic-axis"
+}

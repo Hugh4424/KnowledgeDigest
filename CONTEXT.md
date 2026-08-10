@@ -32,6 +32,8 @@
 
 **Reader Package**：用户默认阅读的交付包，只包含 `README.md`、`Home.md`、现有结构/分类导航索引、正式主题页和 `indexes/sources.md`。新运行不生成 `_digest/source-index.md`；历史结果不迁移、不重写。
 
+**Reader Bundle**：把 Reader Package 升级为 OKF v0.2-compatible profile 后的可读交付形态（Task 2-A 起），布局见 PRD §6.8：`README.md → Home.md → 根 index.md → 根 log.md → products/<product>/...`；`Home.md`、Reader `README.md`、`references/sources.md` 是豁免文件，不是 concept，不放 concept frontmatter；来源投影路径是 `references/sources.md`，旧 `indexes/sources.md` 属旧 Reader Package 布局，不迁移、不重写；包级 `digest_release_status` 只在 manifest，不写入 concept 页。
+
 **Audit/Archive Package**：用于审计、恢复和排查的交付包，包含 input manifest、source snapshot、Claim、Evidence、原文归档、失败原因、运行报告和配置/provider hash。它不作为日常阅读入口。
 
 **页级发布状态**：页级只允许 `published` 或 `degraded`。`published` 表示通过机器门，可以进入候选 Reader Package；`degraded` 表示失败、冲突、缺证据或人工修改冲突，不进入正式导航。
