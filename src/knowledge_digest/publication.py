@@ -195,7 +195,15 @@ def _five_gram_jaccard(left: str, right: str) -> float:
 
 def _claim_is_supported_by_body(claim_text: str, body: str) -> bool:
     """Allow conservative paraphrases without trusting a claim id by itself."""
-    claim = normalize_for_gate(claim_text)
+    # Ordered-list markers are source formatting, not facts. A provider may
+    # turn ``2. fact`` into a sentence inside a paragraph; keep the fact and
+    # token checks while ignoring only that leading marker.
+    claim_without_list_marker = re.sub(
+        r"^\s*(?:[-*+]\s+|\d+\s*[.)、]\s*)",
+        "",
+        str(claim_text),
+    )
+    claim = normalize_for_gate(claim_without_list_marker)
     rendered = normalize_for_gate(body)
     if claim and claim in rendered:
         return True
@@ -227,7 +235,7 @@ _COPY_EXCEPTION_TYPES = {
 def _sentences(value: str) -> list[str]:
     return [
         sentence.strip()
-        for sentence in re.split(r"(?<=[.!?。！？])\s+", value)
+        for sentence in re.split(r"(?<=[.!?。！？；;])\s+|\n+", value)
         if normalize_for_gate(sentence)
     ]
 

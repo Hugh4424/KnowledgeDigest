@@ -27,6 +27,9 @@ TOPIC_INDEX_SCHEMA_VERSION = "2.0.0"
 MATCH_ORDER = ("canonical", "alias", "parent_path", "h1_title", "candidate")
 KNOWLEDGE_TYPE_REGISTRY_SCHEMA_VERSION = "1.0.0"
 DEFAULT_RESERVED = frozenset({"home", "index", "indexes", "_digest", "_archive", "_queues", "pending"})
+_EXPLICIT_TOPIC_PAGE_TYPES = frozenset(
+    {"product_overview", "module_or_capability", "procedure_or_rule"}
+)
 _INGESTIBLE = {".md", ".txt", ".json"}
 _SOURCE_LINE = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
 _H1 = re.compile(r"^#\s+(.+?)\s*$")
@@ -815,6 +818,44 @@ def _evidence_refs(members: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(refs, key=lambda ref: (str(ref.get("source_uri")), int(ref.get("line_number") or 0), str(ref.get("content_fingerprint"))))
 
 
+def _explicit_topic_page_type(member_rows: list[dict[str, Any]]) -> str | None:
+    """Preserve explicit source metadata in the Task1 topic authority.
+
+    Titles, headings and body text are deliberately not classifiers. A merged
+    topic must declare one identical value for every member; otherwise the
+    upstream snapshot is ambiguous and must stop rather than guess.
+    """
+    values: list[str | None] = []
+    for row in member_rows:
+        metadata = row.get("source_meta") if isinstance(row.get("source_meta"), dict) else {}
+        raw_value = row.get("page_type") if "page_type" in row else metadata.get("page_type")
+        if raw_value is None:
+            values.append(None)
+            continue
+        if not isinstance(raw_value, str) or not raw_value.strip():
+            raise ValidationError("topic-axis", row.get("source_id") or "page_type", "explicit page_type must be a non-empty string")
+        page_type = raw_value.strip()
+        if page_type not in _EXPLICIT_TOPIC_PAGE_TYPES:
+            raise ValidationError("topic-axis", row.get("source_id") or "page_type", f"unsupported explicit page_type: {page_type}")
+        values.append(page_type)
+    if not any(value is not None for value in values):
+        return None
+    if any(value is None for value in values):
+        raise ValidationError(
+            "topic-axis",
+            ",".join(sorted(str(row.get("source_id") or "") for row in member_rows)),
+            "merged topic page_type metadata is incomplete",
+        )
+    unique = sorted({value for value in values if value is not None})
+    if len(unique) != 1:
+        raise ValidationError(
+            "topic-axis",
+            ",".join(sorted(str(row.get("source_id") or "") for row in member_rows)),
+            "merged topic page_type metadata conflicts",
+        )
+    return unique[0]
+
+
 def build_topic_plan(
     inventory: list[dict[str, Any]],
     gazetteer: dict[str, Any],
@@ -910,6 +951,7 @@ def build_topic_plan(
                     }
                 )
             continue
+        page_type = _explicit_topic_page_type(member_rows)
         candidate_topics.append(
             {
                 "topic_key": key,
@@ -927,6 +969,7 @@ def build_topic_plan(
                 "evidence_refs": _evidence_refs(member_rows),
                 "single_source_checks": items[0]["checks"] if len(items) == 1 else None,
                 "candidate_items": items,
+                **({"page_type": page_type} if page_type else {}),
             }
         )
     candidate_key_counts = defaultdict(int)

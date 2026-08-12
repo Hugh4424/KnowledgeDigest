@@ -1,0 +1,6 @@
+{
+  "routing_tier": "feature",
+  "routing_rationale": "本次没有生产代码改动；按现有 Task 2-B 的 feature 预判执行 focused acceptance 与兼容回归，语义运行是非行为证据捕获，不新增行为测试层级。",
+  "result": "pass",
+  "ts": "2026-08-12T06:12:30Z"
+}

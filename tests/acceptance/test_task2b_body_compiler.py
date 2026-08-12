@@ -241,7 +241,7 @@ def test_typed_prompt_compacts_source_context_without_dropping_claim_evidence() 
     ]
     assert payload["claims"] == [
         {
-            **{key: claim[key] for key in ("claim_fingerprint", "text", "source_uri", "fragment_locator", "raw_id")},
+            **{key: claim[key] for key in ("claim_fingerprint", "text")},
             "provider_claim_ref": f"c{index:03d}",
         }
         for index, claim in enumerate(claims, start=1)
@@ -364,6 +364,9 @@ def test_typed_prompt_explains_section_roles_and_conservative_exact_claim_bindin
     assert "never use claim_ids" in prompt
     assert "source" in prompt
     assert "checklist" in prompt
+    assert "SOURCE SECTION RULE" in prompt
+    assert "must not be empty" in prompt
+    assert "240 characters" in prompt
 
 
 def _source_gap_procedure_page() -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -782,6 +785,21 @@ def test_provenance_gate_accepts_typed_claim_backtrace_for_a_faithful_paraphrase
     assert any("typed claim mapping is incomplete" in reason for reason in incomplete_result["reasons"])
 
 
+def test_provenance_gate_ignores_only_a_source_list_marker_in_typed_paraphrase() -> None:
+    gate = getattr(publication_module, "validate_body_gate", None)
+    assert callable(gate)
+    payload = _provenance_payload(
+        "The second deployment mode is controlled by AWS platform and registers GOINSIGHT as a DC. [^claim-alpha-1]"
+    )
+    payload["claims"][0]["text"] = (
+        "2. The deployment mode is controlled by AWS platform and registers GOINSIGHT as a DC."
+    )
+    payload["typed_claim_ids"] = ["claim-alpha-1"]
+    result = gate(payload)
+    assert result["status"] == "published"
+    assert result["reader_eligible"] is True
+
+
 def test_publication_gate_rejects_typed_mapping_when_numeric_fact_changes() -> None:
     gate = getattr(publication_module, "validate_body_gate", None)
     assert callable(gate)
@@ -913,6 +931,21 @@ def test_provenance_gate_requires_content_fingerprint_and_source_block_limit() -
     assert copied_result["status"] == "degraded"
     assert copied_result["checks"]["continuous_source_block"]["failed_samples"]
     assert any("continuous source block" in reason for reason in copied_result["reasons"])
+
+
+def test_provenance_gate_does_not_join_separate_typed_sections_into_one_source_block() -> None:
+    payload = _provenance_payload(
+        "Alpha supports 99% of internal cases. [^claim-alpha-1]\n\n"
+        "## entry\n\nThe reader enters through the documented console."
+    )
+    payload["evidence_body"] = (
+        "Alpha supports 99% of internal cases.\n"
+        "The reader enters through the documented console.\n"
+        "A separate source note remains available."
+    )
+    result = publication_module.validate_body_gate(payload)
+    assert result["status"] == "published"
+    assert result["checks"]["continuous_source_block"]["failed_samples"] == []
 
 
 @pytest.mark.parametrize(

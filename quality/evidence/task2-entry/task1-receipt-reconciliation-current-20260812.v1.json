@@ -1,0 +1,56 @@
+{
+  "schema_version": "task1-receipt-reconciliation.v2",
+  "status": "reconciled_by_scope",
+  "delivery_status": "not_released",
+  "old_snapshot": {
+    "path": "quality/evidence/task2-entry/task1-real-corpus-20260806",
+    "topic_index_sha256": "78ab433084e782d8753d1399f5d85714a572ddaa0c1c3b7f29f535a7105b1c7c",
+    "run_report_sha256": "532e6ce4794beb9245b63f8d6a15617a8a8169e667814b52bc4f76ddbb063412",
+    "page_type_projection": "absent"
+  },
+  "current_snapshot": {
+    "path": "quality/evidence/task2-entry/task1-real-corpus-current-20260812",
+    "topic_index_sha256": "19170772e4c166ddcf42a220de616d2924cfdc99ac8740a2711ab93f7e9a71f6",
+    "run_report_sha256": "4825d8938c855bc159ca18a2f0f9ec8fddaf6d305f85b13afe31851ba836d6ae",
+    "source_declarations_sha256": "1ea395d21db15e7a1c7175a7b9505210d1f38081bdbd4f0f6303ee1d3c4e9be8",
+    "source_count": 89,
+    "topic_count": 54,
+    "published_topic_count": 31,
+    "degraded_topic_count": 23,
+    "explicit_page_type_counts": {
+      "product_overview": 1,
+      "module_or_capability": 1,
+      "procedure_or_rule": 1
+    }
+  },
+  "page_type_bindings": [
+    {
+      "page_type": "product_overview",
+      "source_uri": "raw://confluence/GoInsight/12. GoInsight DC部署方案.md",
+      "content_fingerprint": "a80a7f39ecb214ef4bcd7ff216314d48cc5bb80ec4141ae4d91baee90bbda51b",
+      "locator": "line:1",
+      "topic_key": "v2/products/goinsight/12-goinsight-dc/12-goinsight-dc"
+    },
+    {
+      "page_type": "module_or_capability",
+      "source_uri": "raw://confluence/GoInsight/16 问数自动识别数据集.md",
+      "content_fingerprint": "c37d40c8b16b6640ed09813572e69e280ffb404446952e8bde96c74d78c52973",
+      "locator": "line:1",
+      "topic_key": "v2/products/goinsight/16/16"
+    },
+    {
+      "page_type": "procedure_or_rule",
+      "source_uri": "raw://confluence/GoInsight/17  智能搭建.md",
+      "content_fingerprint": "f13a606b8e3905db2b0cf5ae94d8e61f0ae79b0f26cfba02074b61986ec6e96f",
+      "locator": "line:1",
+      "topic_key": "v2/products/goinsight/17/17"
+    }
+  ],
+  "authority": {
+    "historical_receipt_is_immutable": true,
+    "current_snapshot_is_authoritative_for_task2b_rerun": true,
+    "task2b_overlay_used": false,
+    "title_or_body_classifier_used": false
+  },
+  "next_gate": "Task 2-B T013/T014 must consume the current snapshot and retain not_released unless the existing semantic exit passes."
+}

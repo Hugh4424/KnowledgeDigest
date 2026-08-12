@@ -21,8 +21,13 @@ from contextlib import contextmanager
 from typing import Any, Callable, Iterator, Mapping
 
 from .errors import ValidationError
-from .faithfulness import normalize_claim
-from .publication import PAGE_TYPE_OPTIONAL_SECTIONS, PAGE_TYPE_SECTION_MATRIX
+from .faithfulness import normalize_claim, normalize_for_gate
+from .publication import (
+    PAGE_TYPE_OPTIONAL_SECTIONS,
+    PAGE_TYPE_SECTION_MATRIX,
+    _claim_is_supported_by_body,
+    _continuous_source_block_check,
+)
 
 
 OPENAI_FORMAT = "openai"
@@ -409,7 +414,11 @@ Typed body rules:
    claim contains a URL, path, command, identifier, number, version, table
    value, or other exact token, copy that material into the body or leave the
    claim_id out. Do not cite a claim merely because it is related to the
-   section.
+   section. For ordinary prose, the safest valid form is to copy the complete
+   claim sentence into the section body and cite it; a short paraphrase is
+   valid only when it preserves the claim's facts, qualifiers, and protected
+   tokens. Cite only claims whose facts are actually present; never cite a
+   claim just because it is nearby or because it completes a section.
 9. Do not invent a required section, fill it with a placeholder, or claim that
    the source says something it does not say. If the supplied source cannot
    support a required section, the safe result is for the page to be rejected
@@ -424,7 +433,8 @@ Typed body rules:
     Markdown separator lines, URLs, or links unless the exact material is
     present in that section body. A compact paraphrase must cite only the
     specific claims it actually preserves; never use claim_ids as a source
-    checklist.
+    checklist. Prefer a plain source title or heading claim. If no such claim
+    exists, do not invent a source description.
 11. `source_kind` is a deterministic handling hint, not evidence. For `table`,
     `bilingual`, `image`, `code`, and `version` claims, preserve the exact
     protected values, paired text, link, path, command, or version when citing
@@ -437,7 +447,20 @@ Typed body rules:
     only two valid uses: copy that claim's complete text into the same section
     body and cite it, or omit both the claim_id and the fact. Never paraphrase
     a marked claim and then cite it. This rule is especially important for
-    tables, URLs, paths, images, code, bilingual pairs, and revision rows.
+    tables, URLs, paths, images, code, bilingual pairs, and revision rows. When
+    in doubt, omit the structured claim and the related fact; omission is safer
+    than a paraphrase with a misleading citation. In particular, do not cite
+    revision-table, image, URL, or Markdown-format claims merely because they
+    appear in the `sources` or `relationships` input.
+14. For each required section, choose only the smallest set of claims needed to
+   state the section. The robust output pattern is one or two concise sentences
+   copied from supported ordinary-prose claims, followed by only those claim
+   refs. Never attach every supplied claim to a section.
+15. Keep ordinary-prose sections concise: do not copy more than 3 consecutive
+   source sentences or 240 characters into one reader section. Select the
+   shortest sufficient claims and leave the rest in Evidence. This limit does
+   not apply to a single table, code block, bilingual pair, public template, or
+   other explicitly structured source fragment when it is copied verbatim.
 """
 
 
@@ -486,6 +509,26 @@ def _typed_section_guidance(contract: Mapping[str, Any]) -> str:
     if not rows:
         return ""
     return "SECTION MEANINGS (use only as labels; source evidence remains authoritative):\n" + "\n".join(rows)
+
+
+def _typed_source_section_rule(contract: Mapping[str, Any]) -> str:
+    """Give the required source section an explicit, source-only recipe."""
+    sections = {
+        str(value)
+        for value in [
+            *contract.get("required_sections", []),
+            *contract.get("optional_sections", []),
+        ]
+    }
+    if "sources" not in sections:
+        return ""
+    return (
+        "SOURCE SECTION RULE:\n"
+        "The required `sources` section must not be empty and must cite at least one supplied claim. "
+        "Use one source-identifying claim only: copy that claim's complete text into `sources` and cite its provider claim ref. "
+        "A heading/source-title claim, a linked title, or a revision/version claim may be used only when its complete supplied text is copied verbatim. "
+        "Do not summarize a revision table, cite an image/URL/Markdown delimiter without copying it, or invent a source description."
+    )
 
 
 def validate_publication_provider_identity(*, model: str, base_url: str) -> None:
@@ -632,12 +675,17 @@ def build_prompt(context: dict[str, Any], *, target_page: str) -> str:
                         source_kinds[(raw_id, locator)] = content_type
         typed_claims = []
         for index, claim in enumerate(claims, start=1):
-            typed_claim = dict(claim)
             # Long fingerprints are trusted identities, not a good model-facing
             # handle.  Give the provider a short deterministic reference while
-            # retaining the fingerprint in the prompt for optional publication
-            # metadata and mapping it back before any gate consumes the result.
-            typed_claim["provider_claim_ref"] = f"c{index:03d}"
+            # retaining only the fingerprint needed by optional publication
+            # metadata. URI/locator/raw_id are deterministic local lineage and
+            # do not help the model write the body; repeating them consumes
+            # context and increases the chance of truncated or malformed JSON.
+            typed_claim = {
+                "provider_claim_ref": f"c{index:03d}",
+                "claim_fingerprint": claim.get("claim_fingerprint"),
+                "text": claim.get("text"),
+            }
             source_kind = source_kinds.get(
                 (
                     str(claim.get("raw_id", "")).strip(),
@@ -709,6 +757,15 @@ def build_prompt(context: dict[str, Any], *, target_page: str) -> str:
     if isinstance(typed_contract, Mapping) and not context.get("publication_only"):
         publication = typed_publication_prompt_sections(context) if context.get("publication_enabled") else ""
         section_guidance = _typed_section_guidance(typed_contract)
+        source_section_rule = _typed_source_section_rule(typed_contract)
+        repair_feedback = str(context.get("typed_repair_feedback") or "").strip()
+        repair_instruction = (
+            "\n\nDETERMINISTIC REPAIR FEEDBACK:\n"
+            + repair_feedback
+            + "\nReturn the complete typed JSON again. For every listed claim/body failure, either copy the complete supplied claim text into the same section or remove both its claim_id and the related fact. Do not preserve an unsupported paraphrase."
+            if repair_feedback
+            else ""
+        )
         summary_requirement = (
             "\n\nIf summary is returned, use the validated shape "
             "{\"status\":\"validated\",\"segments\":[{\"summary_id\":\"summary-1\",\"text\":\"...\",\"supports\":[{\"claim_fingerprint\":\"...\"}]}]} "
@@ -725,8 +782,9 @@ def build_prompt(context: dict[str, Any], *, target_page: str) -> str:
         return (
             f"{_TYPED_BODY_RULES}\n"
             f"{section_guidance}\n"
+            f"{source_section_rule}\n"
             f"{publication}\n"
-            f"{publication_requirement}{summary_requirement}\n\n"
+            f"{publication_requirement}{summary_requirement}{repair_instruction}\n\n"
             "INPUT:\n"
             + json.dumps(payload, ensure_ascii=False, indent=2)
         )
@@ -968,6 +1026,191 @@ def validate_section_response(
             return _typed_section_failure(page_draft, "provider summary is not an object")
         normalized_response["summary"] = dict(parsed["summary"])
     return normalized_response
+
+
+def typed_claim_support_failures(
+    page_draft: Mapping[str, Any],
+    typed_response: Mapping[str, Any],
+) -> list[str]:
+    """Return cited typed claims whose facts are absent from the body.
+
+    This is a provider-repair diagnostic only.  The Publication Gate remains
+    the release authority; the helper lets a live provider receive a bounded
+    correction request before its response is finally marked degraded.
+    """
+    if typed_response.get("status") != "draft":
+        return [str(typed_response.get("reason") or "typed response is not a draft")]
+    claims_by_id = {
+        str(claim.get("claim_id") or claim.get("claim_fingerprint")): claim
+        for claim in page_draft.get("claims", [])
+        if isinstance(claim, Mapping)
+        and (claim.get("claim_id") or claim.get("claim_fingerprint"))
+    }
+    sections = typed_response.get("sections")
+    if not isinstance(sections, Mapping):
+        return ["provider sections object is missing"]
+    full_body = "\n".join(
+        str(section.get("body", ""))
+        for section in sections.values()
+        if isinstance(section, Mapping)
+    )
+    failures: list[str] = []
+    for section_id, section in sections.items():
+        if not isinstance(section, Mapping):
+            continue
+        for raw_claim_id in section.get("claim_ids", []):
+            claim_id = str(raw_claim_id).strip()
+            claim = claims_by_id.get(claim_id)
+            if claim is None or _is_format_only_claim(claim):
+                continue
+            if not _claim_is_supported_by_body(str(claim.get("text", "")), full_body):
+                failures.append(f"{section_id}:{claim_id}")
+    return failures
+
+
+def typed_source_block_failures(
+    page_draft: Mapping[str, Any],
+    typed_response: Mapping[str, Any],
+) -> list[str]:
+    """Return typed sections that copy too many ordinary source sentences.
+
+    The final Publication Gate checks the rendered page.  This helper applies
+    the same deterministic rule to each typed section so a live provider can
+    repair a section before the candidate is rejected.  Checking sections
+    independently is important: separate reader sections must not become one
+    artificial source run merely because their evidence is stored together.
+    """
+    if typed_response.get("status") != "draft":
+        return []
+    claims_by_id = {
+        str(claim.get("claim_id") or claim.get("claim_fingerprint")): claim
+        for claim in page_draft.get("claims", [])
+        if isinstance(claim, Mapping)
+        and (claim.get("claim_id") or claim.get("claim_fingerprint"))
+    }
+    fragments = [
+        fragment
+        for fragment in page_draft.get("source_fragments", [])
+        if isinstance(fragment, Mapping)
+    ]
+    failures: list[str] = []
+    sections = typed_response.get("sections")
+    if not isinstance(sections, Mapping):
+        return failures
+    for section_id, raw_section in sections.items():
+        if not isinstance(raw_section, Mapping):
+            continue
+        claim_ids = [str(value).strip() for value in raw_section.get("claim_ids", [])]
+        section_claims = [claims_by_id[claim_id] for claim_id in claim_ids if claim_id in claims_by_id]
+        evidence_body = "\n".join(
+            str(claim.get("text", ""))
+            for claim in section_claims
+            if str(claim.get("text", "")).strip()
+        )
+        if not evidence_body:
+            continue
+        section_fragments = [
+            fragment
+            for claim in section_claims
+            for fragment in fragments
+            if fragment.get("raw_id") == claim.get("raw_id")
+            and str(fragment.get("fragment_locator") or "")
+            == str(claim.get("fragment_locator") or "")
+        ]
+        check = _continuous_source_block_check(
+            str(raw_section.get("body", "")),
+            evidence_body,
+            {"source_fragments": section_fragments},
+        )
+        if check.get("failed_samples"):
+            failures.append(str(section_id))
+    return failures
+
+
+def repair_typed_source_blocks(
+    page_draft: Mapping[str, Any],
+    typed_response: Mapping[str, Any],
+) -> dict[str, Any] | None:
+    """Safely shorten verbatim typed sections without touching the evidence ledger.
+
+    This is a last deterministic compiler repair, not a relaxed gate: it only
+    runs when a section body contains complete supplied claim text. It keeps
+    the longest safe prefix of those claims, removes the omitted claim refs
+    from the Reader section, and leaves every omitted claim in the trusted
+    source/evidence records. Paraphrased or ambiguous output remains degraded.
+    """
+    if typed_response.get("status") != "draft":
+        return None
+    claims_by_id = {
+        str(claim.get("claim_id") or claim.get("claim_fingerprint")): claim
+        for claim in page_draft.get("claims", [])
+        if isinstance(claim, Mapping)
+        and (claim.get("claim_id") or claim.get("claim_fingerprint"))
+    }
+    fragments = [
+        fragment
+        for fragment in page_draft.get("source_fragments", [])
+        if isinstance(fragment, Mapping)
+    ]
+    sections = typed_response.get("sections")
+    if not isinstance(sections, Mapping):
+        return None
+    repaired_sections = {str(section_id): dict(section) for section_id, section in sections.items() if isinstance(section, Mapping)}
+    repaired_ids: list[str] = []
+    changed = False
+    for section_id, section in repaired_sections.items():
+        claim_ids = [str(value).strip() for value in section.get("claim_ids", []) if str(value).strip()]
+        section_claims = [claims_by_id[claim_id] for claim_id in claim_ids if claim_id in claims_by_id]
+        if not section_claims:
+            continue
+        current_body = normalize_for_gate(str(section.get("body", "")))
+        if not current_body:
+            continue
+        # Do not replace a genuine paraphrase with source text. This fallback
+        # is only for the unambiguous Evidence-dump shape.
+        if any(
+            normalize_for_gate(str(claim.get("text", ""))) not in current_body
+            for claim in section_claims
+            if str(claim.get("text", "")).strip()
+        ):
+            continue
+        safe_prefix: list[Mapping[str, Any]] = []
+        for claim in section_claims:
+            candidate = [*safe_prefix, claim]
+            candidate_body = "\n".join(str(item.get("text", "")) for item in candidate)
+            candidate_fragments = [
+                fragment
+                for item in candidate
+                for fragment in fragments
+                if fragment.get("raw_id") == item.get("raw_id")
+                and str(fragment.get("fragment_locator") or "")
+                == str(item.get("fragment_locator") or "")
+            ]
+            check = _continuous_source_block_check(
+                candidate_body,
+                candidate_body,
+                {"source_fragments": candidate_fragments},
+            )
+            if check.get("failed_samples"):
+                break
+            safe_prefix = candidate
+        if len(safe_prefix) == len(section_claims):
+            continue
+        if not safe_prefix:
+            continue
+        section["body"] = "\n".join(str(item.get("text", "")) for item in safe_prefix)
+        section["claim_ids"] = [
+            str(item.get("claim_id") or item.get("claim_fingerprint"))
+            for item in safe_prefix
+        ]
+        repaired_ids.append(section_id)
+        changed = True
+    if not changed:
+        return None
+    repaired = dict(typed_response)
+    repaired["sections"] = repaired_sections
+    repaired["_deterministic_source_block_repair"] = repaired_ids
+    return repaired
 
 
 def _restore_source_lineage(

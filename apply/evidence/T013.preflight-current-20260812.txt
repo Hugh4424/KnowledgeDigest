@@ -1,0 +1,17 @@
+Task 2-B T013 current preflight (2026-08-12)
+
+command surface: `uv run --frozen digest --help` completed; `--config`, `--llm-format={openai,anthropic}`, and positional `new_dir kb_dir` are present.
+sample manifest: `quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json`
+sample manifest sha256: `fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f`
+frozen sample: 20 examples / 30 selected source records
+question set: `config/task0-question-set.v1.json`
+question set sha256: `8f5cb5e82c66d26d598e4aaeba71aa06db1b1cd67f9b92c122ab5ab2c70f1ac9`
+semantic input: `/tmp/kd-task2b-live.iTTxL8/sample-input` (existing isolated local run input; not copied into the repository)
+semantic KB: `/tmp/kd-task2b-live.iTTxL8/sample-kb` (existing isolated local run KB; not copied into the repository)
+semantic config: `/tmp/kd-task2b-live.iTTxL8/semantic-config.json`
+llm format: `openai`
+approved provider identity: `qwen3.6` at `https://dashscope.in.whatspos.cn/v1`, as enforced by current code and Task 2-B materials
+credential source: `KD_LLM_API_KEY` environment variable; current invocation has no value
+provider model/base-url environment: `KD_LLM_MODEL` and `KD_LLM_BASE_URL` are absent; the current command cannot perform a real provider run without the credential/config environment
+evidence path check: `apply/evidence/T013.semantic-run.json` already exists as a tracked historical evidence file, so the frozen T013 gate's required-new-file precondition is not satisfied; it was preserved and not overwritten
+preflight result: `incomplete`; stop before provider execution. No old evidence was relabeled as a current run, no sample was changed, and no threshold was lowered.

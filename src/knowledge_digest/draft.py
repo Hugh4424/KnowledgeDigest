@@ -1720,70 +1720,160 @@ def draft(
             started = time.perf_counter()
             provider_failure: dict[str, Any] | None = None
             typed_response: dict[str, Any] | None = None
-            try:
-                result = _invoke_generator(generator, context)
-                page_draft = context.get("page_draft")
-                if (
-                    settings.llm_enabled
-                    and not context.get("publication_only")
-                    and isinstance(page_draft, Mapping)
-                    and isinstance(result, (Mapping, str))
-                ):
-                    from .llm import validate_section_response
-
-                    validation_input = result
-                    if isinstance(result, Mapping):
-                        validation_input = {
-                            key: value
-                            for key, value in result.items()
-                            if key not in {
-                                "provider_attempt_count",
-                                "provider_input_tokens",
-                                "provider_output_tokens",
-                            }
-                        }
-                    typed_response = validate_section_response(page_draft, validation_input)
-                    if typed_response.get("status") == "draft":
-                        typed_response = _bind_typed_section_dependencies(
-                            page_draft,
-                            typed_response,
-                            [
-                                claim
-                                for claim in page_draft.get("claims", context.get("claims", []))
-                                if isinstance(claim, Mapping)
-                            ],
+            page_draft = context.get("page_draft")
+            typed_compilation = (
+                settings.llm_enabled
+                and not context.get("publication_only")
+                and isinstance(page_draft, Mapping)
+                and page_draft.get("status") == "draft"
+            )
+            repair_feedback: str | None = None
+            result: Any = None
+            repair_rounds = 3 if typed_compilation and not provider_supplied else 1
+            for repair_round in range(repair_rounds):
+                attempt_context = (
+                    {**context, "typed_repair_feedback": repair_feedback}
+                    if repair_feedback
+                    else context
+                )
+                provider_failure = None
+                typed_response = None
+                try:
+                    result = _invoke_generator(generator, attempt_context)
+                    if (
+                        typed_compilation
+                        and isinstance(result, (Mapping, str))
+                    ):
+                        from .llm import (
+                            repair_typed_source_blocks,
+                            typed_claim_support_failures,
+                            typed_source_block_failures,
+                            validate_section_response,
                         )
-                    if typed_response.get("status") != "draft":
-                        provider_failure = {
-                            "kind": "typed_section_contract",
-                            "stage": "llm",
-                            "reason": str(typed_response.get("reason") or "typed section contract failed"),
-                        }
+
+                        validation_input = result
                         if isinstance(result, Mapping):
+                            validation_input = {
+                                key: value
+                                for key, value in result.items()
+                                if key not in {
+                                    "provider_attempt_count",
+                                    "provider_input_tokens",
+                                    "provider_output_tokens",
+                                }
+                            }
+                        typed_response = validate_section_response(page_draft, validation_input)
+                        if typed_response.get("status") == "draft":
+                            typed_response = _bind_typed_section_dependencies(
+                                page_draft,
+                                typed_response,
+                                [
+                                    claim
+                                    for claim in page_draft.get("claims", context.get("claims", []))
+                                    if isinstance(claim, Mapping)
+                                ],
+                            )
+                        if typed_response.get("status") == "draft":
+                            support_failures = (
+                                typed_claim_support_failures(page_draft, typed_response)
+                                if not provider_supplied
+                                else []
+                            )
+                            if support_failures:
+                                reason = "typed claim/body fidelity failed: " + ", ".join(support_failures[:12])
+                                if repair_round + 1 < repair_rounds:
+                                    repair_feedback = reason
+                                    continue
+                                provider_failure = {
+                                    "kind": "typed_body_fidelity",
+                                    "stage": "llm",
+                                    "reason": reason,
+                                }
+                            else:
+                                source_block_failures = (
+                                    typed_source_block_failures(page_draft, typed_response)
+                                    if not provider_supplied
+                                    else []
+                                )
+                                if source_block_failures and not provider_supplied:
+                                    repaired_response = repair_typed_source_blocks(page_draft, typed_response)
+                                    if repaired_response is not None:
+                                        typed_response = repaired_response
+                                        source_block_failures = typed_source_block_failures(
+                                            page_draft,
+                                            typed_response,
+                                        )
+                                if source_block_failures:
+                                    reason = (
+                                        "continuous source block exceeds 3 sentences or 240 characters in sections: "
+                                        + ", ".join(source_block_failures)
+                                    )
+                                    if repair_round + 1 < repair_rounds:
+                                        repair_feedback = reason + (
+                                            ". The previous section was rejected. For each listed section, return "
+                                            "one short reader sentence based on at most one supplied claim: keep only "
+                                            "the first claim_id you use, omit the other claim_ids and do not copy "
+                                            "their source text. The omitted source claims remain in Evidence; do "
+                                            "not invent facts or a source description."
+                                        )
+                                        continue
+                                    provider_failure = {
+                                        "kind": "typed_source_block",
+                                        "stage": "llm",
+                                        "reason": reason,
+                                    }
+                                else:
+                                    break
+                        else:
+                            reason = str(typed_response.get("reason") or "typed section contract failed")
+                            if repair_round + 1 < repair_rounds:
+                                repair_feedback = "Previous typed response was rejected: " + reason
+                                if "section sources claim mapping is missing" in reason:
+                                    repair_feedback += (
+                                        " The required sources section must contain one supplied source-identifying claim. "
+                                        "Copy the complete text of one suitable supplied claim verbatim into sources and cite its provider claim ref; do not summarize or invent a source description."
+                                    )
+                                if reason.startswith("section ") and " is empty" in reason:
+                                    section_id = reason[len("section "):].split(" is empty", 1)[0]
+                                    repair_feedback += (
+                                        f" The required `{section_id}` section must not be empty. "
+                                        f"Choose the shortest supplied claim that directly supports `{section_id}`, copy its complete text into that section, and cite its provider claim ref."
+                                    )
+                                continue
+                            provider_failure = {
+                                "kind": "typed_section_contract",
+                                "stage": "llm",
+                                "reason": reason,
+                            }
+                        if isinstance(result, Mapping) and provider_failure is not None:
                             result = {
                                 **dict(result),
                                 "valid": False,
                                 "invalid_reason": provider_failure["reason"],
                             }
-            except ValidationError as error:
-                # Provider output is untrusted. Preserve deterministic source
-                # evidence, but mark this source for replay instead of
-                # aborting unrelated sources in the same run.
-                provider_failure = {
-                    "kind": "provider_error",
-                    "stage": error.stage,
-                    "reason": error.reason,
-                }
-                result = {
-                    "final_body": context["initial_body"],
-                    "claims": context["claims"],
-                    "coverage_mapping": _coverage_for_claims(context["claims"], base_target),
-                    "valid": False,
-                    "invalid_reason": error.reason,
-                    "provider_input_tokens": None,
-                    "provider_output_tokens": None,
-                    "provider_attempt_count": 1,
-                }
+                    break
+                except ValidationError as error:
+                    if repair_round + 1 < repair_rounds:
+                        repair_feedback = "Previous provider response failed before validation: " + error.reason
+                        continue
+                    # Provider output is untrusted. Preserve deterministic source
+                    # evidence, but mark this source for replay instead of
+                    # aborting unrelated sources in the same run.
+                    provider_failure = {
+                        "kind": "provider_error",
+                        "stage": error.stage,
+                        "reason": error.reason,
+                    }
+                    result = {
+                        "final_body": context["initial_body"],
+                        "claims": context["claims"],
+                        "coverage_mapping": _coverage_for_claims(context["claims"], base_target),
+                        "valid": False,
+                        "invalid_reason": error.reason,
+                        "provider_input_tokens": None,
+                        "provider_output_tokens": None,
+                        "provider_attempt_count": 1,
+                    }
             elapsed_ms = max(0, int((time.perf_counter() - started) * 1000))
             batch_candidate = _candidate_from_result(
                 result,
@@ -1807,19 +1897,40 @@ def draft(
                 if not summary_valid:
                     batch_candidate["explicit_invalid"] = True
                     batch_candidate["invalid_reason"] = summary_reason
-            (
-                batch_valid,
-                batch_reason,
-                batch_coverage_ratio,
-                batch_retained_ratio,
-                batch_unsupported_count,
-            ) = _validate_candidate(
-                batch_candidate,
-                source_claims=context["claims"],
-                required_structure_lines=_required_structure_lines(
-                    context["initial_body"]
-                ),
+            typed_compilation = (
+                isinstance(page_draft, Mapping)
+                and page_draft.get("status") == "draft"
+                and not context.get("publication_only")
             )
+            if typed_compilation:
+                # Typed responses have no legacy ``final_body`` contract. The
+                # PageDraft validator and the later Publication Gate are the
+                # authorities for this path; running the old whole-body claim
+                # check here makes S4 diagnostics report a false legacy
+                # failure for an otherwise valid typed response.
+                batch_valid = typed_response is not None and typed_response.get("status") == "draft" and provider_failure is None
+                batch_reason = None if batch_valid else str(
+                    provider_failure.get("reason")
+                    if provider_failure is not None
+                    else "typed section contract failed"
+                )
+                batch_coverage_ratio = 1.0 if batch_valid else 0.0
+                batch_retained_ratio = 1.0 if batch_valid else 0.0
+                batch_unsupported_count = 0 if batch_valid else len(context["claims"])
+            else:
+                (
+                    batch_valid,
+                    batch_reason,
+                    batch_coverage_ratio,
+                    batch_retained_ratio,
+                    batch_unsupported_count,
+                ) = _validate_candidate(
+                    batch_candidate,
+                    source_claims=context["claims"],
+                    required_structure_lines=_required_structure_lines(
+                        context["initial_body"]
+                    ),
+                )
             batch_record = _round_record(
                 candidate=batch_candidate,
                 valid=batch_valid,
@@ -2022,7 +2133,18 @@ def draft(
                     for support in segment.get("supports", [])
                 ]
             candidate["final_body"] = _render_summary(candidate["summary"], initial_body)
-        if failure_reason is None:
+        typed_compilation = (
+            isinstance(page_draft, Mapping)
+            and page_draft.get("status") == "draft"
+            and not base_context.get("publication_only")
+        )
+        if typed_compilation:
+            valid = failure_reason is None and isinstance(merged_typed_response, Mapping)
+            reason = None if valid else str(failure_reason or "typed section responses could not be merged")
+            coverage_ratio = 1.0 if valid else 0.0
+            retained_ratio = 1.0 if valid else 0.0
+            unsupported_count = 0 if valid else len(claims)
+        elif failure_reason is None:
             (
                 valid,
                 reason,

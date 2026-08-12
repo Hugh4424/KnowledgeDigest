@@ -1,0 +1,62 @@
+{
+  "authority": {
+    "current_is_authoritative_for_rerun": true,
+    "current_snapshot": "quality/evidence/task2-entry/task1-real-corpus-current-20260812",
+    "old_snapshot": "quality/evidence/task2-entry/task1-real-corpus-20260806"
+  },
+  "delivery_status": "not_released",
+  "input": {
+    "page_type_declarations": {
+      "GoInsight/12. GoInsight DC部署方案.md": "product_overview",
+      "GoInsight/16 问数自动识别数据集.md": "module_or_capability",
+      "GoInsight/17  智能搭建.md": "procedure_or_rule"
+    },
+    "raw_source_modified": false,
+    "source_count": 89,
+    "source_root": "/Users/Hugh/Downloads/confluence 原始数据",
+    "source_root_id": "confluence-raw-20260806"
+  },
+  "outputs": {
+    "kb_structure": {
+      "path": "kb.structure.md",
+      "sha256": "034645cfee216e6a8a7fa3d8140784671fedd75153d2ce6a70b4395f4427472e"
+    },
+    "run_report": {
+      "path": "_digest/runs/run-topic-axis-current-20260812.json",
+      "sha256": "4825d8938c855bc159ca18a2f0f9ec8fddaf6d305f85b13afe31851ba836d6ae"
+    },
+    "source_declarations": {
+      "path": "source-declarations.jsonl",
+      "sha256": "1ea395d21db15e7a1c7175a7b9505210d1f38081bdbd4f0f6303ee1d3c4e9be8"
+    },
+    "source_inventory": {
+      "path": "_digest/source-inventory.jsonl",
+      "sha256": "b8c4705d0e428ce32566e09d66d5d8cfa5167db713ec0b764d18b766af191cf0"
+    },
+    "topic_index": {
+      "path": "_digest/topic-index.json",
+      "sha256": "19170772e4c166ddcf42a220de616d2924cfdc99ac8740a2711ab93f7e9a71f6"
+    },
+    "topic_plan": {
+      "path": "_digest/topic-plan.json",
+      "sha256": "56a5d371e4a98e69f666928495c1db3e223ba777ef62ff448a7c156d1bf3c4da"
+    }
+  },
+  "provenance_mode": "recomputed_backfill_with_explicit_page_type_projection",
+  "run": {
+    "run_id": "run-topic-axis-current-20260812",
+    "summary": "task1 topic axis: inventoried 89 source(s); planned 54 topic(s); not_released"
+  },
+  "schema_version": "task1-real-corpus-verification.v2",
+  "status": "verified_control_plane_not_released",
+  "topic_counts": {
+    "degraded": 23,
+    "explicit_page_type_counts": {
+      "module_or_capability": 1,
+      "procedure_or_rule": 1,
+      "product_overview": 1
+    },
+    "published": 31,
+    "total": 54
+  }
+}

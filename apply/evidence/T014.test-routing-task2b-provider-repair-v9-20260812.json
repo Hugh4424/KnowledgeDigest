@@ -1,0 +1,17 @@
+{
+  "schema_version": "task2b-t014-routing.v1",
+  "routing_tier": "feature",
+  "routing_rationale": "Typed provider repair and deterministic body-gate compatibility changed draft/LLM/publication behavior; run Task 1 focused acceptance, Task 2-B consumer regression, and full repository regression. Semantic evidence is validated separately.",
+  "commands": [
+    {"scope": "task1", "result": "49 passed", "skipped": 0, "exit_code": 0},
+    {"scope": "task2b-task2-task2a-consumers", "result": "264 passed", "skipped": 2, "exit_code": 0},
+    {"scope": "full", "result": "518 passed", "skipped": 3, "exit_code": 0},
+    {"scope": "git-diff-check", "result": "pass", "exit_code": 0}
+  ],
+  "semantic_gate": {
+    "evidence": "apply/evidence/T013.semantic-run-task2b-provider-repair-v9-20260812.json",
+    "machine_exit_passed": true,
+    "delivery_status": "not_released"
+  },
+  "ts": "2026-08-12"
+}

@@ -47,6 +47,12 @@ GAZETTEER = {
     ],
 }
 
+_REAL_SOURCE_PAGE_TYPES = {
+    "GoInsight/12. GoInsight DC部署方案.md": "product_overview",
+    "GoInsight/16 问数自动识别数据集.md": "module_or_capability",
+    "GoInsight/17  智能搭建.md": "procedure_or_rule",
+}
+
 
 def _override_manifest_hash(rows: list[dict[str, object]]) -> str:
     payload = [
@@ -138,6 +144,32 @@ def test_inventory_and_link_edges(tmp_path: Path) -> None:
     assert all("table" in row["structure_features"] for row in rows)
     assert all(row["link_edges"][0]["target_source_uri"] for row in rows)
     assert rows[0]["link_edges"][0]["line_number"] > 0
+
+
+def test_explicit_source_page_type_is_preserved_in_topic_authority(tmp_path: Path) -> None:
+    new_dir, _kb_dir = _source_fixture(tmp_path, count=1)
+    declaration = json.loads((new_dir / "sources.jsonl").read_text(encoding="utf-8"))
+    declaration["page_type"] = "procedure_or_rule"
+    (new_dir / "sources.jsonl").write_text(json.dumps(declaration) + "\n", encoding="utf-8")
+
+    inventory = build_source_inventory(new_dir)
+    plan = build_topic_plan(inventory, GAZETTEER, topic_root="pages/topics")
+    index = topic_index_from_plan(plan)
+
+    assert plan["topics"][0]["page_type"] == "procedure_or_rule"
+    assert index["topics"][0]["page_type"] == "procedure_or_rule"
+
+
+def test_conflicting_explicit_page_types_fail_closed_for_merged_topic(tmp_path: Path) -> None:
+    new_dir, _kb_dir = _source_fixture(tmp_path, count=2)
+    declarations = [json.loads(line) for line in (new_dir / "sources.jsonl").read_text(encoding="utf-8").splitlines()]
+    declarations[0]["page_type"] = "product_overview"
+    declarations[1]["page_type"] = "procedure_or_rule"
+    (new_dir / "sources.jsonl").write_text("".join(json.dumps(row) + "\n" for row in declarations), encoding="utf-8")
+
+    inventory = build_source_inventory(new_dir)
+    with pytest.raises(ValidationError, match="page_type metadata conflicts"):
+        build_topic_plan(inventory, GAZETTEER, topic_root="pages/topics")
 
 
 def test_inventory_uses_h1_not_an_earlier_h2(tmp_path: Path) -> None:
@@ -796,6 +828,7 @@ def test_real_corpus_isolation_and_delivery_boundary(tmp_path: Path) -> None:
                 "content_path": content_path.as_posix(),
                 "source_uri": f"raw://confluence/{relative.as_posix()}",
                 "knowledge_type": "products",
+                **({"page_type": _REAL_SOURCE_PAGE_TYPES[relative.as_posix()]} if relative.as_posix() in _REAL_SOURCE_PAGE_TYPES else {}),
             }
         )
     (new_dir / "sources.jsonl").write_text(
@@ -827,6 +860,12 @@ def test_real_corpus_isolation_and_delivery_boundary(tmp_path: Path) -> None:
     assert (kb_dir / "_digest/topic-plan.json").is_file()
     assert (kb_dir / "_digest/topic-index.json").is_file()
     assert report_path.is_file()
+    topic_index = json.loads((kb_dir / "_digest/topic-index.json").read_text(encoding="utf-8"))
+    assert {
+        row["page_type"]
+        for row in topic_index["topics"]
+        if row.get("page_type")
+    } == {"product_overview", "module_or_capability", "procedure_or_rule"}
     gazetteer = load_product_gazetteer(kb_dir / "kb.structure.md")
     assert gazetteer["entries"]
     assert all(entry["status"] == "canonical" for entry in gazetteer["entries"])
