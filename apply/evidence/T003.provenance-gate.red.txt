@@ -1,0 +1,6 @@
+command: uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k provenance_gate
+exit: 1
+oracle: ORACLE-T2B-PROVENANCE-GATE
+result: target RED; 4 failed, 15 deselected
+failure: test collection succeeded; the first target assertions reported that validate_body_gate was not present. No dependency, import, fixture-path or command setup error.
+scope: tests/acceptance/test_task2b_body_compiler.py; tests/fixtures/task2b_publication_body/cases.json

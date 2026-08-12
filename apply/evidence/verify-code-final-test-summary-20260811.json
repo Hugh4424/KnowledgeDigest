@@ -1,0 +1,12 @@
+{
+  "schema_version": "knowledge-digest-verify-code-final-test-summary.v1",
+  "command": "uv run --frozen pytest -q -rs && git diff --check",
+  "result": "511 passed, 3 skipped",
+  "exit_code": 0,
+  "skipped": [
+    {"test": "tests/acceptance/test_task1_topic_axis.py:781", "reason": "KNOWLEDGEDIGEST_TASK1_RAW_CORPUS 未设置，外部 89-source corpus check 不运行"},
+    {"test": "tests/acceptance/test_task2_corpus_regression.py:73", "reason": "可选 Task1/CompanyBrain corpus fixture 不在当前 checkout"},
+    {"test": "tests/acceptance/test_task2_corpus_regression.py:124", "reason": "可选 Task1/Task2/CompanyBrain corpus fixture 不在当前 checkout"}
+  ],
+  "coverage_limit": "三个跳过项均为可选外部语料覆盖；它们不证明 AC-09/AC-10/AC-11/AC-13 的真实语义出口。"
+}

@@ -1,0 +1,6 @@
+command: uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k typed_sections
+exit: 0
+oracle: ORACLE-T2B-TYPED-SECTIONS
+result: 3 passed, 10 deselected
+coverage: AC-01, AC-02; Structure Normalizer fragments, TopicIndex page-type mapping, fixed section matrices, provider contract rejection and Audit-only failure results.
+route: planned feature; actual advisor fullstack because changed files span src/ and tests/; selected fullstack-slice-testing for the Phase.

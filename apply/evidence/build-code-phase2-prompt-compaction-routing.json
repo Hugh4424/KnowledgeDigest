@@ -1,0 +1,21 @@
+{
+  "phase_id": "phase-2-prompt-compaction",
+  "changed_files": [
+    "src/knowledge_digest/llm.py",
+    "tests/acceptance/test_task2b_body_compiler.py"
+  ],
+  "phase_count": 2,
+  "test_command": "uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q",
+  "routing": {
+    "routing_tier": "feature",
+    "routing_rationale": "llm.py changes typed publication request behavior and its acceptance contract; the adjacent Python acceptance test covers the same backend seam",
+    "result": "pass",
+    "ts": "2026-08-12T01:51:20Z"
+  },
+  "selected_testing_skill": "backend-testing",
+  "browser_qa": "not_applicable",
+  "limits": [
+    "This routing fact does not prove provider semantic quality.",
+    "The full frozen T013 semantic run is captured separately."
+  ]
+}

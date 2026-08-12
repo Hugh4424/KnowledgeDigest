@@ -1,0 +1,6 @@
+Task: T010 GREEN — semantic evidence machine exit
+Command: uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_exit
+Observed: exit 0; 3 passed; 24 deselected.
+Covered: required manifest/run fields, deterministic answerability and first-hit records, evidence backtrace, section completeness, AC bindings, revision budget, and not_released on invalid/degraded evidence.
+Additional file-boundary check: `uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_evidence_file` exited `0` with 1 passed; the validator bound output path and run_id and rejected a mismatched run identity.
+Limitation: this validates the deterministic evidence contract only; it does not claim a real semantic provider run or formal WorkflowHub acceptance.

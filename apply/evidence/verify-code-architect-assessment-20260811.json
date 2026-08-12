@@ -1,0 +1,43 @@
+{
+  "schema_version": "knowledge-digest-verify-code-architect-assessment.v1",
+  "scope": "反向检查原始需求 → decision-log → spec → plan/tasks → 完整用户流程 → AC → 当前测试/证据",
+  "raw_requirement_check": {
+    "status": "pass_with_unknowns",
+    "covered": [
+      "正文可读、可回查、固定三类 page type",
+      "受影响 section 重编且不残留已知旧说法",
+      "影响不确定时整页重编并保护旧 Reader",
+      "失败页 degraded、交付 not_released、失败不伪装成功",
+      "source_not_documented 仅用于固定 exceptions section"
+    ],
+    "unknowns": ["冻结真实语义运行、机器出口和独立审查未形成有效通过事实"]
+  },
+  "user_flow": {
+    "entry": "人工触发 digest，读取已声明来源并建立快照/证据",
+    "success": "Normalizer → TopicIndex → PageDraft → 受控正文 → Publication Gate → Reader 导航；页级 published 与交付级状态分离",
+    "failure": "缺证据、归因/保真/版本/重复/截断/provider 失败进入 degraded/Audit，不进入 Reader，不覆盖旧正式页",
+    "recovery": "影响不确定扩大整页重编；整页失败保留旧 Reader；语义证据缺失保持 not_released",
+    "special_case": "procedure_or_rule.exceptions 经确定性来源审计为 source_not_documented 时不生成 Claim、不写占位句，异常题 not_answerable；其他 section 仍需各自通过"
+  },
+  "ac_results": [
+    {"id":"AC-01","status":"unknown","evidence":"当前 511 passed 的结构/来源回查测试","limit":"当前 packet 没有独立 evidence 锚点，不能把测试摘要当成 evidence 型 AC 的完整通过"},
+    {"id":"AC-02","status":"pass","evidence":"typed section/page contract 回归","limit":"provider 真实样本覆盖仍不完整"},
+    {"id":"AC-03","status":"unknown","evidence":"provenance/claim mapping/body gate 回归","limit":"当前 packet 没有独立 evidence 锚点，真实语义出口仍未闭合"},
+    {"id":"AC-04","status":"unknown","evidence":"faithfulness、重复、分页和失败门测试","limit":"规格要求的各门分母、检测器版本、seed 和失败样本没有当前记录"},
+    {"id":"AC-05","status":"unknown","evidence":"section dependency/impact closure 回归","limit":"当前 packet 没有独立 evidence 锚点，真实运行交付证据缺失"},
+    {"id":"AC-06","status":"pass","evidence":"不确定影响整页重编与旧页保护回归","limit":"仅当前自动化行为范围"},
+    {"id":"AC-07","status":"unknown","evidence":"published/degraded/not_released 分离回归","limit":"当前 packet 没有独立 evidence 锚点，当前交付仍 not_released"},
+    {"id":"AC-08","status":"pass","evidence":"Task 2-A Reader Bundle、导航和兼容回归","limit":"无浏览器验收，CLI/Markdown 任务不适用"},
+    {"id":"AC-09","status":"unknown","evidence":"冻结 manifest 历史事实存在","limit":"当前没有合法冻结的 sample input/KB 与新绑定覆盖证据"},
+    {"id":"AC-10","status":"unknown","evidence":"旧 T013 运行事实仅作历史背景","limit":"真实 provider/model/budget/detector/answerability/section completeness 当前未闭合"},
+    {"id":"AC-11","status":"unknown","evidence":"机器出口 validator 可运行","limit":"少于 6 machine-passing concepts、page-type 覆盖和真实运行成功未证明"},
+    {"id":"AC-12","status":"unknown","evidence":"SR-20260811 revision ledger 与 contract revision 1/1","limit":"当前 packet 没有独立 evidence 锚点，不授权继续新增产品契约"},
+    {"id":"AC-13","status":"unknown","evidence":"source_not_documented 正负 fixture 与来源审计规则测试","limit":"真实语义运行和四类输入的当前完整 evidence 未闭合"}
+  ],
+  "risks": [
+    "独立异源 build-code review unavailable，不能把空 findings 当成无严重 finding",
+    "T013/T014/T016 语义证据与 human confirmation 缺失，交付必须保持 not_released",
+    "不能把 focused/full regression 的绿色结果扩大解释为语义出口或人工质量通过"
+  ],
+  "decision": "不新增实现修复；保留 unknown/incomplete，进入一次 verify-code 异源复核，close 前停止。"
+}

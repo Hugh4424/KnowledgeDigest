@@ -1,0 +1,1468 @@
+{
+  "ac_bindings": {
+    "AC-01": "structure-evidence",
+    "AC-03": "claim-backtrace",
+    "AC-05": "impact-closure",
+    "AC-07": "status-navigation",
+    "AC-09": "sample-coverage",
+    "AC-10": "run-identity",
+    "AC-11": "machine-bottom-line",
+    "AC-12": "revision-ledger",
+    "AC-13": "source-gap-section-state"
+  },
+  "answerability_source": "task0-question-set.v1",
+  "answerability_subset": {
+    "content_hash": "8f5cb5e82c66d26d598e4aaeba71aa06db1b1cd67f9b92c122ab5ab2c70f1ac9",
+    "id": "knowledge-digest-task0-v1",
+    "method": "section-presence-v1",
+    "questions": [
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-01"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-02"
+      },
+      {
+        "answerable": true,
+        "first_hit": "topic-3ffd8813c930b3e1efe1",
+        "polarity": "positive",
+        "question_id": "positive-03"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-04"
+      },
+      {
+        "answerable": true,
+        "first_hit": "topic-3ffd8813c930b3e1efe1",
+        "polarity": "positive",
+        "question_id": "positive-05"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-06"
+      },
+      {
+        "answerable": true,
+        "first_hit": "topic-3ffd8813c930b3e1efe1",
+        "polarity": "positive",
+        "question_id": "positive-07"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-08"
+      },
+      {
+        "answerable": true,
+        "first_hit": "topic-3ffd8813c930b3e1efe1",
+        "polarity": "positive",
+        "question_id": "positive-09"
+      },
+      {
+        "answerable": true,
+        "first_hit": "topic-3ffd8813c930b3e1efe1",
+        "polarity": "positive",
+        "question_id": "positive-10"
+      },
+      {
+        "answerable": true,
+        "first_hit": "topic-3ffd8813c930b3e1efe1",
+        "polarity": "positive",
+        "question_id": "positive-11"
+      },
+      {
+        "answerable": true,
+        "first_hit": "topic-3ffd8813c930b3e1efe1",
+        "polarity": "positive",
+        "question_id": "positive-12"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "positive",
+        "question_id": "positive-13"
+      },
+      {
+        "answerable": true,
+        "first_hit": "topic-3ffd8813c930b3e1efe1",
+        "polarity": "positive",
+        "question_id": "positive-14"
+      },
+      {
+        "answerable": true,
+        "first_hit": "topic-3ffd8813c930b3e1efe1",
+        "polarity": "positive",
+        "question_id": "positive-15"
+      },
+      {
+        "answerable": true,
+        "first_hit": "topic-3ffd8813c930b3e1efe1",
+        "polarity": "positive",
+        "question_id": "positive-16"
+      },
+      {
+        "answerable": true,
+        "first_hit": "topic-3ffd8813c930b3e1efe1",
+        "polarity": "positive",
+        "question_id": "positive-17"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-01"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-02"
+      },
+      {
+        "answerable": false,
+        "first_hit": null,
+        "polarity": "negative",
+        "question_id": "negative-03"
+      }
+    ],
+    "reason": "machine first-hit from typed sections; this is not human reader review"
+  },
+  "budget": {
+    "max_tokens": 8192,
+    "provider_calls": 14,
+    "provider_calls_planned": 14,
+    "source": "DigestSettings/current environment"
+  },
+  "concepts": [
+    {
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "page_type": "module_or_capability",
+      "section_ids": [
+        "capabilities",
+        "entry_prerequisites",
+        "limitations",
+        "purpose",
+        "relationships",
+        "sources"
+      ],
+      "section_statuses": {
+        "capabilities": "candidate",
+        "entry_prerequisites": "candidate",
+        "limitations": "candidate",
+        "purpose": "candidate",
+        "relationships": "candidate",
+        "sources": "candidate"
+      },
+      "status": "machine-passing"
+    },
+    {
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "page_type": "module_or_capability",
+      "section_ids": [
+        "capabilities",
+        "entry_prerequisites",
+        "limitations",
+        "purpose",
+        "relationships",
+        "sources"
+      ],
+      "section_statuses": {
+        "capabilities": "candidate",
+        "entry_prerequisites": "candidate",
+        "limitations": "candidate",
+        "purpose": "candidate",
+        "relationships": "candidate",
+        "sources": "candidate"
+      },
+      "status": "machine-passing"
+    }
+  ],
+  "contract_revision": 1,
+  "delivery_status": "not_released",
+  "detector": {
+    "name": "task2b-publication-gate.v1",
+    "version": "jaccard-5gram.v1"
+  },
+  "evidence_backtrace": [
+    {
+      "claim_id": "6aa39a51f50d5680d21d7d64995f55c9f25998b7f05993483d517a3f2320658d",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:3-3"
+    },
+    {
+      "claim_id": "76f55ae78ffbe0cbbd546646afa2976b6ce48a53903375a7ca21dd50183160fc",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:5-5"
+    },
+    {
+      "claim_id": "538bab32448ff7ddca897fe14667d1e1e422e731d0d873cae962b594d0cbee79",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:6-6"
+    },
+    {
+      "claim_id": "e5ddde5c9d9f1596452fe6621cbc93efb5f8874ca0ed14af6fc15fb0945aca05",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:8-8"
+    },
+    {
+      "claim_id": "cfd601572dc8937c20a5c3bcb01438618322ac26ef457fabd906886f223b6ea3",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:9-9"
+    },
+    {
+      "claim_id": "aecf2bfef236764e1c3b7e1ac3daedb60b07848a97f3d13fab3222884edfc7b7",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:10-10"
+    },
+    {
+      "claim_id": "d6c1f5e6e9e105a88df93f7e037c322ee093e60566d3eaf60a84c152a80987a5",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:12-12"
+    },
+    {
+      "claim_id": "79e16f142e57495c8dc21a76537ae4a0e8a4f7772eda1ccab025a75c7a50a67f",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:14-14"
+    },
+    {
+      "claim_id": "4a1ffefc99f29ad307bf00369a18e5a67645d9afdc28caa419243deed4f21cc0",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:16-16"
+    },
+    {
+      "claim_id": "1ab07feeb552d38b7b86b3ef997d5f45f1d70ffd715390dfd9022364e79f6e4d",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:17-17"
+    },
+    {
+      "claim_id": "5151976b54b81220a4089ecb65ba95acb18a535aaf3e2c55ee761fd36a92473a",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:19-19"
+    },
+    {
+      "claim_id": "7dba40725b11698eb819935265070bd513880e4991d41914e070c3e09c0e741c",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:22-22"
+    },
+    {
+      "claim_id": "d81c8b0abe5747ec59b7417877a220a88260b48ed693b70097a786d99223b5d0",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:24-24"
+    },
+    {
+      "claim_id": "49cd55778fe0bb5b1339af55865baedee82e91864684468b47203c3a27581fcb",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:29-29"
+    },
+    {
+      "claim_id": "92f87d347e96d5320faefa7e6deab2eef64f335de2865329f94ffdeabdc8a83f",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:30-30"
+    },
+    {
+      "claim_id": "2aeb7ff312ac9064c92db9692c361359517b6f72af20b1b91c6e66746af14270",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:32-32"
+    },
+    {
+      "claim_id": "ca386db99dc9cfea187cad5818e833fc84fe74de0c557c595e0728390ce43781",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:35-35"
+    },
+    {
+      "claim_id": "2414461a176d1c06c8b5f876e499a1d7b56bfbda73e1b68c7a46f640cf2aec7a",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:37-37"
+    },
+    {
+      "claim_id": "d58e8a8eb5f03077bf92077f6ec8e239d3e16321bbb7e2dbcf1f0db3f559999e",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:40-40"
+    },
+    {
+      "claim_id": "407f4ef46d008b67dae39a32bb32559151cabdcfd61f67412dff31e477d424bb",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:42-42"
+    },
+    {
+      "claim_id": "10193eb882a5a4f0507a7af88c086342c079e6361ec810b24f179f21cc8dd779",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:45-45"
+    },
+    {
+      "claim_id": "4ab8a292f3924c830f39fe0a45fcc23a1ce41099be8701fafe38406e49c2580f",
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "fragment_locator": "lines:47-47"
+    },
+    {
+      "claim_id": "032f1b0345836e5f0c7d9089b4cdba2d9b2ee1d069a0367fbc9a6cbc1d451997",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:3-3"
+    },
+    {
+      "claim_id": "9e31e50e769ae49a76ddada905f0a23842040dfa3e19b9f69130b16cb82639a2",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:6-6"
+    },
+    {
+      "claim_id": "9e31e50e769ae49a76ddada905f0a23842040dfa3e19b9f69130b16cb82639a2",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:142-142"
+    },
+    {
+      "claim_id": "9e31e50e769ae49a76ddada905f0a23842040dfa3e19b9f69130b16cb82639a2",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:179-179"
+    },
+    {
+      "claim_id": "9e31e50e769ae49a76ddada905f0a23842040dfa3e19b9f69130b16cb82639a2",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:192-192"
+    },
+    {
+      "claim_id": "9e31e50e769ae49a76ddada905f0a23842040dfa3e19b9f69130b16cb82639a2",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:210-210"
+    },
+    {
+      "claim_id": "9e31e50e769ae49a76ddada905f0a23842040dfa3e19b9f69130b16cb82639a2",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:264-264"
+    },
+    {
+      "claim_id": "dbcacc43caa693a3c612d69f3eddf7b3cb6d3997fa4acb24192f81e79af1e814",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:12-12"
+    },
+    {
+      "claim_id": "2d0e5473a2c46ed13448510d8a8e47f2c330185daf0225c1478375b813de3d50",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:13-13"
+    },
+    {
+      "claim_id": "ae9f53fd6da6e9e9ab9cff89d3ce5734815671f8066907ba56d816823be56e07",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:14-14"
+    },
+    {
+      "claim_id": "4354e9946e4fcf205fd4e35bf5f77436b0d0af7bf8c489886f1284196b10e320",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:15-15"
+    },
+    {
+      "claim_id": "a994605b2626699521a90506a2290d04dad58ab42baecd5b123cea3efb86f013",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:16-16"
+    },
+    {
+      "claim_id": "1011a514122c57d190c237e43e04ff0aa49203cf24d86f78fa3c21bb32e52928",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:18-18"
+    },
+    {
+      "claim_id": "b11288b3605b422cf41ff3e7f20deba955941282956104156b0cdbbfcf5802be",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:20-20"
+    },
+    {
+      "claim_id": "a64b389e2a9d4520c6e917ec3a22f19b889f5756c199b66e13076dd101de453e",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:24-24"
+    },
+    {
+      "claim_id": "4898ad67d30385d5165d2dbc538ec231aa98b4c6998fb826a99abed5e753bbcf",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:25-25"
+    },
+    {
+      "claim_id": "96f396527cb50d48f89d52552678ec3bba05cc4f978a7e4c886f4ab7775aef49",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:26-26"
+    },
+    {
+      "claim_id": "4d938dc1bab39cd182e251bf12400e4f70b8625a86f5c7e2bd212748cb2ad51e",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:27-27"
+    },
+    {
+      "claim_id": "c183379f62f2fccca69356cee00e43e9bb514accddb073e8171e7caa9f9820de",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:28-28"
+    },
+    {
+      "claim_id": "5227d240d2971533ab62afa0ca7d375307ac24a16a06147fc7a6f5c08525b3c3",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:29-29"
+    },
+    {
+      "claim_id": "0f895272c82cca682d21016b3b3952fb35388e5546a04ca10e11d5d40c352286",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:30-30"
+    },
+    {
+      "claim_id": "03bf80c2b6eb6358fa61ab7b33dacd64f40772937afcf652e235f6798582dc05",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:31-31"
+    },
+    {
+      "claim_id": "f8fa875c55aa2d38f5198eeeb94826cec51832e2305fdf62135ab94cda40b482",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:32-32"
+    },
+    {
+      "claim_id": "56adb5f731c041c5065e68475d58af12681d9e0912eedd4690a2042612e368c0",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:33-33"
+    },
+    {
+      "claim_id": "8ee7b1f5efc916b7196948b557d6c3f8b8f9768f0b380693f67f7f19946e85a9",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:34-34"
+    },
+    {
+      "claim_id": "662b396c3327f034ffe7eb4582678b7ac04b0118e234154b8c6d5b97d7b25043",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:35-35"
+    },
+    {
+      "claim_id": "1bf53eaffe65d753127b2dd83dc950c3b5d52a78e6504346f47a9b36df1cb33c",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:36-36"
+    },
+    {
+      "claim_id": "5e4ed6c5af48b4f6c704497696740454bcb2b84c3f2a6afc0a2077c11f851819",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:37-37"
+    },
+    {
+      "claim_id": "eaa8fc8c71b3e4d3a1649b87a616a8be48bbf374dcf5d3afb85a62a4a620d6ef",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:39-39"
+    },
+    {
+      "claim_id": "26f600ac745d3bd8b1271f27f9643e7e08e24da8fe68a5bad84adaf74fc86f10",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:41-41"
+    },
+    {
+      "claim_id": "ddd4fac7595d25a691a6752967d2e67ea1b9ea0d5413ebbd75cc3ab252bf33bf",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:42-42"
+    },
+    {
+      "claim_id": "be187975f82d191bbd6e9e2f6bd5f31c72d83a94ddc181db7b8d03c3cd7cde4f",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:43-43"
+    },
+    {
+      "claim_id": "7b8bae5429e1020fc8132f9423589d3ca1bc318143bc4a4faf2051b1490b5e3b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:44-44"
+    },
+    {
+      "claim_id": "d3d49d619a938942911cf30aeb858f9b33cd3ef1d04cd83849ee372afcc13301",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:45-45"
+    },
+    {
+      "claim_id": "8b04a5eed6aadeeef8dc50d8f35fc0e8d063860423f82b4031c1030a348be3d6",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:46-46"
+    },
+    {
+      "claim_id": "29c92cb1f91d9557f69db10abf696bc3e545015aa9db0b17f826e02fff5847b6",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:47-47"
+    },
+    {
+      "claim_id": "d941a3171f5e31dfb6b90f0d54fad333ffc6068f11e0b8ac9454b54f8c1c31a8",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:48-48"
+    },
+    {
+      "claim_id": "c596691943a04b9a8298b8ab81b35b350a0d995ad2f2bfb38de6fb7eb14f13d9",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:50-50"
+    },
+    {
+      "claim_id": "0f9504b56e905c452d5653ea6b001fed94f56ad1a94bc08ce7aa1f66266ffa05",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:52-52"
+    },
+    {
+      "claim_id": "05e7caa0ff0ccf5e89c9ef7898e90056e58a525b2c2030ae8bcf1ef69d4cd53d",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:54-54"
+    },
+    {
+      "claim_id": "4ddc46f6518c8dfe00806cd9cf8ca89ed9752507d5e213464274eb2f1e620973",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:55-55"
+    },
+    {
+      "claim_id": "b2d8f1bc1464c548baf3b2ed2722837a7d06f5fcf560edb9e20783245475afed",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:56-56"
+    },
+    {
+      "claim_id": "30ddc085b1b99e2a1b1aaadfe53b50dc406c316ae0daed3935992a129e9403ab",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:57-57"
+    },
+    {
+      "claim_id": "9719cf597e8f1a5fe71567492d34e4cbbcf96e0a977d9cdd373a1606ec45a8cc",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:58-58"
+    },
+    {
+      "claim_id": "2d01d2282a81994fa953b374ad60e84238f91a5c1312a2eb68710fef28056542",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:59-59"
+    },
+    {
+      "claim_id": "9bcc61a7a820ba1b56e30c28f1065dab23f58410821464ba9ad75b0a599f946c",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:60-60"
+    },
+    {
+      "claim_id": "0e55fd9c903531df58bcc8a8159ea4ea099df1fe0fc69e733548b8b805c84dfc",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:61-61"
+    },
+    {
+      "claim_id": "874125273de1499cdbdee366b09fa7eb55e2372b0e03e5df26e5db2982ef758e",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:62-62"
+    },
+    {
+      "claim_id": "341cd3172078b6530ecc2688f2b478c297308265bc6dc1e7341a502d31618b55",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:63-63"
+    },
+    {
+      "claim_id": "523d006b5d9b535803ed1010b66d7c3fd08cc22d801d1efad25f422c4999acd8",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:64-64"
+    },
+    {
+      "claim_id": "16a98e253ad8faf6a09c5500981eb4b7d2f5e64b443382de3ba5b06440432d72",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:65-65"
+    },
+    {
+      "claim_id": "c611c3e799dbe3af3896b3f4c6ba436d62c21cc825912f985ed566a3f8f1bf2c",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:66-66"
+    },
+    {
+      "claim_id": "c611c3e799dbe3af3896b3f4c6ba436d62c21cc825912f985ed566a3f8f1bf2c",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:89-89"
+    },
+    {
+      "claim_id": "c611c3e799dbe3af3896b3f4c6ba436d62c21cc825912f985ed566a3f8f1bf2c",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:100-100"
+    },
+    {
+      "claim_id": "c611c3e799dbe3af3896b3f4c6ba436d62c21cc825912f985ed566a3f8f1bf2c",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:104-104"
+    },
+    {
+      "claim_id": "56e78f40cc0fef2e13b4f892ede04022f876ec91ad1aa03f6da0dc07be2bfa7c",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:67-67"
+    },
+    {
+      "claim_id": "56e78f40cc0fef2e13b4f892ede04022f876ec91ad1aa03f6da0dc07be2bfa7c",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:90-90"
+    },
+    {
+      "claim_id": "56e78f40cc0fef2e13b4f892ede04022f876ec91ad1aa03f6da0dc07be2bfa7c",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:106-106"
+    },
+    {
+      "claim_id": "3bbd6e0c40e402a2124bb4047dbd2a86dea4aefbfa3ff0c73996f61adfc47ed1",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:68-68"
+    },
+    {
+      "claim_id": "b62763c8d6d09074fc9fa36319a6621ae3b1c8875eae18898b24f37dcbfec54b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:69-69"
+    },
+    {
+      "claim_id": "dee675634495034e090e55cda75617a7f0d987ffa3c709fe9c6cdc3a5b2778db",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:70-70"
+    },
+    {
+      "claim_id": "dee675634495034e090e55cda75617a7f0d987ffa3c709fe9c6cdc3a5b2778db",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:92-92"
+    },
+    {
+      "claim_id": "2fd21b9d11ee503a80c371fde7f331db1f64a1fded8551cdb06244c406540116",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:71-71"
+    },
+    {
+      "claim_id": "b227a23a0f8c4c67795bb4203aadce9b97560f040f1a03465e4de716dbcf687b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:72-72"
+    },
+    {
+      "claim_id": "058d09e3909f91255f499ff863726be2c40136694262d08069db2580e8c72b98",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:73-73"
+    },
+    {
+      "claim_id": "59a5f93eab22e6bb8014d7cf29ded898fc1aca6e833ee98c6ae3b5a836dd0c11",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:75-75"
+    },
+    {
+      "claim_id": "897f4675fa2e420b046d50450546977d3492ed20e7a90c05da07f91d4ea833cb",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:77-77"
+    },
+    {
+      "claim_id": "97d49c1a3baf9feae9267e6c9c5acaf6a585836ddf9cf0ad564aac363456d27b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:79-79"
+    },
+    {
+      "claim_id": "e00d3aefb389b89d44c57dd576118b245d306cdafa51b723a66d29fcbeb52457",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:80-80"
+    },
+    {
+      "claim_id": "a18e9d96bb96d09870c67072d484d43156be152baa50d142a716538701929805",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:82-82"
+    },
+    {
+      "claim_id": "ed8c462cdfc6f5ff0e6d70825260c04f6210eaebcccf39c55bd1a3b258091aba",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:84-84"
+    },
+    {
+      "claim_id": "8087adb94b2df80ba5d6fd81b8ed32ae21b3ad2f9aa73f0eb3cb07a4c0d30240",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:86-86"
+    },
+    {
+      "claim_id": "fd76bab44479ef65398a38b547abeef88532c76c7c8bf61e149f9340d4b8215a",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:87-87"
+    },
+    {
+      "claim_id": "4e10757c0fec0de4a472bc73b38ed09b07a432234135a6653f58212719646a2f",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:88-88"
+    },
+    {
+      "claim_id": "d68ae6dcdbe226cb2b78ebdcd183e0c14fd7b7260a6f4793f83d9a9cc23d8458",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:91-91"
+    },
+    {
+      "claim_id": "9b47c87d46dfd0209014f5e00255e25a2306afc7ec86a8ed8235c297095b3fe5",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:93-93"
+    },
+    {
+      "claim_id": "e631b68f6c64fde0a1e9228662a01e86c2777faf4bb97f7caa15a05c0218f876",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:94-94"
+    },
+    {
+      "claim_id": "d0993c90b9f9fe817df6830d1ee9e9d05bd04739a76a0a55c21d40a75b20ea21",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:95-95"
+    },
+    {
+      "claim_id": "d63f1cfe05e8a2b7c4820a0a15a6683dd54176de81d7f4603c9072c9a7b2aae2",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:96-96"
+    },
+    {
+      "claim_id": "dee7303a44f527827c8ddd7a476bb561ca140aaab97e2c21d50d4c5a5e50315d",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:97-97"
+    },
+    {
+      "claim_id": "174bbb32f1975900548520e1a0a6441fa87621df6b282ee8b605c3948c46b12b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:98-98"
+    },
+    {
+      "claim_id": "174bbb32f1975900548520e1a0a6441fa87621df6b282ee8b605c3948c46b12b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:102-102"
+    },
+    {
+      "claim_id": "193f64f7083fa80a483a605d9d85bf75d59c3e0691544ffb78fd545d955db0fe",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:99-99"
+    },
+    {
+      "claim_id": "a430b5c0ccdc93edefc6525fd46a7f70a39d0870c737df50360aab89b74a6ca3",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:101-101"
+    },
+    {
+      "claim_id": "14cdf38296401cb132f3d11afb0cd9042e588928992bee88eabb55decf1e759a",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:103-103"
+    },
+    {
+      "claim_id": "1d82d4055767a5b27cc7622b1535c9b26cb00f4e17c88061f8b8697ff5afacd4",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:105-105"
+    },
+    {
+      "claim_id": "5134a980cbf2442e21793f3c92dbf65f7e79d3cd04f8dd9b03b2ea23eca550c5",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:107-107"
+    },
+    {
+      "claim_id": "b33688ba91eea84c8ab36310cb67cf461fe85a711852979df292e1677d8e4b43",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:108-108"
+    },
+    {
+      "claim_id": "dda1a1167190d7c7f6975e1dc64aaa8d27790e54267f2f7ca7dbbbada29e2ebb",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:109-109"
+    },
+    {
+      "claim_id": "d133951a56c0faa1875bd8628c02e33d58819744f904d4a21ab9309d58f4a689",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:110-110"
+    },
+    {
+      "claim_id": "000a977dcac67b1362886d0f7deb5ee4cb3d8c7c1f672cb7117eee97eed3702d",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:111-111"
+    },
+    {
+      "claim_id": "75abc5d4c9e82a0f3ea34cda3a7ff35da00d7fdf2f1e7b453ab6d0ec70b7e06f",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:112-112"
+    },
+    {
+      "claim_id": "1ab0934210e6963a54c1421ae33030e8f59a0d95f4dc38ba7ff51921908a6b0c",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:113-113"
+    },
+    {
+      "claim_id": "a9ec04ac0de7f02323458c7c628ca34691f4c4e7c9fc0cc4bdf9b7b1b427a737",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:114-114"
+    },
+    {
+      "claim_id": "9d00a4ce94cfdab0f08c764a8110d353f140c3b224f298271ca6bd461079f8e2",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:116-116"
+    },
+    {
+      "claim_id": "9373cbcc28fe70277c52c01bf1653ca250c55bb0e8b13c1b8dcda0a9325b8981",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:118-118"
+    },
+    {
+      "claim_id": "5fad0bbc6eaf01a2fffb7c6bf816069be3b6b01f31c7ebb35f9cdf4b410593b1",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:120-120"
+    },
+    {
+      "claim_id": "d07760835d049808a159c71934a4e4a5424970750a662b021a13037b6406af42",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:121-121"
+    },
+    {
+      "claim_id": "7209c26e2e0af31660ca9a1c0fb72012eee496df023098a5477e1713a5b5f64b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:122-122"
+    },
+    {
+      "claim_id": "7209c26e2e0af31660ca9a1c0fb72012eee496df023098a5477e1713a5b5f64b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:128-128"
+    },
+    {
+      "claim_id": "c2928aa8c1d89275931d65c7fa58dbfb6bcab7537ab5013ca758bb738b4c375e",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:123-123"
+    },
+    {
+      "claim_id": "c2928aa8c1d89275931d65c7fa58dbfb6bcab7537ab5013ca758bb738b4c375e",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:129-129"
+    },
+    {
+      "claim_id": "52bc59763fc3ea396d8856c255baf76f9b38328592b21055b040a9b561760afa",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:124-124"
+    },
+    {
+      "claim_id": "8108a5eb3cded559a59166ffcbcef8c245d514740b18ab06c584b4b8e73dccab",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:125-125"
+    },
+    {
+      "claim_id": "8108a5eb3cded559a59166ffcbcef8c245d514740b18ab06c584b4b8e73dccab",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:133-133"
+    },
+    {
+      "claim_id": "93f7420358f0b32903b39a1f5bcb51f3d4d5b4dc08694ce6a69243d0daaae0e0",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:126-126"
+    },
+    {
+      "claim_id": "4b816ff4721b92fd6936125f39746e82e8200476663f449e2705590e6fe19c8b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:127-127"
+    },
+    {
+      "claim_id": "7a110f826f1fa1ab12860885e47e41dfc52f58dafc9837e37a1122be9b3730d3",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:130-130"
+    },
+    {
+      "claim_id": "ef21e300b4e3166affd819ad06ce552c6dc60c38dcea2591bb15e472a9ea52af",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:131-131"
+    },
+    {
+      "claim_id": "1f8378db1fbd12e6b099a0127f95b4bf7969cad201f46b6ee5cab69440ecfefc",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:132-132"
+    },
+    {
+      "claim_id": "c9e70fc347ae971aa32d2960b948e94ed44f0bc3fa90fd6a57b115de71690a69",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:134-134"
+    },
+    {
+      "claim_id": "cb19daac58d6644c4634bf16d735292786e0d07af01d41a28be6b6052dd97c9a",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:135-135"
+    },
+    {
+      "claim_id": "65dd0dd3b38043a584c31ad8a1e974f048a173fe4adc29561886bd41bff0d4b3",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:137-137"
+    },
+    {
+      "claim_id": "7e8c8ce278fb3a91ebb97e702d37d1850a865d59f4b6af8f315ebc8d35905149",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:139-139"
+    },
+    {
+      "claim_id": "bdbdd538f7fbeb4b4e4633de56aae1537ae1d9e130f45ff60d1764ba2b0b2925",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:148-148"
+    },
+    {
+      "claim_id": "705f109339b553515d55d4a969db96be0baebc04b2130da07aef1f0db1f3a4da",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:149-149"
+    },
+    {
+      "claim_id": "3f3a4a68df411b9bc067489568388b487b4557e416aeb6f2032a36d04d9a55e6",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:150-150"
+    },
+    {
+      "claim_id": "bfdaeb265775a3fad9c9353fce9da2ef2592e48b07f88d1ed1c2154ebd8701ac",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:151-151"
+    },
+    {
+      "claim_id": "e822b98777105dae62ecbd2b9bdb1cb50c5aa6e37fef8c3dd3c5f517dbe56888",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:152-152"
+    },
+    {
+      "claim_id": "59bac8b7843dc897a798eca2fae0de79b666d59560f0387ac4d694b26d5eff34",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:153-153"
+    },
+    {
+      "claim_id": "3c4bedf4df326aeaf46bec6370da57f0cd99726b3010d7287895142ef54a37f8",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:154-154"
+    },
+    {
+      "claim_id": "b2921be4497eb1a2deccd39f8c7fa8c24d76da4de1487f3b2f5851191c7651a8",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:155-155"
+    },
+    {
+      "claim_id": "aec2130452403a6af4eff5d132dedf8cce14fd4949a441dd10028ba09e93ff5a",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:156-156"
+    },
+    {
+      "claim_id": "1c64a783bc9b8eb42c60ce64173aa1304a3f04b11fbff4c8549eb046a60b74c0",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:157-157"
+    },
+    {
+      "claim_id": "b1b4e1ada815511307da642b04ac5b1a281f6f2832a997e98f4752671d910665",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:158-158"
+    },
+    {
+      "claim_id": "ea61a1b2ed8f120e7be19c66f3b16fb2872894d0f2d5d4f5ddf64bb3ab8d7254",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:159-159"
+    },
+    {
+      "claim_id": "e90a8152074898cf4d3f66c13a9eee70fc85e8b90df9c2a574976a24cdbbf4af",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:160-160"
+    },
+    {
+      "claim_id": "889862d278d8b969b1622c569ebe6a58bb84b0aad943f52b836c03ec4846f99b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:162-162"
+    },
+    {
+      "claim_id": "dc53ec9aaf972f4e57b3855fca5f7be627a1887161a859452d2f7b7ff2747dcf",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:164-164"
+    },
+    {
+      "claim_id": "d748dfb6c31804282ad2153d9d38e1b177d735163f366fe0219e3029383a06c3",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:165-165"
+    },
+    {
+      "claim_id": "680d8c5bb877a69dd2ac44bf097de4396130eae99fbede2754574cf0ee91a106",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:166-166"
+    },
+    {
+      "claim_id": "9f3d0ce6b082e2533e5f27f056947f91ca6f2cc9ccbbe28534e98f92835100af",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:167-167"
+    },
+    {
+      "claim_id": "cbc8ad25833ddca8e8adfbcd6a4530daffd24868edcd07c60c3b61e47bd82807",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:168-168"
+    },
+    {
+      "claim_id": "5d8878a75879b995e94ff8ea2996c8d377e12b07e8037de32782580702c1b491",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:169-169"
+    },
+    {
+      "claim_id": "9d82840e6494ad4264f8c557f366294c2755bd2f2c0626ea21e3da618c18b51b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:170-170"
+    },
+    {
+      "claim_id": "1b3e3ec0ae528c85f9aeaf05bd5ac203abaa38d49245fe2c8f9a8e9875342977",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:171-171"
+    },
+    {
+      "claim_id": "3b0187394a1e77093ca56fa459fdd166dfb65a33de003b2203f9a4dbffcb06ba",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:172-172"
+    },
+    {
+      "claim_id": "f5527afc5364ae50efab7a074f9c83989106d5687a32cd7a18c067c1098fea7a",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:174-174"
+    },
+    {
+      "claim_id": "58d369254697b8971d2e1b9673cae70a9375ba48316cbf82b1e4d0c5617b85cc",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:176-176"
+    },
+    {
+      "claim_id": "8efc9e91686c029205cf2a66a68d2755ad7eeaf393754e2dd648303a2432a7eb",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:177-177"
+    },
+    {
+      "claim_id": "47861658ed9efcb088cc8c4492a0da1f81d9c882596d5b4d4ed3b2fa75873ed9",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:183-183"
+    },
+    {
+      "claim_id": "16ba2b4162901851e6c97299b98afabfd49dd1a4de09958e4f30253d2d3ea478",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:184-184"
+    },
+    {
+      "claim_id": "af1cf8bcfa55c7966453c2f02a47028571dc5f819fafa795ccbca7c27a3e81da",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:185-185"
+    },
+    {
+      "claim_id": "f0ef15bce2a39b239ca5d888244b6480b7764cdc03664a1c000948a70a6bd960",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:186-186"
+    },
+    {
+      "claim_id": "3c1a0ecf9313c1cc760d5470b1ca17711722e245a1a7c05c26de4ef827fd191f",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:187-187"
+    },
+    {
+      "claim_id": "d4c634eb16326de43fbd6116a97dd003ecd353414bfe91bd53916c3f9f8f5b1c",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:188-188"
+    },
+    {
+      "claim_id": "0c2abb15f31fb2674f36199db72eca8dfc140b91e8805b04b14c900fafe839ab",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:189-189"
+    },
+    {
+      "claim_id": "a383828c990971a44b9e620d986e9110c432dddafc93957ec7a52f56d76eb99b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:190-190"
+    },
+    {
+      "claim_id": "1a518f307e6875298321169ec1113ed54a13d9ba05dd0bbcc4a93766e96dec27",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:196-196"
+    },
+    {
+      "claim_id": "3510dff96da0ed33ccfa669520d243c7ae130c5f719195b09dc6d614620b6483",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:197-197"
+    },
+    {
+      "claim_id": "289b848c6c554c32176d30aec18f4e7771d87926076ce986a89a2e280ad54f81",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:198-198"
+    },
+    {
+      "claim_id": "d4a2deaa3f97e89ce7878d84c01b2138a8bc6a8ebfca9cb692e28b3a2b543983",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:199-199"
+    },
+    {
+      "claim_id": "8bad54cc9a2a0de57049273764b6d1b5afdf664526dd2b105332a68c54bf446b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:200-200"
+    },
+    {
+      "claim_id": "0a0be2f6843cde1215a1c875b7be0029531c1862193484b24e17382bb6cbc306",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:201-201"
+    },
+    {
+      "claim_id": "f4d9af07184a1864adc42ba4b5b8b6cab357853fb39c7bd9a6718db073b15bb7",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:202-202"
+    },
+    {
+      "claim_id": "11c6029fc940949a30421c455bc9508efaf218bbbbe2173b7f2d85c1edb39af1",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:203-203"
+    },
+    {
+      "claim_id": "1e4b6eb2a693aede9954deeb063fb7867742d6c2f47becb07973f2b966ebdda6",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:204-204"
+    },
+    {
+      "claim_id": "0a8cf9dd191bf04295667f34bc0c3b744aa8dd7a742660651e76fa83535868da",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:205-205"
+    },
+    {
+      "claim_id": "41d0091c35bfedda63c3c893725f1fe55c12d7172bc0df35fe5c183e09f85714",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:206-206"
+    },
+    {
+      "claim_id": "ac99b52db797f3a9eeabf67ec8a468b4630d9d3dfaa716e565fcd3f0e25abdc2",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:207-207"
+    },
+    {
+      "claim_id": "141b5fdc8f0a80024b97e939cef0f1edf6def7339df9d89e44ba1071cebc99eb",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:208-208"
+    },
+    {
+      "claim_id": "593d6af3cbe12385ad792b0d1e161e89139eaf6d5619b1f271a2161715467708",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:214-214"
+    },
+    {
+      "claim_id": "7bc6f41393cf6a1fefd4566d33f99dc767a466ad93e820c57eb8356d7291fdc3",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:215-215"
+    },
+    {
+      "claim_id": "832a99366b647cc2dfa1c2f1c868ac8ecb07330f5171473d7370c0b9ac39f7fc",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:217-217"
+    },
+    {
+      "claim_id": "05c0850b189ee2a7087bae3f4d8b130f786964bc07f55c0809001c5bf8123239",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:218-218"
+    },
+    {
+      "claim_id": "743863f822689f39d9a31ab7af0e12460e92f9ae89447b58c0d723719f0fa0f1",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:219-219"
+    },
+    {
+      "claim_id": "812846f944a9a6fddc75f9fc19645a66d99f7d92816537f8cd311b33e474ca50",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:220-220"
+    },
+    {
+      "claim_id": "ff43cb45d3996c0b68b00f35c84537eb334a305bc0d0bb426c65f90fb51ae62c",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:221-221"
+    },
+    {
+      "claim_id": "ca9a535320e9bca1360f9ef29896670cc80e6f5fb8b6779852acf3e5de1d7f5f",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:222-222"
+    },
+    {
+      "claim_id": "178d983c5271930eab2f6646d6fb979a74800bf5bdf55c94991064dc2e835f92",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:223-223"
+    },
+    {
+      "claim_id": "c868326258892fb6ae3b30bb82bfaa848c069de0c9cf7fc3bc38a7dda4f589b8",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:224-224"
+    },
+    {
+      "claim_id": "35760b4c40584525ee8425f490dbc69b7836edb42ef92eb8876922f227edcf0c",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:225-225"
+    },
+    {
+      "claim_id": "f84a46d09078835c765502347e1a3029d6dd3678a112590dd31ecf9c6e250e4b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:226-226"
+    },
+    {
+      "claim_id": "2d9d3ab1c5a238f3e7f79b68d2edbe303d661740e1096147dc8ef623c0c46f9f",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:227-227"
+    },
+    {
+      "claim_id": "f0ed9e6ce6e4a07b42c820e1ded4a9a42a8647604d91df2b766381afdc47b8a7",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:228-228"
+    },
+    {
+      "claim_id": "afe1430e75072ad6add8c469955233e569495f5e6ffece1ab5b0a04355d073d9",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:229-229"
+    },
+    {
+      "claim_id": "579e1eac008d005633dea79b3a0f29c31e53d877d603bc3ef131dcf96137bf1b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:230-230"
+    },
+    {
+      "claim_id": "03988d272414abc9dfde48fa9a573ea3d87c48d018da3bba2a68f4c070461957",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:231-231"
+    },
+    {
+      "claim_id": "359e41e227313fc370f441f77df00936a3bbf365edccd7f84891b933bedd8f4d",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:232-232"
+    },
+    {
+      "claim_id": "164e769086101b31663727ceca3f7dc820b90562e20a29868889eb8118838c7a",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:233-233"
+    },
+    {
+      "claim_id": "8c76334b8162cef24f510c7761b4f5ced26564b3f9df1a8c798ac9b0b0effe78",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:234-234"
+    },
+    {
+      "claim_id": "b612f780b2198c32da40303ca742b6f79655651dd0cb03672184797348f7172b",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:235-235"
+    },
+    {
+      "claim_id": "73aa2df4a8f27d97e96cef5bab8faca7738fbb4bebb39cedd625e0ca24b10a96",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:236-236"
+    },
+    {
+      "claim_id": "06d867d6ef17df7fb7094d0d58f7253833037cef87d74affc944462d6df60cec",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:237-237"
+    },
+    {
+      "claim_id": "6b198d3d5672ae8f76d18ed442142f626bf8e13fc26fec0062096c8a6c294bf9",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:238-238"
+    },
+    {
+      "claim_id": "d5ca5e2416627de2e510f3e6892740b3adf2d623af71ef4d28b7b891e765cdaa",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:239-239"
+    },
+    {
+      "claim_id": "f6fe1c65b8b04a13a85d8c77e15540a04247f2fa0674a85986dbfe1d800ed966",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:240-240"
+    },
+    {
+      "claim_id": "c0c4e1c3e8774fb34dfcb5866fecb1b99772bf34a925a51214f2bf789be100ce",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:241-241"
+    },
+    {
+      "claim_id": "e23d9cff07ca56c2ba2bf1299325f92b92a1eb045de49094195ece0aca59b739",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:242-242"
+    },
+    {
+      "claim_id": "f69f1cf4a2e623b8f1cc2189ca457f8656c10f8a843abeb922ba2252e8e8cad0",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:243-243"
+    },
+    {
+      "claim_id": "fb21f577a45b3fb287f49fd9c61605b7c72ed1afde732621bacc79ee01a7f93f",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:244-244"
+    },
+    {
+      "claim_id": "c6f3698fa922ad4473a1aaae33364ad4ca56ba52d7fd16265b49beb092c06665",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:245-245"
+    },
+    {
+      "claim_id": "98bdc46c1430fe2f4527cce7bed9896f044a9f78a295c035b09b61388efdf310",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:246-246"
+    },
+    {
+      "claim_id": "f499f266e3cb638573fb20d53969466fa09415f96e7ee39bdc0680709f0f76c8",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:247-247"
+    },
+    {
+      "claim_id": "0dd7fb01b819fc6e56bd6d82165cd910af708a6de3790874366ccf3e28c2a5ac",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:248-248"
+    },
+    {
+      "claim_id": "bde3b33c08b08936a6dfaccbec90ce3b57afcbd89396990d4e3a087c72e874a4",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:249-249"
+    },
+    {
+      "claim_id": "530a3bb2e77ef97ad1a94351517a5cf3b7a42113e38f8a3935331a016fd18b8f",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:250-250"
+    },
+    {
+      "claim_id": "b02d821d97770508c937982fee7e466df45b2651457d0681653fade068ca8a23",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:251-251"
+    },
+    {
+      "claim_id": "8fe0aa9d3ed146e795d878aabc54dc467ca8d52afac13c943a1b373404299564",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:252-252"
+    },
+    {
+      "claim_id": "33d97ace0fefdbf3eb40d0d8e4ad5123c7c59e71f4465ff0abebb2990a8bd22d",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:253-253"
+    },
+    {
+      "claim_id": "d97f27f00e561307a00ba920ea22cebb5fed7f642529f8a278c320c52df4aa09",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:254-254"
+    },
+    {
+      "claim_id": "235f8e227b7cbf1cf695d18e81086ed812d84185917231e22dc11d51f4cb95c2",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:255-255"
+    },
+    {
+      "claim_id": "df515d59db3147c36a821f53d69ebb33ab440191048a07ea6e3c18201ade72ad",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:256-256"
+    },
+    {
+      "claim_id": "d7ce4b5776db4a6e77cf9e3eb49485fca55dc9ac232a9e2b2e86a6ad88a45233",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:257-257"
+    },
+    {
+      "claim_id": "bcc1b793be0296305a1f8ce789ff0d47fad071ececcf59608b747563af72694c",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:258-258"
+    },
+    {
+      "claim_id": "956bffdd8a49ff2c9e3a02d9a855f8aaafedc7b3062fc35bda1a3f8dc44c8862",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:259-259"
+    },
+    {
+      "claim_id": "1917ec3eb77e7cbcb841669dbb1543f4d0d86b426c21cca02b6dee49a64ad7ad",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:260-260"
+    },
+    {
+      "claim_id": "27b62a3f793e43c53d5224d061ce6b20909a604556542712b5ead4dc4f29fa36",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:262-262"
+    },
+    {
+      "claim_id": "2cb0322a9d8c682877a0c1e14f375bfc7cf7835ed19c2f8ba32838cf62c4be41",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:267-267"
+    },
+    {
+      "claim_id": "9c700675435202e513b0702a2c6fa0979b5d5ee367a3034ee00aca825f707272",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:269-269"
+    },
+    {
+      "claim_id": "b89085b1add4ba5d6b3c09dd37fd0d5f05053dc2fac5372a05ed034a87577f97",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:270-270"
+    },
+    {
+      "claim_id": "cc2462a07238b98a758df417050b1fe6b0274ece6d18f19f466688bfa276bf80",
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "fragment_locator": "lines:271-271"
+    }
+  ],
+  "execution_mode": "real_semantic",
+  "failure_reasons": [
+    "provider output is not JSON (Unterminated string starting at: line 276 column 7 (char 12117))",
+    "section entry_prerequisites is empty",
+    "section limitations is empty",
+    "token or faithfulness mismatch: 0070e6c9b6d4446da1646dadfd2ae9ad455ebadcc14b937c33f9c0f915b24d3e; token or faithfulness mismatch: 6d9908f3487fd1fdd2e0fc42ea3482f73e13e871bca2cd4ba1771bfdbce70a0a; token or faithfulness mismatch: ca315583c4e276dd2c219721571713924f163fb65980710e6403c0789e18a884",
+    "token or faithfulness mismatch: 08fff17be97767f989fd9ca91a61bda5555ca493af66e2e779350a118e2de69b; token or faithfulness mismatch: 182bfea128d3b78ea95103de42bf9c6544227256f078da4a174d4a09c2c92afc; token or faithfulness mismatch: 28b4e05304e9e756bd5bff2aeadaf5b91b38634148fd3afbd73ca0981da6e735; token or faithfulness mismatch: 6ca0f0d2370c190eee3f6bf265fd3984fd053e79d82e10369984a47526c027ac; token or faithfulness mismatch: 745e10487760f9362246233d8dfa1f1d4e1db4232ce28c6d71d70cb073c6a5ac; token or faithfulness mismatch: 7d7f8a76d4a7f9779bb0b858c8bef07d3a684676cc7647b41dd7703ddd20b68c; token or faithfulness mismatch: 7ea47982c92aa0175ace10fa4f1e60ed776491a94ab580461604622243954cc1; token or faithfulness mismatch: b90c44a6b0fe4003d04ba599e46cfa4a610e8376772cba9c2625226c02f511d4; token or faithfulness mismatch: ba248fbefac03a8c0e09603d16543f6ceca50374fe456440bbd0672d93a139cf; token or faithfulness mismatch: cbfe0b10b5e503cd10c7cec0576c62d5bf242670abb942ea8d1d87e72f27c1c8; token or faithfulness mismatch: cf788a9149e31ba6834d3249c8a419a722d0ec66a5fa09ff5a5959c7e96143db; token or faithfulness mismatch: fa0d81447b0b4f6fe86a9a18a6eeee73bfddf8822aa8b6b8339467443415bba0",
+    "token or faithfulness mismatch: 0a46d64086b2f9442d745e65fff71d426c372e9f83bdb566e94a285d265f5453; token or faithfulness mismatch: 5c49229442077ca3edb53faaa49c0d65d1f6b248ac05ce437cc7520ab44cbf08; token or faithfulness mismatch: aab6b29059df8fcdecd7813bfcdddc7ee3ba4e0d97202e1eccc0ce4fa54c285b",
+    "token or faithfulness mismatch: 5054c840a6b4d34f551f27cb9cc1712db90623801e2dd1e42087f8a01aecd48e; token or faithfulness mismatch: 5a8be71fdd5d3219dd4e5e0b041a2453f12033105fa22e09e4f2f7e3d9a6cbb0; token or faithfulness mismatch: bda6a73a5a421da605bfe8ebe7bf967eb55ec3b28be01f41f7bd98039660478a; token or faithfulness mismatch: cecd821004a5ed5d9ef06f7b6d2d971768d9f7954fe41839bdb0c818d7613856",
+    "topic index mapping is degraded",
+    "version is not a semver, date, or explicit release label"
+  ],
+  "output_path": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task2b-knowledge-publication-body-compiler/apply/evidence/T013.semantic-run-20260812-source-kind-v1.json",
+  "provider": {
+    "base_url": "https://dashscope.in.whatspos.cn/v1",
+    "credential": "environment-only",
+    "model": "qwen3.6",
+    "provider": "qwen3.6"
+  },
+  "revision_ledger": [
+    {
+      "reason": "initial accepted body contract",
+      "revision": 0
+    },
+    {
+      "id": "SR-20260811-task2b-procedure-source-gap",
+      "reason": "procedure_or_rule.exceptions source_not_documented section state",
+      "revision": 1
+    }
+  ],
+  "run_id": "run-84c8857251da4746a392308d4f4b8d61",
+  "run_identity": {
+    "input_fingerprint": "28f547447f97500977b17fb849e612826b8c1bbce461a6c6eb46c4386ff2ac5c",
+    "kb_fingerprint": "eb3880d8012e00220678e5d6662f7c80aeed912b58ed7a885f97ae9fca4d8f85",
+    "manifest_path": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task2b-knowledge-publication-body-compiler/quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json",
+    "run_id": "run-84c8857251da4746a392308d4f4b8d61",
+    "sample_fingerprint": "fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f",
+    "source_run_hash": "532e6ce4794beb9245b63f8d6a15617a8a8169e667814b52bc4f76ddbb063412"
+  },
+  "run_status": "completed",
+  "sample_manifest": {
+    "content_hash": "fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f",
+    "covered_categories": [
+      "table_image",
+      "bilingual",
+      "multi_source"
+    ],
+    "excluded_categories": [
+      {
+        "category": "long_text",
+        "reason": "source manifest does not expose a long-document feature; no semantic coverage is claimed"
+      }
+    ],
+    "path": "quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json",
+    "required_categories": [
+      "long_text",
+      "table_image",
+      "bilingual",
+      "multi_source"
+    ],
+    "sample_count": 20,
+    "sampling_seed": 4026961625,
+    "sampling_seed_label": "knowledge-digest-task0-v1",
+    "source_count": 89
+  },
+  "schema_version": "task2b-semantic-evidence.v1",
+  "section_completeness": [
+    {
+      "complete": true,
+      "concept_id": "topic-3ffd8813c930b3e1efe1",
+      "sections": [
+        "capabilities",
+        "entry_prerequisites",
+        "limitations",
+        "purpose",
+        "relationships",
+        "sources"
+      ]
+    },
+    {
+      "complete": true,
+      "concept_id": "topic-d4cdbc519607aca540d4",
+      "sections": [
+        "capabilities",
+        "entry_prerequisites",
+        "limitations",
+        "purpose",
+        "relationships",
+        "sources"
+      ]
+    }
+  ],
+  "threshold": {
+    "answerability": 1.0,
+    "max_body_lines": 120,
+    "max_page_lines": 300,
+    "section_completeness": 1.0
+  }
+}

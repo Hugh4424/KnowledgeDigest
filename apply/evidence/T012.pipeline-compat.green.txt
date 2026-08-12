@@ -1,0 +1,6 @@
+Task: T012 GREEN — formal pipeline compiler and Task 2-A-compatible Reader/Audit split
+Command: uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k pipeline_compat
+Observed: exit 0; 6 passed; 28 deselected.
+Covered: typed PageDraft handoff from draft(), typed provider validation at the pipeline boundary, body/Evidence gate projection, degraded Audit-only results, frozen input and fingerprint failures, old Reader body protection, stable topic navigation, and repeated-run path stability.
+Additional regression facts: task2_publication 18 passed; phase25_llm 72 passed; Task 2-A Reader Bundle/Frontmatter/OKF smoke 48 passed; batch recovery 13 passed.
+Limitation: this is deterministic/local compatibility evidence; it does not claim real provider semantic completion, human reader quality, or formal WorkflowHub acceptance.

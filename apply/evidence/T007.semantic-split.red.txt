@@ -1,0 +1,5 @@
+Task: T007 RED — semantic split, pagination, and unique Claim part
+Command: uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_split
+Expected RED: exit 1
+Observed: exit 1; 1 target assertion failed and 1 assertion passed; 22 tests deselected.
+Interpretation: the focused oracle exposed the missing unified part-navigation entry before the navigation projection was implemented. This was a target behavior failure, not a setup/import failure.

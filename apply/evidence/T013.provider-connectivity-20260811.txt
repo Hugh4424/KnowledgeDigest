@@ -1,0 +1,9 @@
+T013 provider connectivity diagnostic (2026-08-11)
+
+- Endpoint: `https://dashscope.in.whatspos.cn/v1/chat/completions`
+- Model: `qwen3.6`
+- Request shape: the same OpenAI-compatible JSON-mode/no-thinking fields used by `src/knowledge_digest/llm.py` (`response_format`, `enable_thinking=false`, `chat_template_kwargs.enable_thinking=false`)
+- Credential handling: environment-only for the diagnostic; no credential is written to this evidence.
+- Direct `curl` diagnostic with a 20-second deadline: exit `28`, HTTP status `000`, response body size `0`; both default proxy resolution and explicit direct connection timed out.
+
+Interpretation: the current semantic failure is externally blocked at provider connectivity before a response can be validated. This is evidence of `unknown/incomplete`, not permission to lower the machine gate, substitute a provider, or call the run semantic-pass.

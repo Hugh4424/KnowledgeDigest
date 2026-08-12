@@ -1,0 +1,35 @@
+{
+  "receipts": {
+    "tests": "quality/tests/verify-code-final-full-20260811-v41.json",
+    "review": "quality/reviews/results/build-code-default-5ae8b6c5f13cbf963915c1390629da7d1c5a849a-d6ba4d2b-1018-4a5d-9d59-7f8a38dd3899.json",
+    "quality_review": "quality/reviews/attempts/b9f7cdad-cb35-4b79-8b1d-12a9bd2b9acf/attempt.json",
+    "evidence": "quality/evidence/verify-evidence-v6.json",
+    "verification": "quality/evidence/verification-v7.json"
+  },
+  "finding_dispositions": [
+    {
+      "finding_id": "F-3803dae5448a",
+      "original_fact": "integration review found task completion anchors were not independently verifiable from the provider packet",
+      "source": "quality/reviews/results/build-code-default-5ae8b6c5f13cbf963915c1390629da7d1c5a849a-d6ba4d2b-1018-4a5d-9d59-7f8a38dd3899.json",
+      "consequence": "task completion evidence remains audit-limited; no release claim is made",
+      "status": "accepted_risk",
+      "next_action": "retain the finding and use the current verify reverse-check; do not use packet anchors as sole release evidence",
+      "evidence_ref": "quality/evidence/implementation/current-5ae8b6c5f13cbf963915c1390629da7d1c5a849a.json",
+      "owner": "Task 2-B",
+      "consumer": "verify-code close decision",
+      "retain_or_delete": "retain"
+    },
+    {
+      "finding_id": "F-7c03ddd2645e",
+      "original_fact": "AC-09, AC-10 and AC-11 lack complete real semantic-run evidence",
+      "source": "quality/reviews/results/build-code-default-5ae8b6c5f13cbf963915c1390629da7d1c5a849a-d6ba4d2b-1018-4a5d-9d59-7f8a38dd3899.json",
+      "consequence": "those criteria remain unknown/incomplete and delivery remains not_released",
+      "status": "accepted_risk",
+      "next_action": "retain the latest T013 v23 failure facts; do not claim semantic exit until all page-type and section evidence is complete",
+      "evidence_ref": "apply/evidence/T013.semantic-run-v23.json",
+      "owner": "Task 2-B",
+      "consumer": "verify-code semantic exit",
+      "retain_or_delete": "retain"
+    }
+  ]
+}

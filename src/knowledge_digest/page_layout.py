@@ -10,11 +10,12 @@ tested without a model provider.
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import re
 from collections import defaultdict, deque
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 from .errors import ValidationError
 from .faithfulness import claim_entity_key, normalize_claim
@@ -29,6 +30,355 @@ from .identity import (
 from .jsonl import read_jsonl
 from .kb_structure import PublicationContract
 from .paths import DigestPaths
+
+
+def _canonical_dependency_payload(value: Mapping[str, Any]) -> str:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _sorted_dependency_rows(rows: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    normalized = [dict(row) for row in rows if isinstance(row, Mapping)]
+    return sorted(
+        normalized,
+        key=lambda row: _canonical_dependency_payload(row),
+    )
+
+
+def build_section_dependency_record(
+    *,
+    topic_id: str,
+    page_type: str,
+    section_id: str,
+    source_deps: Iterable[Mapping[str, Any]],
+    claim_deps: Iterable[Mapping[str, Any]],
+    version_deps: Iterable[Mapping[str, Any]],
+    structure_deps: Iterable[Mapping[str, Any]],
+    attribution_deps: Iterable[Mapping[str, Any]],
+    dependency_scope: str = "resolved",
+) -> dict[str, Any]:
+    """Build the canonical section-dependency-record.v1 value."""
+    payload = {
+        "schema_version": "section-dependency-record.v1",
+        "topic_id": topic_id,
+        "page_type": page_type,
+        "section_id": section_id,
+        "dependency_scope": dependency_scope,
+        "source_deps": _sorted_dependency_rows(source_deps),
+        "claim_deps": _sorted_dependency_rows(claim_deps),
+        "version_deps": _sorted_dependency_rows(version_deps),
+        "structure_deps": _sorted_dependency_rows(structure_deps),
+        "attribution_deps": _sorted_dependency_rows(attribution_deps),
+    }
+    digest = hashlib.sha256(_canonical_dependency_payload(payload).encode("utf-8")).hexdigest()
+    return {**payload, "dependency_hash": digest}
+
+
+def _dependency_record_is_valid(record: Any) -> bool:
+    if not isinstance(record, Mapping):
+        return False
+    required = {
+        "schema_version",
+        "topic_id",
+        "page_type",
+        "section_id",
+        "dependency_scope",
+        "source_deps",
+        "claim_deps",
+        "version_deps",
+        "structure_deps",
+        "attribution_deps",
+        "dependency_hash",
+    }
+    if not required.issubset(record):
+        return False
+    payload = {key: record[key] for key in required if key != "dependency_hash"}
+    expected = hashlib.sha256(_canonical_dependency_payload(payload).encode("utf-8")).hexdigest()
+    return record.get("dependency_hash") == expected and record.get("dependency_scope") in {"resolved", "unresolved"}
+
+
+def evaluate_section_impact(
+    old_sections: Iterable[Mapping[str, Any]],
+    new_sections: Iterable[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Compare section dependency records and produce a conservative impact closure."""
+    old_by_id = {
+        str(section.get("section_id")): section
+        for section in old_sections
+        if isinstance(section, Mapping) and section.get("section_id")
+    }
+    new_by_id = {
+        str(section.get("section_id")): section
+        for section in new_sections
+        if isinstance(section, Mapping) and section.get("section_id")
+    }
+    affected: list[str] = []
+    reused: list[str] = []
+    content_hash_proof: dict[str, dict[str, Any]] = {}
+    path_byte_proof: dict[str, dict[str, Any]] = {}
+    uncertain = False
+    reason = "no dependency changes"
+
+    def content_hash(section: Mapping[str, Any]) -> str | None:
+        declared = section.get("content_hash")
+        if isinstance(declared, str) and re.fullmatch(r"[0-9a-fA-F]{64}", declared):
+            return declared
+        if "body" in section:
+            return hashlib.sha256(str(section.get("body", "")).encode("utf-8")).hexdigest()
+        return None
+
+    for section_id, new_section in sorted(new_by_id.items()):
+        old_section = old_by_id.get(section_id)
+        old_record = old_section.get("dependency_record") if old_section else None
+        new_record = new_section.get("dependency_record")
+        if not _dependency_record_is_valid(old_record) or not _dependency_record_is_valid(new_record):
+            uncertain = True
+            affected.append(section_id)
+            reason = "section dependency record is missing or invalid"
+            continue
+        if old_record.get("dependency_scope") != "resolved" or new_record.get("dependency_scope") != "resolved":
+            uncertain = True
+            affected.append(section_id)
+            reason = "section dependency scope is unresolved"
+            continue
+        old_content_hash = content_hash(old_section)
+        new_content_hash = content_hash(new_section)
+        old_target_path = str(old_section.get("target_path", ""))
+        new_target_path = str(new_section.get("target_path", ""))
+        content_hash_proof[section_id] = {
+            "old": old_content_hash,
+            "new": new_content_hash,
+            "equal": old_content_hash is not None and old_content_hash == new_content_hash,
+        }
+        path_byte_proof[section_id] = {
+            "old": old_target_path,
+            "new": new_target_path,
+            "equal": bool(old_target_path) and old_target_path == new_target_path,
+        }
+        if old_content_hash is None or new_content_hash is None or not old_target_path or not new_target_path:
+            uncertain = True
+            affected.append(section_id)
+            reason = "section content hash or target path is missing"
+        elif old_record["dependency_hash"] == new_record["dependency_hash"] and old_content_hash == new_content_hash and old_target_path == new_target_path:
+            reused.append(section_id)
+        elif old_record["dependency_hash"] == new_record["dependency_hash"]:
+            affected.append(section_id)
+            reason = "section content or path changed despite unchanged dependency"
+        else:
+            affected.append(section_id)
+            reason = "section dependency changed"
+    removed = sorted(set(old_by_id) - set(new_by_id))
+    if removed:
+        uncertain = True
+        reason = "section disappeared from the new page"
+        affected.extend(removed)
+    affected = sorted(set(affected))
+    if uncertain:
+        scope = "page"
+        reused = []
+        affected = sorted(set(new_by_id) | set(old_by_id))
+    elif affected:
+        scope = "sections"
+    else:
+        scope = "none"
+    return {
+        "status": "uncertain" if uncertain else ("affected" if affected else "unchanged"),
+        "uncertain": uncertain,
+        "recompile_scope": scope,
+        "affected_sections": affected,
+        "reused_sections": sorted(reused),
+        "safe_reuse_proof": {section_id: True for section_id in sorted(reused)},
+        "content_hash_proof": content_hash_proof,
+        "path_byte_proof": path_byte_proof,
+        "old_signal_invalidated": affected,
+        "reason": reason,
+    }
+
+
+def protect_old_page_on_failure(
+    old_page: Mapping[str, Any],
+    failed_candidate: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Keep the last valid Reader body while sending failed output to Audit."""
+    reader_projection = {
+        "status": old_page.get("status", "published"),
+        "reader_eligible": bool(old_page.get("reader_eligible", True)),
+        "body": str(old_page.get("body", "")),
+        "target_path": old_page.get("target_path"),
+    }
+    candidate = {
+        **dict(failed_candidate),
+        "status": "degraded",
+        "reader_eligible": False,
+    }
+    return {
+        "status": "degraded",
+        "reader_eligible": False,
+        "candidate": candidate,
+        "reader_projection": reader_projection,
+        "audit_record": {
+            "destination": "Audit",
+            "reason": candidate.get("reason") or "whole-page recompile failed",
+            "candidate": candidate,
+        },
+    }
+
+
+def _section_lines(section: Mapping[str, Any]) -> list[str]:
+    heading = str(section.get("heading") or f"## {section.get('section_id', 'Section')}")
+    raw_body = section.get("body", [])
+    body = [str(line) for line in raw_body.splitlines()] if isinstance(raw_body, str) else [str(line) for line in raw_body]
+    return [heading, *body]
+
+
+def build_semantic_parts(
+    *,
+    topic_id: str,
+    title: str,
+    page_type: str,
+    sections: list[Mapping[str, Any]],
+    claims: list[Mapping[str, Any]],
+    max_body_lines: int = 120,
+    max_page_lines: int = 300,
+) -> dict[str, Any]:
+    """Partition complete typed sections without splitting their semantic entries."""
+    overview_path = f"pages/{topic_id}/index.md"
+    part_groups: list[dict[str, Any]] = []
+    current_lines: list[str] = []
+    current_claim_ids: list[str] = []
+    current_section_ids: list[str] = []
+    for section in sections:
+        lines = _section_lines(section)
+        section_id = str(section.get("section_id", ""))
+        claim_ids = [str(value) for value in section.get("claim_ids", [])]
+        if len(lines) > max_body_lines:
+            # A section that has no declared semantic sub-boundary cannot be
+            # safely cut into arbitrary lines.
+            return {
+                "status": "degraded",
+                "valid": False,
+                "reason": f"section {section_id} has no safe semantic split boundary",
+                "overview": {"target_path": overview_path, "body": ""},
+                "parts": [],
+                "related_key": topic_id,
+            }
+        if current_lines and len(current_lines) + len(lines) > max_body_lines:
+            part_groups.append(
+                {
+                    "body": current_lines,
+                    "claim_ids": current_claim_ids,
+                    "section_ids": current_section_ids,
+                }
+            )
+            current_lines = []
+            current_claim_ids = []
+            current_section_ids = []
+        current_lines.extend(lines)
+        current_claim_ids.extend(claim_ids)
+        current_section_ids.append(section_id)
+    if current_lines:
+        part_groups.append(
+            {
+                "body": current_lines,
+                "claim_ids": current_claim_ids,
+                "section_ids": current_section_ids,
+            }
+        )
+    parts: list[dict[str, Any]] = []
+    for part_index, group in enumerate(part_groups, start=1):
+        target_path = f"pages/{topic_id}/part-{part_index}.md"
+        rendered_lines = [
+            f"# {title}",
+            f"page_type: {page_type}",
+            f"related_key: {topic_id}",
+            *group["body"],
+        ]
+        parts.append(
+            {
+                "part_index": part_index,
+                "target_path": target_path,
+                "entry_path": target_path,
+                "overview_path": overview_path,
+                "prev": None,
+                "next": None,
+                "body": "\n".join(group["body"]),
+                "rendered_body": "\n".join(rendered_lines),
+                "claim_ids": list(group["claim_ids"]),
+                "section_ids": list(group["section_ids"]),
+            }
+        )
+    for index, part in enumerate(parts):
+        part["prev"] = parts[index - 1]["target_path"] if index else None
+        part["next"] = parts[index + 1]["target_path"] if index + 1 < len(parts) else None
+    overview_lines = [
+        f"# {title}",
+        f"page_type: {page_type}",
+        f"related_key: {topic_id}",
+        "",
+        "## Parts",
+        *[f"- [{part['part_index']}]({part['target_path']})" for part in parts],
+    ]
+    result = {
+        "status": "published",
+        "valid": True,
+        "reason": None,
+        "related_key": topic_id,
+        "overview": {
+            "target_path": overview_path,
+            "body": "\n".join(overview_lines),
+            "entry_path": overview_path,
+        },
+        "parts": parts,
+        "claims": [dict(claim) for claim in claims],
+    }
+    checked = validate_semantic_parts(result, max_body_lines=max_body_lines, max_page_lines=max_page_lines)
+    result["valid"] = checked["valid"]
+    result["status"] = "published" if checked["valid"] else "degraded"
+    result["reason"] = "; ".join(checked["reasons"]) or None
+    return result
+
+
+def validate_semantic_parts(
+    result: Mapping[str, Any],
+    *,
+    max_body_lines: int = 120,
+    max_page_lines: int = 300,
+) -> dict[str, Any]:
+    reasons: list[str] = []
+    overview = result.get("overview")
+    parts = result.get("parts")
+    if not isinstance(overview, Mapping) or not overview.get("target_path"):
+        reasons.append("overview entry is missing")
+    if not isinstance(parts, list) or not parts:
+        reasons.append("parts are missing")
+        return {"valid": False, "reasons": reasons}
+    overview_path = str(overview.get("target_path", ""))
+    if overview_path == parts[0].get("target_path"):
+        reasons.append("part-1 cannot replace the overview entry")
+    expected_claims = {
+        str(claim.get("claim_id") or claim.get("claim_fingerprint"))
+        for claim in result.get("claims", [])
+        if isinstance(claim, Mapping)
+    }
+    actual_claims = [str(claim_id) for part in parts for claim_id in part.get("claim_ids", [])]
+    counts = {claim_id: actual_claims.count(claim_id) for claim_id in set(actual_claims)}
+    if set(actual_claims) != expected_claims or any(count != 1 for count in counts.values()):
+        reasons.append("claims must appear in exactly one part")
+    for index, part in enumerate(parts):
+        body_lines = str(part.get("body", "")).splitlines()
+        rendered_lines = str(part.get("rendered_body", "")).splitlines()
+        if len(body_lines) > max_body_lines:
+            reasons.append(f"part {index + 1} body exceeds 120 lines")
+        if len(rendered_lines) > max_page_lines:
+            reasons.append(f"part {index + 1} page exceeds 300 lines")
+        if not part.get("entry_path"):
+            reasons.append(f"part {index + 1} has no entry")
+        if part.get("overview_path") != overview_path:
+            reasons.append(f"part {index + 1} has no overview link")
+        expected_prev = parts[index - 1].get("target_path") if index else None
+        expected_next = parts[index + 1].get("target_path") if index + 1 < len(parts) else None
+        if part.get("prev") != expected_prev or part.get("next") != expected_next:
+            reasons.append(f"part {index + 1} prev/next is inconsistent")
+    return {"valid": not reasons, "reasons": list(dict.fromkeys(reasons))}
 
 
 def _claim_key(claim: dict[str, Any]) -> tuple[str, str, str]:
@@ -218,8 +568,12 @@ def _legacy_body(content: str) -> list[str]:
     return _trim_blank_lines(lines)
 
 
-def _evidence_lines(body: str) -> list[str]:
-    """Use deterministic source-backed evidence, not a provider's repeated shell."""
+def evidence_lines(body: str) -> list[str]:
+    """Return source-backed evidence without the generated Summary shell.
+
+    This is a public rendering seam because the reader projection and its
+    regression tests must observe the same evidence/body boundary.
+    """
     lines = body.splitlines()
     if lines and lines[0].strip() == "## Summary":
         try:
@@ -532,7 +886,7 @@ def _incoming_entries(
         if not any(_claim_key(claim) in incoming_claim_keys for claim in draft_claims):
             continue
         entries, unmatched = _entries_for_body(
-            _evidence_lines(str(draft.get("final_body", ""))), draft_claims
+            evidence_lines(str(draft.get("final_body", ""))), draft_claims
         )
         for lines, matched in entries:
             if matched:
@@ -818,6 +1172,24 @@ def build_topic_layouts(
             )
         if not pages and all_claims:
             raise ValidationError("layout", stable_topic_id, "topic claims produced no final pages")
+        section_dependency_records: dict[str, Any] = {}
+        for draft in topic_drafts:
+            for section_id, record in (draft.get("section_dependency_records") or {}).items():
+                if not isinstance(record, Mapping):
+                    continue
+                previous = section_dependency_records.get(str(section_id))
+                if previous is not None and previous != record:
+                    section_dependency_records[str(section_id)] = {
+                        "status": "uncertain",
+                        "reason": "multiple incoming dependency records disagree",
+                    }
+                else:
+                    section_dependency_records[str(section_id)] = dict(record)
+        reader_projections = [
+            dict(draft["reader_projection"])
+            for draft in topic_drafts
+            if isinstance(draft.get("reader_projection"), Mapping)
+        ]
         layouts.append(
             {
                 "draft_id": f"layout-{stable_topic_id}",
@@ -834,10 +1206,51 @@ def build_topic_layouts(
                 "final_body": "\n".join(page["final_body"] for page in pages),
                 "claims": [claim for page in pages for claim in page["claims"]],
                 "provenance": sorted({str(claim.get("source_uri")) for page in pages for claim in page["claims"]}),
+                # Keep the typed compiler outcome in the final layout artifact.
+                # S4/S6 need the same machine status and page type after the
+                # layout projection; dropping it here made a real semantic
+                # run look like it had zero concepts even when provider and
+                # compiler work had completed successfully.
+                "compiler_results": [
+                    dict(draft["compiler_result"])
+                    for draft in topic_drafts
+                    if isinstance(draft.get("compiler_result"), Mapping)
+                ],
+                "typed_page_drafts": [
+                    dict(draft["typed_page_draft"])
+                    for draft in topic_drafts
+                    if isinstance(draft.get("typed_page_draft"), Mapping)
+                ],
+                "typed_responses": [
+                    dict(draft["typed_response"])
+                    for draft in topic_drafts
+                    if isinstance(draft.get("typed_response"), Mapping)
+                ],
+                "reader_projections": reader_projections,
+                "page_status": next(
+                    (
+                        str(draft.get("page_status"))
+                        for draft in topic_drafts
+                        if draft.get("page_status")
+                    ),
+                    "degraded"
+                    if any(bool(draft.get("provider_failure")) for draft in topic_drafts)
+                    else "published",
+                ),
+                "reader_eligible": all(
+                    bool(draft.get("reader_eligible", True))
+                    and bool(
+                        (draft.get("reader_projection") or {}).get("reader_eligible", True)
+                        if isinstance(draft.get("reader_projection"), Mapping)
+                        else True
+                    )
+                    for draft in topic_drafts
+                ),
                 "removed_claims": [claim for draft in topic_drafts for claim in draft.get("removed_claims", [])],
                 "split_pages": pages,
                 "coverage_mapping": coverage,
                 "component_coverage": [],
+                "section_dependency_records": section_dependency_records,
                 "layout_finalized": True,
                 # A reader may retain an old part after a topic shrinks.  It is
                 # omitted from the freshly built navigation, never deleted or

@@ -1,0 +1,5 @@
+Task: T006 GREEN — impact closure and stale section protection
+Command: uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k impact_closure
+Observed: exit 0; 3 passed; 24 deselected.
+Covered: canonical section-dependency records, changed-section recompilation, uncertain whole-page impact, and protection of the old formal page after candidate failure.
+Limitation: this is a deterministic focused seam test; it does not claim a real provider run or formal WorkflowHub acceptance.

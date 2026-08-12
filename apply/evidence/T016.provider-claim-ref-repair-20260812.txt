@@ -1,0 +1,53 @@
+T016 provider claim-reference repair evidence (2026-08-12)
+
+Scope:
+- Changed files: src/knowledge_digest/llm.py and tests/acceptance/test_task2b_body_compiler.py.
+- The typed provider contract is unchanged at the product level: the provider still fills only fixed sections, and every non-empty section still needs a trusted claim mapping.
+- Only the model-facing claim handle changed from a long fingerprint to a deterministic provider_claim_ref (c001, c002, ...). The validator maps that handle back to the trusted claim_id/claim_fingerprint before dependency, faithfulness, or publication gates run.
+- Legacy prompt mode and publication metadata fingerprints are unchanged.
+
+Test routing advisor:
+{"routing_tier":"feature","routing_rationale":"llm.py changes the typed provider serialization/validation seam and its acceptance test; this is one Python publication-pipeline behavior domain with no UI, database, or deployment change.","result":"pass"}
+
+RED:
+- Command: uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k 'provider_claim_refs_are_short or typed_prompt_compacts_source_context'
+- Exit: 1
+- Result: 1 target assertion failed and 1 existing compaction test passed; failure was the missing provider_claim_ref assertion, not setup/import/fixture failure.
+
+GREEN and regression:
+- Focused typed provider/consumer tests: uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py tests/acceptance/test_task2_publication.py tests/acceptance/test_phase25_llm.py -q
+- Exit: 0; 166 passed.
+- Full local command: uv run --frozen pytest -q && git diff --check
+- Exit: 0; 513 passed, 3 skipped.
+- Canonical test receipt: quality/tests/build-code-phase2-claim-ref-20260812.json
+- Receipt hash: 0180a3d984e8b8ed4e41e448de6fda7f5d599df2c9de5da68ad860b670220fda
+- Snapshot tree: c56f6885302541d39dfb83676b69e98eb62d5061
+- Output hash: ddb11d6dc3356fd063e67729c4da9e97716691e9e60f39dc243e72168d1b8e98
+
+AC impact:
+- AC-02/AC-03/AC-04: deterministic tests show the provider can only bind short refs that are mapped to trusted identities; unknown refs remain degraded. This does not prove the frozen semantic exit.
+- AC-07/AC-09/AC-10/AC-11: unchanged limits. The latest frozen semantic evidence predates this repair and remains not_released; no new provider credential is present in the current process, so no new semantic run is claimed here.
+
+Review:
+- The Phase 2 bounded review was already executed once at quality/reviews/attempts/46a34cd0-c5e6-4e65-ae06-575310644579/attempt.json and was unavailable because opencode/v4flash returned OUTPUT_INVALID and pi/coding exited nonzero; codex/luna was same-source. Per the user's one-review-per-phase rule, no second review was started for this same phase repair. This leaves independent review quality incomplete; it is not treated as pass.
+
+Status:
+- T016 remains incomplete/not_released until a fresh real semantic run with frozen provider/sample/budget/detector facts is captured and verify-code rechecks the full flow.
+
+Receipt rebinding correction:
+- The first canonical receipt was captured before the append-only task fact was written. The current material-bound receipt is quality/tests/build-code-phase2-claim-ref-20260812-v2.json with receipt hash cdf56b3ab6d137335e4aa9b61510c7a53f2f85c20a8e862b1760acf9f1ed85d7, snapshot tree d2caf22a65d8711614519eeba7c845fa1d239f7e, output hash f484acde012f3a947c06f5eb576012ac36203f081eb709523a28b1e82ace1db8, exit 0.
+
+Second rebinding:
+- The v2 receipt preceded the append-only receipt correction above. The final receipt for the current material snapshot is quality/tests/build-code-phase2-claim-ref-20260812-v3.json with receipt hash 54d3b242aba4e16b2bed9873b43620d7efb0e866307dbf3b06decedb78663e45, snapshot tree a7204da9229224baeac1316dd7390ac979b2093a, output hash b4c846727990281a20109fa8f5589078eaa8b2e25d1f213b3e813b40e993210c, exit 0.
+
+Fresh semantic rerun after the claim-ref repair:
+- Frozen manifest and sample input were unchanged: sample=20, source=89, manifest hash fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f, input fingerprint 28f547447f97500977b17fb849e612826b8c1bbce461a6c6eb46c4386ff2ac5c. The run used qwen3.6 at the configured endpoint, environment-only credentials, max_tokens=8192, and 15 planned/15 completed provider calls.
+- Evidence: apply/evidence/T013.semantic-run-20260812-claim-ref-v3.json; run_id=run-98428571e91c47228e1cc9d9fb841327; run_status=completed; delivery_status=not_released.
+- The repaired short provider references are effective in this run: the failure list contains no untrusted provider claim-id failure and no invalid/truncated provider JSON failure. At least one mapped typed round returned valid output with coverage=1.0 and faithfulness_status=passed.
+- This is not a semantic pass. The copied frozen TopicIndex has 23 degraded sample rows, which were correctly kept out of Reader; the run produced concepts=0, evidence_backtrace=0, section_completeness=0. Remaining failures include degraded TopicIndex mapping, empty required sections, missing backtrace, faithfulness mismatches, and invalid version. The embedding probe also fell back to Jaccard under the fixed short timeout, so the evidence remains not_released.
+- The result identifies the remaining blocker as frozen sample/TopicIndex coverage and semantic content quality, not a reason to infer page types or loosen gates. No Task 1 artifact, provider/model, threshold, budget, or page-type contract was changed; no review was repeated and no close was called.
+
+Current-material test rebinding after the fresh semantic evidence note:
+- Official build-code capture command: `uv run --frozen pytest -q && git diff --check`; exit=0.
+- Current receipt: `quality/tests/build-code-phase2-claim-ref-20260812-v6.json`; receipt_hash=`67a01c8c49e49647dc6d75a23342106bbc6fa2c18393924c6271ff4db57b00d8`; snapshot_tree=`ab71edb6e2a0e91099ebcb4c7484c740e19c6a1d`; output_hash=`fdced490d25d6adf6c181b46585be98e7621c35ccc4e39996ff1f79b5cf74a8a`; exit=0.
+- This receipt proves the current local regression only. It does not change the fresh semantic result, review availability, acceptance evidence, or human confirmation; the task remains `incomplete/not_released` pending the one current-material `verify-code` run.

@@ -150,6 +150,7 @@ def test_qwen_openai_payload_requests_json_and_no_thinking() -> None:
 
     assert body["response_format"] == {"type": "json_object"}
     assert body["enable_thinking"] is False
+    assert body["chat_template_kwargs"] == {"enable_thinking": False}
     assert body["max_tokens"] == llm.PUBLICATION_MAX_TOKENS
 
 

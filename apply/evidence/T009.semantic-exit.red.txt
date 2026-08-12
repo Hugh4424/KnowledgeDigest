@@ -1,0 +1,5 @@
+Task: T009 RED — semantic evidence machine exit
+Command: uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_exit
+Expected RED: exit 1
+Observed: exit 1; 3 target assertions failed; 24 tests deselected.
+Interpretation: the focused oracle was established before the semantic evidence validator existed. This was a target behavior failure, not a setup/import failure.

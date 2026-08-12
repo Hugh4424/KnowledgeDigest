@@ -1,0 +1,5 @@
+command: uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k provenance_gate
+exit: 0
+oracle: ORACLE-T2B-PROVENANCE-GATE
+result: 4 passed, 15 deselected
+coverage: AC-03, AC-04, AC-12; body/Evidence separation, claim footnote backtrace, token mismatch, missing attribution, provider/golden-negative failure, duplicate denominator/detector/seed/failed samples.

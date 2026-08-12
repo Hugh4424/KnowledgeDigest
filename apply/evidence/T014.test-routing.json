@@ -1,0 +1,13 @@
+{
+  "schema_version": "test-routing-advisor-result.v1",
+  "routing_tier": "fullstack",
+  "selected_skill": "fullstack-slice-testing",
+  "result": "pass",
+  "rationale": "本次变更同时跨越 src/、tests/、apply/ 和 specs/；需要验证源码到 CLI/管线的真实边界。",
+  "scope": {
+    "browser": "not_applicable",
+    "persistent_service": "not_applicable",
+    "real_slice": "本地 digest 管线和一次 qwen3.6 typed-body provider smoke",
+    "limits": "完整语义样本仍受冻结 page_type/answerability 上游事实限制"
+  }
+}

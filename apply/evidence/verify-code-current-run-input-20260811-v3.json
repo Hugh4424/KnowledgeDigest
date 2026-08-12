@@ -1,0 +1,44 @@
+{
+  "receipts": {
+    "tests": "quality/tests/verify-code-final-full-20260811-current-v4.json",
+    "review": "quality/reviews/results/verify-code-default-77c051128229589f50cae0da72191ad920c6f806-bbfbfaa4-d85c-445e-b514-0eacfaf53778.json",
+    "quality_review": "quality/reviews/attempts/bbfbfaa4-d85c-445e-b514-0eacfaf53778/attempt.json",
+    "evidence": "quality/evidence/verify-evidence-v6.json",
+    "verification": "quality/evidence/verification-v7.json"
+  },
+  "finding_dispositions": [
+    {
+      "finding_id": "F-a3484cf00ad5",
+      "original_fact": "AC-04 was reported pass without current denominator, detector version, seed, and failure-sample records",
+      "consequence": "AC-04 cannot be pass from the frozen packet",
+      "status": "fixed",
+      "next_action": "Keep AC-04 unknown until the required measurement record exists",
+      "evidence_ref": "apply/evidence/verify-code-architect-assessment-20260811.json",
+      "owner": "Task 2-B",
+      "consumer": "verify-code close decision",
+      "retain_or_delete": "retain"
+    },
+    {
+      "finding_id": "F-887d33bac044",
+      "original_fact": "Evidence-type ACs were reported pass from a regression summary without independent evidence anchors",
+      "consequence": "AC-01/03/05/07/12 are test-limited and cannot be treated as evidence-complete pass",
+      "status": "fixed",
+      "next_action": "Keep those ACs unknown until evidence anchors exist",
+      "evidence_ref": "apply/evidence/verify-code-architect-assessment-20260811.json",
+      "owner": "Task 2-B",
+      "consumer": "verify-code close decision",
+      "retain_or_delete": "retain"
+    },
+    {
+      "finding_id": "F-9cb127a17ac0",
+      "original_fact": "The prior final test summary only said 3 skipped",
+      "consequence": "Skipped coverage could be misread as semantic coverage",
+      "status": "fixed",
+      "next_action": "Retain the named skip reasons and keep semantic ACs unknown",
+      "evidence_ref": "apply/evidence/verify-code-final-test-summary-20260811.json",
+      "owner": "Task 2-B",
+      "consumer": "verify-code close decision",
+      "retain_or_delete": "retain"
+    }
+  ]
+}
