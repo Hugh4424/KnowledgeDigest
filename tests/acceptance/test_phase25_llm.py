@@ -154,6 +154,20 @@ def test_qwen_openai_payload_requests_json_and_no_thinking() -> None:
     assert body["max_tokens"] == llm.PUBLICATION_MAX_TOKENS
 
 
+def test_openai_json_mode_requests_json_for_non_qwen_reader_provider() -> None:
+    body = llm._request_payload(
+        "openai",
+        "deepseek-v4-flash",
+        "prompt text",
+        max_tokens=1024,
+        json_mode=True,
+    )
+
+    assert body["response_format"] == {"type": "json_object"}
+    assert body["max_tokens"] == 1024
+    assert "enable_thinking" not in body
+
+
 def test_four_concurrent_real_requests_cross_the_transport_boundary() -> None:
     server = ThreadingHTTPServer(("127.0.0.1", 0), _LocalOpenAIHandler)
     server_thread = threading.Thread(target=server.serve_forever, daemon=True)

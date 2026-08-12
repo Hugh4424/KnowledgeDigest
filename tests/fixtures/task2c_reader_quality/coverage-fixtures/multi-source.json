@@ -1,0 +1,7 @@
+{
+  "schema_version": "task2c-coverage-fixture.v1",
+  "category": "multi_source",
+  "disposition": "excluded",
+  "reason": "Machine inspection of topic-index.json found no topic with more than one source member in this Task 2-C corpus; multi-source coverage is deferred to the full Task 3 corpus gate.",
+  "evidence": "topic-index.json"
+}

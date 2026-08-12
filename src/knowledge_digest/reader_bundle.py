@@ -58,6 +58,93 @@ _ACCEPTED_ENTRY_STATUSES = frozenset({
 })
 
 
+def derive_reader_signals(
+    frontmatter: Mapping[str, Any], *, as_of: str | date | None = None
+) -> dict[str, Any]:
+    """Project reader-facing trust and lifecycle facts from existing metadata.
+
+    This is deliberately a pure projection.  It does not create a new review
+    event and it never turns a stale or deprecated page into a degraded page.
+    """
+
+    verified = frontmatter.get("verified")
+    if isinstance(verified, Mapping):
+        verified_items = [verified]
+    elif isinstance(verified, list):
+        verified_items = verified
+    else:
+        verified_items = []
+    events = {
+        str(item.get("event"))
+        for item in verified_items
+        if isinstance(item, Mapping) and item.get("event")
+    }
+    # Task 2-C does not create or accept a human-review event.  Keep this
+    # projection aligned with the validator: only the existing deterministic
+    # machine events can produce a trust tier here.
+    if events & _TRUST_EVENTS:
+        trust_tier = "machine-confirmed"
+    else:
+        trust_tier = "unverified"
+
+    page_status = frontmatter.get("digest_page_status")
+    if not isinstance(page_status, str) or not page_status.strip():
+        page_status = "unknown"
+    page_status = page_status.strip()
+    lifecycle_status = frontmatter.get("status")
+    if not isinstance(lifecycle_status, str):
+        lifecycle_status = ""
+
+    stale_after = frontmatter.get("stale_after")
+    generated = frontmatter.get("generated")
+    generated_at = generated.get("at") if isinstance(generated, Mapping) else None
+    lifecycle_as_of: str | None = None
+    if lifecycle_status.strip() == "deprecated":
+        lifecycle = "deprecated"
+    elif isinstance(stale_after, str) and stale_after:
+        # Freeze the projection date even while the page is still current.
+        # Validation must replay the same lifecycle decision after the
+        # wall-clock date moves past stale_after.
+        effective_as_of = as_of or date.today()
+        if isinstance(effective_as_of, str):
+            effective_as_of = date.fromisoformat(effective_as_of)
+        lifecycle_as_of = effective_as_of.isoformat()
+        try:
+            lifecycle = "stale" if effective_as_of >= date.fromisoformat(stale_after) else "current"
+        except ValueError:
+            lifecycle = "unknown"
+    else:
+        lifecycle = "current"
+
+    sources = frontmatter.get("sources")
+    source_count = len(sources) if isinstance(sources, list) else 0
+    page_type = frontmatter.get("digest_page_type") or frontmatter.get("page_type") or frontmatter.get("type")
+    description = frontmatter.get("description")
+    return {
+        "page_type": page_type,
+        "description": description if isinstance(description, str) else "",
+        "source_count": source_count,
+        "generated_at": generated_at,
+        "trust_tier": trust_tier,
+        "status": page_status,
+        "stale_after": stale_after,
+        "lifecycle": lifecycle,
+        "lifecycle_as_of": lifecycle_as_of,
+    }
+
+
+def _reader_signal_lines(signals: Mapping[str, Any], *, indent: str = "  ") -> list[str]:
+    return [
+        f"{indent}- page_type: `{signals.get('page_type') or 'unknown'}`",
+        f"{indent}- description: {signals.get('description') or '未提供'}",
+        f"{indent}- source_count: `{signals.get('source_count', 0)}`",
+        f"{indent}- generated_at: `{signals.get('generated_at') or 'unknown'}`",
+        f"{indent}- trust_tier: `{signals.get('trust_tier') or 'unverified'}`",
+        f"{indent}- status: `{signals.get('status') or 'unknown'}`",
+        f"{indent}- lifecycle: `{signals.get('lifecycle') or 'unknown'}`",
+    ]
+
+
 @dataclass(frozen=True)
 class ArtifactRef:
     artifact_kind: str
@@ -771,6 +858,18 @@ def _validate_trust_signals(
     audit_events = audit.get("events") if isinstance(audit, Mapping) and isinstance(audit.get("events"), list) else []
     if audit is not None and verified != audit_events:
         errors.append("TRUST_SIGNAL_EVIDENCE_MISMATCH")
+    reader_signals = frontmatter.get("reader_signals")
+    if reader_signals is not None:
+        if not isinstance(reader_signals, Mapping):
+            errors.append("READER_SIGNALS_MISMATCH")
+        else:
+            lifecycle_as_of = reader_signals.get("lifecycle_as_of")
+            expected_signals = derive_reader_signals(
+                frontmatter,
+                as_of=lifecycle_as_of if isinstance(lifecycle_as_of, str) else None,
+            )
+            if dict(reader_signals) != expected_signals:
+                errors.append("READER_SIGNALS_MISMATCH")
     canonical_fingerprints: Mapping[str, Any] | None = None
     if isinstance(expected, ReaderBundleInputs):
         try:
@@ -1124,6 +1223,7 @@ def project_reader_bundle(
         (staged.bundle_dir / "log.md").write_text(f"# Projection log\n\n- digest_release_status: `{_NOT_RELEASED}`\n- change: initial isolated projection\n", encoding="utf-8")
         degraded: list[dict[str, Any]] = []
         concepts: list[tuple[str, str, str, str]] = []
+        concept_signals: dict[str, dict[str, Any]] = {}
         source_projection: list[dict[str, Any]] = []
         matched_selection_keys: set[tuple[str, str]] = set()
         projected_paths: set[str] = set()
@@ -1161,6 +1261,8 @@ def project_reader_bundle(
             frontmatter = _selected_frontmatter(adapter, row, source_map, claim_map, selection, page_type=page_type, title=title, description=description) if selection else _concept_frontmatter(adapter, row, source_map, page_type=page_type, title=title, description=description)
             frontmatter["generated"] = _generated_record()
             frontmatter["digest_machine_pass"] = True
+            if (row.get("reader_status") or row.get("lifecycle_status")) == "deprecated":
+                frontmatter["status"] = "deprecated"
             stale_after = _explicit_stale_after(source_row)
             if stale_after is not None:
                 frontmatter["stale_after"] = stale_after
@@ -1169,6 +1271,7 @@ def project_reader_bundle(
             events = _trust_events(frontmatter, body, selection, content_hash=content_hash, evidence_ref=evidence_ref)
             if events:
                 frontmatter["verified"] = events
+            frontmatter["reader_signals"] = derive_reader_signals(frontmatter, as_of=date.today())
             audit_ref = staged.audit_dir / PurePosixPath(evidence_ref).relative_to("audit")
             _write_json(audit_ref, {
                 "schema_version": _TRUST_SCHEMA,
@@ -1183,6 +1286,7 @@ def project_reader_bundle(
             frontmatter["digest_content_hash"] = content_hash
             target.write_text(serialize_concept_document(frontmatter, body), encoding="utf-8")
             concepts.append((rel, title, description, page_type))
+            concept_signals[rel] = dict(frontmatter["reader_signals"])
             product_key = _slug(str(adapter.product), "product")
             product_labels.setdefault(product_key, _normalize_readable(str(adapter.product)))
             if page_type == "product_overview":
@@ -1212,20 +1316,38 @@ def project_reader_bundle(
         products_root = staged.bundle_dir / "products"
         products_root.mkdir(parents=True, exist_ok=True)
         root_lines = ["# Reader index", "", "## Products", "", "- [Products](products/index.md) — Published products"]
+        root_lines.extend(["", "## Reader signals", ""])
+        for rel, _title, _description, _page_type in sorted(concepts):
+            signals = concept_signals[rel]
+            if signals.get("lifecycle") == "deprecated":
+                continue
+            root_lines.append(f"- page_path: `{rel}`")
+            root_lines.extend(_reader_signal_lines(signals, indent="  "))
+            root_lines.append("")
         products_index_lines = ["# Products", ""]
         for product in sorted(product_dirs):
+            visible_product_items = [
+                item for item in product_dirs[product]
+                if concept_signals[item[0]].get("lifecycle") != "deprecated"
+            ]
+            if not visible_product_items:
+                continue
             product_index = staged.bundle_dir / "products" / product / "index.md"
             product_index.parent.mkdir(parents=True, exist_ok=True)
             product_label = product_labels.get(product, _normalize_readable(product))
             product_description = product_descriptions.get(product, "")
             products_index_lines.append(f"- [{_link_label(product_label)}]({product}/index.md) — {product_description}")
             lines = [f"# {product_label}", ""]
-            for rel, title, description, page_type in sorted(product_dirs[product]):
+            for rel, title, description, page_type in sorted(visible_product_items):
                 parts = PurePosixPath(rel).parts
+                if concept_signals[rel].get("lifecycle") == "deprecated":
+                    continue
                 if page_type == "product_overview":
                     target = PurePosixPath(rel).relative_to(PurePosixPath("products") / product)
                     lines.append(f"- [{_link_label(title)}]({target.as_posix()}) — {description}")
-            modules = sorted({PurePosixPath(rel).parts[3] for rel, _title, _description, page_type in product_dirs[product] if page_type != "product_overview"})
+                    lines.append(f"- page_path: `{rel}`")
+                    lines.extend(["", "Reader signals:", *_reader_signal_lines(concept_signals[rel])])
+            modules = sorted({PurePosixPath(rel).parts[3] for rel, _title, _description, page_type in visible_product_items if page_type != "product_overview"})
             if modules:
                 lines.append(f"- [Modules](modules/index.md) — {len(modules)} published module(s)")
             product_index.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -1237,17 +1359,27 @@ def project_reader_bundle(
             for (module_product, module), _items in sorted(module_dirs.items()):
                 if module_product != product:
                     continue
+                visible_items = [item for item in _items if concept_signals[item[0]].get("lifecycle") != "deprecated"]
+                if not visible_items:
+                    continue
                 module_title, module_description = module_labels[(product, module)]
                 module_lines.append(f"- [{_link_label(module_title)}]({module}/index.md) — {module_description}")
             modules_index.write_text("\n".join(module_lines) + "\n", encoding="utf-8")
         for (product, module), items in sorted(module_dirs.items()):
+            items = [item for item in items if concept_signals[item[0]].get("lifecycle") != "deprecated"]
+            if not items:
+                continue
             module_index = staged.bundle_dir / "products" / product / "modules" / module / "index.md"
             module_index.parent.mkdir(parents=True, exist_ok=True)
             module_title, _module_description = module_labels.get((product, module), (_normalize_readable(module), ""))
             lines = [f"# {module_title}", ""]
             for rel, title, description, _page_type in sorted(items):
+                if concept_signals[rel].get("lifecycle") == "deprecated":
+                    continue
                 target = PurePosixPath(rel).relative_to(PurePosixPath("products") / product / "modules" / module)
                 lines.append(f"- [{_link_label(title)}]({target.as_posix()}) — {description}")
+                lines.append(f"- page_path: `{rel}`")
+                lines.extend(["", "Reader signals:", *_reader_signal_lines(concept_signals[rel])])
             module_index.write_text("\n".join(lines) + "\n", encoding="utf-8")
         (staged.bundle_dir / "index.md").write_text("\n".join(root_lines) + "\n", encoding="utf-8")
         source_lines = ["# Sources", "", "<!-- projected from the same audit records -->", ""]
@@ -1355,6 +1487,7 @@ def validate_reader_bundle(
     if any(path.is_dir() and path.name in {"_digest", "_archive"} for path in bundle.rglob("*")):
         errors.append("BUNDLE_AUDIT_ESCAPE")
     concepts = 0
+    concept_signal_map: dict[str, dict[str, Any]] = {}
     expected_claims: dict[str, dict[str, Any]] = {}
     if isinstance(expected, ReaderBundleInputs):
         try:
@@ -1390,6 +1523,8 @@ def validate_reader_bundle(
         if frontmatter.get("digest_content_hash") != managed_content_hash(frontmatter, body):
             errors.append("MANAGED_HASH_MISMATCH")
         errors.extend(_validate_trust_signals(path, frontmatter, body, artifacts, expected))
+        if isinstance(frontmatter.get("reader_signals"), Mapping):
+            concept_signal_map[rel] = dict(frontmatter["reader_signals"])
         if isinstance(expected, ReaderBundleInputs):
             _count, attribution_errors = _validate_attribution(path, frontmatter, body, expected_claims)
             errors.extend(attribution_errors)
@@ -1411,6 +1546,17 @@ def validate_reader_bundle(
                     errors.append("LINK_TARGET_MISSING")
             except ValidationError:
                 errors.append("LINK_ESCAPES_BUNDLE")
+        if path.name == "index.md":
+            for page_path, signals in concept_signal_map.items():
+                marker = f"- page_path: `{page_path}`"
+                if marker in text:
+                    signal_lines = _reader_signal_lines(signals)
+                    expected_blocks = (
+                        "\n".join([marker, *signal_lines]),
+                        "\n".join([marker, "", "Reader signals:", *signal_lines]),
+                    )
+                    if not any(expected_block in text for expected_block in expected_blocks):
+                        errors.append("READER_INDEX_SIGNALS_MISMATCH")
     report_path = artifacts.projection_report_path
     if not report_path.is_file() or not artifacts.exit_manifest_path.is_file():
         errors.append("REPORT_SURFACE_MISSING")

@@ -42,6 +42,10 @@
 
 **交付级发布状态**：交付级只允许 `released` 或 `not_released`。Task 0–2 只能是 `not_released`；只有 Task 3 同时通过机器门、读者门和交付门，才能是 `released`。
 
+**Task 2-C Agent 读者门**：本任务允许 Agent 作为小语料读者质量门的评审主体，但这只是 Task 2-C 的范围修订，不代表人工评审、`verified` 事件或正式发布。逐题证据保留 `agent_assisted=true`，并明确 `review_mode=agent_only`、`gate_actor=agent`；不得写 `human_reviewed`、`human:` actor 或把 Agent 结果派生为 `machine-confirmed`/`human-reviewed` trust tier。即使 Agent 读者门通过，Task 2-C 交付级状态仍为 `not_released`。
+
+**Task 2-C 页级状态映射**：`unverified`、stale 警告和 `status=deprecated` 本身不把页面改成 `degraded`；前者是信任信号，stale 只提示复核，deprecated 保留旧路径但默认隐藏。只有必需信号投影/事实源不一致、来源回查断裂、机器门失败、正文/人工修改冲突或其他明确失败，页面才是 `degraded`，并从正式 Reader 导航排除。页面通过机器门且信号投影可重算时可为 `published`，但 Task 2-C 整包仍保持 `not_released`。
+
 **业务结果幂等**：同一输入快照和配置重跑时，Reader/Audit 中的来源、Claim、页面、duplicate 和 archive 内容不能重复增长；运行记录可以追加，用于保留审计历史。
 
 **待复核清单**：待复核论断在每次运行报告和待处理清单中可见，供后续手动运行再次校验。本期不设告警、数量上限或人工复核产品流程。

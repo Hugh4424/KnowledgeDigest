@@ -144,6 +144,7 @@ def _request_payload(
     prompt: str,
     *,
     max_tokens: int = DEFAULT_MAX_TOKENS,
+    json_mode: bool = False,
 ) -> dict[str, Any]:
     messages = [{"role": "user", "content": prompt}]
     if api_format == OPENAI_FORMAT:
@@ -156,13 +157,14 @@ def _request_payload(
             "temperature": 0,
             "max_tokens": max_tokens,
         }
+        if json_mode or model == PUBLICATION_LLM_MODEL:
+            payload["response_format"] = {"type": "json_object"}
         if model == PUBLICATION_LLM_MODEL:
             # The approved qwen OpenAI bridge understands JSON mode.  It does
             # not expose reasoning_content to the client.  The bridge only
             # honors the no-thinking switch through chat_template_kwargs;
             # sending enable_thinking alone still burns the completion budget
             # on hidden reasoning and can truncate the JSON body.
-            payload["response_format"] = {"type": "json_object"}
             payload["enable_thinking"] = False
             payload["chat_template_kwargs"] = {"enable_thinking": False}
         return payload
@@ -590,6 +592,7 @@ def call_llm(
     model: str,
     timeout: int = DEFAULT_TIMEOUT_SECONDS,
     max_tokens: int = DEFAULT_MAX_TOKENS,
+    json_mode: bool = False,
 ) -> str:
     """POST one completion request and return the raw assistant text."""
     if api_format not in SUPPORTED_FORMATS:
@@ -600,7 +603,13 @@ def call_llm(
 
     if max_tokens <= 0:
         raise ValidationError("llm", "max_tokens", "must be greater than zero")
-    body = _request_payload(api_format, model, prompt, max_tokens=max_tokens)
+    body = _request_payload(
+        api_format,
+        model,
+        prompt,
+        max_tokens=max_tokens,
+        json_mode=json_mode,
+    )
     headers = {"content-type": "application/json"}
     if api_format == OPENAI_FORMAT:
         headers["authorization"] = f"Bearer {api_key}"

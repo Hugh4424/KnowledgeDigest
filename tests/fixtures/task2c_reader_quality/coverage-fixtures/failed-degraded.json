@@ -1,0 +1,7 @@
+{
+  "schema_version": "task2c-coverage-fixture.v1",
+  "category": "failed_degraded",
+  "disposition": "excluded",
+  "reason": "Machine inspection of topic-index.json found no topic with status failed or degraded in this Task 2-C corpus; degraded-page coverage is deferred to the full Task 3 corpus gate.",
+  "evidence": "topic-index.json"
+}
