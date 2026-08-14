@@ -1,0 +1,13 @@
+Task: T013
+Command: `uv run --frozen pytest -q tests/acceptance/test_task3_projection.py tests/acceptance/test_task3_quality_release.py tests/acceptance/test_task3_closeout.py tests/acceptance/test_task2c_reader_quality.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task1_topic_axis.py tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_corpus_regression.py && uv run --frozen pytest -q`
+Expected exit: 0
+Observed exit: 0
+Focused aggregate (with real corpus): 216 passed, 3 skipped in 4.14s.
+Full repository gate (with real corpus): 639 passed, 3 skipped in 15.81s.
+stdout_sha256: current receipt is `quality/tests/task3-final-aggregate-current.json`.
+Oracle: ORACLE-TASK3-AGGREGATE
+Real corpus fact: `KNOWLEDGEDIGEST_TASK1_RAW_CORPUS='/Users/Hugh/Downloads/confluence 原始数据'` contains 89 Markdown sources; `tests/acceptance/test_task1_topic_axis.py` passed 49 tests.
+Skip facts: three acceptance cases require optional Task1/Task2 baseline fixtures; those paths are absent, so these are unavailable, not passes.
+Coverage limit: pytest and fixtures do not prove summary confirmation or formal release readback. The real provider-backed 89-source semantic result is separately bound by `run-a21c831619c44834` and `apply/evidence/task3-real-semantic-run-20260813.md`.
+
+真实语义补跑：run `run-a21c831619c44834`，provider `qwen3.6`，20/20 调用完成；候选 31 published 页、23 degraded 主题；17+3 结果为正题 17/17、负题误命中 0/3；交付硬门和质量门通过，summary `incomplete`，包级 `not_released`，原因是没有可安全绑定的旧正式根和 readback。详见 `apply/evidence/task3-real-semantic-run-20260813.md`。

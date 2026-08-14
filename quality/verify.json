@@ -1,0 +1,78 @@
+{
+  "schema_version": "workflowhub-verify-result.v1",
+  "task_id": "task3-knowledge-publication-full-release",
+  "status": "incomplete",
+  "conclusion": "implementation_and_real_89_control_plane_regression_pass_real_task3_semantic_quality_passed_local_review_clean_workflowhub_review_and_formal_readback_unavailable",
+  "architecture_report_ref": "apply/evidence/verify-code-architecture-report.md",
+  "real_input_inventory_ref": "apply/evidence/verify-code-real-input-inventory-20260813.md",
+  "final_test_receipt_ref": "quality/tests/task3-final-aggregate-current.json",
+  "implementation_snapshot_sha256": "28e20517ef4f7b8fbfef2de9a7af0dbf958089f90cb57556ff8053e0de6ff0e9",
+  "ac_results": {
+    "AC-01": "pass",
+    "AC-02": "pass",
+    "AC-03": "pass",
+    "AC-04": "pass",
+    "AC-05": "pass",
+    "AC-06": "pass",
+    "AC-07": "pass",
+    "AC-08": "pass",
+    "AC-09": "unknown",
+    "AC-10": "unknown",
+    "AC-11": "pass",
+    "AC-12": "pass",
+    "AC-13": "pass"
+  },
+  "current_tests": {
+    "focused": "216 passed, 3 skipped in 4.14s",
+    "full": "639 passed, 3 skipped in 15.81s",
+    "real_task1_89_source": "49 passed",
+    "git_diff_check": "passed",
+    "compileall": "passed"
+  },
+  "independent_review": {
+    "transport_status": "unavailable",
+    "reason": "WorkflowHub wh-review route doctor was repaired to status=ok, but the current TaskHandle has no bound workspace identity; the fresh verify-code call returned incomplete/snapshot_or_material_identity_unavailable without an attempt",
+    "counts_as_pass": false
+  },
+  "local_independent_review": {
+    "status": "clean",
+    "scope": "final read-only review of Task3 question oracle integration, target binding, provider replay, comparison, filesystem safety gates, formal-root preflight/readback, and affected replay planning",
+    "counts_as_workflowhub_provider_pass": false
+  },
+  "unavailable_or_deferred": [
+    "formal root protection/readback is implemented and fixture-tested, but no explicit real formal root was supplied for the current candidate",
+    "summary confirmation and formal root readback",
+    "real affected replay on a provider-failed run",
+    "WorkflowHub provider review because the current TaskHandle has no bound workspace identity",
+    "Closeout document sync/archive/cleanup/recovery rehearsal"
+  ],
+  "release_status": "not_released",
+  "close_authorized": false,
+  "real_task3_semantic": {
+    "status": "passed_quality_gate",
+    "evidence_ref": "apply/evidence/task3-real-semantic-run-20260813.md",
+    "run_id": "run-a21c831619c44834",
+    "provider": "dashscope-qwen3.6",
+    "model": "qwen3.6",
+    "source_count": 89,
+    "published_page_count": 31,
+    "degraded_topic_count": 23,
+    "provider_calls": 20,
+    "positive_passed": 17,
+    "positive_required": 15,
+    "negative_false_positives": 0,
+    "title_rate": 0.967741935483871,
+    "ownership_rate": 0.967741935483871,
+    "delivery_status": "passed",
+    "digest_release_status": "not_released",
+    "hard_failures": ["OLD_PACKAGE_NOT_PROTECTED"],
+    "summary_sha256": "cc510b1acefe1d2653c0bb0b9faf39b48fc10e0c262116bfd9365febb1794fac",
+    "candidate_root": "/private/tmp/kd-task3-real-semantic-20260813/candidate2"
+  },
+  "formal_boundary_repairs": {
+    "formal_root_preflight": "implemented_and_fixture_tested",
+    "affected_replay_plan": "implemented_and_fixture_tested",
+    "workflowhub_doctor": "passed_after_mode_config_repair",
+    "fresh_review_result": "incomplete_snapshot_or_material_identity_unavailable"
+  }
+}

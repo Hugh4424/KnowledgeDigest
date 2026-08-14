@@ -1,0 +1,9 @@
+Task: T008
+Command: uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k recovery
+Expected exit: 0
+stdout_sha256: 8decfd1a61ccefc4301d43f6bbae4a95393f4f0316627d45562584335d6725de
+Observed exit: 0
+Observed original GREEN: 3 passed, 20 deselected.
+Current repaired recovery gate: 5 passed, 26 deselected; rollback failure preserves a recoverable backup and failure record.
+Oracle: ORACLE-RECOVERY
+Coverage: lock competition, stale candidate, replacement failure, and successful single-root release with rollback/old-root protection.

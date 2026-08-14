@@ -1,0 +1,5 @@
+Task1 real corpus: 49 passed
+Focused aggregate with real corpus: 216 passed, 3 skipped in 4.14s
+Full repository gate with real corpus: 639 passed, 3 skipped in 15.81s
+All observed exits: 0
+Skip facts: three acceptance cases require optional Task1/Task2 baseline fixtures; skips are not passes.

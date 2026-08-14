@@ -1,0 +1,7 @@
+Task: T003
+Command: uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k 'snapshot or quality'
+Expected exit: 1
+Observed exit: 1
+Oracle: ORACLE-QUALITY
+Observed target failures before implementation: the fixture tests failed on the missing Task3 snapshot/quality assessment contract, including the 89-source freeze, exact 17+3 question set, threshold checks, structural/source-chain checks, failure isolation, and replay evidence.
+Note: this is the pre-implementation RED record; the GREEN implementation did not weaken the negative cases.

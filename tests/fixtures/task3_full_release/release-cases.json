@@ -1,0 +1,46 @@
+{
+  "schema_version": "task3-full-release-cases.v1",
+  "snapshot": {
+    "source_count": 89,
+    "source_manifest_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "topic_index_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "concept_contract_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "template_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "question_set_hash": "41080f16f2955df27b9437df72e3a95c5c437a122abc514ad3abf09e9ab9d2e7",
+    "provider_config_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "budget_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "version": "task3-fixture-v1"
+  },
+  "pages": [
+    {
+      "path": "products/fixture-product/product-overview.md",
+      "status": "published",
+      "in_reader": true,
+      "body_lines": 20,
+      "page_lines": 40,
+      "navigation_complete": true,
+      "claims": [{"claim_id": "claim-overview", "target_path": "products/fixture-product/product-overview.md", "source_uri": "raw://fixture/product-overview.md"}]
+    },
+    {
+      "path": "products/fixture-product/modules/fixture-module/module-capability.md",
+      "status": "published",
+      "in_reader": true,
+      "body_lines": 20,
+      "page_lines": 40,
+      "navigation_complete": true,
+      "claims": [{"claim_id": "claim-module", "target_path": "products/fixture-product/modules/fixture-module/module-capability.md", "source_uri": "raw://fixture/module-capability.md"}]
+    },
+    {
+      "path": "products/other-product/modules/other-module/module-capability.md",
+      "status": "published",
+      "in_reader": true,
+      "body_lines": 20,
+      "page_lines": 40,
+      "navigation_complete": true,
+      "claims": [{"claim_id": "claim-other", "target_path": "products/other-product/modules/other-module/module-capability.md", "source_uri": "raw://fixture/other.md"}]
+    }
+  ],
+  "title_scores": {"passed": 9, "sample_size": 10, "actor": "process:task3-title-v1", "rule": "title-detached-path-v1", "seed": "task3-fixture-seed"},
+  "ownership_scores": {"passed": 9, "sample_size": 10, "actor": "process:task3-ownership-v1", "rule": "product-module-ownership-v1", "seed": "task3-fixture-seed"},
+  "replay": {"manifest_ref": "audit/run-manifest.json", "quality_ref": "reports/quality.json", "config_ref": "audit/config.json", "execution_mode": "real_semantic", "incomplete_topics": ["topic-7"]}
+}

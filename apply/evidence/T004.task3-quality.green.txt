@@ -1,0 +1,8 @@
+Task: T004
+Command: uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k 'snapshot or quality'
+Expected exit: 0
+Observed exit: 0
+stdout_sha256: 6c46716ddff62d0203de734f7befc0af039cab08bcb5fe5a12992335ffce4ecd
+Observed: 22 passed, 1 deselected.
+Oracle: ORACLE-QUALITY
+Coverage: 89-source snapshot contract, exact 17 positive/3 negative questions, 15/17 and 0/3 thresholds, title/ownership 90% gates, structure/navigation/claim/source-chain checks, degraded isolation, and replay evidence.

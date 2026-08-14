@@ -34,13 +34,21 @@
 
 **Reader Bundle**：把 Reader Package 升级为 OKF v0.2-compatible profile 后的可读交付形态（Task 2-A 起），布局见 PRD §6.8：`README.md → Home.md → 根 index.md → 根 log.md → products/<product>/...`；`Home.md`、Reader `README.md`、`references/sources.md` 是豁免文件，不是 concept，不放 concept frontmatter；来源投影路径是 `references/sources.md`，旧 `indexes/sources.md` 属旧 Reader Package 布局，不迁移、不重写；包级 `digest_release_status` 只在 manifest，不写入 concept 页。
 
+**Raw Reader candidate**：Task 3 真实裸目录演练的候选编译模式。它把输入顶层目录映射为产品，把来源保留在 `products/<product>/modules/<module>/knowledge/`，并把指纹、映射原因和完整来源清单放进同级 `audit/`；没有可靠产品归属的来源进入 `unclassified/general`，不静默丢失。该模式只生成 `candidate/not_released`，不能替代既有机器门、汇总确认或正式发布回读；语义候选与保真整理的数量必须分开报告。
+
+Raw Reader 编译对空内容只写 Audit 失败，不生成“暂无正文”占位页；语义候选还要通过可执行代码的确定性保真检查，失败时回退保真正文并把事实损失写入 Audit，质量代理按实际通过比例扣分。表格、链接、版本历史和普通叙述允许被语义候选重新组织。
+
+**受控语义候选编译**：`scripts/task3_semantic_compile.py` 按固定小批量调用批准的 `qwen3.6`，每批只请求一次，失败不自动重放，逐批输出进度并把失败来源写入 `audit/semantic-manifest.json`。它只生成可供 Raw Reader candidate 消费的语义候选，不直接发布；凭据只能通过 `KD_LLM_API_KEY`、`KD_LLM_BASE_URL`、`KD_LLM_MODEL` 环境变量传入。
+
 **Audit/Archive Package**：用于审计、恢复和排查的交付包，包含 input manifest、source snapshot、Claim、Evidence、原文归档、失败原因、运行报告和配置/provider hash。它不作为日常阅读入口。
 
 **页级发布状态**：页级只允许 `published` 或 `degraded`。`published` 表示通过机器门，可以进入候选 Reader Package；`degraded` 表示失败、冲突、缺证据或人工修改冲突，不进入正式导航。
 
 **来源未说明（`source_not_documented`）**：仅用于 `procedure_or_rule` 页的 `exceptions` section，表示确定性来源审计确认当前冻结来源没有明确的异常触发、处理、分支或恢复规则。它不是“没有异常”的判断，不生成领域 Claim；异常专属问题仍为 `not_answerable`。该 section 仍存在并绑定来源指纹与审计记录；其他缺证据、含糊或映射失败不得使用此状态。
 
-**交付级发布状态**：交付级只允许 `released` 或 `not_released`。Task 0–2 只能是 `not_released`；只有 Task 3 同时通过机器门、读者门和交付门，才能是 `released`。
+**交付级发布状态**：交付级只允许 `released` 或 `not_released`。Task 0–2 只能是 `not_released`；Task 3 只有在机器硬门、自动固定读者题集、交付完整性和“汇总确认”都通过后才能是 `released`。非阻断警告不阻止发布，但必须留在汇总和审计记录中；未知或无法分类的信号按硬失败处理。
+
+**汇总确认**：人工只确认自动验收汇总完整、可判定且没有明确阻断失败；不打开知识页、不逐题检查、不检查来源链。它不等于人工阅读正文，不产生 `human_reviewed` 内容核验。
 
 **Task 2-C Agent 读者门**：本任务允许 Agent 作为小语料读者质量门的评审主体，但这只是 Task 2-C 的范围修订，不代表人工评审、`verified` 事件或正式发布。逐题证据保留 `agent_assisted=true`，并明确 `review_mode=agent_only`、`gate_actor=agent`；不得写 `human_reviewed`、`human:` actor 或把 Agent 结果派生为 `machine-confirmed`/`human-reviewed` trust tier。即使 Agent 读者门通过，Task 2-C 交付级状态仍为 `not_released`。
 

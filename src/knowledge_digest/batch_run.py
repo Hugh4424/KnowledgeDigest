@@ -8,7 +8,7 @@ import os
 import tempfile
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 from .config import DigestSettings
 from .errors import ValidationError
@@ -185,6 +185,127 @@ def _manifest(paths: DigestPaths, batch_size: int) -> dict[str, Any]:
         "batch_size": batch_size,
         "sources": sources,
         "batches": batches,
+    }
+
+
+def build_affected_replay_plan(
+    *,
+    affected: Mapping[str, Any],
+    batch_state: Mapping[str, Any],
+    topic_sources: Mapping[str, list[str]] | None = None,
+    topic_status: Mapping[str, str] | None = None,
+    contract_changed: bool = False,
+    contract_change_reason: str | None = None,
+    old_formal_tree_hash: str | None = None,
+) -> dict[str, Any]:
+    """Project the existing batch ledger into a narrow affected replay plan.
+
+    This is deliberately a read-only adapter.  ``run_batched`` remains the
+    only executor and its immutable manifest/runtime checks remain in force.
+    A contract change stops replay instead of silently replaying under a new
+    contract.  Successful batches and the old formal hash are reported as
+    preserved facts; neither is overwritten by this function.
+    """
+
+    def string_set(value: Any, field: str) -> set[str]:
+        if not isinstance(value, list) or any(not isinstance(item, str) or not item.strip() for item in value):
+            raise ValidationError("batch-replay", field, "must be a list of non-empty strings")
+        return {item for item in value}
+
+    affected_source_ids = string_set(affected.get("affected_source_ids"), "affected_source_ids")
+    affected_topic_keys = string_set(affected.get("affected_topic_keys"), "affected_topic_keys")
+    sources = batch_state.get("sources")
+    batches = batch_state.get("batches")
+    if not isinstance(sources, list) or not isinstance(batches, list):
+        raise ValidationError("batch-replay", "batch_state", "sources and batches are required")
+    source_by_path: dict[str, str] = {}
+    for row in sources:
+        if not isinstance(row, Mapping) or not isinstance(row.get("source_id"), str) or not isinstance(row.get("content_path"), str):
+            raise ValidationError("batch-replay", "batch_state.sources", "source rows must bind source_id and content_path")
+        source_id_value = str(row["source_id"])
+        content_path = str(row["content_path"])
+        if content_path in source_by_path or source_id_value in source_by_path.values():
+            raise ValidationError("batch-replay", "batch_state.sources", "source identity is duplicated")
+        source_by_path[content_path] = source_id_value
+    unknown_sources = affected_source_ids - set(source_by_path.values())
+    if unknown_sources:
+        raise ValidationError("batch-replay", "affected_source_ids", "affected source is absent from the fixed batch manifest")
+
+    statuses_by_source: dict[str, list[str]] = {source_id_value: [] for source_id_value in source_by_path.values()}
+    for batch in batches:
+        if not isinstance(batch, Mapping):
+            raise ValidationError("batch-replay", "batch_state.batches", "batch rows must be objects")
+        status = str(batch.get("status") or "unknown")
+        paths = batch.get("source_paths")
+        if not isinstance(paths, list) or any(not isinstance(path, str) for path in paths):
+            raise ValidationError("batch-replay", "batch_state.batches", "source_paths must be a list of strings")
+        for content_path in paths:
+            source_id_value = source_by_path.get(content_path)
+            if source_id_value is not None:
+                statuses_by_source[source_id_value].append(status)
+
+    successful_source_ids = {
+        source_id_value
+        for source_id_value, statuses in statuses_by_source.items()
+        # A split recovery leaves the failed parent batch beside successful
+        # child batches.  The successful child is the terminal fact for that
+        # source; replaying it would redo work that already completed.
+        if statuses and "succeeded" in statuses and all(status in {"succeeded", "failed"} for status in statuses)
+    }
+    replay_source_ids = sorted(affected_source_ids - successful_source_ids)
+    preserved_source_ids = sorted(successful_source_ids)
+
+    if topic_sources is not None:
+        normalized_topic_sources: dict[str, set[str]] = {}
+        for topic_key, source_ids in topic_sources.items():
+            if not isinstance(topic_key, str) or not topic_key.strip() or not isinstance(source_ids, list) or any(not isinstance(item, str) for item in source_ids):
+                raise ValidationError("batch-replay", "topic_sources", "topic source mapping is invalid")
+            normalized_topic_sources[topic_key] = set(source_ids)
+    else:
+        normalized_topic_sources = {}
+    normalized_topic_status = dict(topic_status or {})
+    replay_topic_keys: set[str] = set()
+    preserved_topic_keys: set[str] = set()
+    for topic_key in affected_topic_keys:
+        if normalized_topic_status.get(topic_key) == "succeeded":
+            preserved_topic_keys.add(topic_key)
+        elif topic_key in normalized_topic_sources and normalized_topic_sources[topic_key] and normalized_topic_sources[topic_key].isdisjoint(replay_source_ids):
+            preserved_topic_keys.add(topic_key)
+        else:
+            replay_topic_keys.add(topic_key)
+
+    old_formal_hash_valid = old_formal_tree_hash is None or (
+        isinstance(old_formal_tree_hash, str)
+        and len(old_formal_tree_hash) == 64
+        and all(character in "0123456789abcdef" for character in old_formal_tree_hash)
+    )
+    old_formal_preserved = old_formal_hash_valid and old_formal_tree_hash is not None
+    stop_reason = (
+        contract_change_reason if contract_changed else
+        "old formal tree hash is invalid" if not old_formal_hash_valid else
+        None
+    )
+    stopped = contract_changed or not old_formal_hash_valid
+    status = "stopped" if stopped else "ready" if replay_source_ids or replay_topic_keys else "nothing_to_replay"
+    return {
+        "schema_version": "kd-affected-replay-plan.v1",
+        "status": status,
+        "contract_changed": bool(contract_changed),
+        "contract_change_reason": contract_change_reason if contract_changed else None,
+        "stop_reason": stop_reason,
+        "manifest_sha256": batch_state.get("manifest_sha256"),
+        "replay_source_ids": [] if stopped else replay_source_ids,
+        "replay_source_paths": [] if stopped else sorted(
+            content_path for content_path, source_id_value in source_by_path.items() if source_id_value in replay_source_ids
+        ),
+        "replay_topic_keys": [] if stopped else sorted(replay_topic_keys),
+        "preserved_source_ids": preserved_source_ids,
+        "preserved_topic_keys": sorted(preserved_topic_keys),
+        "successful_batch_preserved": bool(successful_source_ids),
+        "old_formal_hash_valid": old_formal_hash_valid,
+        "old_formal_preserved": old_formal_preserved,
+        "old_formal_tree_hash": old_formal_tree_hash if old_formal_preserved else None,
+        "replay_executor": "knowledge_digest.batch_run.run_batched",
     }
 
 

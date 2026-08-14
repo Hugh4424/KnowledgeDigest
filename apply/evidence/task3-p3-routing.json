@@ -1,0 +1,12 @@
+{
+  "predicted": {"tier": "feature", "method": "backend-testing"},
+  "actual": {"tier": "feature", "method": "backend-testing"},
+  "changed_files": [
+    "scripts/task2_publication_comparison.py",
+    "scripts/task3_full_release.py",
+    "tests/acceptance/test_task3_closeout.py",
+    "tests/fixtures/task3_full_release/closeout-cases.json"
+  ],
+  "reason": "Python comparison/coordination APIs and local JSON/Markdown evidence; no browser or resident service.",
+  "rerouted": false
+}

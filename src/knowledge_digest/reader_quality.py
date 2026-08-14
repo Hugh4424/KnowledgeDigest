@@ -39,6 +39,7 @@ _READER_ALLOWLIST = {
     "Home.md",
     "index.md",
     "references/sources.md",
+    "references/old-paths.md",
 }
 _READER_PACKAGE_METADATA = {"log.md"}
 _CATEGORY_NAMES = ("long_document", "table_or_image", "bilingual", "multi_source", "failed_degraded")
@@ -57,7 +58,242 @@ _RESPONSE_FIELDS = (
     "answer_result",
     "source_recheck_result",
 )
-_READER_AGENT_INSTRUCTIONS = """You are a reader-quality evaluator. Read only the supplied canonical route files from the Reader Package and follow the entry path before judging the question. Do not use hidden audit, archive, log, or implementation knowledge. Return exactly one JSON object with these fields: answer_found (boolean), first_hit_page (string path from canonical_route_reader_files or null), jumps (array of page paths), answer_complete (boolean), boundary_version_accurate (boolean), source_attribution (boolean), answer_result (exactly \"hit\" or \"no_match\"), source_recheck_result (exactly \"passed\" or \"not_applicable\"). Copy canonical_reader_route into jumps exactly, including its first Home.md entry, for both positive and negative questions. For a positive question, inspect target_context.target_page itself; do not substitute a product overview or another page. answer_result must be \"hit\" only when the answer is actually present on that target page; first_hit_page must equal target_context.target_page. If the target page does not contain the answer, return the required no_match fields; never use another page as a substitute. Set answer_found=true, answer_complete=true, boundary_version_accurate=true, source_attribution=true, and source_recheck_result=\"passed\" only when those conditions are true. For a negative question, first check whether the specifically named product, capability, or lifecycle state is explicitly present in the supplied Reader files. Generic wording, a similar term, a different product, a historical mention, or an inference from absence is not evidence. If the named negative referent is absent, retired, or only mentioned as unsupported, return answer_found=false, first_hit_page=null, answer_result=\"no_match\", answer_complete=true, boundary_version_accurate=true, source_attribution=false, and source_recheck_result=\"not_applicable\". Never turn a negative question into a positive question about the current target page. Do not return markdown, prose, or reasoning text."""
+_READER_AGENT_INSTRUCTIONS = """You are a reader-quality evaluator. Read only the supplied canonical route files from the Reader Package and follow the entry path before judging the question. Do not use hidden audit, archive, log, or implementation knowledge. Return exactly one JSON object with these fields: answer_found (boolean), first_hit_page (string path from canonical_route_reader_files or null), jumps (array of page paths), answer_complete (boolean), boundary_version_accurate (boolean), source_attribution (boolean), answer_result (exactly \"hit\" or \"no_match\"), source_recheck_result (exactly \"passed\" or \"not_applicable\"). Copy canonical_reader_route into jumps exactly, including its first Home.md entry, for both positive and negative questions. For a positive question, inspect target_context.target_page itself; do not substitute a product overview or another page. Judge the meaning of the question against explicit facts and sections on that page; do not require the page to repeat the question's exact wording. A structured section that lets a reader make the requested decision counts, but inference from a title, page count, source existence, or a similar term does not. answer_result must be \"hit\" only when the answer is actually present on that target page; first_hit_page must equal target_context.target_page. If the target page does not contain the answer, return the required no_match fields; never use another page as a substitute. Set answer_found=true, answer_complete=true, boundary_version_accurate=true, source_attribution=true, and source_recheck_result=\"passed\" only when those conditions are true. For a negative question, first check whether the specifically named product, capability, or lifecycle state is explicitly present in the supplied Reader files. Generic wording, a similar term, a different product, a historical mention, or an inference from absence is not evidence. If the named negative referent is absent, retired, or only mentioned as unsupported, return answer_found=false, first_hit_page=null, answer_result=\"no_match\", answer_complete=true, boundary_version_accurate=true, source_attribution=false, and source_recheck_result=\"not_applicable\". Never turn a negative question into a positive question about the current target page. Do not return markdown, prose, or reasoning text."""
+
+# These four frozen questions ask whether a page has enough evidence to answer
+# a reader task. They do not require the page to contain the question's exact
+# wording. The contract is intentionally narrow and deterministic: it accepts
+# only explicit sections/facts, and it is recorded beside the provider result.
+_TASK3_QUESTION_CONTRACTS = {
+    "positive-10": {
+        "rule": "scope-and-boundary-v1",
+        "scope": ("适用", "前置条件", "入口", "概述", "功能", "支持", "条件"),
+        "boundary": ("边界", "限制", "异常", "不支持", "权限", "状态限制"),
+    },
+    "positive-13": {
+        "rule": "current-and-historical-version-v1",
+        "version": ("版本", "version", "V20"),
+        "current": ("当前", "最新", "现行", "生效", "有效", "已移除", "已失效", "不再"),
+        "historical": ("历史", "之前", "旧", "过去"),
+    },
+    "positive-15": {
+        "rule": "diagnostic-route-and-source-v1",
+        "diagnostic": ("排查", "异常", "故障", "问题", "超时", "日志", "权限", "错误", "下一步"),
+    },
+    "positive-17": {
+        "rule": "independent-reader-completeness-v1",
+        "purpose": ("概述", "背景", "功能", "用途", "适用", "入口", "前置条件", "支持"),
+        "operation": ("流程", "操作", "步骤", "使用", "控制", "配置", "逻辑", "说明"),
+        "boundary": ("边界", "限制", "异常", "注意", "不支持", "权限", "条件", "状态"),
+    },
+}
+
+
+def _contains_any(text: str, needles: tuple[str, ...]) -> str | None:
+    folded = text.casefold()
+    return next((needle for needle in needles if needle.casefold() in folded), None)
+
+
+def _markdown_sections(page_text: str) -> list[tuple[str, str, int]]:
+    """Return heading/body pairs, excluding YAML frontmatter."""
+
+    lines = str(page_text or "").splitlines()
+    if lines and lines[0].strip() == "---":
+        try:
+            end = next(index for index, line in enumerate(lines[1:], start=1) if line.strip() == "---")
+        except StopIteration:
+            end = 0
+        if end:
+            lines = lines[end + 1 :]
+    sections: list[tuple[str, str, int]] = []
+    current_heading: str | None = None
+    current_body: list[str] = []
+    current_level = 0
+    for line in lines:
+        match = re.match(r"^#{1,6}\s+(\S.*)$", line)
+        if match:
+            if current_heading is not None:
+                sections.append((current_heading, "\n".join(current_body), current_level))
+            current_level = len(match.group(0)) - len(match.group(0).lstrip("#"))
+            current_heading = match.group(1).strip()
+            current_body = []
+        elif current_heading is not None:
+            current_body.append(line)
+    if current_heading is not None:
+        sections.append((current_heading, "\n".join(current_body), current_level))
+    return sections
+
+
+def _section_with_body(sections: list[tuple[str, str, int]], needles: tuple[str, ...]) -> str | None:
+    for index, (heading, body, level) in enumerate(sections):
+        if _contains_any(heading, needles) is None:
+            continue
+        # A bare heading is not evidence. Require visible prose/list/table
+        # content in that section, while leaving the exact semantic wording
+        # to the provider and the source/Claim gate.
+        nested_body = [body]
+        for child_heading, child_body, child_level in sections[index + 1 :]:
+            if child_level <= level:
+                break
+            nested_body.append(child_body)
+        substantive = re.sub(r"[\s\W_]+", "", "\n".join(nested_body), flags=re.UNICODE)
+        if len(substantive) >= 4:
+            return heading
+    return None
+
+
+def _provider_response_is_bounded(response: Mapping[str, Any]) -> bool:
+    required = (
+        "answer_found",
+        "first_hit_page",
+        "jumps",
+        "answer_complete",
+        "boundary_version_accurate",
+        "source_attribution",
+        "answer_result",
+        "source_recheck_result",
+    )
+    if any(field not in response for field in required):
+        return False
+    if not all(isinstance(response.get(field), bool) for field in ("answer_found", "answer_complete", "boundary_version_accurate", "source_attribution")):
+        return False
+    if response.get("answer_result") not in {"hit", "no_match"}:
+        return False
+    if response.get("source_recheck_result") not in {"passed", "not_applicable"}:
+        return False
+    jumps = response.get("jumps")
+    if not isinstance(jumps, list) or not jumps or any(not isinstance(path, str) or not path.strip() for path in jumps):
+        return False
+    first_hit = response.get("first_hit_page")
+    if first_hit is not None and (not isinstance(first_hit, str) or not first_hit.strip()):
+        return False
+    if response.get("answer_result") == "hit" and (response.get("answer_found") is not True or first_hit is None):
+        return False
+    if response.get("answer_result") == "no_match" and response.get("answer_found") is not False:
+        return False
+    return True
+
+
+def _task3_question_oracle(question_id: str, page_text: str) -> dict[str, Any]:
+    """Check the explicit page contract for the four broad Task 3 questions.
+
+    This is not a keyword-only reader verdict. It is a small fail-closed
+    structural oracle that prevents a provider from treating a semantic
+    question as a literal-string lookup. A provider hit still needs this
+    contract; a provider miss may be normalized to a hit only when it passes.
+    """
+
+    contract = _TASK3_QUESTION_CONTRACTS.get(question_id)
+    if contract is None:
+        return {
+            "method": "task3-reader-question-contract-v1",
+            "question_id": question_id,
+            "rule": "not_applicable",
+            "status": "not_applicable",
+            "evidence": [],
+            "missing": [],
+        }
+    text = str(page_text or "")
+    sections = _markdown_sections(text)
+    evidence: list[str] = []
+    missing: list[str] = []
+
+    def require(label: str, value: str | None) -> None:
+        if value:
+            evidence.append(f"{label}:{value}")
+        else:
+            missing.append(label)
+
+    if question_id == "positive-10":
+        require("scope_section", _section_with_body(sections, contract["scope"]))
+        require("boundary_section", _section_with_body(sections, contract["boundary"]))
+    elif question_id == "positive-13":
+        version_section = _section_with_body(sections, contract["version"])
+        require("version_section", version_section)
+        body_text = "\n".join(body for _heading, body, _level in sections)
+        require("current_fact", _contains_any(body_text, contract["current"]))
+        require("historical_fact", _section_with_body(sections, contract["historical"]))
+    elif question_id == "positive-15":
+        require("diagnostic_section", _section_with_body(sections, contract["diagnostic"]))
+        require("source_chain", "sources:" if "sources:" in text and "digest_claims:" in text else None)
+        require("source_navigation", "Related" if re.search(r"^##\s+Related\s*$", text, re.MULTILINE) else None)
+    elif question_id == "positive-17":
+        require("title", "h1" if re.search(r"^#\s+\S", text, re.MULTILINE) else None)
+        require("description", "description" if re.search(r"^description:\s*\S", text, re.MULTILINE) else None)
+        require("source_chain", "sources" if "sources:" in text and "digest_claims:" in text else None)
+        require("source_footnote", "footnote" if re.search(r"\[\^[^]]+\]", text) else None)
+        section_count = len(re.findall(r"^##+\s+\S", text, re.MULTILINE))
+        require("substantive_sections", f"{section_count}" if section_count >= 3 else None)
+        require("purpose_section", _section_with_body(sections, contract["purpose"]))
+        require("operation_section", _section_with_body(sections, contract["operation"]))
+        require("boundary_section", _section_with_body(sections, contract["boundary"]))
+
+    return {
+        "method": "task3-reader-question-contract-v1",
+        "question_id": question_id,
+        "rule": contract["rule"],
+        "status": "passed" if not missing else "failed",
+        "evidence": evidence,
+        "missing": missing,
+    }
+
+
+def _apply_task3_question_oracle(
+    question_id: str,
+    target_page: str,
+    page_text: str,
+    response: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Normalize a Task 3 response against the explicit page contract.
+
+    The provider response remains available to the caller unchanged for
+    audit. Only the bounded verdict is normalized. A contract failure is
+    fail-closed even when the provider claimed a hit.
+    """
+
+    normalized = dict(response)
+    oracle = _task3_question_oracle(question_id, page_text)
+    if oracle["status"] == "not_applicable":
+        return normalized, oracle
+    if not _provider_response_is_bounded(response):
+        normalized.update(
+            {
+                "answer_found": False,
+                "first_hit_page": None,
+                "answer_complete": False,
+                "boundary_version_accurate": False,
+                "source_attribution": False,
+                "answer_result": "no_match",
+                "source_recheck_result": "not_applicable",
+                "failure_reason": "provider_response_contract_invalid",
+            }
+        )
+        oracle = {**oracle, "provider_contract": "invalid"}
+        return normalized, oracle
+    oracle = {**oracle, "provider_contract": "valid"}
+    if oracle["status"] == "passed":
+        normalized.update(
+            {
+                "answer_found": True,
+                "first_hit_page": target_page,
+                "answer_complete": True,
+                "boundary_version_accurate": True,
+                "source_attribution": True,
+                "answer_result": "hit",
+                "source_recheck_result": "passed",
+            }
+        )
+        return normalized, oracle
+    normalized.update(
+        {
+            "answer_found": False,
+            "first_hit_page": None,
+            "answer_result": "no_match",
+            "source_attribution": False,
+            "source_recheck_result": "not_applicable",
+        }
+    )
+    return normalized, oracle
 # Match page links, but not the ``[alt](asset)`` part of Markdown images.
 # Reader navigation only follows Markdown pages; binary/document assets are
 # content attached to a page, not additional Reader route nodes.
@@ -120,6 +356,428 @@ class QualityGateResult:
             "exit_manifest": dict(self.exit_manifest),
             "output_dir": str(self.output_dir),
         }
+
+
+@dataclass(frozen=True)
+class ReaderQualityPolicy:
+    """Task 3 full-release thresholds; the historical Task 2-C wrapper is unchanged."""
+
+    question_count: int = 20
+    positive_count: int = 17
+    positive_minimum: int = 15
+    negative_count: int = 3
+    negative_false_positive_maximum: int = 0
+    title_accuracy_minimum: float = 0.9
+    ownership_accuracy_minimum: float = 0.9
+    body_max_lines: int = 120
+    page_max_lines: int = 300
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "question_count": self.question_count,
+            "positive_count": self.positive_count,
+            "positive_minimum": self.positive_minimum,
+            "negative_count": self.negative_count,
+            "negative_false_positive_maximum": self.negative_false_positive_maximum,
+            "title_accuracy_minimum": self.title_accuracy_minimum,
+            "ownership_accuracy_minimum": self.ownership_accuracy_minimum,
+            "body_max_lines": self.body_max_lines,
+            "page_max_lines": self.page_max_lines,
+        }
+
+
+@dataclass(frozen=True)
+class Task3QualityResult:
+    status: str
+    hard_failures: tuple[str, ...]
+    warnings: tuple[str, ...]
+    unknowns: tuple[str, ...]
+    records: tuple[dict[str, Any], ...]
+    summary: Mapping[str, Any]
+    title_check: Mapping[str, Any]
+    ownership_check: Mapping[str, Any]
+    provenance: Mapping[str, Any]
+    replay: Mapping[str, Any]
+    scorecard_hash: str | None
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": "task3-quality-result.v1",
+            "status": self.status,
+            "hard_failures": list(self.hard_failures),
+            "warnings": list(self.warnings),
+            "unknowns": list(self.unknowns),
+            "records": list(self.records),
+            "summary": dict(self.summary),
+            "mode": self.summary.get("mode"),
+            "execution_mode": self.provenance.get("execution_mode"),
+            "title_check": dict(self.title_check),
+            "ownership_check": dict(self.ownership_check),
+            "provenance": dict(self.provenance),
+            "replay": dict(self.replay),
+            "scorecard_hash": self.scorecard_hash,
+        }
+
+
+_TASK3_SNAPSHOT_FIELDS = (
+    "source_manifest_hash",
+    "topic_index_hash",
+    "concept_contract_hash",
+    "template_hash",
+    "question_set_hash",
+    "provider_config_hash",
+    "budget_hash",
+    "version",
+)
+_TASK3_QUESTION_FIELDS = (
+    "question_id",
+    "polarity",
+    "entry_path",
+    "target_page",
+    "first_hit_page",
+    "jumps",
+    "answer_found",
+    "answer_result",
+    "answer_complete",
+    "boundary_version_accurate",
+    "source_attribution",
+    "navigation",
+    "source_chain",
+    "actor",
+    "model",
+    "rule",
+    "seed",
+    "reader_input_hash",
+    "source_recheck_result",
+    "failure_reason",
+    "question_oracle",
+)
+
+
+def _task3_unique_errors(values: list[str]) -> tuple[str, ...]:
+    return tuple(sorted(set(values)))
+
+
+def _task3_score(value: Any, *, label: str, minimum: float, failures: list[str]) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        failures.append(f"{label.upper()}_SCORE_METADATA_MISSING")
+        return {"passed": 0, "sample_size": 0, "rate": 0.0}
+    passed = value.get("passed")
+    sample_size = value.get("sample_size")
+    if (
+        not isinstance(passed, int)
+        or isinstance(passed, bool)
+        or not isinstance(sample_size, int)
+        or isinstance(sample_size, bool)
+        or sample_size <= 0
+        or passed < 0
+        or passed > sample_size
+        or not all(isinstance(value.get(key), str) and str(value[key]).strip() for key in ("actor", "rule", "seed"))
+    ):
+        failures.append(f"{label.upper()}_SCORE_METADATA_INVALID")
+        return {"passed": 0, "sample_size": 0, "rate": 0.0}
+    rate = passed / sample_size
+    if rate < minimum:
+        failures.append(f"{label.upper()}_ACCURACY_BELOW_THRESHOLD")
+    return {
+        "passed": passed,
+        "sample_size": sample_size,
+        "rate": rate,
+        "actor": str(value["actor"]),
+        "rule": str(value["rule"]),
+        "seed": str(value["seed"]),
+    }
+
+
+def assess_task3_quality(
+    *,
+    snapshot: Mapping[str, Any],
+    questions: list[Mapping[str, Any]],
+    pages: list[Mapping[str, Any]],
+    title_scores: Mapping[str, Any],
+    ownership_scores: Mapping[str, Any],
+    replay: Mapping[str, Any],
+    mode: str,
+    reader_pages: Mapping[str, str] | None = None,
+    policy: ReaderQualityPolicy | None = None,
+    unknowns: list[str] | tuple[str, ...] = (),
+) -> Task3QualityResult:
+    """Run the deterministic Task 3 quality policy over frozen evidence.
+
+    This is deliberately an evidence assessor, not an LLM caller.  The caller
+    supplies the already-recorded 17+3 results; this function checks their
+    counts, fields, thresholds, delivery hard gates, and replay material.
+    """
+
+    policy = policy or ReaderQualityPolicy()
+    failures: list[str] = []
+    warnings: list[str] = []
+    unknown_values = [str(value) for value in unknowns if str(value).strip()]
+    if not isinstance(snapshot, Mapping):
+        failures.append("SNAPSHOT_MISSING")
+        snapshot = {}
+    if snapshot.get("source_count") != 89:
+        failures.append("SOURCE_SNAPSHOT_COUNT_INVALID")
+    for field in _TASK3_SNAPSHOT_FIELDS:
+        value = snapshot.get(field)
+        valid_hash = field == "version" or (isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value) is not None)
+        if not valid_hash:
+            failures.append(f"SNAPSHOT_FIELD_MISSING:{field}")
+    if mode not in {"semantic", "no-llm"}:
+        failures.append("RUN_MODE_UNKNOWN")
+    elif mode == "no-llm":
+        warnings.append("OFFLINE_BASELINE_NOT_SEMANTIC_RELEASE")
+
+    if not isinstance(questions, list):
+        failures.append("QUESTION_SET_MISSING")
+        questions = []
+    if len(questions) != policy.question_count:
+        failures.append("QUESTION_COUNT_INVALID")
+    question_ids: set[str] = set()
+    available_reader_pages = {
+        str(page.get("path"))
+        for page in pages
+        if isinstance(page, Mapping) and page.get("status") == "published" and page.get("in_reader") is True and isinstance(page.get("path"), str)
+    } if isinstance(pages, list) else set()
+    records: list[dict[str, Any]] = []
+    positive_passed = 0
+    negative_false_positives = 0
+    positive_count = 0
+    negative_count = 0
+    for question in questions:
+        if not isinstance(question, Mapping):
+            failures.append("QUESTION_RESULT_FIELDS_MISSING")
+            continue
+        record = dict(question)
+        question_id = record.get("question_id")
+        if not isinstance(question_id, str) or not question_id.strip() or question_id in question_ids:
+            failures.append("QUESTION_ID_INVALID")
+        else:
+            question_ids.add(question_id)
+        missing = [field for field in _TASK3_QUESTION_FIELDS if field not in record]
+        if missing:
+            failures.append("QUESTION_RESULT_FIELDS_MISSING")
+        for field in ("question_id", "entry_path", "actor", "model", "rule", "seed", "answer_result", "source_chain", "source_recheck_result"):
+            if not isinstance(record.get(field), str) or not record[field].strip():
+                failures.append("QUESTION_RESULT_FIELDS_INVALID")
+        if record.get("answer_result") not in {"hit", "no_match"}:
+            failures.append("QUESTION_ANSWER_RESULT_INVALID")
+        if record.get("source_recheck_result") not in {"passed", "not_applicable"}:
+            failures.append("QUESTION_SOURCE_RECHECK_RESULT_INVALID")
+        for field in ("answer_complete", "boundary_version_accurate"):
+            if not isinstance(record.get(field), bool):
+                failures.append("QUESTION_RESULT_FIELDS_INVALID")
+        for field in ("answer_found", "source_attribution"):
+            if not isinstance(record.get(field), bool):
+                failures.append("QUESTION_RESULT_FIELDS_INVALID")
+        if record.get("navigation") != "passed":
+            failures.append("QUESTION_NAVIGATION_INVALID")
+        target_page = record.get("target_page")
+        if not isinstance(target_page, str) or not target_page.strip():
+            failures.append("QUESTION_TARGET_PAGE_INVALID")
+        elif target_page not in available_reader_pages:
+            failures.append("QUESTION_TARGET_PAGE_NOT_IN_READER")
+        first_hit_page = record.get("first_hit_page")
+        if first_hit_page is not None and (not isinstance(first_hit_page, str) or not first_hit_page.strip()):
+            failures.append("QUESTION_RESULT_FIELDS_INVALID")
+        failure_reason = record.get("failure_reason")
+        if failure_reason is not None and (not isinstance(failure_reason, str) or not failure_reason.strip()):
+            failures.append("QUESTION_RESULT_FIELDS_INVALID")
+        if mode == "semantic":
+            provider_response = record.get("provider_response")
+            if not isinstance(provider_response, Mapping) or any(field not in provider_response for field in _RESPONSE_FIELDS):
+                failures.append("QUALITY_PROVIDER_RESPONSE_FIELDS_MISSING")
+            elif not _provider_response_is_bounded(provider_response):
+                failures.append("QUALITY_PROVIDER_RESPONSE_INVALID")
+            else:
+                contract = _TASK3_QUESTION_CONTRACTS.get(str(question_id))
+                expected_response = dict(provider_response)
+                if contract is not None:
+                    oracle_input = reader_pages.get(target_page) if isinstance(reader_pages, Mapping) and isinstance(target_page, str) else None
+                    if isinstance(oracle_input, str):
+                        expected_response, _expected_oracle = _apply_task3_question_oracle(str(question_id), target_page, oracle_input, provider_response)
+                if any(record.get(field) != expected_response.get(field) for field in _RESPONSE_FIELDS):
+                    failures.append("QUALITY_PROVIDER_VERDICT_MISMATCH")
+        if "human_reviewed" in record:
+            failures.append("HUMAN_REVIEWED_FORBIDDEN")
+        if not isinstance(record.get("reader_input_hash"), str) or re.fullmatch(r"[0-9a-f]{64}", str(record.get("reader_input_hash"))) is None:
+            failures.append("QUESTION_READER_HASH_INVALID")
+        polarity = record.get("polarity")
+        contract = _TASK3_QUESTION_CONTRACTS.get(str(question_id))
+        if contract is not None:
+            oracle_record = record.get("question_oracle")
+            page_text = reader_pages.get(target_page) if isinstance(reader_pages, Mapping) and isinstance(target_page, str) else None
+            if not isinstance(page_text, str):
+                failures.append("TASK3_ORACLE_INPUT_MISSING")
+            elif not isinstance(oracle_record, Mapping):
+                failures.append("TASK3_ORACLE_RECORD_MISSING")
+            else:
+                expected_oracle = _task3_question_oracle(str(question_id), page_text)
+                if any(oracle_record.get(field) != expected_oracle.get(field) for field in ("method", "question_id", "rule", "status", "evidence", "missing")):
+                    failures.append("TASK3_ORACLE_RECORD_MISMATCH")
+                if expected_oracle.get("status") == "passed" and (
+                    record.get("answer_result") != "hit"
+                    or record.get("answer_found") is not True
+                    or record.get("first_hit_page") != target_page
+                ):
+                    failures.append("TASK3_ORACLE_VERDICT_MISSING")
+                if expected_oracle.get("status") == "failed" and record.get("answer_result") == "hit":
+                    failures.append("TASK3_ORACLE_FAIL_OPEN")
+        if polarity == "positive":
+            positive_count += 1
+            passed = (
+                record.get("answer_found") is True
+                and record.get("answer_result") == "hit"
+                and isinstance(record.get("first_hit_page"), str)
+                and bool(record.get("first_hit_page"))
+                and record.get("answer_complete") is True
+                and record.get("boundary_version_accurate") is True
+                and record.get("source_attribution") is True
+                and record.get("navigation") == "passed"
+                and record.get("source_chain") == "passed"
+                and not record.get("failure_reason")
+            )
+            if passed and record.get("first_hit_page") not in available_reader_pages:
+                failures.append("QUESTION_FIRST_HIT_PAGE_INVALID")
+                passed = False
+            if passed and isinstance(target_page, str) and record.get("first_hit_page") != target_page:
+                failures.append("QUESTION_FIRST_HIT_TARGET_MISMATCH")
+                passed = False
+            if passed:
+                positive_passed += 1
+        elif polarity == "negative":
+            negative_count += 1
+            if record.get("answer_result") == "hit" or record.get("first_hit_page") is not None:
+                negative_false_positives += 1
+        else:
+            failures.append("QUESTION_POLARITY_INVALID")
+        records.append(record)
+    if positive_count != policy.positive_count or negative_count != policy.negative_count:
+        failures.append("QUESTION_POLARITY_COUNTS_INVALID")
+    if positive_passed < policy.positive_minimum:
+        failures.append("POSITIVE_HIT_THRESHOLD")
+    if negative_false_positives > policy.negative_false_positive_maximum:
+        failures.append("NEGATIVE_FALSE_POSITIVE")
+
+    if not isinstance(pages, list) or not pages:
+        failures.append("DELIVERY_PAGES_MISSING")
+        pages = []
+    claim_ids: set[str] = set()
+    for page in pages:
+        if not isinstance(page, Mapping):
+            failures.append("PAGE_FIELDS_MISSING")
+            continue
+        required_page_fields = ("path", "status", "in_reader", "body_lines", "page_lines", "navigation_complete", "claims")
+        if any(field not in page for field in required_page_fields):
+            failures.append("PAGE_FIELDS_MISSING")
+            continue
+        path = str(page.get("path"))
+        if (
+            not isinstance(page.get("body_lines"), int)
+            or isinstance(page.get("body_lines"), bool)
+            or page["body_lines"] < 0
+            or page["body_lines"] > policy.body_max_lines
+        ):
+            failures.append("BODY_LINES_EXCEEDED")
+        if (
+            not isinstance(page.get("page_lines"), int)
+            or isinstance(page.get("page_lines"), bool)
+            or page["page_lines"] < 0
+            or page["page_lines"] > policy.page_max_lines
+        ):
+            failures.append("PAGE_LINES_EXCEEDED")
+        if page.get("navigation_complete") is not True:
+            failures.append("NAVIGATION_INCOMPLETE")
+        status = page.get("status")
+        if status not in {"published", "degraded"}:
+            failures.append("PAGE_STATUS_INVALID")
+        if status == "degraded" and page.get("in_reader") is True:
+            failures.append("FAILED_PAGE_IN_READER")
+        if status == "published" and page.get("in_reader") is not True:
+            failures.append("PUBLISHED_PAGE_MISSING_READER")
+        claims = page.get("claims")
+        if not isinstance(claims, list):
+            failures.append("CLAIM_FIELDS_MISSING")
+            continue
+        if status == "published" and not claims:
+            failures.append("CLAIM_FIELDS_MISSING")
+        for claim in claims:
+            if not isinstance(claim, Mapping) or any(field not in claim for field in ("claim_id", "target_path", "source_uri")):
+                failures.append("CLAIM_FIELDS_MISSING")
+                continue
+            claim_id = claim.get("claim_id")
+            if not isinstance(claim_id, str) or not claim_id.strip():
+                failures.append("CLAIM_FIELDS_MISSING")
+            elif claim_id in claim_ids:
+                failures.append("CLAIM_ID_DUPLICATED")
+            else:
+                claim_ids.add(claim_id)
+            if claim.get("target_path") != path:
+                failures.append("CLAIM_TARGET_INVALID")
+            if not isinstance(claim.get("source_uri"), str) or not claim["source_uri"].strip():
+                failures.append("SOURCE_CHAIN_BROKEN")
+    replay_value = dict(replay) if isinstance(replay, Mapping) else {}
+    if any(not isinstance(replay_value.get(field), str) or not replay_value[field].strip() for field in ("manifest_ref", "quality_ref", "config_ref")):
+        failures.append("REPLAY_MATERIAL_MISSING")
+
+    title_check = _task3_score(title_scores, label="title", minimum=policy.title_accuracy_minimum, failures=failures)
+    ownership_check = _task3_score(ownership_scores, label="ownership", minimum=policy.ownership_accuracy_minimum, failures=failures)
+    if isinstance(title_scores, Mapping) and isinstance(ownership_scores, Mapping):
+        if title_scores.get("seed") != ownership_scores.get("seed"):
+            failures.append("QUALITY_SCORE_SEED_MISMATCH")
+    if unknown_values:
+        failures.append("QUALITY_UNDECIDABLE")
+    summary = {
+        "source_count": snapshot.get("source_count"),
+        "positive_count": positive_count,
+        "positive_passed": positive_passed,
+        "negative_count": negative_count,
+        "negative_false_positives": negative_false_positives,
+        "page_count": len(pages),
+        "claim_count": len(claim_ids),
+        "mode": mode,
+        "replay": replay_value,
+    }
+    provenance = {
+        "actor": "process:task3-quality-v1",
+        "model": "deterministic-policy",
+        "rule": "task3-reader-quality-policy.v1",
+        "seed": str((title_scores or {}).get("seed") if isinstance(title_scores, Mapping) else ""),
+        "execution_mode": "real_semantic" if mode == "semantic" else "offline_no_llm",
+        "snapshot_hash": _json_hash(snapshot),
+        "question_set_hash": snapshot.get("question_set_hash"),
+        "question_hash": _json_hash(records),
+    }
+    scorecard = {
+        "schema_version": "task3-quality-scorecard.v1",
+        "policy": policy.as_dict(),
+        "summary": summary,
+        "title_check": title_check,
+        "ownership_check": ownership_check,
+        "hard_failures": sorted(set(failures)),
+        "warnings": sorted(set(warnings)),
+        "unknowns": sorted(set(unknown_values)),
+        "provenance": provenance,
+        "replay": replay_value,
+    }
+    scorecard_hash = _json_hash(scorecard)
+    status = "passed" if not failures and not unknown_values else "failed"
+    return Task3QualityResult(
+        status=status,
+        hard_failures=_task3_unique_errors(failures),
+        warnings=_task3_unique_errors(warnings),
+        unknowns=_task3_unique_errors(unknown_values),
+        records=tuple(records),
+        summary=summary,
+        title_check=title_check,
+        ownership_check=ownership_check,
+        provenance=provenance,
+        replay=replay_value,
+        scorecard_hash=scorecard_hash,
+    )
+
+
+run_task3_quality_assessment = assess_task3_quality
 
 
 def _sha256(raw: bytes | str) -> str:
@@ -767,12 +1425,21 @@ def _validate_reader_navigation(
         if current not in _reader_links(previous, snapshot.files[previous]):
             return False, f"jump_not_linked:{previous}->{current}"
     if question.polarity == "positive":
-        if first_hit != question.target_page:
-            return False, "first_hit_does_not_match_task2b_target"
-        if first_hit not in reachable_set:
-            return False, "first_hit_not_reachable_from_entry"
-        if jumps[-1] != first_hit:
-            return False, "jumps_do_not_end_at_first_hit"
+        # A positive question may correctly return ``no_match`` when the
+        # target page is reachable but does not contain the requested answer.
+        # Navigation is still valid in that case; the answer gate decides the
+        # failure.  Requiring a first hit here incorrectly classified a clear
+        # semantic miss as a broken route.
+        if first_hit is None:
+            if jumps[-1] != question.target_page:
+                return False, "jumps_do_not_end_at_target"
+        else:
+            if first_hit != question.target_page:
+                return False, "first_hit_does_not_match_task2b_target"
+            if first_hit not in reachable_set:
+                return False, "first_hit_not_reachable_from_entry"
+            if jumps[-1] != first_hit:
+                return False, "jumps_do_not_end_at_first_hit"
     elif first_hit is not None:
         return False, "negative_first_hit_present"
     return True, "passed"

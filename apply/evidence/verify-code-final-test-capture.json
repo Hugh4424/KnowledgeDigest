@@ -1,0 +1,5 @@
+{
+  "command": "uv run --frozen pytest -q tests/acceptance/test_task3_projection.py tests/acceptance/test_task3_quality_release.py tests/acceptance/test_task3_closeout.py tests/acceptance/test_task2c_reader_quality.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task1_topic_axis.py tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_corpus_regression.py && uv run --frozen pytest -q",
+  "receipt_ref": "quality/tests/task3-final-aggregate-v6.json",
+  "output_ref": "quality/tests/output/task3-final-aggregate-v6.output"
+}

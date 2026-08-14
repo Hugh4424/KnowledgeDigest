@@ -1,0 +1,12 @@
+{
+  "predicted": {"tier": "feature", "method": "backend-testing"},
+  "actual": {"tier": "feature", "method": "backend-testing"},
+  "changed_files": [
+    "src/knowledge_digest/reader_quality.py",
+    "src/knowledge_digest/full_release.py",
+    "tests/acceptance/test_task3_quality_release.py",
+    "tests/fixtures/task3_full_release/release-cases.json"
+  ],
+  "reason": "Python quality/release APIs, local filesystem transactions, lock and acceptance fixtures; no browser or resident service.",
+  "rerouted": false
+}

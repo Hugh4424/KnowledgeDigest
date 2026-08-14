@@ -1,0 +1,8 @@
+Task: T010
+Command: uv run --frozen pytest tests/acceptance/test_task3_closeout.py -q -k comparison
+Expected exit: 0
+Observed exit: 0
+stdout_sha256: 46bbb22e55fb24b7f2055288e906115418ae559f532c151cc450be7ff2c9d3b8
+Observed: 2 passed, 1 deselected.
+Oracle: ORACLE-COMPARE
+Coverage: Task2/CompanyBrain/Task3 source slots, eight fixed dimensions, explicit comparable/N/A basis, no subjective total, report JSON/Markdown output, and no release decision.

@@ -1,0 +1,5 @@
+{
+  "command": "uv run --frozen pytest -q tests/acceptance/test_task3_quality_release.py tests/acceptance/test_task3_projection.py tests/acceptance/test_task3_closeout.py && git diff --check",
+  "receipt_ref": "quality/tests/task3-verify-risk-after-repair.json",
+  "output_ref": "quality/tests/output/task3-verify-risk-after-repair.output"
+}

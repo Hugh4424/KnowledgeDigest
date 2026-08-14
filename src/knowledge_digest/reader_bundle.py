@@ -29,7 +29,9 @@ from .reader_frontmatter import managed_content_hash, parse_concept_document, se
 TOPIC_INDEX_SCHEMA = "2.0.0"
 STRUCTURE_INPUT_SCHEMA = "reader-bundle-structure-inputs.v1"
 FULL_INPUT_SCHEMA = "reader-bundle-inputs.v1"
-EXEMPT_FILES = {"README.md", "Home.md", "references/sources.md"}
+SEMANTIC_INPUT_SCHEMA = "reader-bundle-semantic-inputs.v1"
+SEMANTIC_SNAPSHOT_SCHEMA = "reader-bundle-semantic-snapshot.v1"
+EXEMPT_FILES = {"README.md", "Home.md", "references/sources.md", "references/old-paths.md"}
 CONCEPT_TYPES = {
     "product_overview": "KnowledgeDigest Product Overview",
     "module_or_capability": "KnowledgeDigest Module or Capability",
@@ -163,6 +165,21 @@ class ReaderBundleStructureInputs:
     source_inventory_ref: ArtifactRef
     entry_manifest_refs: tuple[ArtifactRef, ...]
     offline_mode: Literal["no-llm"]
+
+
+@dataclass(frozen=True)
+class SemanticReaderBundleInputs(ReaderBundleStructureInputs):
+    """Task 3 semantic snapshot plus the already-audited page evidence.
+
+    A semantic snapshot may add reader relations, but it is not allowed to
+    manufacture page bodies or claim history.  Those remain the same frozen
+    inputs used by the Task 2-A full projection.
+    """
+
+    schema_version: Literal["reader-bundle-semantic-inputs.v1"]
+    semantic_snapshot_ref: ArtifactRef
+    claim_records_ref: ArtifactRef
+    fixture_selection_ref: ArtifactRef
 
 
 @dataclass(frozen=True)
@@ -505,16 +522,18 @@ def adapt_topic_index_row(
     return TopicIndexAdapterResult("standard", topic_key, identity, product, module, intent, row.get("published_path"), (), row)
 
 
-def _load_inputs(inputs: ReaderBundleStructureInputs | ReaderBundleInputs) -> tuple[dict[str, Any], list[dict[str, Any]], tuple[Mapping[str, Any], ...], EntryBindingCheck, dict[str, Any]]:
+def _load_inputs(inputs: ReaderBundleStructureInputs | ReaderBundleInputs | SemanticReaderBundleInputs) -> tuple[dict[str, Any], list[dict[str, Any]], tuple[Mapping[str, Any], ...], EntryBindingCheck, dict[str, Any]]:
     root = Path(inputs.input_root)
     if root.is_symlink() or not root.is_dir():
         raise ValidationError("reader-bundle", root, "input root must be a real directory")
-    if inputs.schema_version not in {STRUCTURE_INPUT_SCHEMA, FULL_INPUT_SCHEMA}:
+    if inputs.schema_version not in {STRUCTURE_INPUT_SCHEMA, FULL_INPUT_SCHEMA, SEMANTIC_INPUT_SCHEMA}:
         raise ValidationError("reader-bundle", inputs.schema_version, "unsupported input schema")
     if inputs.offline_mode != "no-llm":
         raise ValidationError("reader-bundle", inputs.offline_mode, "only no-llm input mode is allowed")
     refs = [inputs.topic_index_ref, inputs.source_inventory_ref, *inputs.entry_manifest_refs]
-    if isinstance(inputs, ReaderBundleInputs):
+    if isinstance(inputs, SemanticReaderBundleInputs):
+        refs.append(inputs.semantic_snapshot_ref)
+    if isinstance(inputs, (ReaderBundleInputs, SemanticReaderBundleInputs)):
         refs.extend([inputs.claim_records_ref, inputs.fixture_selection_ref])
     seen: set[str] = set()
     loaded: dict[str, Any] = {}
@@ -529,15 +548,220 @@ def _load_inputs(inputs: ReaderBundleStructureInputs | ReaderBundleInputs) -> tu
             loaded["topic_index"] = value
         elif ref is inputs.source_inventory_ref:
             loaded["source_inventory"] = _read_jsonl(path)
-        elif isinstance(inputs, ReaderBundleInputs) and ref is inputs.claim_records_ref:
+        elif isinstance(inputs, SemanticReaderBundleInputs) and ref is inputs.semantic_snapshot_ref:
+            value = record.get("value")
+            if not isinstance(value, dict):
+                raise ValidationError("reader-bundle", ref.ref, "semantic snapshot must be a JSON object")
+            loaded["semantic_snapshot"] = value
+        elif isinstance(inputs, (ReaderBundleInputs, SemanticReaderBundleInputs)) and ref is inputs.claim_records_ref:
             loaded["claims"] = _read_jsonl(path)
-        elif isinstance(inputs, ReaderBundleInputs) and ref is inputs.fixture_selection_ref:
+        elif isinstance(inputs, (ReaderBundleInputs, SemanticReaderBundleInputs)) and ref is inputs.fixture_selection_ref:
             value = record.get("value")
             if not isinstance(value, dict):
                 raise ValidationError("reader-bundle", ref.ref, "fixture selection must be a JSON object")
             loaded["selection"] = value
     check = check_entry_bindings(inputs, source_inventory=loaded["source_inventory"])
     return loaded["topic_index"], loaded["source_inventory"], tuple(readback), check, loaded
+
+
+def _row_identity(row: Mapping[str, Any]) -> str | None:
+    for key in ("topic_id", "digest_topic_id", "topic_key"):
+        value = row.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return None
+
+
+def _merge_semantic_snapshot(
+    raw_index: Mapping[str, Any],
+    snapshot: Mapping[str, Any],
+    *,
+    topic_index_ref: ArtifactRef,
+) -> dict[str, Any]:
+    if snapshot.get("schema_version") != SEMANTIC_SNAPSHOT_SCHEMA:
+        raise ValidationError("reader-bundle", "semantic-snapshot", "unsupported semantic snapshot schema")
+    if snapshot.get("topic_index_ref") != topic_index_ref.ref:
+        raise ValidationError("reader-bundle", "semantic-snapshot", "semantic snapshot is bound to another TopicIndex")
+    records = snapshot.get("topics")
+    raw_topics = raw_index.get("topics")
+    if not isinstance(records, list) or not isinstance(raw_topics, list):
+        raise ValidationError("reader-bundle", "semantic-snapshot", "semantic snapshot topics must be a list")
+    by_id: dict[str, Mapping[str, Any]] = {}
+    for record in records:
+        if not isinstance(record, Mapping):
+            raise ValidationError("reader-bundle", "semantic-snapshot", "semantic topic record must be an object")
+        identity = _row_identity(record)
+        if identity is None or identity in by_id:
+            raise ValidationError("reader-bundle", "semantic-snapshot", "semantic topic identities must be unique")
+        by_id[identity] = record
+    merged: list[dict[str, Any]] = []
+    raw_ids: set[str] = set()
+    for row in raw_topics:
+        if not isinstance(row, Mapping):
+            raise ValidationError("reader-bundle", "topic-index", "topic row must be an object")
+        identity = _row_identity(row)
+        if identity is None or identity in raw_ids:
+            raise ValidationError("reader-bundle", "topic-index", "topic identities must be unique")
+        raw_ids.add(identity)
+        record = by_id.get(identity)
+        if record is None:
+            raise ValidationError("reader-bundle", identity, "semantic snapshot is missing a TopicIndex topic")
+        # TopicIndex remains authoritative for identity and old-path
+        # migration.  The semantic snapshot may only add evidence-bearing
+        # reader relations; it must never replace an existing migration map
+        # or create a second source of truth for it.
+        if "old_path_mapping" in record:
+            raise ValidationError("reader-bundle", identity, "old_path_mapping must come from TopicIndex")
+        if "related_topic_ids" in record:
+            raise ValidationError("reader-bundle", identity, "explicit relations require evidence refs")
+        value = dict(row)
+        if "related_topic_refs" in record:
+            value["related_topic_refs"] = record["related_topic_refs"]
+        merged.append(value)
+    if set(by_id) != raw_ids:
+        missing = sorted(set(by_id) - raw_ids)[0]
+        raise ValidationError("reader-bundle", missing, "semantic snapshot contains an unknown TopicIndex topic")
+    result = dict(raw_index)
+    result["topics"] = merged
+    return result
+
+
+def _semantic_related_edges(
+    rows: list[Mapping[str, Any]],
+    concept_ids: set[str],
+    *,
+    source_map: Mapping[str, Mapping[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    all_ids = {_row_identity(row) for row in rows if _row_identity(row) is not None}
+    by_id = {_row_identity(row): row for row in rows if _row_identity(row) in concept_ids}
+    for owner_row in rows:
+        owner_id = _row_identity(owner_row)
+        if owner_id is None:
+            continue
+        refs = owner_row.get("related_topic_refs")
+        if refs is None:
+            continue
+        if not isinstance(refs, list):
+            raise ValidationError("reader-bundle", owner_id, "related_topic_refs must be a list")
+        for ref in refs:
+            if not isinstance(ref, Mapping):
+                raise ValidationError("reader-bundle", owner_id, "related topic evidence must be an object")
+            target_id = ref.get("target_topic_id")
+            if not isinstance(target_id, str) or target_id not in all_ids or target_id == owner_id:
+                raise ValidationError("reader-bundle", owner_id, "related topic target must be another known topic")
+            required = ("source_id", "source_uri", "content_fingerprint", "fragment_locator")
+            if any(not isinstance(ref.get(field), str) or not str(ref[field]).strip() for field in required):
+                raise ValidationError("reader-bundle", owner_id, "related topic evidence is incomplete")
+            if not _SHA256.fullmatch(str(ref["content_fingerprint"])):
+                raise ValidationError("reader-bundle", owner_id, "related topic evidence fingerprint is invalid")
+            if re.fullmatch(r"lines:\d+(?:-\d+)?", str(ref["fragment_locator"]).strip()) is None:
+                raise ValidationError("reader-bundle", owner_id, "related topic evidence locator is invalid")
+            if source_map is not None:
+                source = source_map.get(str(ref["source_id"]))
+                if source is None or source.get("source_uri") != ref["source_uri"] or source.get("content_fingerprint") != ref["content_fingerprint"]:
+                    raise ValidationError("reader-bundle", owner_id, "related topic evidence does not match source inventory")
+    ids = sorted(identity for identity in by_id if identity is not None)
+    edges: list[dict[str, Any]] = []
+    for index, left_id in enumerate(ids):
+        left = by_id[left_id]
+        for right_id in ids[index + 1:]:
+            right = by_id[right_id]
+            reasons: list[str] = []
+            if left.get("product") and left.get("product") == right.get("product"):
+                reasons.append("same_product")
+            if left.get("module") and left.get("module") == right.get("module"):
+                reasons.append("same_module")
+            left_sources = {str(value) for value in (left.get("source_members") or left.get("source_ids") or [])}
+            right_sources = {str(value) for value in (right.get("source_members") or right.get("source_ids") or [])}
+            if left_sources & right_sources:
+                reasons.append("shared_source")
+            evidence_refs: list[dict[str, Any]] = []
+            for owner, refs in ((left_id, left.get("related_topic_refs")), (right_id, right.get("related_topic_refs"))):
+                if refs is None:
+                    continue
+                for ref in refs:
+                    target_id = ref.get("target_topic_id")
+                    expected_target = right_id if owner == left_id else left_id
+                    if target_id != expected_target:
+                        continue
+                    required = ("source_id", "source_uri", "content_fingerprint", "fragment_locator")
+                    evidence_refs.append({key: ref[key] for key in required} | {"target_topic_id": target_id})
+            if evidence_refs:
+                reasons.append("explicit_cross_reference")
+            if reasons:
+                edge = {"from_topic_id": left_id, "reason": sorted(set(reasons)), "to_topic_id": right_id}
+                if evidence_refs:
+                    edge["evidence_refs"] = sorted(evidence_refs, key=lambda value: json.dumps(value, ensure_ascii=False, sort_keys=True))
+                edges.append(edge)
+    return edges
+
+
+def _semantic_old_path_mappings(
+    rows: list[Mapping[str, Any]], concept_paths: Mapping[str, str]
+) -> list[dict[str, Any]]:
+    mappings: list[dict[str, Any]] = []
+    seen_old_paths: set[str] = set()
+    for row in rows:
+        source_id = _row_identity(row)
+        entries = row.get("old_path_mapping") or []
+        if not isinstance(entries, list):
+            raise ValidationError("reader-bundle", source_id or "semantic-snapshot", "old_path_mapping must be a list")
+        for entry in entries:
+            if not isinstance(entry, Mapping):
+                raise ValidationError("reader-bundle", source_id or "semantic-snapshot", "old path mapping must be an object or string")
+            old_path = entry.get("old_path")
+            target_id = source_id
+            if not isinstance(old_path, str) or not old_path.strip():
+                raise ValidationError("reader-bundle", source_id or "semantic-snapshot", "old path is missing")
+            if entry.get("relation") not in {"rename", "merge", "split", "unmappable"}:
+                raise ValidationError("reader-bundle", old_path, "old path relation is invalid")
+            evidence_refs = entry.get("evidence_refs")
+            if not isinstance(evidence_refs, list):
+                raise ValidationError("reader-bundle", old_path, "old path evidence_refs must be a list")
+            old = PurePosixPath(old_path)
+            if old.is_absolute() or ".." in old.parts or not old.parts or old.parts[0] != "pages":
+                raise ValidationError("reader-bundle", old_path, "old path must be relative")
+            if old.as_posix() in seen_old_paths:
+                raise ValidationError("reader-bundle", old_path, "one old path cannot map to multiple targets")
+            seen_old_paths.add(old.as_posix())
+            target_path = concept_paths.get(str(target_id)) if target_id is not None and entry["relation"] != "unmappable" else None
+            if target_path is not None:
+                mappings.append({"old_path": old.as_posix(), "relation": entry["relation"], "evidence_refs": evidence_refs, "reason": "canonical topic target", "status": "alias", "target_path": target_path})
+            else:
+                mappings.append({"old_path": old.as_posix(), "relation": entry["relation"], "evidence_refs": evidence_refs, "reason": "canonical topic target is unavailable", "status": "deprecated", "target_path": None})
+    return sorted(mappings, key=lambda item: item["old_path"])
+
+
+def _relative_page_link(source_rel: str, target_rel: str) -> str:
+    return PurePosixPath(os.path.relpath(target_rel, start=PurePosixPath(source_rel).parent.as_posix())).as_posix()
+
+
+def _compatibility_stub_text(mapping: Mapping[str, Any]) -> str:
+    target_path = mapping.get("target_path")
+    if target_path:
+        link = _relative_page_link(str(mapping["old_path"]), str(target_path))
+        return f"# Moved page\n\n[Open the canonical page]({link})\n\nThis old path is kept as a compatibility alias.\n"
+    return "# Deprecated page path\n\nThis old path is deprecated and has no current canonical page.\n"
+
+
+def _write_old_path_compatibility(bundle: Path, mappings: list[Mapping[str, Any]]) -> None:
+    """Materialize every old-path mapping as a readable stub.
+
+    The mapping report alone is not a compatibility surface: an old bookmark
+    must resolve to either a canonical page or an explicit deprecation note.
+    """
+
+    for mapping in mappings:
+        old_path = PurePosixPath(str(mapping["old_path"]))
+        target_path = mapping.get("target_path")
+        target = bundle / old_path
+        reserved = {"README.md", "Home.md", "index.md", "log.md", "references", "products", "audit", "reports"}
+        if old_path.parts and old_path.parts[0] in reserved:
+            raise ValidationError("reader-bundle", old_path, "old path collides with a Reader or audit surface")
+        if target.is_symlink() or (target.exists() and not target.is_file()):
+            raise ValidationError("reader-bundle", old_path, "old path collides with a non-file")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(_compatibility_stub_text(mapping), encoding="utf-8")
 
 
 def check_entry_bindings(inputs: ReaderBundleStructureInputs, *, source_inventory: list[dict[str, Any]] | None = None) -> EntryBindingCheck:
@@ -851,7 +1075,7 @@ def _validate_trust_signals(
     event_names = [repr(item.get("event")) for item in verified if isinstance(item, Mapping)]
     if len(event_names) != len(set(event_names)):
         errors.append("TRUST_SIGNAL_EVENT_DUPLICATED")
-    if isinstance(expected, ReaderBundleInputs) and {item.get("event") for item in verified if isinstance(item, Mapping)} != _TRUST_EVENTS:
+    if isinstance(expected, (ReaderBundleInputs, SemanticReaderBundleInputs)) and {item.get("event") for item in verified if isinstance(item, Mapping)} != _TRUST_EVENTS:
         errors.append("TRUST_SIGNAL_REQUIRED_EVENT_MISSING")
     if audit is not None and audit.get("content_hash") != current_hash:
         errors.append("TRUST_SIGNAL_CONTENT_HASH_MISMATCH")
@@ -871,7 +1095,7 @@ def _validate_trust_signals(
             if dict(reader_signals) != expected_signals:
                 errors.append("READER_SIGNALS_MISMATCH")
     canonical_fingerprints: Mapping[str, Any] | None = None
-    if isinstance(expected, ReaderBundleInputs):
+    if isinstance(expected, (ReaderBundleInputs, SemanticReaderBundleInputs)):
         try:
             _raw_index, source_inventory, _readback, _entry_check, loaded = _load_inputs(expected)
             selection_map = _selection_map(loaded.get("selection"))
@@ -1048,6 +1272,7 @@ def _selected_frontmatter(
             raise ValidationError("reader-bundle", claim_id, "claim source/fingerprint does not match fixture source")
         digest_claims.append({
             "claim_id": _required_text(claim.get("claim_id"), str(claim_id)),
+            "source_uri": source_uri,
             "fragment_locator": _required_text(claim.get("fragment_locator"), str(claim_id)),
             "target_path": _required_text(claim.get("target_path"), str(claim_id)),
             "content_fingerprint": _required_text(claim.get("content_fingerprint"), str(claim_id)),
@@ -1139,6 +1364,10 @@ def _link_label(value: str) -> str:
     return value.replace("[", "").replace("]", "").strip() or "untitled"
 
 
+def _is_compatibility_path(relative: str) -> bool:
+    return relative.startswith("pages/") and relative.endswith(".md")
+
+
 def _relative_target(source: Path, target: str, bundle: Path) -> Path:
     if target.startswith("#"):
         return source
@@ -1162,6 +1391,7 @@ def _atomic_commit(staging: Path, artifacts: BundleArtifactPaths) -> None:
     rollback = staging_parent / f".rollback-{staging.name}"
     rollback.mkdir(parents=True, exist_ok=False)
     installed: list[str] = []
+    restored = False
     try:
         for name in names:
             destination = artifacts.artifact_root / name
@@ -1170,6 +1400,7 @@ def _atomic_commit(staging: Path, artifacts: BundleArtifactPaths) -> None:
                 os.replace(destination, previous)
             os.replace(staging / name, destination)
             installed.append(name)
+        restored = True
     except Exception:
         for name in reversed(names):
             destination = artifacts.artifact_root / name
@@ -1181,16 +1412,18 @@ def _atomic_commit(staging: Path, artifacts: BundleArtifactPaths) -> None:
                     destination.unlink()
             if previous.exists() or previous.is_symlink():
                 os.replace(previous, destination)
+        restored = True
         raise
     finally:
-        shutil.rmtree(rollback, ignore_errors=True)
+        if restored:
+            shutil.rmtree(rollback, ignore_errors=True)
         shutil.rmtree(staging, ignore_errors=True)
         if staging_parent.is_dir() and not any(staging_parent.iterdir()):
             staging_parent.rmdir()
 
 
 def project_reader_bundle(
-    inputs: ReaderBundleStructureInputs | ReaderBundleInputs,
+    inputs: ReaderBundleStructureInputs | ReaderBundleInputs | SemanticReaderBundleInputs,
     artifacts: BundleArtifactPaths,
 ) -> CommittedBundleRun:
     if artifacts.artifact_root.is_symlink():
@@ -1210,16 +1443,23 @@ def project_reader_bundle(
         raw_index, source_inventory, input_readback, entry_check, loaded = _load_inputs(inputs)
         if raw_index.get("schema_version") != TOPIC_INDEX_SCHEMA or not isinstance(raw_index.get("topics"), list):
             raise ValidationError("reader-bundle", "topic-index", "unsupported TopicIndex envelope")
+        semantic_mode = isinstance(inputs, SemanticReaderBundleInputs)
+        if semantic_mode:
+            raw_index = _merge_semantic_snapshot(raw_index, loaded.get("semantic_snapshot", {}), topic_index_ref=inputs.topic_index_ref)
         source_map = _source_rows(source_inventory)
         claim_map: dict[str, dict[str, Any]] = {}
         selection_map: dict[tuple[str, str], dict[str, Any]] = {}
-        if isinstance(inputs, ReaderBundleInputs):
+        if isinstance(inputs, (ReaderBundleInputs, SemanticReaderBundleInputs)):
             claim_map = _claim_map(loaded.get("claims", []))
             selection_map = _selection_map(loaded.get("selection"))
         staged.bundle_dir.mkdir(parents=True)
         (staged.bundle_dir / "references").mkdir()
         (staged.bundle_dir / "Home.md").write_text("# Home\n\n[Reader index](index.md)\n", encoding="utf-8")
-        (staged.bundle_dir / "README.md").write_text("# Reader Bundle\n\nThis isolated Task 2-A projection is not released.\n", encoding="utf-8")
+        if semantic_mode:
+            readme = "# Reader Bundle\n\nThis semantic snapshot candidate is not released.\n\n- digest_release_status: `not_released`\n\n[Old path compatibility](references/old-paths.md)\n"
+        else:
+            readme = "# Reader Bundle\n\nThis isolated Task 2-A projection is not released.\n\n- digest_release_status: `not_released`\n"
+        (staged.bundle_dir / "README.md").write_text(readme, encoding="utf-8")
         (staged.bundle_dir / "log.md").write_text(f"# Projection log\n\n- digest_release_status: `{_NOT_RELEASED}`\n- change: initial isolated projection\n", encoding="utf-8")
         degraded: list[dict[str, Any]] = []
         concepts: list[tuple[str, str, str, str]] = []
@@ -1230,6 +1470,8 @@ def project_reader_bundle(
         product_labels: dict[str, str] = {}
         product_descriptions: dict[str, str] = {}
         module_labels: dict[tuple[str, str], tuple[str, str]] = {}
+        concept_paths: dict[str, str] = {}
+        concept_titles: dict[str, str] = {}
         for row_number, row in enumerate(raw_index["topics"]):
             adapter = adapt_topic_index_row(row, source_ref=inputs.topic_index_ref, row_number=row_number)
             if adapter.branch == "degraded":
@@ -1241,8 +1483,36 @@ def project_reader_bundle(
             selection = selection_map.get(selection_key)
             if selection is not None:
                 matched_selection_keys.add(selection_key)
-            body = _fixture_body(inputs.input_root, selection) if selection else ""
             source_row = next((source_map.get(str(source_id)) for source_id in (row.get("source_members") or row.get("source_ids") or []) if source_map.get(str(source_id))), None)
+            if semantic_mode and selection is None:
+                record = _degraded_record(
+                    TopicIndexAdapterResult(
+                        "degraded", adapter.digest_topic_key, adapter.digest_topic_id,
+                        adapter.product, adapter.module, adapter.object_intent, None,
+                        ("SEMANTIC_CONTENT_EVIDENCE_MISSING",), row,
+                    ),
+                    row_number,
+                )
+                degraded.append(record)
+                _write_degraded(staged, record)
+                continue
+            try:
+                body = _fixture_body(inputs.input_root, selection) if selection else ""
+            except ValidationError as exc:
+                if not semantic_mode:
+                    raise
+                record = _degraded_record(
+                    TopicIndexAdapterResult(
+                        "degraded", adapter.digest_topic_key, adapter.digest_topic_id,
+                        adapter.product, adapter.module, adapter.object_intent, None,
+                        ("SEMANTIC_CONTENT_EVIDENCE_INVALID",), row,
+                    ),
+                    row_number,
+                )
+                record["detail"] = exc.reason
+                degraded.append(record)
+                _write_degraded(staged, record)
+                continue
             selected = _title_description(row, adapter, body=body, source_row=source_row)
             if selected is None:
                 record = _degraded_record(TopicIndexAdapterResult("degraded", adapter.digest_topic_key, adapter.digest_topic_id, adapter.product, adapter.module, adapter.object_intent, None, ("TITLE_OR_DESCRIPTION_UNREADABLE",), row), row_number)
@@ -1258,8 +1528,37 @@ def project_reader_bundle(
             target = staged.bundle_dir / rel
             target.parent.mkdir(parents=True, exist_ok=True)
             body = body if selection else f"# {title}\n\n{description}\n"
-            frontmatter = _selected_frontmatter(adapter, row, source_map, claim_map, selection, page_type=page_type, title=title, description=description) if selection else _concept_frontmatter(adapter, row, source_map, page_type=page_type, title=title, description=description)
+            try:
+                frontmatter = _selected_frontmatter(adapter, row, source_map, claim_map, selection, page_type=page_type, title=title, description=description) if selection else _concept_frontmatter(adapter, row, source_map, page_type=page_type, title=title, description=description)
+            except ValidationError as exc:
+                if not semantic_mode:
+                    raise
+                record = _degraded_record(
+                    TopicIndexAdapterResult(
+                        "degraded", adapter.digest_topic_key, adapter.digest_topic_id,
+                        adapter.product, adapter.module, adapter.object_intent, None,
+                        ("SEMANTIC_CONTENT_EVIDENCE_INVALID",), row,
+                    ),
+                    row_number,
+                )
+                record["detail"] = exc.reason
+                degraded.append(record)
+                _write_degraded(staged, record)
+                continue
             frontmatter["generated"] = _generated_record()
+            events = _trust_events(frontmatter, body, selection, content_hash="0" * 64, evidence_ref=_trust_audit_ref(rel))
+            if semantic_mode and set(event.get("event") for event in events) != set(_TRUST_EVENTS):
+                record = _degraded_record(
+                    TopicIndexAdapterResult(
+                        "degraded", adapter.digest_topic_key, adapter.digest_topic_id,
+                        adapter.product, adapter.module, adapter.object_intent, None,
+                        ("SEMANTIC_PAGE_GATE_FAILED",), row,
+                    ),
+                    row_number,
+                )
+                degraded.append(record)
+                _write_degraded(staged, record)
+                continue
             frontmatter["digest_machine_pass"] = True
             if (row.get("reader_status") or row.get("lifecycle_status")) == "deprecated":
                 frontmatter["status"] = "deprecated"
@@ -1286,6 +1585,10 @@ def project_reader_bundle(
             frontmatter["digest_content_hash"] = content_hash
             target.write_text(serialize_concept_document(frontmatter, body), encoding="utf-8")
             concepts.append((rel, title, description, page_type))
+            topic_identity = _row_identity(row)
+            if topic_identity is not None:
+                concept_paths[topic_identity] = rel
+                concept_titles[topic_identity] = title
             concept_signals[rel] = dict(frontmatter["reader_signals"])
             product_key = _slug(str(adapter.product), "product")
             product_labels.setdefault(product_key, _normalize_readable(str(adapter.product)))
@@ -1304,6 +1607,46 @@ def project_reader_bundle(
             unmatched = sorted(set(selection_map) - matched_selection_keys)
             if unmatched:
                 raise ValidationError("reader-bundle", unmatched[0], "fixture selection has no matching TopicIndex concept")
+        if semantic_mode:
+            semantic_rows = [row for row in raw_index["topics"] if isinstance(row, Mapping)]
+            relation_edges = _semantic_related_edges(semantic_rows, set(concept_paths), source_map=source_map)
+            _write_json(staged.audit_dir / "relations.json", {"schema_version": "reader-bundle-relations.v1", "edges": relation_edges})
+            related_by_topic: dict[str, list[tuple[str, str]]] = {}
+            for edge in relation_edges:
+                left = str(edge["from_topic_id"])
+                right = str(edge["to_topic_id"])
+                related_by_topic.setdefault(left, []).append((right, concept_paths[right]))
+                related_by_topic.setdefault(right, []).append((left, concept_paths[left]))
+            for topic_id, related in sorted(related_by_topic.items()):
+                page_rel = concept_paths[topic_id]
+                page = staged.bundle_dir / page_rel
+                frontmatter, body = parse_concept_document(page.read_text(encoding="utf-8"))
+                lines = [f"- [{_link_label(concept_titles[target_id])}]({_relative_page_link(page_rel, target_rel)})" for target_id, target_rel in sorted(related)]
+                body = body.rstrip() + "\n\n## Related\n\n" + "\n".join(lines) + "\n"
+                content_hash = managed_content_hash(frontmatter, body)
+                frontmatter["digest_content_hash"] = content_hash
+                verified = frontmatter.get("verified")
+                if isinstance(verified, list):
+                    for event in verified:
+                        if isinstance(event, dict):
+                            event["content_hash"] = content_hash
+                    frontmatter["verified"] = verified
+                page.write_text(serialize_concept_document(frontmatter, body), encoding="utf-8")
+                audit_path = staged.audit_dir / PurePosixPath(_trust_audit_ref(page_rel)).relative_to("audit")
+                audit = json.loads(audit_path.read_text(encoding="utf-8"))
+                audit["content_hash"] = content_hash
+                audit["events"] = frontmatter.get("verified", [])
+                _write_json(audit_path, audit)
+            old_path_mappings = _semantic_old_path_mappings(semantic_rows, concept_paths)
+            _write_json(staged.audit_dir / "old-path-mapping.json", {"schema_version": "reader-bundle-old-path-mapping.v1", "mappings": old_path_mappings})
+            old_path_lines = ["# Old path compatibility", ""]
+            for mapping in old_path_mappings:
+                if mapping["status"] == "alias":
+                    old_path_lines.append(f"- [{mapping['old_path']}](../{mapping['old_path']}) — alias: {mapping['reason']}")
+                else:
+                    old_path_lines.append(f"- [{mapping['old_path']}](../{mapping['old_path']}) — deprecated: {mapping['reason']}")
+            (staged.bundle_dir / "references" / "old-paths.md").write_text("\n".join(old_path_lines) + "\n", encoding="utf-8")
+            _write_old_path_compatibility(staged.bundle_dir, old_path_mappings)
         product_dirs: dict[str, list[tuple[str, str, str, str]]] = {}
         module_dirs: dict[tuple[str, str], list[tuple[str, str, str, str]]] = {}
         for rel, title, description, page_type in concepts:
@@ -1386,6 +1729,24 @@ def project_reader_bundle(
         for source in sorted({json.dumps(item, ensure_ascii=False, sort_keys=True): item for item in source_projection}.values(), key=lambda item: item["id"]):
             source_lines.append(f"- `{source['id']}`: {source['title']} ({source['resource']})")
         (staged.bundle_dir / "references" / "sources.md").write_text("\n".join(source_lines) + "\n", encoding="utf-8")
+        source_manifest = [
+            {
+                "source_id": str(row.get("source_id")),
+                "source_uri": row.get("source_uri"),
+                "content_fingerprint": row.get("content_fingerprint"),
+            }
+            for row in source_inventory
+            if isinstance(row, Mapping) and isinstance(row.get("source_id"), str)
+        ]
+        _write_json(
+            staged.audit_dir / "source-manifest.json",
+            {
+                "schema_version": "reader-bundle-source-manifest.v1",
+                "run_id": run_id,
+                "source_count": len(source_manifest),
+                "entries": sorted(source_manifest, key=lambda item: item["source_id"]),
+            },
+        )
         entry_backfill = write_entry_backfill_manifest(entry_check, staged, run_id=run_id) if entry_check.status != "passed" else None
         report_value = {
             "schema_version": "reader-bundle-report.v1",
@@ -1400,9 +1761,14 @@ def project_reader_bundle(
             "input_readback": list(input_readback),
             "entry_binding": {"status": entry_check.status, "missing_refs": list(entry_check.missing_refs), "backfill_ref": entry_backfill.path if entry_backfill else None},
             "concept_count": len(concepts),
-            "source_count": len(source_projection),
+            # Task 2-A historically reports sources that actually reached the
+            # Reader projection.  Task 3 additionally exposes the complete
+            # frozen inventory in audit/source-manifest.json.
+            "source_count": len(source_manifest) if semantic_mode else len({item["id"] for item in source_projection}),
             "claim_count": len(claim_map),
         }
+        if semantic_mode:
+            report_value.update({"projection_mode": "semantic", "relations_ref": "audit/relations.json", "old_path_mapping_ref": "audit/old-path-mapping.json"})
         _write_json(staged.projection_report_path, report_value)
         bundle_hash = _sha256_tree(staged.bundle_dir)
         _write_json(staged.exit_manifest_path, {"schema_version": "reader-bundle-exit-manifest.v1", "run_id": run_id, "ac08_result": _AC08_BLOCKED, "digest_release_status": _NOT_RELEASED, "bundle_hash": bundle_hash, "reason": "parser smoke is owned by Phase 3"})
@@ -1459,7 +1825,7 @@ def _valid_okf_root_index(text: str) -> bool:
 
 def validate_reader_bundle(
     artifacts: BundleArtifactPaths,
-    expected: ReaderBundleStructureInputs | ReaderBundleInputs | None,
+    expected: ReaderBundleStructureInputs | ReaderBundleInputs | SemanticReaderBundleInputs | None,
 ) -> BundleValidationReport:
     errors: list[str] = []
     checked: list[str] = []
@@ -1472,13 +1838,17 @@ def validate_reader_bundle(
         checked.append(required)
         if not path.is_file():
             errors.append("BUNDLE_REQUIRED_FILE_MISSING")
-    allowed_root_files = {"README.md", "Home.md", "index.md", "log.md", "references/sources.md"}
+    allowed_root_files = {"README.md", "Home.md", "index.md", "log.md", "references/sources.md", "references/old-paths.md"}
     for path in sorted(bundle.rglob("*")):
         rel = path.relative_to(bundle).as_posix()
         if path.is_symlink():
             errors.append("BUNDLE_SYMLINK_FORBIDDEN")
             continue
-        if path.is_file() and (rel not in allowed_root_files and (not rel.startswith("products/") or path.suffix != ".md")):
+        if path.is_file() and (
+            rel not in allowed_root_files
+            and (not rel.startswith("products/") or path.suffix != ".md")
+            and not _is_compatibility_path(rel)
+        ):
             errors.append("BUNDLE_FILE_NOT_ALLOWLISTED")
     if (bundle / "Home.md").is_file():
         home_targets = _markdown_link_targets((bundle / "Home.md").read_text(encoding="utf-8"))
@@ -1489,10 +1859,14 @@ def validate_reader_bundle(
     concepts = 0
     concept_signal_map: dict[str, dict[str, Any]] = {}
     expected_claims: dict[str, dict[str, Any]] = {}
-    if isinstance(expected, ReaderBundleInputs):
+    semantic_index: dict[str, Any] | None = None
+    if isinstance(expected, (ReaderBundleInputs, SemanticReaderBundleInputs)):
         try:
             _raw_index, _source_inventory, _readback, _entry_check, loaded = _load_inputs(expected)
-            expected_claims = _claim_map(loaded.get("claims", []))
+            if isinstance(expected, (ReaderBundleInputs, SemanticReaderBundleInputs)):
+                expected_claims = _claim_map(loaded.get("claims", []))
+            if isinstance(expected, SemanticReaderBundleInputs):
+                semantic_index = _merge_semantic_snapshot(_raw_index, loaded.get("semantic_snapshot", {}), topic_index_ref=expected.topic_index_ref)
         except ValidationError:
             errors.append("INPUT_READBACK_INVALID")
     for path in sorted(bundle.rglob("*.md")):
@@ -1501,6 +1875,10 @@ def validate_reader_bundle(
         if rel in EXEMPT_FILES:
             if path.read_text(encoding="utf-8").startswith("---\n"):
                 errors.append("EXEMPT_FILE_FRONTMATTER")
+            continue
+        if _is_compatibility_path(rel):
+            # Old-path stubs are deliberately plain Markdown, not concept
+            # pages.  Their links are checked by the general link pass below.
             continue
         if path.name in {"index.md", "log.md"}:
             continue
@@ -1525,7 +1903,7 @@ def validate_reader_bundle(
         errors.extend(_validate_trust_signals(path, frontmatter, body, artifacts, expected))
         if isinstance(frontmatter.get("reader_signals"), Mapping):
             concept_signal_map[rel] = dict(frontmatter["reader_signals"])
-        if isinstance(expected, ReaderBundleInputs):
+        if isinstance(expected, (ReaderBundleInputs, SemanticReaderBundleInputs)):
             _count, attribution_errors = _validate_attribution(path, frontmatter, body, expected_claims)
             errors.extend(attribution_errors)
     for path in sorted(bundle.rglob("*.md")):
@@ -1557,6 +1935,92 @@ def validate_reader_bundle(
                     )
                     if not any(expected_block in text for expected_block in expected_blocks):
                         errors.append("READER_INDEX_SIGNALS_MISMATCH")
+    if semantic_index is not None:
+        concept_path_by_topic: dict[str, str] = {}
+        for path in sorted(bundle.rglob("*.md")):
+            if path.name == "index.md" or path.relative_to(bundle).as_posix() in EXEMPT_FILES:
+                continue
+            try:
+                frontmatter, _body = parse_concept_document(path.read_text(encoding="utf-8"))
+            except ValidationError:
+                continue
+            topic_id = frontmatter.get("digest_topic_id")
+            if isinstance(topic_id, str) and topic_id:
+                concept_path_by_topic[topic_id] = path.relative_to(bundle).as_posix()
+        source_rows = _load_inputs(expected)[1] if isinstance(expected, SemanticReaderBundleInputs) else []
+        expected_edges = _semantic_related_edges(
+            semantic_index["topics"],
+            set(concept_path_by_topic),
+            source_map=_source_rows(source_rows),
+        )
+        expected_directed = {
+            (str(edge["from_topic_id"]), str(edge["to_topic_id"])) for edge in expected_edges
+        } | {
+            (str(edge["to_topic_id"]), str(edge["from_topic_id"])) for edge in expected_edges
+        }
+        actual_directed: set[tuple[str, str]] = set()
+        path_to_topic = {path: topic for topic, path in concept_path_by_topic.items()}
+        for topic_id, page_rel in concept_path_by_topic.items():
+            page = bundle / page_rel
+            _frontmatter, body = parse_concept_document(page.read_text(encoding="utf-8"))
+            for target in _markdown_link_targets(body):
+                try:
+                    target_rel = _relative_target(page, target, bundle).relative_to(bundle).as_posix()
+                except (ValidationError, ValueError):
+                    continue
+                target_topic = path_to_topic.get(target_rel)
+                if target_topic is not None:
+                    actual_directed.add((topic_id, target_topic))
+        if actual_directed != expected_directed:
+            errors.append("RELATED_LINKS_NOT_BIDIRECTIONAL")
+        relations_path = artifacts.audit_dir / "relations.json"
+        if not relations_path.is_file():
+            errors.append("RELATED_AUDIT_MISSING")
+        else:
+            try:
+                relation_value = json.loads(relations_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                relation_value = None
+            if not isinstance(relation_value, Mapping) or relation_value.get("edges") != expected_edges:
+                errors.append("RELATED_AUDIT_MISMATCH")
+        expected_old_paths = _semantic_old_path_mappings(semantic_index["topics"], concept_path_by_topic)
+        old_path_file = artifacts.audit_dir / "old-path-mapping.json"
+        if not old_path_file.is_file():
+            errors.append("OLD_PATH_MAPPING_MISSING")
+        else:
+            try:
+                old_path_value = json.loads(old_path_file.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                old_path_value = None
+            if not isinstance(old_path_value, Mapping) or old_path_value.get("mappings") != expected_old_paths:
+                errors.append("OLD_PATH_MAPPING_MISMATCH")
+        reachable: set[str] = set()
+        pending = ["Home.md"]
+        while pending:
+            current = pending.pop()
+            if current in reachable:
+                continue
+            reachable.add(current)
+            path = bundle / current
+            if not path.is_file():
+                continue
+            for target in _markdown_link_targets(path.read_text(encoding="utf-8")):
+                try:
+                    target_rel = _relative_target(path, target, bundle).relative_to(bundle).as_posix()
+                except (ValidationError, ValueError):
+                    continue
+                if target_rel not in reachable:
+                    pending.append(target_rel)
+        if any(path not in reachable for path in concept_path_by_topic.values()):
+            errors.append("CANONICAL_PAGE_UNREACHABLE")
+        for mapping in expected_old_paths:
+            old_path = PurePosixPath(str(mapping["old_path"]))
+            compatibility_path = bundle / old_path
+            if not compatibility_path.is_file() or compatibility_path.is_symlink():
+                errors.append("OLD_PATH_COMPATIBILITY_MISSING")
+                continue
+            if compatibility_path.read_text(encoding="utf-8") != _compatibility_stub_text(mapping):
+                errors.append("OLD_PATH_COMPATIBILITY_MISMATCH")
     report_path = artifacts.projection_report_path
     if not report_path.is_file() or not artifacts.exit_manifest_path.is_file():
         errors.append("REPORT_SURFACE_MISSING")

@@ -1,0 +1,7 @@
+Task: T005
+Command: uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k 'summary or release'
+Expected exit: 1
+Observed exit: 1
+Oracle: ORACLE-RELEASE
+Observed target failures before implementation: summary confirmation and release-decision assertions failed because the one-page summary, run/hash binding, warning/unknown classification, mode and old-package protection fields were not yet implemented.
+Note: this is the pre-implementation RED record; no release decision or formal root was changed.

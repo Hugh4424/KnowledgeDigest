@@ -1,0 +1,5 @@
+{
+  "command": "uv run --frozen pytest tests/acceptance/test_task3_closeout.py -q",
+  "receipt_ref": "quality/tests/task3-p3-closeout-v2.json",
+  "output_ref": "quality/tests/output/task3-p3-closeout-v2.output"
+}

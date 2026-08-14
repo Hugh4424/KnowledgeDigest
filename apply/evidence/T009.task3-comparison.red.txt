@@ -1,0 +1,6 @@
+Task: T009
+Command: uv run --frozen pytest tests/acceptance/test_task3_closeout.py -q -k comparison
+Expected exit: 1
+Observed exit: 1
+Oracle: ORACLE-COMPARE
+Observed target failures: the Task3 three-source comparison builder was absent; tests failed on the missing seam and did not invent an overall score.

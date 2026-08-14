@@ -1,0 +1,8 @@
+Task: T006
+Command: uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k 'summary or release'
+Expected exit: 0
+stdout_sha256: 6c46716ddff62d0203de734f7befc0af039cab08bcb5fe5a12992335ffce4ecd
+Observed exit: 0
+Observed: 22 passed, 1 deselected.
+Oracle: ORACLE-RELEASE
+Coverage: summary fields, deterministic summary hash, current run/hash confirmation, warning pass-through, hard/unknown blocking, semantic/offline mode, old-package protection, and no human trust fields.
