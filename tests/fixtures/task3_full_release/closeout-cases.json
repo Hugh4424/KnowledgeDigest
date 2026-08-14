@@ -1,0 +1,42 @@
+{
+  "comparison_inputs": {
+    "task2": {
+      "saved_integrity": {"status": "comparable", "value": "published-root-hash-task2", "basis": "machine receipt"},
+      "machine_quality": {"status": "comparable", "value": "8+3 wrapper", "basis": "Task2C receipt"},
+      "reader_readability": {"status": "comparable", "value": "manual fields pending", "basis": "fixed sample manifest"},
+      "trust_freshness": {"status": "comparable", "value": "source fingerprints", "basis": "source index"},
+      "failures": {"status": "comparable", "value": 0, "basis": "run report"},
+      "performance": {"status": "comparable", "value": {"elapsed_seconds": 12}, "basis": "run report"},
+      "cost": {"status": "comparable", "value": {"provider_calls": 4}, "basis": "cost ledger"},
+      "limitations": {"status": "comparable", "value": ["Task2 is a historical baseline"], "basis": "comparison scope"}
+    },
+    "companybrain": {
+      "saved_integrity": {"status": "comparable", "value": "filesystem snapshot", "basis": "inventory"},
+      "reader_readability": {"status": "N/A", "value": null, "basis": "no shared Task3 question-set evidence"},
+      "trust_freshness": {"status": "N/A", "value": null, "basis": "no shared provenance schema"},
+      "failures": {"status": "N/A", "value": null, "basis": "no shared run report"},
+      "performance": {"status": "N/A", "value": null, "basis": "no comparable run timing"},
+      "cost": {"status": "N/A", "value": null, "basis": "no comparable provider ledger"},
+      "limitations": {"status": "comparable", "value": ["different publication contract"], "basis": "comparison scope"}
+    },
+    "task3": {
+      "saved_integrity": {"status": "comparable", "value": "candidate-root-hash-task3", "basis": "release evidence"},
+      "machine_quality": {"status": "comparable", "value": "17+3 and 90% gates", "basis": "quality scorecard"},
+      "reader_readability": {"status": "comparable", "value": "automatic fixed questions", "basis": "Task3 quality result"},
+      "trust_freshness": {"status": "comparable", "value": "source fingerprints and old-path map", "basis": "bundle audit"},
+      "failures": {"status": "comparable", "value": 0, "basis": "delivery hard gates"},
+      "performance": {"status": "comparable", "value": {"elapsed_seconds": 30}, "basis": "run evidence"},
+      "cost": {"status": "comparable", "value": {"provider_calls": 8}, "basis": "run evidence"},
+      "limitations": {"status": "comparable", "value": ["fixture evidence is not a real 89-source run"], "basis": "verification boundary"}
+    }
+  },
+  "entrypoint": {
+    "expected_sequence": ["freeze", "candidate", "quality", "comparison", "summary", "confirmation", "readback"],
+    "expected_status": "not_released",
+    "deferred": [
+      {"id": "DEFER-001", "owner": "Task 3-Closeout", "status": "deferred"},
+      {"id": "DEFER-002", "owner": "Task 3-Closeout", "status": "deferred"},
+      {"id": "DEFER-005", "owner": "verify-code", "status": "deferred"}
+    ]
+  }
+}

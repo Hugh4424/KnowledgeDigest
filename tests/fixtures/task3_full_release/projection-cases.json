@@ -1,0 +1,30 @@
+{
+  "schema_version": "reader-bundle-semantic-snapshot.v1",
+  "topic_index_ref": "topic-index.json",
+  "topics": [
+    {
+      "topic_id": "digest-topic-product-overview",
+      "related_topic_refs": [
+        {
+          "target_topic_id": "digest-topic-module",
+          "source_id": "source-fixture-product",
+          "source_uri": "raw://fixture/product-overview.md",
+          "content_fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "fragment_locator": "lines:1-1"
+        }
+      ]
+    },
+    {
+      "topic_id": "digest-topic-module",
+      "related_topic_refs": []
+    },
+    {
+      "topic_id": "digest-topic-other-product",
+      "related_topic_refs": []
+    },
+    {
+      "topic_id": "digest-topic-degraded",
+      "related_topic_refs": []
+    }
+  ]
+}

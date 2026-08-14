@@ -1,0 +1,7 @@
+Task: T007
+Command: uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k recovery
+Expected exit: 1
+Observed exit: 1
+Oracle: ORACLE-RECOVERY
+Observed target failures before implementation: recovery assertions failed because lock-safe staging, candidate hash readback, single-root replacement, and old-root preservation were not yet implemented.
+Note: this is the pre-implementation RED record; no formal package was touched.

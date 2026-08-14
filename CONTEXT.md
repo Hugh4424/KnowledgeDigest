@@ -40,7 +40,9 @@
 
 **来源未说明（`source_not_documented`）**：仅用于 `procedure_or_rule` 页的 `exceptions` section，表示确定性来源审计确认当前冻结来源没有明确的异常触发、处理、分支或恢复规则。它不是“没有异常”的判断，不生成领域 Claim；异常专属问题仍为 `not_answerable`。该 section 仍存在并绑定来源指纹与审计记录；其他缺证据、含糊或映射失败不得使用此状态。
 
-**交付级发布状态**：交付级只允许 `released` 或 `not_released`。Task 0–2 只能是 `not_released`；只有 Task 3 同时通过机器门、读者门和交付门，才能是 `released`。
+**交付级发布状态**：交付级只允许 `released` 或 `not_released`。Task 0–2 只能是 `not_released`；Task 3 只有在机器硬门、自动固定读者题集、交付完整性和“汇总确认”都通过后才能是 `released`。非阻断警告不阻止发布，但必须留在汇总和审计记录中；未知或无法分类的信号按硬失败处理。
+
+**汇总确认**：人工只确认自动验收汇总完整、可判定且没有明确阻断失败；不打开知识页、不逐题检查、不检查来源链。它不等于人工阅读正文，不产生 `human_reviewed` 内容核验。
 
 **Task 2-C Agent 读者门**：本任务允许 Agent 作为小语料读者质量门的评审主体，但这只是 Task 2-C 的范围修订，不代表人工评审、`verified` 事件或正式发布。逐题证据保留 `agent_assisted=true`，并明确 `review_mode=agent_only`、`gate_actor=agent`；不得写 `human_reviewed`、`human:` actor 或把 Agent 结果派生为 `machine-confirmed`/`human-reviewed` trust tier。即使 Agent 读者门通过，Task 2-C 交付级状态仍为 `not_released`。
 

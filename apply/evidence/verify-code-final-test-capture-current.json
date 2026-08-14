@@ -1,0 +1,9 @@
+{
+  "command": "uv run --frozen pytest -q tests/acceptance/test_task3_projection.py tests/acceptance/test_task3_quality_release.py tests/acceptance/test_task3_closeout.py tests/acceptance/test_task2c_reader_quality.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task1_topic_axis.py tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_corpus_regression.py && uv run --frozen pytest -q",
+  "focused": {"exit": 0, "observed": "198 passed, 3 skipped"},
+  "full": {"exit": 0, "observed": "621 passed, 3 skipped in 17.70s"},
+  "real_task1_89_source": {"exit": 0, "observed": "49 passed"},
+  "git_diff_check": "passed",
+  "compileall": "passed",
+  "coverage_limits": ["full Task3 89-source semantic run not run", "provider result unavailable", "formal release readback not run"]
+}

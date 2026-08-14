@@ -1,0 +1,41 @@
+{
+  "schema_version": "workflowhub-test-receipt.v1",
+  "task_id": "task3-knowledge-publication-full-release",
+  "phase_id": null,
+  "commands": [
+    "uv run --frozen pytest -q tests/acceptance/test_task3_projection.py tests/acceptance/test_task3_quality_release.py tests/acceptance/test_task3_closeout.py tests/acceptance/test_task2c_reader_quality.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task1_topic_axis.py tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_corpus_regression.py",
+    "uv run --frozen pytest -q"
+  ],
+  "expected_exit": 0,
+  "observed_exit": 0,
+  "observed": {
+    "focused": "216 passed, 3 skipped in 4.14s",
+    "full": "639 passed, 3 skipped in 15.81s"
+  },
+  "snapshot_scope": "reader_quality-and-Task3-acceptance-files; hash is sha256(canonical path-to-file-sha256 map)",
+  "snapshot_sha256": "28e20517ef4f7b8fbfef2de9a7af0dbf958089f90cb57556ff8053e0de6ff0e9",
+  "snapshot_paths": [
+    "config/task0-question-set.v1.json",
+    "scripts/task2_publication_comparison.py",
+    "src/knowledge_digest/batch_run.py",
+    "src/knowledge_digest/full_release.py",
+    "src/knowledge_digest/reader_bundle.py",
+    "src/knowledge_digest/reader_frontmatter.py",
+    "src/knowledge_digest/reader_quality.py",
+    "tests/acceptance/test_task1_topic_axis.py",
+    "tests/acceptance/test_task2_batch_recovery.py",
+    "tests/acceptance/test_task2_corpus_regression.py",
+    "tests/acceptance/test_task2a_reader_bundle.py",
+    "tests/acceptance/test_task2c_reader_quality.py",
+    "tests/acceptance/test_task3_closeout.py",
+    "tests/acceptance/test_task3_projection.py",
+    "tests/acceptance/test_task3_quality_release.py"
+  ],
+  "oracle": "ORACLE-TASK3-AGGREGATE",
+  "skip_facts": [
+    "three acceptance cases require optional Task1/Task2 baseline fixtures"
+  ],
+  "coverage_limits": ["semantic 17+3 quality gate is separately bound to run-a21c831619c44834", "no summary confirmation", "no formal release readback because no safe formal root was available"],
+  "interpretation": "test_commands_and_real_semantic_quality_passed_with_delivery_limits; this receipt is not a Task3 release result",
+  "status": "passed"
+}

@@ -1,0 +1,7 @@
+Task: T012
+Command: uv run --frozen pytest tests/acceptance/test_task3_closeout.py -q -k entrypoint
+Expected exit: 0
+stdout_sha256: c3e318bf141db2ce370584ea1ca68cbfdc8b71c247bc79a51b8cdb03bf60db04
+Observed: 1 passed, 2 deselected.
+Oracle: ORACLE-HANDOFF
+Coverage: frozen execution order, readback-derived released/not_released status, failed-step fail-closed behavior, and Closeout-only deferred/risk handoff without human_reviewed or new scope.

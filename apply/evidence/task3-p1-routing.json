@@ -1,0 +1,11 @@
+{
+  "predicted": {"tier": "feature", "method": "backend-testing"},
+  "actual": {"tier": "feature", "method": "backend-testing"},
+  "changed_files": [
+    "src/knowledge_digest/reader_bundle.py",
+    "tests/acceptance/test_task3_projection.py",
+    "tests/fixtures/task3_full_release/projection-cases.json"
+  ],
+  "reason": "Python projection API, local filesystem artifacts, and acceptance fixtures; no browser or resident service.",
+  "rerouted": false
+}

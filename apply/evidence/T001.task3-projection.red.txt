@@ -1,0 +1,7 @@
+Task: T001
+Command: uv run --frozen pytest tests/acceptance/test_task3_projection.py -q
+Expected exit: 1
+Observed exit: 1
+Oracle: ORACLE-PROJECTION
+Observed target failure: three semantic projection tests failed at the unsupported reader-bundle-semantic-inputs.v1 path; no success behavior was asserted.
+Note: the first collection run exposed the intentionally missing import seam (exit 2); the seam was added as the minimum import-only RED prerequisite, then this target RED was observed.

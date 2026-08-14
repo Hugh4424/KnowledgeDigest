@@ -1,0 +1,6 @@
+Task: T011
+Command: uv run --frozen pytest tests/acceptance/test_task3_closeout.py -q -k entrypoint
+Expected exit: 1
+Observed exit: 1
+Oracle: ORACLE-HANDOFF
+Observed target failure: the thin Task3 entrypoint file and runner were absent; no CLI, formal root, or new business scope was touched.

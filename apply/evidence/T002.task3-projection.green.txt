@@ -1,0 +1,9 @@
+Task: T002
+Command: uv run --frozen pytest tests/acceptance/test_task3_projection.py -q
+Expected exit: 0
+Observed exit: 0
+stdout_sha256: 6cea88752b3e58ae5cee56ff3b1b13eab34117918d6bad9661194c031e2dc157
+Observed original GREEN: 3 passed in 0.13s.
+Current repaired projection gate: 8 passed; additional negative cases cover semantic validation, Related target/locator, and old-path split.
+Oracle: ORACLE-PROJECTION
+Coverage: semantic candidate split, canonical navigation, degraded-to-Audit isolation, evidence-backed bidirectional Related, and alias/deprecated old-path results.
