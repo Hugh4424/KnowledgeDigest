@@ -165,3 +165,143 @@ def test_semantic_fact_loss_falls_back_and_is_recorded(tmp_path: Path) -> None:
     page_text = next((output / "bundle/products/goinsight").rglob("knowledge/*.md")).read_text(encoding="utf-8")
     assert "curl https://example.test/v1" in page_text
     assert "8080" in page_text
+
+
+def test_reader_rejects_semantic_candidate_marked_as_truncated(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    source = "## 长资料\n\n开头事实。\n" + ("完整事实。\n" * 300)
+    _write(raw, "GoInsight/long.md", source)
+    candidate = tmp_path / "semantic"
+    page = candidate / "bundle/products/goinsight/modules/general/long.md"
+    page.parent.mkdir(parents=True)
+    fingerprint = __import__("hashlib").sha256(source.encode("utf-8")).hexdigest()
+    page.write_text(
+        "---\n"
+        "description: 不应采用\n"
+        "sources:\n"
+        "- resource: raw://confluence/GoInsight/long.md\n"
+        f"  digest_content_fingerprint: {fingerprint}\n"
+        "status: draft\n"
+        "title: long\n"
+        "type: KnowledgeDigest Knowledge\n"
+        "---\n\n# 不应采用\n\n模型只看到了开头。\n",
+        encoding="utf-8",
+    )
+    audit = candidate / "audit"
+    audit.mkdir()
+    (audit / "semantic-manifest.json").write_text(json.dumps({
+        "schema_version": "task3-semantic-candidate.v1",
+        "source_count": 1,
+        "semantic_candidate_count": 0,
+        "failure_count": 1,
+        "max_chars_per_source": 10,
+        "truncated_count": 1,
+        "entries": [],
+        "failures": [{
+            "source_uri": "raw://confluence/GoInsight/long.md",
+            "relative_path": "GoInsight/long.md",
+            "status": "semantic_truncated_fallback",
+            "input_chars": len(source),
+            "max_chars_per_source": 10,
+        }],
+    }, ensure_ascii=False), encoding="utf-8")
+
+    output = tmp_path / "candidate"
+    compile_reader_bundle(raw, output, semantic_candidate=candidate)
+
+    manifest = json.loads((output / "audit/source-manifest.json").read_text(encoding="utf-8"))
+    entry = manifest["entries"][0]
+    assert entry["semantic_status"] == "semantic_truncated_fallback"
+    assert entry["semantic_input_chars"] == len(source)
+    assert entry["semantic_max_chars_per_source"] == 10
+    page_text = next((output / "bundle/products/goinsight").rglob("knowledge/*.md")).read_text(encoding="utf-8")
+    assert "模型只看到了开头" not in page_text
+    assert "完整事实。" in page_text
+
+
+def test_reader_rejects_overlong_candidate_with_legacy_manifest(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    source = "## 长资料\n\n开头事实。\n" + ("完整事实。\n" * 1800)
+    _write(raw, "GoInsight/legacy.md", source)
+    candidate = tmp_path / "semantic"
+    page = candidate / "bundle/products/goinsight/modules/general/legacy.md"
+    page.parent.mkdir(parents=True)
+    fingerprint = __import__("hashlib").sha256(source.encode("utf-8")).hexdigest()
+    page.write_text(
+        "---\n"
+        "description: 旧清单不应绕过门禁\n"
+        "sources:\n"
+        "- resource: raw://confluence/GoInsight/legacy.md\n"
+        f"  digest_content_fingerprint: {fingerprint}\n"
+        "status: draft\n"
+        "title: legacy\n"
+        "type: KnowledgeDigest Knowledge\n"
+        "---\n\n# 旧清单候选\n\n模型只看到了开头。\n",
+        encoding="utf-8",
+    )
+    audit = candidate / "audit"
+    audit.mkdir(parents=True)
+    (audit / "semantic-manifest.json").write_text(json.dumps({
+        "schema_version": "task3-semantic-candidate.v1",
+        "entries": [{"source_uri": "raw://confluence/GoInsight/legacy.md"}],
+        "failures": [],
+    }), encoding="utf-8")
+
+    output = tmp_path / "candidate"
+    compile_reader_bundle(raw, output, semantic_candidate=candidate)
+
+    manifest = json.loads((output / "audit/source-manifest.json").read_text(encoding="utf-8"))
+    assert manifest["entries"][0]["semantic_status"] == "semantic_truncated_fallback"
+    assert manifest["failures"][0]["reason"] == "candidate_manifest_missing_or_failed_to_record_truncation"
+    page_text = next((output / "bundle/products/goinsight").rglob("knowledge/*.md")).read_text(encoding="utf-8")
+    assert "模型只看到了开头" not in page_text
+    assert "完整事实。" in page_text
+
+
+def test_reader_rejects_candidate_when_semantic_manifest_is_invalid(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    source = "## 资料\n\n完整来源内容。\n"
+    _write(raw, "GoInsight/broken.md", source)
+    candidate = tmp_path / "semantic"
+    page = candidate / "bundle/products/goinsight/modules/general/broken.md"
+    page.parent.mkdir(parents=True)
+    fingerprint = __import__("hashlib").sha256(source.encode("utf-8")).hexdigest()
+    page.write_text(
+        "---\n"
+        "sources:\n"
+        "- resource: raw://confluence/GoInsight/broken.md\n"
+        f"  digest_content_fingerprint: {fingerprint}\n"
+        "title: broken\n"
+        "type: KnowledgeDigest Knowledge\n"
+        "---\n\n# 错误候选\n\n不应采用。\n",
+        encoding="utf-8",
+    )
+    audit = candidate / "audit"
+    audit.mkdir(parents=True)
+    (audit / "semantic-manifest.json").write_text("{not-json", encoding="utf-8")
+
+    output = tmp_path / "candidate"
+    compile_reader_bundle(raw, output, semantic_candidate=candidate)
+
+    manifest = json.loads((output / "audit/source-manifest.json").read_text(encoding="utf-8"))
+    assert manifest["entries"][0]["semantic_status"] == "semantic_manifest_unavailable"
+    assert manifest["failures"][0]["status"] == "semantic_manifest_unavailable"
+    page_text = next((output / "bundle/products/goinsight").rglob("knowledge/*.md")).read_text(encoding="utf-8")
+    assert "不应采用" not in page_text
+    assert "完整来源内容。" in page_text
+
+
+def test_reader_audits_invalid_semantic_manifest_without_candidate_pages(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    _write(raw, "GoInsight/a.md", "## 资料\n\n原始内容。\n")
+    candidate = tmp_path / "semantic"
+    (candidate / "bundle").mkdir(parents=True)
+    (candidate / "audit").mkdir(parents=True)
+    (candidate / "audit/semantic-manifest.json").write_text("{not-json", encoding="utf-8")
+
+    output = tmp_path / "candidate"
+    compile_reader_bundle(raw, output, semantic_candidate=candidate)
+
+    manifest = json.loads((output / "audit/source-manifest.json").read_text(encoding="utf-8"))
+    assert manifest["failures"][0]["status"] == "semantic_manifest_unavailable"
+    assert manifest["failures"][0]["relative_path"] == "audit/semantic-manifest.json"
