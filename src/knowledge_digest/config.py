@@ -19,6 +19,10 @@ DEFAULT_MAX_LINES = 300
 DEFAULT_LLM_BATCH_MAX_CLAIMS = 20
 DEFAULT_LLM_BATCH_MAX_SOURCE_CHARS = 3000
 DEFAULT_LLM_BATCH_CONCURRENCY = 4
+DEFAULT_RUNTIME_MAX_PROVIDER_CALLS = 180
+DEFAULT_RUNTIME_MAX_REPLAY_CALLS = 1
+DEFAULT_RUNTIME_REQUEST_TIMEOUT_SECONDS = 180
+DEFAULT_RUNTIME_MAX_WALL_SECONDS = 3600
 RISK_RULE_VERSION = "risk-rules-v1"
 ROUTING_RULE_VERSION = "routing-jaccard-v2"
 SUPPORTED_LLM_FORMATS = ("openai", "anthropic")
@@ -38,6 +42,7 @@ _CONFIG_KEYS = frozenset(
         "llm_batch_max_claims",
         "llm_batch_max_source_chars",
         "llm_batch_concurrency",
+        "runtime",
         "similarity",
     }
 )
@@ -64,6 +69,16 @@ class SimilaritySettings:
 
 
 @dataclass(frozen=True)
+class RuntimePolicy:
+    max_provider_calls: object = DEFAULT_RUNTIME_MAX_PROVIDER_CALLS
+    max_replay_calls: object = DEFAULT_RUNTIME_MAX_REPLAY_CALLS
+    request_timeout_seconds: object = DEFAULT_RUNTIME_REQUEST_TIMEOUT_SECONDS
+    max_wall_seconds: object = DEFAULT_RUNTIME_MAX_WALL_SECONDS
+    concurrency: object = DEFAULT_LLM_BATCH_CONCURRENCY
+    source: str = "bundled-defaults"
+
+
+@dataclass(frozen=True)
 class DigestSettings:
     top_k: int = DEFAULT_TOP_K
     page_match_threshold: float = DEFAULT_PAGE_MATCH_THRESHOLD
@@ -78,6 +93,7 @@ class DigestSettings:
     llm_batch_max_claims: int = DEFAULT_LLM_BATCH_MAX_CLAIMS
     llm_batch_max_source_chars: int = DEFAULT_LLM_BATCH_MAX_SOURCE_CHARS
     llm_batch_concurrency: int = DEFAULT_LLM_BATCH_CONCURRENCY
+    runtime: RuntimePolicy = RuntimePolicy()
     similarity: SimilaritySettings = SimilaritySettings()
 
 
@@ -173,6 +189,39 @@ def _similarity_settings(value: Any) -> SimilaritySettings:
     )
 
 
+def _runtime_policy(value: Any) -> RuntimePolicy:
+    if value is None:
+        return RuntimePolicy()
+    if not isinstance(value, dict):
+        return RuntimePolicy(
+            max_provider_calls=None,
+            max_replay_calls=None,
+            request_timeout_seconds=None,
+            max_wall_seconds=None,
+            concurrency=None,
+            source="config:invalid",
+        )
+    allowed = {
+        "max_provider_calls",
+        "max_replay_calls",
+        "request_timeout_seconds",
+        "max_wall_seconds",
+        "concurrency",
+    }
+    unknown = sorted(set(value) - allowed)
+    if unknown:
+        return RuntimePolicy(
+            max_provider_calls=None,
+            max_replay_calls=None,
+            request_timeout_seconds=None,
+            max_wall_seconds=None,
+            concurrency=None,
+            source=f"config:runtime-unknown:{','.join(unknown)}",
+        )
+    values = {key: value.get(key) for key in allowed}
+    return RuntimePolicy(**values, source="config:runtime")
+
+
 def resolve_settings(
     config_path: Path | None,
     *,
@@ -202,6 +251,7 @@ def resolve_settings(
         "llm_batch_max_claims": DEFAULT_LLM_BATCH_MAX_CLAIMS,
         "llm_batch_max_source_chars": DEFAULT_LLM_BATCH_MAX_SOURCE_CHARS,
         "llm_batch_concurrency": DEFAULT_LLM_BATCH_CONCURRENCY,
+        "runtime": None,
         "similarity": None,
     }
     values.update(_load_json(config_path))
@@ -248,6 +298,7 @@ def resolve_settings(
         llm_batch_concurrency=_require_int(
             "llm_batch_concurrency", values["llm_batch_concurrency"]
         ),
+        runtime=_runtime_policy(values["runtime"]),
         similarity=_similarity_settings(values["similarity"]),
     )
     if settings.llm_format not in SUPPORTED_LLM_FORMATS:

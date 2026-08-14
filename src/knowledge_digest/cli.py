@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -132,7 +133,14 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     print(f"{summary}; report={report_path}")
-    return 0
+    try:
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return 1
+    execution_status = report.get("execution", {}).get("status")
+    if execution_status is not None:
+        return 0 if execution_status == "completed" else 1
+    return 1 if report.get("status") == "failed" else 0
 
 
 if __name__ == "__main__":

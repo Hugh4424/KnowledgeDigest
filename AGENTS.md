@@ -61,6 +61,8 @@ uv run python scripts/task2_publication_comparison.py \
 
 需要语义发布时只允许使用项目配置约定的 `qwen3.6`（`https://dashscope.in.whatspos.cn/v1`）和 `jina-embeddings`（`https://llm.paxszapp.com/v1`）；凭据必须通过环境变量传入，禁止写入代码、结果或报告。离线回归使用 `--no-llm` + Jaccard，不触碰任何 provider。
 
+每次运行都会先做 preflight，并在 `_digest/runs/<run_id>/plan.json` 写入来源数、逻辑批次、预计 provider calls 和显式限制；运行中可读状态在同目录 `progress.json`，每 10 秒更新一次。`completed` 才返回退出码 0；`blocked`、`failed`、`cancelled` 都返回非零。运行执行状态只描述本次执行，不等同于知识文件或 `released/not_released` 状态。
+
 ## 实际文件结构
 
 ```text

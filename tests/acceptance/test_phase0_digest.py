@@ -258,6 +258,7 @@ def test_digest_dry_run_contract_audits_structure_with_defaults_without_writing(
         Path("kb/_digest/runs"),
         run_dir,
         report_paths[0].relative_to(tmp_path),
+        run_dir / "progress.json",
     }
 
 

@@ -6,6 +6,7 @@ import json
 import hashlib
 import os
 import tempfile
+import threading
 import time
 from urllib.parse import urlsplit, urlunsplit
 from dataclasses import replace
@@ -14,7 +15,7 @@ from typing import Any, Mapping
 from uuid import uuid4
 
 from .cluster import cluster
-from .config import DigestSettings, RISK_RULE_VERSION
+from .config import DigestSettings, RISK_RULE_VERSION, RuntimePolicy, SimilaritySettings
 from .draft import draft
 from .errors import ValidationError
 from .embedding import EmbeddingError, normalize_endpoint_identity, resolve_similarity_backend
@@ -59,6 +60,7 @@ from .retrieve import retrieve
 from .text_similarity import EmbeddingScorer, JaccardScorer
 from .writeback import targets_for_draft, writeback
 from .topic_axis import read_topic_axis_settings, run_topic_axis
+from .runtime_status import RunStatus
 
 
 def _formal_changes(writes: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -83,6 +85,13 @@ def _config_identity(settings: DigestSettings, structure: StructureContract) -> 
             "llm_batch_max_claims": settings.llm_batch_max_claims,
             "llm_batch_max_source_chars": settings.llm_batch_max_source_chars,
             "llm_batch_concurrency": settings.llm_batch_concurrency,
+            "runtime": {
+                "max_provider_calls": settings.runtime.max_provider_calls,
+                "max_replay_calls": settings.runtime.max_replay_calls,
+                "request_timeout_seconds": settings.runtime.request_timeout_seconds,
+                "max_wall_seconds": settings.runtime.max_wall_seconds,
+                "concurrency": settings.runtime.concurrency,
+            },
             "similarity_backend": settings.similarity.backend,
             "embedding_model": embedding.model if embedding else None,
             "embedding_dimension": embedding.expected_dimension if embedding else None,
@@ -481,6 +490,7 @@ def _digest_metrics(
         cost: dict[str, object] = {
             "generator_calls": 0,
             "planned_generator_calls": sum(ceilings) if llm_enabled else 0,
+            "planned_provider_calls": sum(ceilings) if llm_enabled else 0,
             "provider_calls_planned": sum(ceilings) if llm_enabled else 0,
             "provider_calls_observed": 0,
             "failed_calls": 0,
@@ -525,13 +535,14 @@ def _digest_metrics(
                 int(item.get("provider_call_count", 1)) for item in all_rounds
             ) if llm_enabled else 0,
             "planned_generator_calls": sum(ceilings) if llm_enabled else 0,
+            "planned_provider_calls": sum(ceilings) if llm_enabled else 0,
             "provider_calls_planned": sum(ceilings) if llm_enabled else 0,
             "provider_calls_observed": sum(
                 int(item.get("provider_call_count", 1)) for item in all_rounds
             ) if llm_enabled else 0,
             "failed_calls": sum(1 for item in all_rounds if item.get("status") == "invalid"),
             "replay_calls": sum(
-                max(0, int(item.get("provider_attempt_count", 1)) - 1)
+                int(item.get("replay_call_count", 0))
                 for item in all_rounds
             ),
             "timeout_exceeded": timeout_exceeded,
@@ -584,6 +595,175 @@ def _write_similarity_audit(
     report["similarity"] = similarity_audit
     if "effective_thresholds" in similarity_audit and "settings" in report:
         report["settings"].update(similarity_audit["effective_thresholds"])
+    report_path.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _runtime_policy_values(policy: RuntimePolicy) -> tuple[dict[str, int] | None, str | None]:
+    names = (
+        "max_provider_calls",
+        "max_replay_calls",
+        "request_timeout_seconds",
+        "max_wall_seconds",
+        "concurrency",
+    )
+    values: dict[str, int] = {}
+    for name in names:
+        value = getattr(policy, name, None)
+        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+            return None, f"runtime policy {name} is missing or must be a positive integer"
+        values[name] = value
+    return values, None
+
+
+def _preflight_plan(
+    *,
+    paths: DigestPaths,
+    settings: DigestSettings,
+    structure: StructureContract,
+    roots: tuple[str, ...],
+    raw_items: list[dict[str, Any]],
+    run_dir: Path,
+    cluster_plan: list[dict[str, Any]] | None,
+) -> dict[str, Any]:
+    """Build the generation plan without touching either configured provider."""
+    policy, policy_error = _runtime_policy_values(settings.runtime)
+    source_snapshot = [
+        {
+            key: item.get(key)
+            for key in ("source_id", "source_uri", "content_fingerprint", "input_path")
+        }
+        for item in raw_items
+    ]
+    plan: dict[str, Any] = {
+        "schema_version": "knowledge-digest-run-plan.v1",
+        "run_id": run_dir.name,
+        "source_count": len(raw_items),
+        "sources": source_snapshot,
+        "logical_batches": [],
+        "planned_provider_calls": 0,
+        "planned_generator_calls": 0,
+        "policy": policy or {},
+        "policy_source": settings.runtime.source,
+        "progress_path": (run_dir / "progress.json").as_posix(),
+        "preflight": {"status": "blocked", "reason": policy_error},
+    }
+    if policy_error is not None:
+        _atomic_json(run_dir / "plan.json", plan)
+        return plan
+
+    with tempfile.TemporaryDirectory(prefix="knowledge-digest-preflight-") as temporary:
+        planning_dir = Path(temporary)
+        planning_settings = replace(settings, similarity=SimilaritySettings(backend="jaccard"))
+        clusters, decisions, _similarity_audit = _run_similarity_stages(
+            raw_items,
+            planning_dir,
+            paths,
+            roots,
+            planning_settings,
+            publication=structure.publication,
+        )
+        if cluster_plan is not None:
+            by_id = {str(item["raw_id"]): item for item in raw_items}
+            planned_clusters = []
+            for planned in cluster_plan:
+                members = [str(member) for member in planned.get("members", []) if str(member) in by_id]
+                if members:
+                    planned_clusters.append({**planned, "members": members})
+            clusters = planned_clusters
+            decisions = retrieve(
+                clusters,
+                raw_items,
+                planning_dir,
+                paths,
+                roots,
+                planning_settings,
+                preserve_cluster_identity=True,
+            )
+        for decision in decisions:
+            decision["page_root"] = roots[0]
+        _attach_task2b_topic_mapping(
+            decisions=decisions,
+            clusters=clusters,
+            raw_items=raw_items,
+            paths=paths,
+        )
+        drafts = draft(
+            decisions,
+            clusters,
+            raw_items,
+            planning_dir,
+            planning_settings,
+            dry_run=True,
+            publication=structure.publication,
+        )
+    planned = sum(int(item.get("planned_generator_calls") or 0) for item in drafts)
+    plan["planned_provider_calls"] = planned if settings.llm_enabled else 0
+    plan["planned_generator_calls"] = planned if settings.llm_enabled else 0
+    logical_batches: list[dict[str, Any]] = []
+    for item in drafts:
+        planned_for_draft = int(item.get("planned_generator_calls") or 0)
+        if not settings.llm_enabled:
+            planned_for_draft = 1
+        for batch_index in range(planned_for_draft):
+            logical_batches.append(
+                {
+                    "logical_batch_id": (
+                        f"{item.get('topic_id') or item.get('cluster_id')}"
+                        f"-batch-{batch_index + 1:03d}"
+                    ),
+                    "topic_id": item.get("topic_id"),
+                    "cluster_id": item.get("cluster_id"),
+                    "planned_first_attempts": 1 if settings.llm_enabled else 0,
+                    "attempt": 1,
+                }
+            )
+    plan["logical_batches"] = logical_batches
+    if settings.llm_enabled and planned > int(policy["max_provider_calls"]):
+        plan["preflight"] = {
+            "status": "blocked",
+            "reason": "planned provider calls exceed max_provider_calls",
+            "actual": planned,
+            "limit": policy["max_provider_calls"],
+        }
+    else:
+        plan["preflight"] = {"status": "passed", "reason": None}
+    _atomic_json(run_dir / "plan.json", plan)
+    print(
+        "preflight: "
+        f"sources={plan['source_count']} batches={len(plan['logical_batches'])} "
+        f"planned_provider_calls={plan['planned_provider_calls']} "
+        f"limits={json.dumps(plan['policy'], ensure_ascii=False, sort_keys=True)} "
+        f"status={plan['preflight']['status']}"
+    )
+    return plan
+
+
+def _mark_preflight_blocked(report_path: Path, plan: dict[str, Any]) -> None:
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    report["execution"] = {
+        "status": "blocked",
+        "phase": "preflight",
+        "reason": plan.get("preflight", {}).get("reason"),
+    }
+    report["cost"] = {
+        "planned_provider_calls": plan.get("planned_provider_calls", 0),
+        "planned_generator_calls": plan.get("planned_generator_calls", 0),
+        "provider_calls_observed": 0,
+        "replay_calls": 0,
+        "failed_calls": 0,
+        "timeout_exceeded": False,
+    }
+    report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _set_execution_report(
+    report_path: Path, *, status: str, phase: str, error: str | None = None
+) -> None:
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    report["execution"] = {"status": status, "phase": phase, "reason": error}
     report_path.write_text(
         json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -644,17 +824,27 @@ def _task0_canonical_endpoint(value: str) -> str:
     return urlunsplit((parsed.scheme, netloc, parsed.path, "", ""))
 
 
-def _task0_budget_status(cost: dict[str, Any], *, source_count: int) -> str:
-    planned = int(cost.get("planned_generator_calls") or 0)
+def _task0_budget_status(
+    cost: dict[str, Any], *, source_count: int, policy: RuntimePolicy | None = None
+) -> str:
+    limits = {
+        "max_provider_calls": _TASK0_GENERATOR_HARD_CAP,
+        "max_replay_calls": _TASK0_REPLAY_LIMIT,
+        "max_wall_seconds": _TASK0_WALL_HARD_CAP_SECONDS,
+    }
+    if policy is not None:
+        values, error = _runtime_policy_values(policy)
+        if error is None and values is not None:
+            limits = values
+    planned = int(cost.get("planned_provider_calls", cost.get("planned_generator_calls")) or 0)
     observed = int(cost.get("provider_calls_observed") or 0)
     replay_calls = int(cost.get("replay_calls") or 0)
     elapsed = float(cost.get("wall_clock_elapsed_seconds", cost.get("elapsed_seconds")) or 0.0)
     if (
-        planned > _TASK0_GENERATOR_HARD_CAP
-        or observed > source_count * _TASK0_PROVIDER_CALL_MULTIPLIER
-        or replay_calls > _TASK0_REPLAY_LIMIT
+        planned > limits["max_provider_calls"]
+        or replay_calls > limits["max_replay_calls"]
         or bool(cost.get("timeout_exceeded"))
-        or elapsed > _TASK0_WALL_HARD_CAP_SECONDS
+        or elapsed > limits["max_wall_seconds"]
     ):
         return "exceeded"
     if elapsed > _TASK0_WALL_TARGET_SECONDS:
@@ -711,7 +901,7 @@ def _task0_runtime_audit(
         page_status = "degraded"
     provider_calls = int(cost.get("provider_calls_observed") or 0) if settings.llm_enabled else 0
     embedding_calls = int(similarity_audit.get("provider_calls_observed") or 0)
-    budget_status = _task0_budget_status(cost, source_count=source_count)
+    budget_status = _task0_budget_status(cost, source_count=source_count, policy=settings.runtime)
     if budget_status != "within_budget" and page_status == "published":
         page_status = "degraded"
     llm_model = os.environ.get("KD_LLM_MODEL") if settings.llm_enabled else None
@@ -741,14 +931,17 @@ def _task0_runtime_audit(
         "calls": {"llm": provider_calls, "embedding": embedding_calls},
         "budget": {
             "timeout_seconds": _TASK0_TIMEOUT_SECONDS,
-            "replay_limit": _TASK0_REPLAY_LIMIT,
-            "provider_call_budget": source_count * _TASK0_PROVIDER_CALL_MULTIPLIER,
+            "replay_limit": settings.runtime.max_replay_calls,
+            "provider_call_budget": settings.runtime.max_provider_calls,
+            "request_timeout_seconds": settings.runtime.request_timeout_seconds,
+            "concurrency": settings.runtime.concurrency,
+            "planned_provider_calls": cost.get("planned_provider_calls"),
             "planned_generator_calls": cost.get("planned_generator_calls"),
             "provider_calls_observed": cost.get("provider_calls_observed"),
             "replay_calls": cost.get("replay_calls"),
             "timeout_exceeded": bool(cost.get("timeout_exceeded")),
             "wall_clock_elapsed_seconds": cost.get("wall_clock_elapsed_seconds"),
-            "planned_generator_hard_cap": _TASK0_GENERATOR_HARD_CAP,
+            "planned_generator_hard_cap": settings.runtime.max_provider_calls,
             "wall_clock_target_seconds": _TASK0_WALL_TARGET_SECONDS,
             "wall_clock_hard_cap_seconds": _TASK0_WALL_HARD_CAP_SECONDS,
         },
@@ -855,6 +1048,19 @@ def _write_task0_runtime_audit(
         page_statuses=page_statuses,
         writes=writes,
     )
+    plan_path = report_path.parent / "plan.json"
+    if plan_path.is_file():
+        try:
+            execution_plan = json.loads(plan_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+            execution_plan = {}
+        if isinstance(execution_plan, dict):
+            report.setdefault("cost", {})["planned_provider_calls"] = execution_plan.get(
+                "planned_provider_calls", report.get("cost", {}).get("planned_provider_calls", 0)
+            )
+            report.setdefault("cost", {})["planned_generator_calls"] = execution_plan.get(
+                "planned_generator_calls", report.get("cost", {}).get("planned_generator_calls", 0)
+            )
     status = {
         "provider_transport": "not_requested" if not settings.llm_enabled else "completed" if not report.get("cost", {}).get("failed_calls") else "failed",
         "claim_verification": "not_run" if not page_statuses else "passed" if runtime["page_status"] == "published" and writes else "degraded",
@@ -876,6 +1082,10 @@ def _write_task0_runtime_audit(
         "budget_status": runtime["budget_status"],
     }
     report["runtime_audit"] = runtime
+    report.setdefault(
+        "execution",
+        {"status": "completed", "phase": "writeback", "reason": None},
+    )
     report["status"] = status
     growth = report.get("growth_audit", {})
     baseline = growth.get("baseline", {})
@@ -969,6 +1179,11 @@ def _initial_report(
                     "fallback": False,
                     "reason": None,
                     "budget_status": "pending",
+                },
+                "execution": {
+                    "status": "pending",
+                    "phase": "preflight",
+                    "reason": None,
                 },
                 "growth_audit": {
                     "baseline": {
@@ -2655,33 +2870,56 @@ def _audit_run_locked(
     cluster_plan: list[dict[str, Any]] | None = None,
     global_duplicates: dict[str, dict[str, str]] | None = None,
 ) -> tuple[Path, str]:
-    """Run S1-S6 and write the formal outputs directly into the knowledge base."""
+    """Run S1-S6 under one status monitor and one knowledge-base lock."""
     from .batch_run import _source_rows
     run_started_monotonic = time.monotonic()
-
-    # Validate the frozen declaration before a new KB receives its first
-    # managed Reader files.  Batch runs still validate the complete source set;
-    # the current batch is narrowed later by ``allowed_content_paths``.
-    _source_rows(paths)
+    source_manifest_error: ValidationError | None = None
+    try:
+        _source_rows(paths)
+    except ValidationError as error:
+        # Keep a durable failed run for an input that cannot be frozen. This
+        # is different from a path/configuration error caught before audit_run
+        # owns a run directory, and must never look like a successful run.
+        source_manifest_error = error
     if paths.initialize_new_kb:
         if dry_run:
             raise ValidationError("publication", paths.kb_dir, "dry-run must not initialize a new knowledge base")
         if not is_new_kb_container(paths.kb_dir):
             raise ValidationError("publication", paths.kb_dir, "new knowledge-base container is not empty")
-        initialize_default_publication(paths.kb_dir)
+        if source_manifest_error is None:
+            initialize_default_publication(paths.kb_dir)
     audit_root = paths.kb_dir / "_digest"
     if audit_root.is_symlink():
         raise ValidationError("audit_run", audit_root, "_digest must not be a symlink")
     if audit_root.exists() and not audit_root.is_dir():
         raise ValidationError("audit_run", audit_root, "_digest must be a directory")
-    structure = inspect_structure(paths.structure_path)
+    if source_manifest_error is not None and paths.initialize_new_kb:
+        # An invalid manifest must not cause first-run publication files to be
+        # created.  Keep the failed run auditable without inventing a
+        # structure declaration that the user did not provide.
+        structure = StructureContract(
+            roots=DEFAULT_ROOTS,
+            why_field=None,
+            version_field=None,
+            missing_fields=("source manifest",),
+            suggestions=(),
+            publication=None,
+            publication_errors=(),
+            allow_official_write=False,
+        )
+    else:
+        structure = inspect_structure(paths.structure_path)
     if structure.publication_errors:
         raise ValidationError(
             "publication",
             paths.structure_path,
             "; ".join(structure.publication_errors),
         )
-    topic_axis_settings = read_topic_axis_settings(paths.structure_path)
+    topic_axis_settings = (
+        {"enabled": False}
+        if source_manifest_error is not None
+        else read_topic_axis_settings(paths.structure_path)
+    )
     if not dry_run and topic_axis_settings["enabled"]:
         # Task1 is an explicit opt-in structural run.  It writes only the
         # four rebuildable _digest projections and never enters the reader
@@ -2698,7 +2936,6 @@ def _audit_run_locked(
     run_id = f"run-{uuid4().hex}"
     effective_run_id = run_id if not dry_run else f"{run_id}-dry"
     run_dir = audit_root / "runs" / effective_run_id
-
     run_dir.mkdir(parents=True, exist_ok=True)
     report_path = _initial_report(
         run_dir,
@@ -2709,6 +2946,130 @@ def _audit_run_locked(
         structure=structure,
         started_monotonic=run_started_monotonic,
     )
+    run_status = RunStatus(run_dir, total_batches=1)
+    run_status.start()
+    if source_manifest_error is not None:
+        reason = source_manifest_error.reason
+        failed_plan = {
+            "schema_version": "knowledge-digest-run-plan.v1",
+            "run_id": run_dir.name,
+            "source_count": source_notes,
+            "sources": [],
+            "logical_batches": [],
+            "planned_provider_calls": 0,
+            "planned_generator_calls": 0,
+            "policy": {},
+            "policy_source": settings.runtime.source,
+            "progress_path": (run_dir / "progress.json").as_posix(),
+            "preflight": {"status": "failed", "reason": reason},
+        }
+        _atomic_json(run_dir / "plan.json", failed_plan)
+        _update_digest_report(report_path, [], [], [], dry_run=dry_run, llm_enabled=settings.llm_enabled)
+        _write_similarity_audit(
+            report_path,
+            {
+                "requested_backend": settings.similarity.backend,
+                "effective_backend": settings.similarity.backend,
+                "reason_code": "manifest_failed",
+                "provider_calls_observed": 0,
+                "effective_thresholds": {
+                    "high": settings.high,
+                    "medium": settings.medium,
+                    "page_match_threshold": settings.page_match_threshold,
+                },
+            },
+        )
+        _write_task0_runtime_audit(
+            report_path,
+            settings,
+            {"requested_backend": settings.similarity.backend, "effective_backend": settings.similarity.backend, "provider_calls_observed": 0},
+            kb_dir=paths.kb_dir,
+            config_identity=_config_identity(settings, structure),
+            source_count=source_notes,
+            page_statuses=[],
+            writes=False,
+        )
+        _set_execution_report(report_path, status="failed", phase="manifest", error=reason)
+        run_status.set_error(reason)
+        run_status.finish(status="failed", phase="manifest", error=reason)
+        return report_path, f"audit failed: input manifest could not be fixed ({reason})"
+    try:
+        result = _audit_run_locked_body(
+            paths,
+            settings,
+            roots,
+            dry_run=dry_run,
+            generator=generator,
+            allowed_content_paths=allowed_content_paths,
+            cluster_plan=cluster_plan,
+            global_duplicates=global_duplicates,
+            structure=structure,
+            source_notes=source_notes,
+            run_dir=run_dir,
+            report_path=report_path,
+            run_status=run_status,
+        )
+    except KeyboardInterrupt:
+        run_status.set_error("KeyboardInterrupt")
+        _set_execution_report(report_path, status="cancelled", phase="interrupted", error="KeyboardInterrupt")
+        run_status.finish(status="cancelled", phase="interrupted", error="KeyboardInterrupt")
+        raise
+    except ValidationError as error:
+        execution_status = "blocked" if error.stage == "runtime" else "failed"
+        run_status.set_error(error.reason)
+        _set_execution_report(
+            report_path,
+            status=execution_status,
+            phase=error.stage,
+            error=error.reason,
+        )
+        run_status.finish(status=execution_status, phase=error.stage, error=error.reason)
+        if execution_status == "blocked":
+            return report_path, f"audit blocked: {error.reason}"
+        raise
+    except Exception as error:
+        run_status.set_error(f"{type(error).__name__}: {error}")
+        _set_execution_report(report_path, status="failed", phase="failed", error=f"{type(error).__name__}: {error}")
+        run_status.finish(status="failed", phase="failed", error=f"{type(error).__name__}: {error}")
+        raise
+    else:
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        execution = report.get("execution", {})
+        final_status = str(execution.get("status") or "completed")
+        if final_status == "pending":
+            final_status = "completed"
+        final_phase = str(execution.get("phase") or "completed")
+        final_error = execution.get("reason")
+        run_status.finish(status=final_status, phase=final_phase, error=final_error)
+        _set_execution_report(
+            report_path,
+            status=final_status,
+            phase=final_phase,
+            error=final_error,
+        )
+        return result
+
+
+def _audit_run_locked_body(
+    paths: DigestPaths,
+    settings: DigestSettings,
+    roots: tuple[str, ...],
+    *,
+    dry_run: bool,
+    generator: Any = None,
+    allowed_content_paths: set[str] | None = None,
+    cluster_plan: list[dict[str, Any]] | None = None,
+    global_duplicates: dict[str, dict[str, str]] | None = None,
+    structure: StructureContract,
+    source_notes: int,
+    run_dir: Path,
+    report_path: Path,
+    run_status: RunStatus,
+) -> tuple[Path, str]:
+    """Run S1-S6 after the immutable run directory and report exist."""
+    run_started_monotonic = time.monotonic()
+    run_id = run_dir.name.removesuffix("-dry")
+    run_status.update(reason="preflight", phase="preflight")
 
     if not dry_run and not structure.allow_official_write:
         raw_items = ingest(
@@ -2728,6 +3089,7 @@ def _audit_run_locked(
             failed_snapshots=failed_snapshots,
             official_status="blocked_structure",
         )
+        _set_execution_report(report_path, status="blocked", phase="preflight", error="missing structure declarations")
         missing = ", ".join(structure.missing_fields)
         return report_path, f"audit blocked: missing structure declarations ({missing}); no formal knowledge-base files written"
 
@@ -2791,6 +3153,78 @@ def _audit_run_locked(
         global_duplicates=global_duplicates,
     )
     failed_snapshots = _read_failed_snapshots(run_dir)
+    preflight_plan = _preflight_plan(
+        paths=paths,
+        settings=settings,
+        structure=structure,
+        roots=roots,
+        raw_items=raw_items,
+        run_dir=run_dir,
+        cluster_plan=cluster_plan,
+    )
+    if preflight_plan["preflight"]["status"] != "passed":
+        _finalize_report(
+            report_path,
+            writes=[],
+            pending=[],
+            cleanup=[],
+            raw_items=raw_items,
+            failed_snapshots=failed_snapshots,
+            official_status="blocked_preflight",
+        )
+        _update_digest_report(report_path, [], [], [], dry_run=False, llm_enabled=settings.llm_enabled)
+        _write_similarity_audit(
+            report_path,
+            {
+                "requested_backend": settings.similarity.backend,
+                "effective_backend": settings.similarity.backend,
+                "reason_code": "preflight_blocked",
+                "provider_calls_observed": 0,
+                "effective_thresholds": {
+                    "high": settings.high,
+                    "medium": settings.medium,
+                    "page_match_threshold": settings.page_match_threshold,
+                },
+            },
+        )
+        _mark_preflight_blocked(report_path, preflight_plan)
+        _write_task0_runtime_audit(
+            report_path,
+            settings,
+            {
+                "requested_backend": settings.similarity.backend,
+                "effective_backend": settings.similarity.backend,
+                "reason_code": "preflight_blocked",
+                "provider_calls_observed": 0,
+            },
+            kb_dir=paths.kb_dir,
+            config_identity=_config_identity(settings, structure),
+            source_count=source_notes,
+            page_statuses=[],
+            writes=False,
+        )
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        report["execution"] = {
+            "status": "blocked",
+            "phase": "preflight",
+            "reason": preflight_plan["preflight"].get("reason"),
+        }
+        report["plan"] = preflight_plan
+        report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        run_status.update(
+            reason="preflight_blocked",
+            execution_status="blocked",
+            phase="preflight",
+            last_error=preflight_plan["preflight"].get("reason"),
+            total_batches=len(preflight_plan.get("logical_batches", [])),
+        )
+        return report_path, f"audit blocked: preflight {preflight_plan['preflight'].get('reason')}"
+    run_status.update(
+        reason="preflight_passed",
+        execution_status="running",
+        phase="provider",
+        total_batches=len(preflight_plan.get("logical_batches", [])),
+    )
     clusters, decisions, similarity_audit = _run_similarity_stages(
         raw_items, run_dir, paths, roots, settings, publication=structure.publication
     )
@@ -2834,6 +3268,39 @@ def _audit_run_locked(
         raw_items=raw_items,
         paths=paths,
     )
+    policy, policy_error = _runtime_policy_values(settings.runtime)
+    if policy_error is not None or policy is None:
+        raise ValidationError("runtime", run_dir, policy_error or "runtime policy is invalid")
+    runtime_ledger = {"provider_calls": 0, "replay_calls": 0}
+    runtime_ledger_lock = threading.Lock()
+
+    def provider_call_guard(logical_batch_id: str, attempt_count: int) -> None:
+        del logical_batch_id
+        with runtime_ledger_lock:
+            elapsed = time.monotonic() - run_started_monotonic
+            if elapsed >= policy["max_wall_seconds"]:
+                raise ValidationError("runtime", run_dir, "max_wall_seconds exceeded before provider request")
+            if runtime_ledger["provider_calls"] >= policy["max_provider_calls"]:
+                raise ValidationError("runtime", run_dir, "max_provider_calls exceeded before provider request")
+            if attempt_count > 0 and runtime_ledger["replay_calls"] >= policy["max_replay_calls"]:
+                raise ValidationError("runtime", run_dir, "max_replay_calls exceeded before provider request")
+            runtime_ledger["provider_calls"] += 1
+            if attempt_count > 0:
+                runtime_ledger["replay_calls"] += 1
+
+    def progress_event(event: dict[str, Any]) -> None:
+        if event.get("event") == "batch_started":
+            run_status.update(
+                reason="batch_started",
+                phase="provider",
+                current_batch_id=event.get("logical_batch_id"),
+            )
+            return
+        run_status.record_batch(
+            provider_calls=int(event.get("provider_calls") or 0),
+            replay_calls=int(event.get("replay_calls") or 0),
+            failed=bool(event.get("failed")),
+        )
     topic_universe = {
         str(record.get("topic_id"))
         for record in declared_managed_topics(paths, structure.publication)
@@ -2848,7 +3315,23 @@ def _audit_run_locked(
         generator=generator,
         publication=structure.publication,
         topic_universe=topic_universe,
+        progress_callback=progress_event,
+        provider_call_guard=provider_call_guard,
     )
+    if settings.llm_enabled:
+        # LLM progress is recorded once per logical generation context by
+        # progress_event. Do not replace that aggregate with draft counts:
+        # one topic can contain several provider batches.
+        run_status.update(reason="provider_complete", phase="writeback")
+    else:
+        offline_batch_count = len(preflight_plan.get("logical_batches", []))
+        run_status.update(
+            reason="provider_complete",
+            phase="writeback",
+            completed_batches=offline_batch_count,
+            succeeded_batches=offline_batch_count,
+            failed_batches=0,
+        )
     typed_duplicate_contexts: list[dict[str, Any]] = []
     for draft_record in drafts:
         typed_response = draft_record.get("typed_response")
@@ -3107,6 +3590,7 @@ def _audit_run_locked(
             page_statuses=[str(draft_record.get("page_status", "published")) for draft_record in drafts],
             writes=False,
         )
+        _set_execution_report(report_path, status="blocked", phase="validation", error="coverage mapping is incomplete")
         return report_path, "audit blocked: coverage mapping is incomplete; no formal knowledge-base files written"
 
     prospective_cost = _digest_metrics(
@@ -3119,33 +3603,6 @@ def _audit_run_locked(
     prospective_cost["wall_clock_elapsed_seconds"] = round(
         max(0.0, time.monotonic() - run_started_monotonic), 3
     )
-    prospective_budget = _task0_budget_status(prospective_cost, source_count=source_notes)
-    if prospective_budget != "within_budget":
-        _finalize_report(
-            report_path,
-            writes=[],
-            pending=[],
-            cleanup=[],
-            raw_items=raw_items,
-            failed_snapshots=failed_snapshots,
-            official_status="blocked_budget",
-        )
-        _update_digest_report(
-            report_path, drafts, decisions, clusters, dry_run=False, llm_enabled=settings.llm_enabled
-        )
-        _write_similarity_audit(report_path, similarity_audit)
-        _write_task0_runtime_audit(
-            report_path,
-            settings,
-            similarity_audit,
-            kb_dir=paths.kb_dir,
-            config_identity=_config_identity(settings, structure),
-            source_count=source_notes,
-            page_statuses=[str(draft_record.get("page_status", "published")) for draft_record in drafts],
-            writes=False,
-        )
-        return report_path, f"audit blocked: Task0 budget status={prospective_budget}; no formal knowledge-base files written"
-
     if not _task0_llm_allowlist(settings) or not _task0_embedding_allowlist(settings):
         _finalize_report(
             report_path,
@@ -3170,6 +3627,7 @@ def _audit_run_locked(
             page_statuses=[str(draft_record.get("page_status", "published")) for draft_record in drafts],
             writes=False,
         )
+        _set_execution_report(report_path, status="blocked", phase="preflight", error="provider is not allowlisted")
         return report_path, "audit blocked: provider is not allowlisted; no formal knowledge-base files written"
 
     writes, pending, cleanup = _commit_outputs(
@@ -3211,6 +3669,24 @@ def _audit_run_locked(
         page_statuses=[str(draft_record.get("page_status", "published")) for draft_record in drafts],
         writes=bool(writes),
     )
+    provider_failures = [
+        failure
+        for draft_record in drafts
+        for failure in draft_record.get("provider_failures", [])
+        if isinstance(failure, Mapping)
+    ]
+    execution_status = "failed" if provider_failures else "completed"
+    execution_reason = (
+        str(provider_failures[0].get("reason") or "provider output requires review")
+        if provider_failures
+        else None
+    )
+    _set_execution_report(
+        report_path,
+        status=execution_status,
+        phase="provider" if provider_failures else "writeback",
+        error=execution_reason,
+    )
     effective_thresholds = similarity_audit["effective_thresholds"]
     summary = (
         f"audit committed: audited {source_notes} source note(s); roots={', '.join(roots)}; "
@@ -3219,4 +3695,9 @@ def _audit_run_locked(
         f"page_match_threshold={effective_thresholds['page_match_threshold']:.2f}; "
         f"max_lines={settings.max_lines}; {len(writes)} formal output(s) committed"
     )
+    if provider_failures:
+        summary = (
+            f"audit failed: {len(provider_failures)} provider failure(s) retained in Audit; "
+            "degraded topics were not added to Reader"
+        )
     return report_path, summary

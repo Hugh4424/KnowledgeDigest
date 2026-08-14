@@ -124,7 +124,7 @@ def test_offline_run_records_zero_calls_independent_statuses_and_not_released(
     budget = report["runtime_audit"]["budget"]
     assert budget["timeout_seconds"] == 180
     assert budget["replay_limit"] == 1
-    assert budget["provider_call_budget"] == 4
+    assert budget["provider_call_budget"] == 180
     assert budget["planned_generator_calls"] == 0
     assert budget["provider_calls_observed"] == 0
     assert budget["replay_calls"] == 0

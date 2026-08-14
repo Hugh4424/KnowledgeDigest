@@ -81,6 +81,62 @@ def test_batch_manifest_is_v3_with_resume_identity_and_budget_fields(tmp_path: P
     )
 
 
+def test_batch_runtime_policy_missing_limit_blocks_before_state_creation(tmp_path: Path) -> None:
+    from knowledge_digest.config import DigestSettings, RuntimePolicy
+    from knowledge_digest.batch_run import run_batched
+
+    paths = _paths(tmp_path)
+    state_path = tmp_path / "invalid-runtime-state.json"
+    settings = DigestSettings(
+        runtime=RuntimePolicy(
+            max_provider_calls=10,
+            max_replay_calls=None,
+            request_timeout_seconds=None,
+            max_wall_seconds=None,
+            concurrency=None,
+            source="config:runtime",
+        )
+    )
+
+    with pytest.raises(Exception, match="runtime policy max_replay_calls"):
+        run_batched(paths, settings, batch_size=1, state_path=state_path, resume=False)
+
+    report_path = state_path.with_name("invalid-runtime-state.json.failure-report.json")
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["execution"]["status"] == "blocked"
+    assert report["plan"]["preflight"]["status"] == "blocked"
+    assert report["cost"]["provider_calls_observed"] == 0
+    assert not state_path.exists()
+
+
+def test_resume_rejects_partial_persisted_runtime_policy(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    from knowledge_digest import batch_run
+    from knowledge_digest.config import DigestSettings
+
+    paths = _paths(tmp_path)
+    state = {
+        "budget": {
+            "max_provider_calls": 180,
+            "request_timeout_seconds": 180,
+            "max_wall_seconds": 3600,
+            "concurrency": 4,
+        }
+    }
+    monkeypatch.setattr(batch_run, "_load_or_create_state", lambda *args, **kwargs: state)
+
+    with pytest.raises(Exception, match="persisted runtime policy max_replay_calls"):
+        batch_run.run_batched(
+            paths,
+            DigestSettings(),
+            batch_size=1,
+            state_path=tmp_path / "partial-runtime-state.json",
+            dry_run=False,
+            resume=True,
+        )
+
+
 def test_failed_multi_source_batch_is_split_and_resumed(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from types import SimpleNamespace
 
@@ -242,7 +298,7 @@ def test_planned_generator_call_hard_stop_happens_before_provider(
     )
     monkeypatch.setattr(batch_run, "audit_run", lambda *args, **kwargs: pytest.fail("provider must not run after planned-call hard stop"))
 
-    with pytest.raises(Exception, match="planned generator calls exceed 180"):
+    with pytest.raises(Exception, match="planned provider calls exceed 8"):
         batch_run.run_batched(
             paths,
             DigestSettings(llm_enabled=True),
@@ -254,14 +310,14 @@ def test_planned_generator_call_hard_stop_happens_before_provider(
     assert state["budget"]["planned_generator_calls"] == 181
     assert state["budget"]["run_status"] == "paused"
     failure = json.loads(state_path.with_name("planned-state.json.failure-report.json").read_text(encoding="utf-8"))
-    assert failure["budget"]["max_planned_generator_calls"] == 180
+    assert failure["budget"]["max_planned_generator_calls"] == 8
 
 
 def test_resume_uses_persisted_wall_clock_budget(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from types import SimpleNamespace
 
     from knowledge_digest import batch_run
-    from knowledge_digest.config import DigestSettings
+    from knowledge_digest.config import DigestSettings, RuntimePolicy
 
     paths = _paths(tmp_path)
     state = {
@@ -273,6 +329,9 @@ def test_resume_uses_persisted_wall_clock_budget(monkeypatch: pytest.MonkeyPatch
         }],
         "budget": {
             "max_wall_seconds": 10,
+            "max_replay_calls": 1,
+            "request_timeout_seconds": 180,
+            "concurrency": 4,
             "started_at": 1000.0,
             "started_monotonic": 1000.0,
             "provider_calls": 0,
@@ -296,7 +355,9 @@ def test_resume_uses_persisted_wall_clock_budget(monkeypatch: pytest.MonkeyPatch
     with pytest.raises(Exception, match="wall-clock budget"):
         batch_run.run_batched(
             paths,
-            DigestSettings(),
+            DigestSettings(
+                runtime=RuntimePolicy(max_provider_calls=4, max_wall_seconds=10),
+            ),
             batch_size=1,
             state_path=tmp_path / "wall-clock-state.json",
             dry_run=False,
@@ -308,7 +369,7 @@ def test_failed_provider_attempt_is_counted_before_resume(monkeypatch: pytest.Mo
     from types import SimpleNamespace
 
     from knowledge_digest import batch_run
-    from knowledge_digest.config import DigestSettings
+    from knowledge_digest.config import DigestSettings, RuntimePolicy
     from knowledge_digest.errors import ValidationError
 
     paths = _paths(tmp_path)
@@ -321,6 +382,9 @@ def test_failed_provider_attempt_is_counted_before_resume(monkeypatch: pytest.Mo
         }],
         "budget": {
             "max_wall_seconds": 3600,
+            "max_replay_calls": 1,
+            "request_timeout_seconds": 180,
+            "concurrency": 4,
             "started_at": None,
             "started_monotonic": None,
             "provider_calls": 0,
@@ -346,7 +410,10 @@ def test_failed_provider_attempt_is_counted_before_resume(monkeypatch: pytest.Mo
     with pytest.raises(ValidationError, match="malformed"):
         batch_run.run_batched(
             paths,
-            DigestSettings(llm_enabled=True),
+            DigestSettings(
+                llm_enabled=True,
+                runtime=RuntimePolicy(max_provider_calls=1),
+            ),
             batch_size=1,
             state_path=tmp_path / "failed-call-state.json",
             dry_run=False,
@@ -357,7 +424,10 @@ def test_failed_provider_attempt_is_counted_before_resume(monkeypatch: pytest.Mo
     with pytest.raises(ValidationError, match="provider call budget"):
         batch_run.run_batched(
             paths,
-            DigestSettings(llm_enabled=True),
+            DigestSettings(
+                llm_enabled=True,
+                runtime=RuntimePolicy(max_provider_calls=1),
+            ),
             batch_size=1,
             state_path=tmp_path / "failed-call-state.json",
             dry_run=False,

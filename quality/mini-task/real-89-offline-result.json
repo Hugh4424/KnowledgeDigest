@@ -1,0 +1,33 @@
+{
+  "status": "verified",
+  "output_dir": "/Users/Hugh/Downloads/KnowledgeDigest-mini-task-89-offline-20260814",
+  "run_dir": "/Users/Hugh/Downloads/KnowledgeDigest-mini-task-89-offline-20260814/_digest/runs/run-99884ee046ba41bd835fe00d3342d1e2",
+  "source_notes": 89,
+  "preflight_sources": 87,
+  "failed_snapshots": 1,
+  "failed_snapshot_reason": "source has no body",
+  "planned_provider_calls": 0,
+  "logical_batches": 86,
+  "execution": {
+    "phase": "writeback",
+    "reason": null,
+    "status": "completed"
+  },
+  "provider_calls_observed": 0,
+  "progress": {
+    "completed_batches": 86,
+    "execution_status": "completed",
+    "failed_batches": 0,
+    "last_error": null,
+    "last_update_reason": "finished",
+    "phase": "writeback",
+    "provider_calls_observed": 0,
+    "replay_calls": 0,
+    "succeeded_batches": 86,
+    "total_batches": 86
+  },
+  "reader_pages": 120,
+  "formal_changes": 136,
+  "delivery_status": "not_released",
+  "human_reviewed": false
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": "workflowhub-spec-analyze-stage-outcome.v1",
+  "stage": "verify-code",
+  "skill_id": "spec-analyze",
+  "status": "inconsistent",
+  "semantic_summary": {
+    "stage_work": "完成原始需求、四份材料、用户流程、AC、实现和真实结果的反向对齐。",
+    "requirement_coverage": "8/8 条 AC 有实现和测试绑定。",
+    "upstream_alignment": "决策、spec、plan、tasks 与当前实现一致；发现 1 个当前证据问题。",
+    "current_stage_repairs": "修复 batch runtime fail-closed；补齐集成 heartbeat 和 KeyboardInterrupt 证据。",
+    "remaining_risks": "异源 review 绑定修复前快照，不能冒充修复后当前快照审查。",
+    "next_stage_boundary": "close 前必须保留该证据缺口；不得把它静默改写成 passed。"
+  },
+  "findings": [
+    {
+      "type": "stale_evidence",
+      "source_artifact": "review",
+      "target_artifact": "verify-code",
+      "fr_or_task_id": "stage-packet",
+      "line_or_anchor": "review",
+      "impact": "异源审查快照早于最后修复，当前审查不能证明修复后代码。",
+      "suggested_correction": "按用户约束不重发审查；保留 incomplete 事实，等待后续授权决定是否补审。",
+      "disposition": "accepted_risk"
+    }
+  ],
+  "evidence": {
+    "review_result": "quality/reviews/results/build-code-default-f06434ef0f70c4b8d26516217af8d1efe605513c-f4e7e0d5-2b52-45e9-9de3-53a90a01057f.json",
+    "final_test_receipt": "quality/tests/mini-task-final-aggregate-v3.json",
+    "real_offline_result": "quality/mini-task/real-89-offline-result.json",
+    "real_qwen_result": "quality/mini-task/real-3-qwen-result.json"
+  }
+}

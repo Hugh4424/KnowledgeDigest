@@ -164,8 +164,10 @@ def test_conflicting_content_for_the_same_source_uri_fails_before_write(tmp_path
         ],
     )
 
-    with pytest.raises(ValidationError, match="source URI is declared for both"):
-        _run(new_dir, kb_dir)
+    report_path = _run(new_dir, kb_dir)
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["execution"]["status"] == "failed"
+    assert "source URI is declared for both" in report["execution"]["reason"]
 
     assert not (kb_dir / "pages").exists()
 

@@ -123,7 +123,7 @@ def test_ac02_missing_source_manifest_does_not_synthesize_file_uri(tmp_path: Pat
 
     result = run_digest(str(new_dir), str(kb_dir))
     assert result.returncode != 0
-    assert "missing declarations" in result.stderr
+    assert "missing declarations" in result.stdout
     assert not (kb_dir / "pages").exists()
 
 
@@ -243,7 +243,7 @@ def test_ac09_ac10_missing_structure_declaration_is_fail_closed(tmp_path: Path, 
     write_source(new_dir, "good.md", "Must not be written.\n", "https://source.example/blocked")
     before = set(kb_dir.rglob("*.md"))
     result = run_digest(str(new_dir), str(kb_dir))
-    assert result.returncode == 0
+    assert result.returncode == 1
     assert "no formal knowledge-base files written" in result.stdout
     assert set(kb_dir.rglob("*.md")) == before
     report = json.loads((latest_run(kb_dir) / "report.json").read_text(encoding="utf-8"))
@@ -255,7 +255,7 @@ def test_ac09_ac10_both_structure_declarations_missing_is_fail_closed(tmp_path: 
     new_dir, kb_dir = make_case(tmp_path, why=None, version=None)
     write_source(new_dir, "good.md", "Must not be written.", "https://source.example/blocked-both")
     result = run_digest(str(new_dir), str(kb_dir))
-    assert result.returncode == 0
+    assert result.returncode == 1
     report = json.loads((latest_run(kb_dir) / "report.json").read_text(encoding="utf-8"))
     assert report["official_write"]["status"] == "blocked_structure"
     assert report["structure_check"]["allow_official_write"] is False
@@ -278,7 +278,7 @@ def test_ac09_ac10_phase0_root_layout_remains_fail_closed(tmp_path: Path, struct
     (kb_dir / "kb.structure.md").write_text(structure, encoding="utf-8")
     write_source(new_dir, "legacy.md", "Must remain blocked.\n", "https://source.example/legacy-gate")
     result = run_digest(str(new_dir), str(kb_dir))
-    assert result.returncode == 0
+    assert result.returncode == 1
     report = json.loads((latest_run(kb_dir) / "report.json").read_text(encoding="utf-8"))
     assert report["structure_check"]["allow_official_write"] is False
     assert report["official_write"]["status"] == "blocked_structure"
@@ -454,7 +454,7 @@ def test_ac15_structure_failure_leaves_existing_formal_page_untouched(tmp_path: 
         encoding="utf-8",
     )
     write_source(new_dir, "good.md", "Would be blocked.\n", "https://source.example/atomic")
-    assert run_digest(str(new_dir), str(kb_dir)).returncode == 0
+    assert run_digest(str(new_dir), str(kb_dir)).returncode == 1
     assert page.read_text(encoding="utf-8") == before
     assert snapshots_path.read_text(encoding="utf-8") == snapshots_before
 

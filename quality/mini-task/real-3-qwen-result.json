@@ -1,0 +1,37 @@
+{
+  "status": "verified",
+  "output_dir": "/Users/Hugh/Downloads/KnowledgeDigest-mini-task-qwen3-valid-20260814-26927",
+  "run_dir": "/Users/Hugh/Downloads/KnowledgeDigest-mini-task-qwen3-valid-20260814-26927/_digest/runs/run-17e3f244fa494f8dba5c18451288c888",
+  "source_count": 3,
+  "planned_provider_calls": 5,
+  "logical_batches": 5,
+  "execution": {
+    "phase": "writeback",
+    "reason": null,
+    "status": "completed"
+  },
+  "provider_calls_observed": 5,
+  "replay_calls": 0,
+  "progress": {
+    "completed_batches": 5,
+    "execution_status": "completed",
+    "failed_batches": 0,
+    "last_error": null,
+    "phase": "writeback",
+    "provider_calls_observed": 5,
+    "replay_calls": 0,
+    "succeeded_batches": 5,
+    "total_batches": 5
+  },
+  "reader_pages": 3,
+  "formal_changes": 8,
+  "machine_pass": true,
+  "page_status": "published",
+  "delivery_status": "not_released",
+  "human_reviewed": false,
+  "selected_files": [
+    "/Users/Hugh/Downloads/confluence 原始数据/emm for ios/iOS-终端管理.md",
+    "/Users/Hugh/Downloads/confluence 原始数据/emm for ios/iOS-开发者应用详情.md",
+    "/Users/Hugh/Downloads/confluence 原始数据/merchant system/系统邮件模板_系统邮件管理_邮件管理_Global System.md"
+  ]
+}

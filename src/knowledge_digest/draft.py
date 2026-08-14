@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import time
 from collections import Counter
@@ -1123,7 +1124,9 @@ def resolve_generator(settings: DigestSettings) -> Generator:
         return default_generator
     from .llm import generator_from_env
 
-    return generator_from_env(api_format=settings.llm_format)
+    provider_env = dict(os.environ)
+    provider_env["KD_LLM_TIMEOUT_SECONDS"] = str(settings.runtime.request_timeout_seconds)
+    return generator_from_env(api_format=settings.llm_format, env=provider_env)
 
 
 def _invoke_generator(generator: Generator, context: dict[str, Any]) -> Any:
@@ -1531,6 +1534,8 @@ def draft(
     dry_run: bool = False,
     publication: PublicationContract | None = None,
     topic_universe: set[str] | None = None,
+    progress_callback: Any = None,
+    provider_call_guard: Any = None,
 ) -> list[dict[str, Any]]:
     """Generate traceable drafts with bounded, auditable rethink rounds.
 
@@ -1638,6 +1643,14 @@ def draft(
                 if settings.llm_enabled
                 else [base_context]
             )
+        if settings.llm_enabled:
+            generation_contexts = [
+                {
+                    **context,
+                    "logical_batch_id": f"{stable_topic_id or decision['cluster_id']}-batch-{index:03d}",
+                }
+                for index, context in enumerate(generation_contexts, start=1)
+            ]
         if dry_run:
             drafts.append(
                 _planned_draft(
@@ -1718,6 +1731,8 @@ def draft(
             batch_index: int, context: dict[str, Any]
         ) -> tuple[int, dict[str, Any], dict[str, Any], bool, str | None, dict[str, Any] | None]:
             started = time.perf_counter()
+            logical_batch_id = str(context.get("logical_batch_id") or f"{draft_id}-batch-{batch_index:03d}")
+            provider_attempts = 0
             provider_failure: dict[str, Any] | None = None
             typed_response: dict[str, Any] | None = None
             page_draft = context.get("page_draft")
@@ -1739,6 +1754,17 @@ def draft(
                 provider_failure = None
                 typed_response = None
                 try:
+                    if progress_callback is not None and settings.llm_enabled:
+                        progress_callback(
+                            {
+                                "event": "batch_started",
+                                "logical_batch_id": logical_batch_id,
+                                "attempt": provider_attempts + 1,
+                            }
+                        )
+                    if provider_call_guard is not None:
+                        provider_call_guard(logical_batch_id, provider_attempts)
+                    provider_attempts += 1
                     result = _invoke_generator(generator, attempt_context)
                     if (
                         typed_compilation
@@ -1853,6 +1879,8 @@ def draft(
                             }
                     break
                 except ValidationError as error:
+                    if error.stage == "runtime":
+                        raise
                     if repair_round + 1 < repair_rounds:
                         repair_feedback = "Previous provider response failed before validation: " + error.reason
                         continue
@@ -1883,6 +1911,8 @@ def draft(
                 summary_enabled=settings.llm_summary_enabled,
                 evidence_body=context["initial_body"],
             )
+            batch_candidate["provider_attempt_count"] = provider_attempts if settings.llm_enabled else 0
+            batch_candidate["logical_batch_id"] = logical_batch_id
             if settings.llm_summary_enabled and not batch_candidate["explicit_invalid"]:
                 batch_candidate["summary"] = _repair_summary(
                     batch_candidate.get("summary"),
@@ -1948,6 +1978,8 @@ def draft(
                     "oversized_atomic": bool(
                         context.get("batch_oversized_atomic", False)
                     ),
+                    "logical_batch_id": logical_batch_id,
+                    "attempt": 1,
                 }
             )
             if not batch_valid and provider_failure is None and settings.llm_enabled:
@@ -1958,6 +1990,16 @@ def draft(
                 }
             if provider_failure is not None:
                 batch_record["provider_failure"] = provider_failure
+            if progress_callback is not None and settings.llm_enabled:
+                progress_callback(
+                    {
+                        "event": "batch_finished",
+                        "logical_batch_id": logical_batch_id,
+                        "provider_calls": provider_attempts,
+                        "replay_calls": max(0, provider_attempts - 1),
+                        "failed": provider_failure is not None,
+                    }
+                )
             if typed_response is not None and typed_response.get("status") == "draft":
                 batch_candidate["typed_response"] = typed_response
                 batch_candidate["typed_page_draft"] = dict(context.get("page_draft", {}))
@@ -1965,7 +2007,11 @@ def draft(
 
         results: list[tuple[int, dict[str, Any], dict[str, Any], bool, str | None, dict[str, Any] | None]] = []
         if generation_contexts:
-            worker_count = min(settings.llm_batch_concurrency, len(generation_contexts))
+            worker_count = min(
+                settings.llm_batch_concurrency,
+                int(settings.runtime.concurrency),
+                len(generation_contexts),
+            )
             if worker_count == 1:
                 results = [
                     run_batch(batch_index, context)
@@ -2178,6 +2224,10 @@ def draft(
         )
         round_record["provider_call_count"] = sum(
             int(record.get("provider_attempt_count", 1)) for record in batch_records
+        )
+        round_record["replay_call_count"] = sum(
+            max(0, int(record.get("provider_attempt_count", 0)) - 1)
+            for record in batch_records
         )
         round_record["batches"] = batch_records
         rounds = [round_record]

@@ -108,7 +108,7 @@ def test_missing_or_extra_source_declaration_fails_before_formal_write(tmp_path:
     result = _run_digest(str(new_dir), str(kb_dir), "--config", str(_offline_config(tmp_path)), "--no-llm")
 
     assert result.returncode == 1
-    assert "manifest" in result.stderr.lower()
+    assert "manifest" in result.stdout.lower()
     assert not (kb_dir / "Home.md").exists()
 
 

@@ -17,7 +17,7 @@ from .ingest import ingest
 from .jsonl import read_jsonl
 from .kb_structure import DEFAULT_ROOTS, inspect_structure
 from .paths import DigestPaths
-from .pipeline import _run_similarity_stages, audit_run
+from .pipeline import _run_similarity_stages, _runtime_policy_values, audit_run
 
 
 _INGESTIBLE_SUFFIXES = {".md", ".txt", ".json"}
@@ -311,6 +311,7 @@ def build_affected_replay_plan(
 
 def _runtime_identity(paths: DigestPaths, settings: DigestSettings) -> dict[str, Any]:
     publication = inspect_structure(paths.structure_path).publication
+    runtime_policy, runtime_policy_error = _runtime_policy_values(settings.runtime)
     return {
         "llm_model": os.environ.get("KD_LLM_MODEL", "") if settings.llm_enabled else None,
         "llm_base_url": os.environ.get("KD_LLM_BASE_URL", "") if settings.llm_enabled else None,
@@ -322,6 +323,7 @@ def _runtime_identity(paths: DigestPaths, settings: DigestSettings) -> dict[str,
         "llm_batch_max_claims": settings.llm_batch_max_claims if settings.llm_enabled else None,
         "llm_batch_max_source_chars": settings.llm_batch_max_source_chars if settings.llm_enabled else None,
         "llm_summary_enabled": settings.llm_summary_enabled if settings.llm_enabled else None,
+        "runtime_policy": runtime_policy or {"error": runtime_policy_error},
     }
 
 
@@ -395,6 +397,7 @@ def _cost_summary(state: dict[str, Any]) -> dict[str, Any]:
         "max_planned_generator_calls": budget.get("max_planned_generator_calls", BATCH_MAX_PLANNED_GENERATOR_CALLS),
         "planned_generator_report_path": budget.get("planned_generator_report_path"),
         "provider_calls_planned": planned,
+        "planned_provider_calls": budget.get("planned_provider_calls", planned),
         "provider_calls_planned_basis": "sum of committed audit reports" if planned is not None else "unknown until an audit report is returned",
         "provider_calls_reserved": int(budget.get("provider_calls", 0)),
         "provider_calls_observed": observed,
@@ -444,6 +447,7 @@ def _write_failure_report(state: dict[str, Any], state_path: Path) -> Path:
                 "max_planned_generator_calls": budget.get("max_planned_generator_calls", BATCH_MAX_PLANNED_GENERATOR_CALLS),
                 "planned_generator_report_path": budget.get("planned_generator_report_path"),
                 "provider_calls_planned": None,
+                "planned_provider_calls": budget.get("planned_provider_calls"),
                 "provider_calls_planned_basis": "unknown until an audit report is returned",
                 "provider_calls_reserved": int(budget.get("provider_calls", 0)),
                 "provider_calls_observed": None,
@@ -566,11 +570,14 @@ def _load_or_create_state(
     state = _manifest(paths, batch_size)
     state["runtime_identity"] = _runtime_identity(paths, settings)
     state["budget"] = {
-        "max_wall_seconds": BATCH_WALL_CLOCK_SECONDS,
         "started_at": None,
         "started_monotonic": None,
         "provider_calls": 0,
-        "max_provider_calls": max(1, len(state["sources"]) * 4),
+        "max_provider_calls": settings.runtime.max_provider_calls,
+        "max_replay_calls": settings.runtime.max_replay_calls,
+        "request_timeout_seconds": settings.runtime.request_timeout_seconds,
+        "max_wall_seconds": settings.runtime.max_wall_seconds,
+        "concurrency": settings.runtime.concurrency,
         "failed_calls": 0,
         "run_failures": 0,
         "replay_calls": 0,
@@ -581,6 +588,33 @@ def _load_or_create_state(
     }
     _atomic_json(state_path, state)
     return state
+
+
+def _validate_persisted_runtime_budget(
+    state: dict[str, Any], settings: DigestSettings, state_path: Path
+) -> dict[str, int]:
+    """Reject incomplete or changed runtime limits before a resumed batch runs."""
+    values, error = _runtime_policy_values(settings.runtime)
+    if error is not None or values is None:
+        raise ValidationError("runtime", state_path, error or "runtime policy is invalid")
+    budget = state.get("budget")
+    if not isinstance(budget, dict):
+        raise ValidationError("runtime", state_path, "persisted batch budget is missing")
+    for name, expected in values.items():
+        actual = budget.get(name)
+        if isinstance(actual, bool) or not isinstance(actual, int) or actual < 1:
+            raise ValidationError(
+                "runtime",
+                state_path,
+                f"persisted runtime policy {name} is missing or must be a positive integer",
+            )
+        if actual != expected:
+            raise ValidationError(
+                "runtime",
+                state_path,
+                f"runtime policy {name} changed; start a new batch state",
+            )
+    return values
 
 
 def _global_plan(
@@ -701,15 +735,52 @@ def run_batched(
             paths.structure_path,
             "Task1 topic-axis runs use one fixed manifest; batch mode is not supported",
         )
+    _runtime_values, runtime_error = _runtime_policy_values(settings.runtime)
+    if runtime_error is not None:
+        report_path = _failure_report_path(state_path)
+        _atomic_json(
+            report_path,
+            {
+                "schema_version": "batch-failure-report.v1",
+                "execution": {
+                    "status": "blocked",
+                    "phase": "preflight",
+                    "reason": runtime_error,
+                },
+                "plan": {
+                    "preflight": {"status": "blocked", "reason": runtime_error},
+                    "planned_provider_calls": 0,
+                    "policy": {
+                        "max_provider_calls": settings.runtime.max_provider_calls,
+                        "max_replay_calls": settings.runtime.max_replay_calls,
+                        "request_timeout_seconds": settings.runtime.request_timeout_seconds,
+                        "max_wall_seconds": settings.runtime.max_wall_seconds,
+                        "concurrency": settings.runtime.concurrency,
+                    },
+                    "policy_source": settings.runtime.source,
+                },
+                "cost": {
+                    "planned_provider_calls": 0,
+                    "provider_calls_observed": 0,
+                    "replay_calls": 0,
+                },
+            },
+        )
+        raise ValidationError("runtime", report_path, runtime_error)
     state = _load_or_create_state(paths, state_path, batch_size, settings, resume=resume)
+    if resume:
+        _validate_persisted_runtime_budget(state, settings, state_path)
     budget = state.setdefault(
         "budget",
         {
-            "max_wall_seconds": BATCH_WALL_CLOCK_SECONDS,
             "started_at": None,
             "started_monotonic": None,
             "provider_calls": 0,
-            "max_provider_calls": max(1, len(state.get("sources", [])) * 4),
+            "max_provider_calls": settings.runtime.max_provider_calls,
+            "max_replay_calls": settings.runtime.max_replay_calls,
+            "request_timeout_seconds": settings.runtime.request_timeout_seconds,
+            "max_wall_seconds": settings.runtime.max_wall_seconds,
+            "concurrency": settings.runtime.concurrency,
             "failed_calls": 0,
             "run_failures": 0,
             "replay_calls": 0,
@@ -720,6 +791,11 @@ def run_batched(
         },
     )
     for key, default in (
+        ("max_provider_calls", settings.runtime.max_provider_calls),
+        ("max_replay_calls", settings.runtime.max_replay_calls),
+        ("request_timeout_seconds", settings.runtime.request_timeout_seconds),
+        ("max_wall_seconds", settings.runtime.max_wall_seconds),
+        ("concurrency", settings.runtime.concurrency),
         ("failed_calls", 0),
         ("run_failures", 0),
         ("replay_calls", 0),
@@ -745,7 +821,7 @@ def run_batched(
         # Do not even run a provider-free planner when a resumed state has
         # already exhausted its caller-owned reservation budget.
         if int(budget.get("provider_calls", 0)) >= int(
-            budget.get("max_provider_calls", max(1, len(state.get("sources", [])) * 4))
+            budget.get("max_provider_calls")
         ):
             budget["run_status"] = "paused"
             budget["pause_reason"] = "provider call budget exceeded"
@@ -766,14 +842,17 @@ def run_batched(
                 global_duplicates,
             )
             budget["planned_generator_calls"] = planned
+            budget["planned_provider_calls"] = planned
             budget["planned_generator_calls_basis"] = "full-manifest dry-run"
             budget["planned_generator_report_path"] = preflight_report.as_posix()
             preflight_report_path = preflight_report.as_posix()
             _atomic_json(state_path, state)
-        if int(planned) > BATCH_MAX_PLANNED_GENERATOR_CALLS:
+        if int(planned) > int(budget["max_provider_calls"]):
             budget["run_status"] = "paused"
-            budget["pause_reason"] = "planned generator calls exceed 180"
-            budget["max_planned_generator_calls"] = BATCH_MAX_PLANNED_GENERATOR_CALLS
+            budget["pause_reason"] = (
+                f"planned provider calls exceed {budget['max_provider_calls']}"
+            )
+            budget["max_planned_generator_calls"] = int(budget["max_provider_calls"])
             state["cost_summary"] = _cost_summary(state)
             _atomic_json(state_path, state)
             _write_failure_report(state, state_path)
@@ -781,7 +860,7 @@ def run_batched(
             raise ValidationError(
                 "batch",
                 preflight_report_path or state_path,
-                f"planned generator calls exceed {BATCH_MAX_PLANNED_GENERATOR_CALLS}; no provider request was sent",
+                f"planned provider calls exceed {budget['max_provider_calls']}; no provider request was sent",
             )
     last_report: Path | None = None
     index = 0
@@ -799,10 +878,11 @@ def run_batched(
             _atomic_json(state_path, state)
             _write_failure_report(state, state_path)
             _atomic_json(state_path, state)
-            raise ValidationError("batch", state_path, "60 minute wall-clock budget exceeded")
+            limit = budget.get("max_wall_seconds", BATCH_WALL_CLOCK_SECONDS)
+            raise ValidationError("batch", state_path, f"wall-clock budget exceeded ({limit}s)")
         planned_calls = int(batch.get("planned_calls", 1))
         if settings.llm_enabled and int(budget.get("provider_calls", 0)) + planned_calls > int(
-            budget.get("max_provider_calls", max(1, len(state.get("sources", [])) * 4))
+            budget.get("max_provider_calls")
         ):
             budget["run_status"] = "paused"
             budget["pause_reason"] = "provider call budget exceeded"
@@ -815,11 +895,19 @@ def run_batched(
             budget["provider_calls"] = int(budget.get("provider_calls", 0)) + planned_calls
             _atomic_json(state_path, state)
         batch["status"] = "running"
-        is_replay = int(batch.get("attempt", 0)) > 0 or bool(batch.get("split_from"))
+        is_replay = int(batch.get("attempt", 0)) > 0
         batch["attempt"] = int(batch.get("attempt", 0)) + 1
         batch["error"] = None
         if is_replay:
-            budget["replay_calls"] = int(budget.get("replay_calls", 0)) + 1
+            budget["replay_calls"] = int(budget.get("replay_calls", 0)) + planned_calls
+            if budget["replay_calls"] > int(budget.get("max_replay_calls", 1)):
+                budget["run_status"] = "paused"
+                budget["pause_reason"] = "replay call budget exceeded"
+                state["cost_summary"] = _cost_summary(state)
+                _atomic_json(state_path, state)
+                _write_failure_report(state, state_path)
+                _atomic_json(state_path, state)
+                raise ValidationError("batch", state_path, "replay call budget exceeded")
         _atomic_json(state_path, state)
         reports_before = _run_report_paths(paths)
         attempt_started = time.time()
