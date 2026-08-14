@@ -343,6 +343,39 @@ def _load_semantic_candidate(candidate_root: Path | None) -> dict[str, dict[str,
     return result
 
 
+def _semantic_manifest_info(candidate_root: Path | None) -> dict[str, Any]:
+    """Read the optional semantic compiler manifest without trusting it blindly."""
+
+    default_limit = 9000
+    if candidate_root is None:
+        return {"max_chars_per_source": default_limit, "truncated": {}, "error": None}
+    root = Path(candidate_root)
+    manifest_path = root / "audit" / "semantic-manifest.json"
+    if not manifest_path.exists():
+        return {"max_chars_per_source": default_limit, "truncated": {}, "error": None}
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if not isinstance(manifest, Mapping):
+            raise ValueError("semantic manifest must be an object")
+        limit = manifest.get("max_chars_per_source", default_limit)
+        if not isinstance(limit, int) or limit <= 0:
+            raise ValueError("semantic manifest max_chars_per_source must be positive")
+        truncated: dict[str, dict[str, Any]] = {}
+        failures = manifest.get("failures", [])
+        if not isinstance(failures, list):
+            raise ValueError("semantic manifest failures must be a list")
+        for item in failures:
+            if not isinstance(item, Mapping) or item.get("status") != "semantic_truncated_fallback":
+                continue
+            uri = item.get("source_uri")
+            if not isinstance(uri, str) or not uri.strip():
+                raise ValueError("semantic truncated failure is missing source_uri")
+            truncated[uri] = dict(item)
+        return {"max_chars_per_source": limit, "truncated": truncated, "error": None}
+    except (OSError, UnicodeError, json.JSONDecodeError, TypeError, ValueError) as exc:
+        return {"max_chars_per_source": default_limit, "truncated": {}, "error": f"{type(exc).__name__}: {exc}"}
+
+
 def _semantic_module_counts(semantic_map: Mapping[str, Mapping[str, Any]]) -> dict[tuple[str, str], int]:
     counts: dict[tuple[str, str], int] = {}
     prefix = "raw://confluence/"
@@ -480,7 +513,7 @@ def _write_product_pages(bundle: Path, product: str, label: str, documents: list
                 following = names[i] if i < len(names) else None
                 rel = f"products/{product}/modules/{module}/knowledge/{names[i - 1]}"
                 body = _part_body(title=document.title, summary=summary, chunk=chunk, index=i, total=len(chunks), previous=previous, following=following, source_reference=source_reference)
-                status = "degraded" if document.semantic_status in {"fidelity_only", "unclassified", "candidate_mismatch", "semantic_empty", "semantic_fact_loss_fallback"} else "published"
+                status = "degraded" if document.semantic_status in {"fidelity_only", "unclassified", "candidate_mismatch", "semantic_empty", "semantic_fact_loss_fallback", "semantic_truncated_fallback", "semantic_manifest_unavailable"} else "published"
                 (knowledge_root / names[i - 1]).write_text(_reader_document(title=document.title, description=summary, status=status, body=body), encoding="utf-8")
                 page_count += 1
             page_paths[document.source_id] = [
@@ -594,6 +627,9 @@ def compile_reader_bundle(input_root: Path, output_root: Path, *, semantic_candi
     _assert_output_root(Path(output_root))
     output_root = Path(output_root).resolve()
     semantic_map = _load_semantic_candidate(semantic_candidate)
+    semantic_info = _semantic_manifest_info(semantic_candidate)
+    semantic_limit = semantic_info["max_chars_per_source"]
+    semantic_truncated = semantic_info["truncated"]
     semantic_module_counts = _semantic_module_counts(semantic_map)
     bundle = output_root / "bundle"
     audit = output_root / "audit"
@@ -604,6 +640,12 @@ def compile_reader_bundle(input_root: Path, output_root: Path, *, semantic_candi
     documents: list[SourceDocument] = []
     failures: list[dict[str, Any]] = []
     source_paths = [path for path in sorted(input_root.rglob("*")) if path.is_file() and not path.name.startswith(".") and path.suffix.lower() in SUPPORTED_SUFFIXES]
+    if semantic_info["error"] and semantic_candidate is not None and not semantic_map:
+        failures.append({
+            "relative_path": "audit/semantic-manifest.json",
+            "status": "semantic_manifest_unavailable",
+            "reason": semantic_info["error"],
+        })
     for path in source_paths:
         relative = path.relative_to(input_root).as_posix()
         raw, error = _safe_read(path)
@@ -639,7 +681,35 @@ def compile_reader_bundle(input_root: Path, output_root: Path, *, semantic_candi
         semantic_status = "fidelity_only"
         semantic_module = None
         mapping_reason = product_reason
-        if semantic is not None:
+        if uri in semantic_truncated:
+            semantic_status = "semantic_truncated_fallback"
+            mapping_reason = "semantic_truncated_fallback"
+            failure = dict(semantic_truncated[uri])
+            failure.update({"source_id": source_id, "source_uri": uri, "relative_path": relative})
+            failures.append(failure)
+        elif semantic is not None and semantic_info["error"]:
+            semantic_status = "semantic_manifest_unavailable"
+            mapping_reason = "semantic_manifest_unavailable"
+            failures.append({
+                "source_id": source_id,
+                "source_uri": uri,
+                "relative_path": relative,
+                "status": "semantic_manifest_unavailable",
+                "reason": semantic_info["error"],
+            })
+        elif semantic is not None and len(raw) > semantic_limit:
+            semantic_status = "semantic_truncated_fallback"
+            mapping_reason = "semantic_truncated_fallback"
+            failures.append({
+                "source_id": source_id,
+                "source_uri": uri,
+                "relative_path": relative,
+                "status": "semantic_truncated_fallback",
+                "reason": "candidate_manifest_missing_or_failed_to_record_truncation",
+                "input_chars": len(raw),
+                "max_chars_per_source": semantic_limit,
+            })
+        elif semantic is not None:
             if semantic.get("fingerprint") == fingerprint:
                 candidate_body = _clean_body(str(semantic.get("body") or ""), title)
                 semantic_summary = _normalize_label(str(semantic.get("summary") or "")) if semantic.get("summary") else None
@@ -771,12 +841,15 @@ def compile_reader_bundle(input_root: Path, output_root: Path, *, semantic_candi
     for document in sorted(documents, key=lambda item: item.relative_path):
         names = reader_paths[document.source_id]
         source_entries.append({"source_id": document.source_id, "source_uri": document.source_uri, "relative_path": document.relative_path, "title": document.title, "content_fingerprint": document.content_fingerprint, "line_count": document.line_count, "validation_status": document.integrity_status, "validation_reason": list(document.integrity_details), "product": document.product, "product_label": document.product_label, "module": document.module, "module_label": document.module_label, "knowledge_type": document.knowledge_type, "knowledge_type_label": document.knowledge_type_label, "knowledge_type_reason": document.knowledge_type_reason, "mapping_reason": document.mapping_reason, "reader_paths": names, "semantic_status": document.semantic_status})
+    for entry in source_entries:
+        entry["semantic_input_chars"] = len(next(document.raw_text for document in documents if document.source_id == entry["source_id"]))
+        entry["semantic_max_chars_per_source"] = semantic_limit
     _write_json(audit / "source-manifest.json", {"schema_version": "reader-source-manifest.v2", "generated_at": _now(), "source_count": len(source_paths), "failure_count": len(failures), "entries": source_entries, "failures": failures})
     run_status = "degraded" if failures else "candidate"
     _write_json(audit / "run-manifest.json", {"schema_version": "reader-compiler-run.v1", "generated_at": _now(), "status": run_status, "input_root": str(input_root), "semantic_candidate": str(Path(semantic_candidate).resolve()) if semantic_candidate else None, "source_count": len(source_paths), "failure_count": len(failures)})
     quality = _quality_score(bundle=bundle, documents=documents, source_total=len(source_paths), product_count=len(products), module_count=total_modules, page_count=total_pages, source_anchors=source_anchors)
     quality["semantic_candidate_count"] = sum(document.semantic_status == "semantic_candidate" for document in documents)
-    quality["fidelity_only_count"] = sum(document.semantic_status in {"fidelity_only", "unclassified", "candidate_mismatch", "semantic_empty", "semantic_fact_loss_fallback"} for document in documents)
+    quality["fidelity_only_count"] = sum(document.semantic_status in {"fidelity_only", "unclassified", "candidate_mismatch", "semantic_empty", "semantic_fact_loss_fallback", "semantic_truncated_fallback", "semantic_manifest_unavailable"} for document in documents)
     _write_json(reports / "quality.json", quality)
     _write_json(reports / "projection-report.json", {"schema_version": "reader-projection-report.v2", "status": quality["status"], "source_count": len(source_paths), "failure_count": len(failures), "product_count": len(products), "module_count": total_modules, "knowledge_type_count": len({document.knowledge_type for document in documents}), "reader_page_count": total_pages, "logical_entry_count": len(documents), "semantic_candidate_count": quality["semantic_candidate_count"], "fidelity_only_count": quality["fidelity_only_count"]})
     release_status = "not_released"

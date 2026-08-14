@@ -136,7 +136,30 @@ def compile_semantic_candidates(
     (output_root / "bundle").mkdir()
     successes: list[dict[str, Any]] = []
     failures: list[dict[str, Any]] = []
-    batches = [records[i:i + batch_size] for i in range(0, len(records), batch_size)]
+    eligible: list[dict[str, Any]] = []
+    truncated: list[dict[str, Any]] = []
+    for source in records:
+        input_chars = len(source["text"])
+        if input_chars > max_chars_per_source:
+            truncated.append({
+                "source_uri": source["source_uri"],
+                "relative_path": source["relative_path"],
+                "status": "semantic_truncated_fallback",
+                "reason": "input_exceeds_max_chars_per_source",
+                "input_chars": input_chars,
+                "max_chars_per_source": max_chars_per_source,
+            })
+        else:
+            eligible.append(source)
+    failures.extend(truncated)
+    if truncated:
+        print(
+            f"semantic preflight: {len(truncated)} sources exceed {max_chars_per_source} chars; "
+            "kept as full-source fallback, no provider call",
+            file=sys.stderr,
+            flush=True,
+        )
+    batches = [eligible[i:i + batch_size] for i in range(0, len(eligible), batch_size)]
     for index, batch in enumerate(batches, start=1):
         try:
             response = call_llm(
@@ -167,9 +190,32 @@ def compile_semantic_candidates(
     reports = output_root / "reports"
     audit.mkdir()
     reports.mkdir()
-    manifest = {"schema_version": "task3-semantic-candidate.v1", "source_count": len(records), "semantic_candidate_count": len(successes), "failure_count": len(failures), "entries": successes, "failures": failures}
+    manifest = {
+        "schema_version": "task3-semantic-candidate.v1",
+        "source_count": len(records),
+        "semantic_candidate_count": len(successes),
+        "failure_count": len(failures),
+        "max_chars_per_source": max_chars_per_source,
+        "truncated_count": len(truncated),
+        "entries": successes,
+        "failures": failures,
+    }
     (audit / "semantic-manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    report = {"schema_version": "task3-semantic-compile.v1", "status": "passed" if not failures else "degraded", "source_count": len(records), "semantic_candidate_count": len(successes), "failure_count": len(failures), "batch_size": batch_size, "batch_count": len(batches), "replays": 0, "model": model, "base_url": base_url, "failures": failures}
+    report = {
+        "schema_version": "task3-semantic-compile.v1",
+        "status": "passed" if not failures else "degraded",
+        "source_count": len(records),
+        "semantic_candidate_count": len(successes),
+        "failure_count": len(failures),
+        "max_chars_per_source": max_chars_per_source,
+        "truncated_count": len(truncated),
+        "batch_size": batch_size,
+        "batch_count": len(batches),
+        "replays": 0,
+        "model": model,
+        "base_url": base_url,
+        "failures": failures,
+    }
     (reports / "semantic-compile.json").write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return report
 
