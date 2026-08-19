@@ -1,0 +1,49 @@
+{
+  "candidate_status": "candidate",
+  "companybrain_binding": {
+    "entries": [
+      {
+        "path": "Home.md",
+        "role": "home",
+        "sha256": "cac402ccaef6bc55bef765ea93405a6af4c315d35cb68ecca7448249e729be2f"
+      },
+      {
+        "path": "Products/产品索引.md",
+        "role": "product-index",
+        "sha256": "75e3b641ea4506c67cc4f209b1322a5a0c5381b295243fc0826299e32ae449d7"
+      },
+      {
+        "path": "Products/GoInsight/文档总览.md",
+        "role": "goinsight-overview",
+        "sha256": "0a22821c27352cb31f6c39e7b44e229d54fba82f2f5de0e4e99cd3b2ebe399f9"
+      },
+      {
+        "path": "Products/GoInsight/模块手册/模块总览.md",
+        "role": "module-index",
+        "sha256": "daea01ef80111682ce15ae79b9accc4251e3889d5dbf154c128e6c31f7448cae"
+      },
+      {
+        "path": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+        "role": "target",
+        "sha256": "9ac850ad9816a422997f99a4564b55ea84dc2834171e7a853bdecbc03c0f4edf"
+      }
+    ],
+    "entry_chain_version": "companybrain-entry-chain-v1",
+    "manifest_id": "companybrain-goinsight-field-filter-20260817-v1",
+    "target_path": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+    "target_sha256": "9ac850ad9816a422997f99a4564b55ea84dc2834171e7a853bdecbc03c0f4edf"
+  },
+  "decision": "undecidable",
+  "delivery_status": "not_released",
+  "failure_reasons": [
+    "evaluator record unavailable"
+  ],
+  "no_network": true,
+  "reader_only": true,
+  "reader_snapshots": {
+    "companybrain": "d6175d5eb2b5584abb1cf68d1dc6b611358fa9f7af9555697f2d0c3d0ed7f84a",
+    "knowledge_digest": "dcb24677144069b41d481b14129134428074b214f688f0fbdcb91de66cb6711b"
+  },
+  "schema_version": "task4-location-comparison-run.v1",
+  "status": "undecidable"
+}

@@ -1,0 +1,44 @@
+{
+  "schema_version": "task4-verify-repair.v1",
+  "step": "repair-current-findings",
+  "changes": [
+    {
+      "finding": "ARCH-004",
+      "disposition": "fixed",
+      "details": [
+        "编译配置现在加载 page_type_fixture，并对未知页面类型 fail-loud。",
+        "质量评估优先使用 source_to_case_map/source_snapshot_id 与 topic.source_ids 绑定案例，不再只依赖 canonical_case_id 或标题。"
+      ],
+      "anchors": [
+        "src/knowledge_digest/task4_reader_quality.py:_load_config",
+        "src/knowledge_digest/task4_reader_quality.py:_page_type",
+        "src/knowledge_digest/task4_reader_quality.py:assess_reader_quality"
+      ],
+      "test": "tests/acceptance/test_task4_full_compiler.py::test_page_type_fixture_controls_compile_and_required_sections; tests/acceptance/test_task4_full_quality.py::test_machine_evaluator_uses_source_map_before_canonical_case_id"
+    },
+    {
+      "finding": "ARCH-001",
+      "disposition": "accepted_risk",
+      "details": "空来源仍按全量硬门阻止 candidate；不能在 verify 中伪造成功。"
+    },
+    {
+      "finding": "ARCH-002",
+      "disposition": "needs_human",
+      "details": "89 条 CompanyBrain 唯一映射不是代码可以安全猜出的事实，保持 undecidable。"
+    },
+    {
+      "finding": "ARCH-003",
+      "disposition": "accepted_risk",
+      "details": "正文仍需继续做结构化知识编辑；当前不把清洗后的 bullet 平铺误报为 CompanyBrain 级正文。"
+    },
+    {
+      "finding": "ARCH-005",
+      "disposition": "needs_human",
+      "details": "正文与 CompanyBrain 的实际优劣仍由后续有效 baseline、正文 oracle 和真实 candidate 共同决定。"
+    }
+  ],
+  "focused_test": {
+    "command": "env PYTHONDONTWRITEBYTECODE=1 uv run --frozen pytest -q -p no:cacheprovider tests/acceptance/test_task4_full_compiler.py tests/acceptance/test_task4_full_quality.py",
+    "result": "15 passed in 0.27s"
+  }
+}

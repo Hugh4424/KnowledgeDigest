@@ -1,0 +1,12 @@
+{
+  "candidate_status": "not_released",
+  "canonical_page": null,
+  "delivery_status": "not_released",
+  "failure_code": "manifest_drift",
+  "failure_reasons": [
+    "source manifest drift: GoInsight/数据分析.md"
+  ],
+  "output_root": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task4-location-candidate-20260817-v1",
+  "reader_eligible": false,
+  "status": "failed"
+}

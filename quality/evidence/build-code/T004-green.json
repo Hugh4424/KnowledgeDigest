@@ -1,0 +1,28 @@
+{
+  "schema_version": "task4-build-code-evidence.v1",
+  "task_id": "task4-reader-quality-compiler",
+  "phase_id": "P2",
+  "task": "T004",
+  "verification_role": "GREEN",
+  "commands": [
+    {"command": "python -m py_compile scripts/task4_reader_quality.py src/knowledge_digest/task4_reader_quality.py", "exit_code": 0},
+    {"command": "uv run --frozen pytest -q tests/acceptance/test_task4_full_compiler.py tests/acceptance/test_task4_full_quality.py", "exit_code": 0, "result": "12 passed"}
+  ],
+  "oracle": "ORACLE-T4-FULL-QUALITY",
+  "fixture_result": {"status": "better_than_companybrain", "release_status": "not_released", "rows": 20, "positive_first_hits": 17, "negative_false_hits": 0},
+  "real_result": {
+    "compile_output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-full-20260818-v3",
+    "assessment_output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-quality-20260818-v4",
+    "status": "undecidable",
+    "release_status": "not_released",
+    "blocking_reasons": ["human_review_incomplete_or_issue", "question_oracle_missing"],
+    "machine_source_count": 89,
+    "positive_first_hits": 17,
+    "negative_false_hits": 0
+  },
+  "repair_review_refs": [
+    "quality/reviews/reports/8fdd2e94-9940-4bc9-a88a-406ee64e6835.md",
+    "quality/reviews/reports/863ff911-6032-4e3a-b65e-592c79327699.md"
+  ],
+  "coverage_limit": "formal superiority requires one completed 17+3 human table with per-question answer anchors"
+}

@@ -1,0 +1,542 @@
+{
+  "schema_version": "task4-source-coverage.v1",
+  "input_manifest_id": "confluence-raw-89-20260818-v1",
+  "expected_count": 89,
+  "manifest_hash": "e1842f683ee3b92fbe532d781a3cd374563ac94e4db3240272238481e33765bf",
+  "entries": [
+    {
+      "source_uri": "GoInsight/12. GoInsight DC部署方案.md",
+      "source_id": "source-f861b295c9403379",
+      "content_hash": "a80a7f39ecb214ef4bcd7ff216314d48cc5bb80ec4141ae4d91baee90bbda51b",
+      "byte_count": 5189
+    },
+    {
+      "source_uri": "GoInsight/16 问数自动识别数据集.md",
+      "source_id": "source-17b9562c8a29cf19",
+      "content_hash": "c37d40c8b16b6640ed09813572e69e280ffb404446952e8bde96c74d78c52973",
+      "byte_count": 2064
+    },
+    {
+      "source_uri": "GoInsight/17  智能搭建.md",
+      "source_id": "source-a6d52989f77f1be4",
+      "content_hash": "f13a606b8e3905db2b0cf5ae94d8e61f0ae79b0f26cfba02074b61986ec6e96f",
+      "byte_count": 1219
+    },
+    {
+      "source_uri": "GoInsight/2021 Annual Leave Plan.md",
+      "source_id": "source-b93446032e697251",
+      "content_hash": "a6acfd18d29e89756e0ec09a2e845887d63258805e70a79205c69b7a416ceba7",
+      "byte_count": 2335
+    },
+    {
+      "source_uri": "GoInsight/GoInsight V2.2.0 bug analysis.md",
+      "source_id": "source-851f3b6840948ec6",
+      "content_hash": "5c11720af889bccc74877c5be1035ed6e1f43d442cb3630d858cadd886812263",
+      "byte_count": 2339
+    },
+    {
+      "source_uri": "GoInsight/Sprint 116 Retrospective meeting.md",
+      "source_id": "source-1cda3ba7f292ef4f",
+      "content_hash": "676177b722393ce8ce743e0182c8d147e1a4f0ceca824e124476454b8231e527",
+      "byte_count": 1634
+    },
+    {
+      "source_uri": "GoInsight/位置字段筛选.md",
+      "source_id": "source-edbe562ea7dc0e71",
+      "content_hash": "32b3c01b03a44727c6a692e9b10e3ee71106abec1f90c45272cbd75c9bce32b1",
+      "byte_count": 5284
+    },
+    {
+      "source_uri": "GoInsight/创建设备报告.md",
+      "source_id": "source-e188aa9129d6da2c",
+      "content_hash": "c1ee20845ae9abee8b130a8fe7bd3cfd7264f4a2304686fc9f9bec558e5b222e",
+      "byte_count": 54529
+    },
+    {
+      "source_uri": "GoInsight/图表类型.md",
+      "source_id": "source-f2990cf7e65a4f5e",
+      "content_hash": "2fb085f12322ed8a45563aabd8172f69ca9722a99af6890f756655f9f9217ad3",
+      "byte_count": 15431
+    },
+    {
+      "source_uri": "GoInsight/市场报告快照.md",
+      "source_id": "source-9b101e2d2bdc0893",
+      "content_hash": "fd020de7dd9ac3ea800c02723ab06089476f65257858937b713f488ec185c811",
+      "byte_count": 5927
+    },
+    {
+      "source_uri": "GoInsight/指标详情页.md",
+      "source_id": "source-063a21f2850f118f",
+      "content_hash": "1e3758853a89257fcf0b2d99c5d5f08cc95f968b7d70079c85299123a3f6fae7",
+      "byte_count": 10618
+    },
+    {
+      "source_uri": "GoInsight/收费应用安装统计.md",
+      "source_id": "source-a2ca47088539639e",
+      "content_hash": "5234687971c2941d8de787cff01187edb9a7227e54ef7eb64608a0011908023b",
+      "byte_count": 4297
+    },
+    {
+      "source_uri": "GoInsight/数据分析.md",
+      "source_id": "source-7d71210e65c068fb",
+      "content_hash": "52abb4c14c9beb1f0752bb6c50a8da9bef225237fc46e76f5f9c471e87c42668",
+      "byte_count": 6753
+    },
+    {
+      "source_uri": "GoInsight/新建迁移任务.md",
+      "source_id": "source-e4b45c1d08eea85a",
+      "content_hash": "d1e600db386a4002eee43a69fc8e94e32af8fb33ac55399bc4789da0e7f8bb28",
+      "byte_count": 15089
+    },
+    {
+      "source_uri": "GoInsight/日志管理.md",
+      "source_id": "source-29b7e7f80334b5f3",
+      "content_hash": "370fc8f996de01d759bfc1b438992a5e5827ae57c6791b25d74aa47e524f0b1c",
+      "byte_count": 2960
+    },
+    {
+      "source_uri": "GoInsight/智能删除图表.md",
+      "source_id": "source-0cedc3c9ac283daf",
+      "content_hash": "80a176eb1cfb6ef10be82c7c11201ab7d39296db0d6897537ce41e07926add62",
+      "byte_count": 4785
+    },
+    {
+      "source_uri": "GoInsight/智能查询文档.md",
+      "source_id": "source-a543696e43f38d8d",
+      "content_hash": "23f9e16c27bf3fdd139668a3b5ea7a372f21f53dfd230bc769a77d8055b9a756",
+      "byte_count": 2331
+    },
+    {
+      "source_uri": "GoInsight/添加关联数据.md",
+      "source_id": "source-8bad219625abda5e",
+      "content_hash": "e669ce76f46b613b308ecdabf60d7ad2f96a5efc57ac4503f29e1fc553dd3ae5",
+      "byte_count": 29715
+    },
+    {
+      "source_uri": "GoInsight/添加指标页.md",
+      "source_id": "source-bbe5f79e1f79b2cc",
+      "content_hash": "66544230f10923384ed88723ab0467a86c508295597af05706b576e0241bf0d0",
+      "byte_count": 21474
+    },
+    {
+      "source_uri": "GoInsight/累计计算.md",
+      "source_id": "source-2a3d754a406a54f2",
+      "content_hash": "d30d2efca1e75c35a8e1697476e95711e6ea48810c856adc170b925150305328",
+      "byte_count": 6465
+    },
+    {
+      "source_uri": "GoInsight/设备位置历史数据集.md",
+      "source_id": "source-292513d4132deb53",
+      "content_hash": "39b5bf52e177319239ebe6afb1df037163b6e567ef2ae2752bc46b3bab739cb6",
+      "byte_count": 3544
+    },
+    {
+      "source_uri": "GoInsight/迁移任务列表.md",
+      "source_id": "source-e2ad89e398a74c8a",
+      "content_hash": "35499e746a06a158ae69b05254094decd71af6ba792a75125ee4f0ac9740871b",
+      "byte_count": 15652
+    },
+    {
+      "source_uri": "emm for android /AE - AirViewer厂商管理.md",
+      "source_id": "source-4fef4600b6629a02",
+      "content_hash": "8b28dec38f962c2a291b3063c3ea6e5e8a3f36e6f1884f9e88c449432b3be885",
+      "byte_count": 5
+    },
+    {
+      "source_uri": "emm for android /AE - GoInsight数据收集.md",
+      "source_id": "source-cdaa211a1f9d9e1b",
+      "content_hash": "8b90893e86e07875cb5d82f3c0b7f774018faaf87a52926b7ab47b9331e39a76",
+      "byte_count": 46577
+    },
+    {
+      "source_uri": "emm for android /AE - 应用定向发布.md",
+      "source_id": "source-78e62a6a7dc33f89",
+      "content_hash": "b1871b739d9afa5a1765ffa139bacc42cc810355e68724c2aacd5e895935147a",
+      "byte_count": 23411
+    },
+    {
+      "source_uri": "emm for android /AE - 应用详情.md",
+      "source_id": "source-53974a6187843668",
+      "content_hash": "214a12f2c5efc529a6698e41d2465bdca30491c36c527342adea8f88b92b1ca5",
+      "byte_count": 45929
+    },
+    {
+      "source_uri": "emm for android /AE - 设备详情页远程控制.md",
+      "source_id": "source-49ceb6bfea152580",
+      "content_hash": "8ce21dbc0c51898ed650c157b542c243bdc78e310dfd7c714c4610ccd76fb741",
+      "byte_count": 14139
+    },
+    {
+      "source_uri": "emm for android /AE-分组管理.md",
+      "source_id": "source-93795d31a195deda",
+      "content_hash": "553f5543380401c8e2997acb462db10062f3a242e8e82a5353c1493ba02dba62",
+      "byte_count": 13695
+    },
+    {
+      "source_uri": "emm for android /AE-参数推送.md",
+      "source_id": "source-b9ec585564a5cd00",
+      "content_hash": "294d0283bd61b93e35ef31565c9da0630dfe3906f562e2545537bb9454a04b10",
+      "byte_count": 13982
+    },
+    {
+      "source_uri": "emm for android /AE-应用参数配置.md",
+      "source_id": "source-d0c83fe63e060d09",
+      "content_hash": "dfb520f863e41225e111d5647d7c057570f8520200953e44c9a6f36f23f91642",
+      "byte_count": 46177
+    },
+    {
+      "source_uri": "emm for android /AE-开发者上传应用.md",
+      "source_id": "source-313bbb41fa85a1bf",
+      "content_hash": "3b158a0c34e651f00eef921f3290796b6e784d35d27cb98947b03ea536ceb422",
+      "byte_count": 13337
+    },
+    {
+      "source_uri": "emm for android /AE-通信和网络配置.md",
+      "source_id": "source-fcbb1280db963ca5",
+      "content_hash": "c066483e58bfc8c26d2f737fbadd97e83850967b4db1f90377d4dd3d8b47dce0",
+      "byte_count": 60615
+    },
+    {
+      "source_uri": "emm for android /EMM for Android应用数据SDK.md",
+      "source_id": "source-49ab107a0c145879",
+      "content_hash": "337c740d2b02c42bb362ec32815a222020ceb0f0d0955e27f7d4590677925568",
+      "byte_count": 7590
+    },
+    {
+      "source_uri": "emm for android /EMM- 企业类型升级及管理.md",
+      "source_id": "source-7784d9e562ecce98",
+      "content_hash": "eafd4b9599032e7759f9ccefc9c60060feb2dbea1e9d8a8ccbc22f1f758c296e",
+      "byte_count": 14091
+    },
+    {
+      "source_uri": "emm for android /EMM-AirViewer插件包设置.md",
+      "source_id": "source-e74bbad1881c0fc6",
+      "content_hash": "1c36216a783ed34ebacd7f60298101aba034b9fecf6dab8a63a03df2d64664c1",
+      "byte_count": 5765
+    },
+    {
+      "source_uri": "emm for android /EMM介绍文档.md",
+      "source_id": "source-3f948509b8ffa047",
+      "content_hash": "227d51f282243d17ca1727f421c2c50933c02c0d2270d47c8eef455706521e8f",
+      "byte_count": 16496
+    },
+    {
+      "source_uri": "emm for android /EMM售前确认.md",
+      "source_id": "source-60a493104fa7d6b7",
+      "content_hash": "8d43aaa9a84fc3cfb644ed74da00e9e134a2c693febb332c08c121fe434b1f8c",
+      "byte_count": 10523
+    },
+    {
+      "source_uri": "emm for android /EMM客户端页面.md",
+      "source_id": "source-57fed22fb5ad4e88",
+      "content_hash": "2529b2cc948b5ee6cb16697af5bd59a680b2f130c0e934ed2ba6926916facd16",
+      "byte_count": 10184
+    },
+    {
+      "source_uri": "emm for android /EMM客户端：隐私协议.md",
+      "source_id": "source-9445f3d6716a9612",
+      "content_hash": "9e300954b01c354177ded86791a0cda852b81e72fec42c95d0b2c4ea0aa9731b",
+      "byte_count": 2745
+    },
+    {
+      "source_uri": "emm for android /EMM服务定价.md",
+      "source_id": "source-05e7770c870ca72d",
+      "content_hash": "97cad2d0f934807213aaa319bda2f231f0994f91756d48efce7c54f1bf92b5be",
+      "byte_count": 9871
+    },
+    {
+      "source_uri": "emm for android /EMM设备AirViewer服务适配新厂商.md",
+      "source_id": "source-746052e8629d47ac",
+      "content_hash": "795c3ddaab3c6243263a02004d4f9392bce05ba01d0c3b19d895c4ca22dd5bae",
+      "byte_count": 4559
+    },
+    {
+      "source_uri": "emm for android /EMM设备数据收集范围.md",
+      "source_id": "source-986117e56c8fd5a6",
+      "content_hash": "4e6e4ac10f9bd9a77405ace87c85add41eb3360bba6edf5cc46d9fec95ff0c0e",
+      "byte_count": 34311
+    },
+    {
+      "source_uri": "emm for android /Global-开发者服务账号管理.md",
+      "source_id": "source-1dc89a88a06d7de3",
+      "content_hash": "dacd7335e82cbd82d706736fa25341b688d59bade72813c30bf088e176ebee09",
+      "byte_count": 7716
+    },
+    {
+      "source_uri": "emm for android /[AE] EMM服务订阅及企业注册.md",
+      "source_id": "source-47e301d60394de24",
+      "content_hash": "a88a10cc09dd0b66d2f79b33cf84cc0ccd310e873244c0e2fabaa5a4e0bbb186",
+      "byte_count": 34955
+    },
+    {
+      "source_uri": "emm for android /[AE] 市场列表及操作.md",
+      "source_id": "source-a439ed0a901a5e75",
+      "content_hash": "3498dc285cb577d1bed9df948ab437b0b7ee387ace3a75548693e8e463ad9e50",
+      "byte_count": 22298
+    },
+    {
+      "source_uri": "emm for android /[AE] 弹窗输入标识符注册设备.md",
+      "source_id": "source-0179b30dd408c5fd",
+      "content_hash": "868eecc7e6077969eb5e256e68becc819d2a3043123ab6b53aa487d4d2bd270d",
+      "byte_count": 20290
+    },
+    {
+      "source_uri": "emm for android /[AE]创建二维码注册设备.md",
+      "source_id": "source-bc9bbd56483a281c",
+      "content_hash": "392eca6a1dbd9f885ec0b157ff694ef284423bb1d5dfb528aaf90b780c93f8f1",
+      "byte_count": 13468
+    },
+    {
+      "source_uri": "emm for android /全管理相关设备配置项注释更动.md",
+      "source_id": "source-d79d864dac9128b4",
+      "content_hash": "df2a2dad6a90aebaef34092a548260684ab39f07ec8d88da251480cfd4142ccb",
+      "byte_count": 23265
+    },
+    {
+      "source_uri": "emm for android /零接触相关流程.md",
+      "source_id": "source-7ea957a17b73dcfd",
+      "content_hash": "6687e16e350067f9d8fce6da8563049dbf1c6e231262e4d0d26afda23a9ad6b4",
+      "byte_count": 16940
+    },
+    {
+      "source_uri": "emm for ios/Payment Settings_商户配置_商户管理_Merchant Management_Reseller Portal.md",
+      "source_id": "source-df56c70403897c65",
+      "content_hash": "1584d30a3ab43e0b749553cad8978524dc2daee2579fa8e4cb23aa4d37b7a9f6",
+      "byte_count": 12672
+    },
+    {
+      "source_uri": "emm for ios/SSO列表_SSO_身份与域名配置_通用设置_Global System.md",
+      "source_id": "source-bd69df56864a92d7",
+      "content_hash": "66692435444d5d73b5302314d451ad8d859c4078f18f727efcc1be4d7dc610e1",
+      "byte_count": 5568
+    },
+    {
+      "source_uri": "emm for ios/Store App应用策略配置效果.md",
+      "source_id": "source-5bcb6e7c64202185",
+      "content_hash": "7b880c9c18111964c8aad9030ac0c304d2d702a1bc647b7b764c624c42bfbe1f",
+      "byte_count": 3665
+    },
+    {
+      "source_uri": "emm for ios/Uptrillion日志管理.md",
+      "source_id": "source-907a1d028f190eff",
+      "content_hash": "fd23ce9447ca3858422038fb8b52f50d8fe913928657995ed3e14e2e31e44c12",
+      "byte_count": 83273
+    },
+    {
+      "source_uri": "emm for ios/iOS - 代理商和商户迁移.md",
+      "source_id": "source-be4f3f5ca3273c49",
+      "content_hash": "094f482222ec4d94148b40ec0f4a24dc53c4dd1e40d78135cea7dee8739fa65b",
+      "byte_count": 2155
+    },
+    {
+      "source_uri": "emm for ios/iOS - 提示邮件汇总.md",
+      "source_id": "source-a52650f96d03f63e",
+      "content_hash": "31b37b90426af16e5540bb56eb7be0bf24aa0210614b917bc7607467b833a583",
+      "byte_count": 8143
+    },
+    {
+      "source_uri": "emm for ios/iOS-子市场用量管理.md",
+      "source_id": "source-d5aa42f5f74e0225",
+      "content_hash": "3c9ed8800ed4a684f3fa064d2384608fa7e18f2e06537666da94d19ccfc11bb9",
+      "byte_count": 8754
+    },
+    {
+      "source_uri": "emm for ios/iOS-市场管理.md",
+      "source_id": "source-e44fddfc14f75141",
+      "content_hash": "51c84beb8d2f32eb1c2d91294220634990cb80d8531a988975737094ebca1571",
+      "byte_count": 19562
+    },
+    {
+      "source_uri": "emm for ios/iOS-应用添加及移除.md",
+      "source_id": "source-d16df6bb75c47b2c",
+      "content_hash": "0a1c2dabbe9359dc5500c82f7bb5a431443e9356ed2811e6ab5c89ec91320c7f",
+      "byte_count": 16446
+    },
+    {
+      "source_uri": "emm for ios/iOS-开发者上传企业应用.md",
+      "source_id": "source-d954302496b06c31",
+      "content_hash": "f5c504e2f996721b38a34cbca13072dde5a70dfe57f5072a644f6704fdd6ba27",
+      "byte_count": 3810
+    },
+    {
+      "source_uri": "emm for ios/iOS-开发者应用列表.md",
+      "source_id": "source-f1332764b7592620",
+      "content_hash": "35e1313fd537aca198ba6ad567c21b31432a41c6c2554db7d051b4be3ecb5a0e",
+      "byte_count": 1190
+    },
+    {
+      "source_uri": "emm for ios/iOS-开发者应用详情.md",
+      "source_id": "source-6260658b6f4dd79b",
+      "content_hash": "8a7ffd25b5a68bc22e2ea9c29fd959435032f9e1b9bf23764f0f3cdc8900968e",
+      "byte_count": 979
+    },
+    {
+      "source_uri": "emm for ios/iOS-日志汇总.md",
+      "source_id": "source-7afc40131ff8c3df",
+      "content_hash": "3488bf5b35f9928cb5c2163e3533ec7f04cc0b06176dde1674f9005712d402a9",
+      "byte_count": 29115
+    },
+    {
+      "source_uri": "emm for ios/iOS-策略-安全配置.md",
+      "source_id": "source-2daebd4e7295e924",
+      "content_hash": "9f3b55dfed71c5842d70ae6de1061aca316cb415d3c891860c9a1505867e21c8",
+      "byte_count": 48442
+    },
+    {
+      "source_uri": "emm for ios/iOS-策略-系统配置.md",
+      "source_id": "source-8b21a4296f11e0cb",
+      "content_hash": "800142f8b584654b56ca389b72e37918679ec79655f6700fa6a201ce5d40c8ff",
+      "byte_count": 18003
+    },
+    {
+      "source_uri": "emm for ios/iOS-策略-通用规则.md",
+      "source_id": "source-f3d1799d241f236f",
+      "content_hash": "5ecda14b8cb34a26789eb7b571cf96bf0983ffbefd4ce7ff9780b6592f6e6f09",
+      "byte_count": 23575
+    },
+    {
+      "source_uri": "emm for ios/iOS-终端管理.md",
+      "source_id": "source-cfee5a8669edecbf",
+      "content_hash": "69b6c8736cfc57020fb4354b65f51a672912a8f100bea57ee65c851752dfeb39",
+      "byte_count": 305
+    },
+    {
+      "source_uri": "emm for ios/iOS-账单.md",
+      "source_id": "source-a62df9a1ef6fda4f",
+      "content_hash": "e309417bf3dfe94671af705c0b0a5e4d9ca03bb951789b554c6a615ba2a12ecf",
+      "byte_count": 2473
+    },
+    {
+      "source_uri": "emm for ios/iOS-资产列表.md",
+      "source_id": "source-efa2d0ae60ed8274",
+      "content_hash": "52598f7ac6d5e763bdd7d344c74ec2b091f200166fb7f4f3552a88bf3e68ff03",
+      "byte_count": 37434
+    },
+    {
+      "source_uri": "emm for ios/ipad支持展示的机型图.md",
+      "source_id": "source-935397017aa1f82a",
+      "content_hash": "0ddd69e5eb629d217cab4fd235ae092a1c549c78d26bacd398be8e8c1c63d941",
+      "byte_count": 7289
+    },
+    {
+      "source_uri": "merchant system/App Management_Global System.md",
+      "source_id": "source-24c6dacdf0549c35",
+      "content_hash": "c92d5a6b7193906c242eeaa35f19a54c1f0c281547098aee16744860e1b54325",
+      "byte_count": 23610
+    },
+    {
+      "source_uri": "merchant system/Apple设备零接触注册流程.md",
+      "source_id": "source-fd7a979d0f96a91b",
+      "content_hash": "fe58f265c88929562c13b80577cf4586ce445c73e8e4996a4b24c787ed05c2f3",
+      "byte_count": 19683
+    },
+    {
+      "source_uri": "merchant system/Dashboard_MerchantPortal.md",
+      "source_id": "source-fb40b6315c86c7e7",
+      "content_hash": "61f416abeb33660ff339446ca3e54a549636c94b32a593e8890b765d02c1d54e",
+      "byte_count": 12097
+    },
+    {
+      "source_uri": "merchant system/Dashboard_ResellerPortal.md",
+      "source_id": "source-2e9cc8121208b53a",
+      "content_hash": "61f416abeb33660ff339446ca3e54a549636c94b32a593e8890b765d02c1d54e",
+      "byte_count": 12097
+    },
+    {
+      "source_uri": "merchant system/Email Activity_Audit Log_日志管理_Global System.md",
+      "source_id": "source-a45c1b748e280a33",
+      "content_hash": "a2752aadb76540d442a70de9d2812a2bd82baf4c7c5d0637fb667afe9f51a169",
+      "byte_count": 7563
+    },
+    {
+      "source_uri": "merchant system/apple接口调用方式.md",
+      "source_id": "source-0ee2b5d5d9cf3e08",
+      "content_hash": "adecbce4e75a9d615433d505852da3685ae4dae787ed7e2fba630982b274ff1d",
+      "byte_count": 1629
+    },
+    {
+      "source_uri": "merchant system/初始化策略验证.md",
+      "source_id": "source-cbcb94745c571374",
+      "content_hash": "8761e96c45acffe47c170ace26bd24ec6210bc157549ff133a96b11745aa68ad",
+      "byte_count": 4195
+    },
+    {
+      "source_uri": "merchant system/商户系统规范要求.md",
+      "source_id": "source-b7d131b392f4d6a2",
+      "content_hash": "c80c8ceef82792e3a440b195def8295c16e6be8c1ea32394e2303bb1bf498fc3",
+      "byte_count": 1219
+    },
+    {
+      "source_uri": "merchant system/小票_商户管理_Merchant Management_Reseller Portal.md",
+      "source_id": "source-43ecd1832cff57fb",
+      "content_hash": "ddc2e854a60d6e3694bc5f89bd403445d3f62df55434301b5db3389b389a32ac",
+      "byte_count": 9609
+    },
+    {
+      "source_uri": "merchant system/小票竞品分析.md",
+      "source_id": "source-1b79af5353b00c68",
+      "content_hash": "9cdaa93733041920cb09715af0feb5f62386d5931d1d178d109b79112501aeb0",
+      "byte_count": 28182
+    },
+    {
+      "source_uri": "merchant system/新建SSO_SSO_身份与域名配置_通用设置_Global System.md",
+      "source_id": "source-c566eb067fe64445",
+      "content_hash": "652b6182dbcc815def20be1baaeca2094b1ac81428d825ba01ed2d694d771b18",
+      "byte_count": 9807
+    },
+    {
+      "source_uri": "merchant system/新建角色_角色管理_ResellerPortal.md",
+      "source_id": "source-261d91e3643422fc",
+      "content_hash": "0d87f777c18432634ea0079913c0120e0d1224b1ccf890364d1145afea9719d4",
+      "byte_count": 4022
+    },
+    {
+      "source_uri": "merchant system/权限分类_角色管理_MerchantPortal.md",
+      "source_id": "source-737700cbe051fb39",
+      "content_hash": "c9495b8d0268aa7749aa706d0d143d32431bf22d4f87dc3232d8b66a336eae17",
+      "byte_count": 10870
+    },
+    {
+      "source_uri": "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md",
+      "source_id": "source-333c50ca6ae7ffe3",
+      "content_hash": "83049ba1855ac9085b31a270a29223525ec6787fc5947c9093bc1ec4f1ede039",
+      "byte_count": 5410
+    },
+    {
+      "source_uri": "merchant system/系统邮件模板_系统邮件管理_邮件管理_Global System.md",
+      "source_id": "source-9277d065ab1f8820",
+      "content_hash": "77dde2804544a0cb8ed55000fefedad1dd62a1eccd057404935999b1e24dec7b",
+      "byte_count": 714
+    },
+    {
+      "source_uri": "merchant system/终端列表_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md",
+      "source_id": "source-51b71ca28267ed10",
+      "content_hash": "70dc077de6e3ebd15e0698f2cc1cc75cadafc15c2071b61d5a2d708c6cb9b08a",
+      "byte_count": 9254
+    },
+    {
+      "source_uri": "merchant system/编辑&删除_Merchant Processor_商户管理_Merchant Management_Reseller Portal.md",
+      "source_id": "source-c64270d16f997750",
+      "content_hash": "837d5a61c36b4cc80c78f4945a7b28b139e9b701f8e0fc4f1e5488e86b2ad962",
+      "byte_count": 12512
+    },
+    {
+      "source_uri": "merchant system/编辑&删除制造商_制造商管理_机型管理_Global System.md",
+      "source_id": "source-2a4e914275caa5da",
+      "content_hash": "09fcee57cac216e29379c468e75f0bae654a46b090995cff52587f3dbd539e50",
+      "byte_count": 5280
+    },
+    {
+      "source_uri": "merchant system/编辑&删除终端_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md",
+      "source_id": "source-f45af2ebc67c7690",
+      "content_hash": "6752d8786a13875cf9f99747b7dc33ade41e8db0484e76b019861543c2e6f354",
+      "byte_count": 19927
+    },
+    {
+      "source_uri": "merchant system/重置密码&更改邮箱_用户_Merchant Management_Reseller Portal.md",
+      "source_id": "source-5434a6f997492fcb",
+      "content_hash": "222ccaea14525b456077c955b29bcc6be12117df30efe4ff358dc39db4256226",
+      "byte_count": 11514
+    }
+  ]
+}

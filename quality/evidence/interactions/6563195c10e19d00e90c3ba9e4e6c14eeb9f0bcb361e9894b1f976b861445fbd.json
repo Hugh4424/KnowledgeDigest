@@ -1,0 +1,19 @@
+{
+  "schema_version": "workflowhub-interaction-aggregate.v1",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "make-decision",
+  "snapshot_tree": "277768791d0db8d8c800d779a4d4f92220b0f3a0",
+  "talk": {
+    "status": "completed",
+    "round_count": 3,
+    "architecture_direction_covered": true,
+    "user_outcome_covered": true
+  },
+  "clarify": {
+    "status": "resolved",
+    "open_direction_changing_questions": 0,
+    "resolved_by": "user_reply"
+  },
+  "decision_ref": "specs/task4-reader-quality-compiler/decision-log.md",
+  "decision_hash": "f7c0780a4b98d4e5fac70346459d9fce428b859eb95d1f2208bef28f4e9b8c4f"
+}

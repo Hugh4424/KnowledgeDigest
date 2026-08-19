@@ -1,0 +1,15 @@
+{
+  "schema_version": "task4-local-worktree-evidence.v2",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "build-code",
+  "worktree": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task4-reader-quality-compiler",
+  "git_head": "3be7492f4d6610f2bc72764a7f962d69fb730202",
+  "git_diff_hash": "3b6dbd1213bbc35a1d203a9e0b5a65978a19ef5b07c40d2b2fbcc180d368601a",
+  "worktree_manifest_sha256": "9876f5cb40df8d31f43c20f8e3911af2a97a21908f4c6550f0d2656a37b4592f",
+  "worktree_file_count": 1267,
+  "test_receipt": "quality/tests/task4-final-aggregate-v10.json",
+  "official_candidate": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-candidate-20260819-v31-89-source",
+  "diagnostic_candidate": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-candidate-20260819-v32-88-valid",
+  "manifest_scope": "all regular non-symlink files except this receipt, quality/verify.json, quality/evidence/verify-code/final-test-v3.json, quality/evidence/verify-code/architect-assessment-v3.json, .git and __pycache__; verification receipts are excluded to avoid self-referential snapshot hashes",
+  "note": "这是当前 in-worktree 的只读绑定证据，不冒充 WorkflowHub canonical implementation receipt；WorkflowHub receipt 仍受 taskPath/worktree identity 限制。"
+}

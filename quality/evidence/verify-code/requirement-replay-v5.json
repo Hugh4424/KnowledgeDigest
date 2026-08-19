@@ -1,0 +1,27 @@
+{
+  "schema_version": "task4-verify-requirement-replay.v5",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "verify-code",
+  "original_requirement": "让 KnowledgeDigest 的最终知识产物质量超过 CompanyBrain；先处理当前 89 条样本，但方案必须能扩展到后续数万条资料；不要求人工逐页审核。",
+  "user_flow": [
+    "扫描已声明来源并建立不可变快照",
+    "识别产品、模块、知识类型和语义主题",
+    "生成 Reader 页面、分类入口、来源追溯和 Audit",
+    "用固定 CompanyBrain baseline 做机器对照",
+    "失败时停在明确状态，不把缺内容伪装成成功"
+  ],
+  "page_scope": ["Reader", "Home/index navigation", "Audit source manifest and snapshots", "quality comparison report"],
+  "data_states": ["candidate", "released", "not_released", "failed", "not_applicable"],
+  "success_boundary": "89 条来源均进入 manifest；88 条有效来源进入 Reader；质量报告为 better_than_companybrain 且无 blocking_reasons。",
+  "failure_boundary": "除精确 allowlist 外，任何空正文仍 hard fail；allowlist 只匹配 source_uri 与 content_hash，内容变化即重新阻断。",
+  "non_goals": ["人工逐页审核", "后台调度器", "向量数据库或 AgentMemory 集成", "把后续数万条资料一次性纳入本次测试"],
+  "deferred_handoff": "后续大规模资料继续复用同一识别、分类、正文整理和 Audit 边界；不得扩大 audit_only 空源白名单。",
+  "evidence": {
+    "candidate": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v39-89",
+    "assessment": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v39-89-assessment",
+    "config": "config/task4-reader-quality.v1.json",
+    "mapping": "config/task4-companybrain-mapping-20260819-v13-89.json",
+    "decision_log": "specs/task4-reader-quality-compiler/decision-log.md"
+  },
+  "conclusion": "原始目标在当前 89 条范围内已达到机器可验证的 better_than_companybrain；产物仍是 candidate，未冒充生产 released。"
+}

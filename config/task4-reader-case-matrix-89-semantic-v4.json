@@ -1,0 +1,3240 @@
+{
+  "schema_version": "task4-reader-case-matrix.v1",
+  "version": "v2-oracle-generated",
+  "source_manifest_id": "confluence-raw-89-20260818-v1",
+  "source_to_case_map": [
+    {
+      "source_uri": "GoInsight/12. GoInsight DC部署方案.md",
+      "source_id": "source-f861b295c9403379",
+      "case_id": "case-001"
+    },
+    {
+      "source_uri": "GoInsight/16 问数自动识别数据集.md",
+      "source_id": "source-17b9562c8a29cf19",
+      "case_id": "case-002"
+    },
+    {
+      "source_uri": "GoInsight/17  智能搭建.md",
+      "source_id": "source-a6d52989f77f1be4",
+      "case_id": "case-003"
+    },
+    {
+      "source_uri": "GoInsight/2021 Annual Leave Plan.md",
+      "source_id": "source-b93446032e697251",
+      "case_id": "case-004"
+    },
+    {
+      "source_uri": "GoInsight/GoInsight V2.2.0 bug analysis.md",
+      "source_id": "source-851f3b6840948ec6",
+      "case_id": "case-005"
+    },
+    {
+      "source_uri": "GoInsight/Sprint 116 Retrospective meeting.md",
+      "source_id": "source-1cda3ba7f292ef4f",
+      "case_id": "case-006"
+    },
+    {
+      "source_uri": "GoInsight/位置字段筛选.md",
+      "source_id": "source-edbe562ea7dc0e71",
+      "case_id": "case-007"
+    },
+    {
+      "source_uri": "GoInsight/创建设备报告.md",
+      "source_id": "source-e188aa9129d6da2c",
+      "case_id": "case-008"
+    },
+    {
+      "source_uri": "GoInsight/图表类型.md",
+      "source_id": "source-f2990cf7e65a4f5e",
+      "case_id": "case-009"
+    },
+    {
+      "source_uri": "GoInsight/市场报告快照.md",
+      "source_id": "source-9b101e2d2bdc0893",
+      "case_id": "case-010"
+    },
+    {
+      "source_uri": "GoInsight/指标详情页.md",
+      "source_id": "source-063a21f2850f118f",
+      "case_id": "case-011"
+    },
+    {
+      "source_uri": "GoInsight/收费应用安装统计.md",
+      "source_id": "source-a2ca47088539639e",
+      "case_id": "case-012"
+    },
+    {
+      "source_uri": "GoInsight/数据分析.md",
+      "source_id": "source-7d71210e65c068fb",
+      "case_id": "case-013"
+    },
+    {
+      "source_uri": "GoInsight/新建迁移任务.md",
+      "source_id": "source-e4b45c1d08eea85a",
+      "case_id": "case-014"
+    },
+    {
+      "source_uri": "GoInsight/日志管理.md",
+      "source_id": "source-29b7e7f80334b5f3",
+      "case_id": "case-015"
+    },
+    {
+      "source_uri": "GoInsight/智能删除图表.md",
+      "source_id": "source-0cedc3c9ac283daf",
+      "case_id": "case-016"
+    },
+    {
+      "source_uri": "GoInsight/智能查询文档.md",
+      "source_id": "source-a543696e43f38d8d",
+      "case_id": "case-017"
+    },
+    {
+      "source_uri": "GoInsight/添加关联数据.md",
+      "source_id": "source-8bad219625abda5e",
+      "case_id": "case-018"
+    },
+    {
+      "source_uri": "GoInsight/添加指标页.md",
+      "source_id": "source-bbe5f79e1f79b2cc",
+      "case_id": "case-019"
+    },
+    {
+      "source_uri": "GoInsight/累计计算.md",
+      "source_id": "source-2a3d754a406a54f2",
+      "case_id": "case-020"
+    },
+    {
+      "source_uri": "GoInsight/设备位置历史数据集.md",
+      "source_id": "source-292513d4132deb53",
+      "case_id": "case-021"
+    },
+    {
+      "source_uri": "GoInsight/迁移任务列表.md",
+      "source_id": "source-e2ad89e398a74c8a",
+      "case_id": "case-022"
+    },
+    {
+      "source_uri": "emm for android /AE - AirViewer厂商管理.md",
+      "source_id": "source-4fef4600b6629a02",
+      "case_id": "case-023"
+    },
+    {
+      "source_uri": "emm for android /AE - GoInsight数据收集.md",
+      "source_id": "source-cdaa211a1f9d9e1b",
+      "case_id": "case-024"
+    },
+    {
+      "source_uri": "emm for android /AE - 应用定向发布.md",
+      "source_id": "source-78e62a6a7dc33f89",
+      "case_id": "case-025"
+    },
+    {
+      "source_uri": "emm for android /AE - 应用详情.md",
+      "source_id": "source-53974a6187843668",
+      "case_id": "case-026"
+    },
+    {
+      "source_uri": "emm for android /AE - 设备详情页远程控制.md",
+      "source_id": "source-49ceb6bfea152580",
+      "case_id": "case-027"
+    },
+    {
+      "source_uri": "emm for android /AE-分组管理.md",
+      "source_id": "source-93795d31a195deda",
+      "case_id": "case-028"
+    },
+    {
+      "source_uri": "emm for android /AE-参数推送.md",
+      "source_id": "source-b9ec585564a5cd00",
+      "case_id": "case-029"
+    },
+    {
+      "source_uri": "emm for android /AE-应用参数配置.md",
+      "source_id": "source-d0c83fe63e060d09",
+      "case_id": "case-030"
+    },
+    {
+      "source_uri": "emm for android /AE-开发者上传应用.md",
+      "source_id": "source-313bbb41fa85a1bf",
+      "case_id": "case-031"
+    },
+    {
+      "source_uri": "emm for android /AE-通信和网络配置.md",
+      "source_id": "source-fcbb1280db963ca5",
+      "case_id": "case-032"
+    },
+    {
+      "source_uri": "emm for android /EMM for Android应用数据SDK.md",
+      "source_id": "source-49ab107a0c145879",
+      "case_id": "case-033"
+    },
+    {
+      "source_uri": "emm for android /EMM- 企业类型升级及管理.md",
+      "source_id": "source-7784d9e562ecce98",
+      "case_id": "case-034"
+    },
+    {
+      "source_uri": "emm for android /EMM-AirViewer插件包设置.md",
+      "source_id": "source-e74bbad1881c0fc6",
+      "case_id": "case-035"
+    },
+    {
+      "source_uri": "emm for android /EMM介绍文档.md",
+      "source_id": "source-3f948509b8ffa047",
+      "case_id": "case-036"
+    },
+    {
+      "source_uri": "emm for android /EMM售前确认.md",
+      "source_id": "source-60a493104fa7d6b7",
+      "case_id": "case-037"
+    },
+    {
+      "source_uri": "emm for android /EMM客户端页面.md",
+      "source_id": "source-57fed22fb5ad4e88",
+      "case_id": "case-038"
+    },
+    {
+      "source_uri": "emm for android /EMM客户端：隐私协议.md",
+      "source_id": "source-9445f3d6716a9612",
+      "case_id": "case-039"
+    },
+    {
+      "source_uri": "emm for android /EMM服务定价.md",
+      "source_id": "source-05e7770c870ca72d",
+      "case_id": "case-040"
+    },
+    {
+      "source_uri": "emm for android /EMM设备AirViewer服务适配新厂商.md",
+      "source_id": "source-746052e8629d47ac",
+      "case_id": "case-041"
+    },
+    {
+      "source_uri": "emm for android /EMM设备数据收集范围.md",
+      "source_id": "source-986117e56c8fd5a6",
+      "case_id": "case-042"
+    },
+    {
+      "source_uri": "emm for android /Global-开发者服务账号管理.md",
+      "source_id": "source-1dc89a88a06d7de3",
+      "case_id": "case-043"
+    },
+    {
+      "source_uri": "emm for android /[AE] EMM服务订阅及企业注册.md",
+      "source_id": "source-47e301d60394de24",
+      "case_id": "case-044"
+    },
+    {
+      "source_uri": "emm for android /[AE] 市场列表及操作.md",
+      "source_id": "source-a439ed0a901a5e75",
+      "case_id": "case-045"
+    },
+    {
+      "source_uri": "emm for android /[AE] 弹窗输入标识符注册设备.md",
+      "source_id": "source-0179b30dd408c5fd",
+      "case_id": "case-046"
+    },
+    {
+      "source_uri": "emm for android /[AE]创建二维码注册设备.md",
+      "source_id": "source-bc9bbd56483a281c",
+      "case_id": "case-047"
+    },
+    {
+      "source_uri": "emm for android /全管理相关设备配置项注释更动.md",
+      "source_id": "source-d79d864dac9128b4",
+      "case_id": "case-048"
+    },
+    {
+      "source_uri": "emm for android /零接触相关流程.md",
+      "source_id": "source-7ea957a17b73dcfd",
+      "case_id": "case-049"
+    },
+    {
+      "source_uri": "emm for ios/Payment Settings_商户配置_商户管理_Merchant Management_Reseller Portal.md",
+      "source_id": "source-df56c70403897c65",
+      "case_id": "case-050"
+    },
+    {
+      "source_uri": "emm for ios/SSO列表_SSO_身份与域名配置_通用设置_Global System.md",
+      "source_id": "source-bd69df56864a92d7",
+      "case_id": "case-051"
+    },
+    {
+      "source_uri": "emm for ios/Store App应用策略配置效果.md",
+      "source_id": "source-5bcb6e7c64202185",
+      "case_id": "case-052"
+    },
+    {
+      "source_uri": "emm for ios/Uptrillion日志管理.md",
+      "source_id": "source-907a1d028f190eff",
+      "case_id": "case-053"
+    },
+    {
+      "source_uri": "emm for ios/iOS - 代理商和商户迁移.md",
+      "source_id": "source-be4f3f5ca3273c49",
+      "case_id": "case-054"
+    },
+    {
+      "source_uri": "emm for ios/iOS - 提示邮件汇总.md",
+      "source_id": "source-a52650f96d03f63e",
+      "case_id": "case-055"
+    },
+    {
+      "source_uri": "emm for ios/iOS-子市场用量管理.md",
+      "source_id": "source-d5aa42f5f74e0225",
+      "case_id": "case-056"
+    },
+    {
+      "source_uri": "emm for ios/iOS-市场管理.md",
+      "source_id": "source-e44fddfc14f75141",
+      "case_id": "case-057"
+    },
+    {
+      "source_uri": "emm for ios/iOS-应用添加及移除.md",
+      "source_id": "source-d16df6bb75c47b2c",
+      "case_id": "case-058"
+    },
+    {
+      "source_uri": "emm for ios/iOS-开发者上传企业应用.md",
+      "source_id": "source-d954302496b06c31",
+      "case_id": "case-059"
+    },
+    {
+      "source_uri": "emm for ios/iOS-开发者应用列表.md",
+      "source_id": "source-f1332764b7592620",
+      "case_id": "case-060"
+    },
+    {
+      "source_uri": "emm for ios/iOS-开发者应用详情.md",
+      "source_id": "source-6260658b6f4dd79b",
+      "case_id": "case-061"
+    },
+    {
+      "source_uri": "emm for ios/iOS-日志汇总.md",
+      "source_id": "source-7afc40131ff8c3df",
+      "case_id": "case-062"
+    },
+    {
+      "source_uri": "emm for ios/iOS-策略-安全配置.md",
+      "source_id": "source-2daebd4e7295e924",
+      "case_id": "case-063"
+    },
+    {
+      "source_uri": "emm for ios/iOS-策略-系统配置.md",
+      "source_id": "source-8b21a4296f11e0cb",
+      "case_id": "case-064"
+    },
+    {
+      "source_uri": "emm for ios/iOS-策略-通用规则.md",
+      "source_id": "source-f3d1799d241f236f",
+      "case_id": "case-065"
+    },
+    {
+      "source_uri": "emm for ios/iOS-终端管理.md",
+      "source_id": "source-cfee5a8669edecbf",
+      "case_id": "case-066"
+    },
+    {
+      "source_uri": "emm for ios/iOS-账单.md",
+      "source_id": "source-a62df9a1ef6fda4f",
+      "case_id": "case-067"
+    },
+    {
+      "source_uri": "emm for ios/iOS-资产列表.md",
+      "source_id": "source-efa2d0ae60ed8274",
+      "case_id": "case-068"
+    },
+    {
+      "source_uri": "emm for ios/ipad支持展示的机型图.md",
+      "source_id": "source-935397017aa1f82a",
+      "case_id": "case-069"
+    },
+    {
+      "source_uri": "merchant system/App Management_Global System.md",
+      "source_id": "source-24c6dacdf0549c35",
+      "case_id": "case-070"
+    },
+    {
+      "source_uri": "merchant system/Apple设备零接触注册流程.md",
+      "source_id": "source-fd7a979d0f96a91b",
+      "case_id": "case-071"
+    },
+    {
+      "source_uri": "merchant system/Dashboard_MerchantPortal.md",
+      "source_id": "source-fb40b6315c86c7e7",
+      "case_id": "case-072"
+    },
+    {
+      "source_uri": "merchant system/Dashboard_ResellerPortal.md",
+      "source_id": "source-2e9cc8121208b53a",
+      "case_id": "case-073"
+    },
+    {
+      "source_uri": "merchant system/Email Activity_Audit Log_日志管理_Global System.md",
+      "source_id": "source-a45c1b748e280a33",
+      "case_id": "case-074"
+    },
+    {
+      "source_uri": "merchant system/apple接口调用方式.md",
+      "source_id": "source-0ee2b5d5d9cf3e08",
+      "case_id": "case-075"
+    },
+    {
+      "source_uri": "merchant system/初始化策略验证.md",
+      "source_id": "source-cbcb94745c571374",
+      "case_id": "case-076"
+    },
+    {
+      "source_uri": "merchant system/商户系统规范要求.md",
+      "source_id": "source-b7d131b392f4d6a2",
+      "case_id": "case-077"
+    },
+    {
+      "source_uri": "merchant system/小票_商户管理_Merchant Management_Reseller Portal.md",
+      "source_id": "source-43ecd1832cff57fb",
+      "case_id": "case-078"
+    },
+    {
+      "source_uri": "merchant system/小票竞品分析.md",
+      "source_id": "source-1b79af5353b00c68",
+      "case_id": "case-079"
+    },
+    {
+      "source_uri": "merchant system/新建SSO_SSO_身份与域名配置_通用设置_Global System.md",
+      "source_id": "source-c566eb067fe64445",
+      "case_id": "case-080"
+    },
+    {
+      "source_uri": "merchant system/新建角色_角色管理_ResellerPortal.md",
+      "source_id": "source-261d91e3643422fc",
+      "case_id": "case-081"
+    },
+    {
+      "source_uri": "merchant system/权限分类_角色管理_MerchantPortal.md",
+      "source_id": "source-737700cbe051fb39",
+      "case_id": "case-082"
+    },
+    {
+      "source_uri": "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md",
+      "source_id": "source-333c50ca6ae7ffe3",
+      "case_id": "case-083"
+    },
+    {
+      "source_uri": "merchant system/系统邮件模板_系统邮件管理_邮件管理_Global System.md",
+      "source_id": "source-9277d065ab1f8820",
+      "case_id": "case-084"
+    },
+    {
+      "source_uri": "merchant system/终端列表_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md",
+      "source_id": "source-51b71ca28267ed10",
+      "case_id": "case-085"
+    },
+    {
+      "source_uri": "merchant system/编辑&删除_Merchant Processor_商户管理_Merchant Management_Reseller Portal.md",
+      "source_id": "source-c64270d16f997750",
+      "case_id": "case-086"
+    },
+    {
+      "source_uri": "merchant system/编辑&删除制造商_制造商管理_机型管理_Global System.md",
+      "source_id": "source-2a4e914275caa5da",
+      "case_id": "case-087"
+    },
+    {
+      "source_uri": "merchant system/编辑&删除终端_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md",
+      "source_id": "source-f45af2ebc67c7690",
+      "case_id": "case-088"
+    },
+    {
+      "source_uri": "merchant system/重置密码&更改邮箱_用户_Merchant Management_Reseller Portal.md",
+      "source_id": "source-5434a6f997492fcb",
+      "case_id": "case-089"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "case-001",
+      "canonical_case_id": "canonical-f861b295c9403379",
+      "comparison_key": "goinsight/技术实现部署迁移/goinsightdc部署方案/describe/procedure",
+      "source_snapshot_id": "source-f861b295c9403379",
+      "target_title": "12. GoInsight DC部署方案",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "dc",
+        "部署"
+      ],
+      "required_boundaries": [
+        "限制"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/12. GoInsight DC部署方案.md",
+        "content_hash": "a80a7f39ecb214ef4bcd7ff216314d48cc5bb80ec4141ae4d91baee90bbda51b",
+        "title": "GoInsight DC部署方案",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/技术实现部署迁移/goinsightdc部署方案/describe/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "技术实现/部署与迁移",
+      "object_or_scenario": "GoInsightDC部署方案",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-002",
+      "canonical_case_id": "canonical-17b9562c8a29cf19",
+      "comparison_key": "goinsight/模块手册智能问数ai/问数自动识别/dataset/procedure",
+      "source_snapshot_id": "source-17b9562c8a29cf19",
+      "target_title": "16 问数自动识别数据集",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "问数",
+        "自动",
+        "识别"
+      ],
+      "required_boundaries": [
+        "边界"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/16 问数自动识别数据集.md",
+        "content_hash": "c37d40c8b16b6640ed09813572e69e280ffb404446952e8bde96c74d78c52973",
+        "title": "问数自动识别数据集",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册智能问数ai/问数自动识别/dataset/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/智能问数与AI",
+      "object_or_scenario": "问数自动识别",
+      "task": "dataset"
+    },
+    {
+      "case_id": "case-003",
+      "canonical_case_id": "canonical-a6d52989f77f1be4",
+      "comparison_key": "goinsight/模块手册智能问数ai/智能搭建/describe/procedure",
+      "source_snapshot_id": "source-a6d52989f77f1be4",
+      "target_title": "17  智能搭建",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "智能",
+        "搭建"
+      ],
+      "required_boundaries": [
+        "来源"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/17  智能搭建.md",
+        "content_hash": "f13a606b8e3905db2b0cf5ae94d8e61f0ae79b0f26cfba02074b61986ec6e96f",
+        "title": "智能搭建",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册智能问数ai/智能搭建/describe/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/智能问数与AI",
+      "object_or_scenario": "智能搭建",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-004",
+      "canonical_case_id": "canonical-b93446032e697251",
+      "comparison_key": "组织工作/团队流程/annualleaveplan/describe/procedure",
+      "source_snapshot_id": "source-b93446032e697251",
+      "target_title": "2021 Annual Leave Plan",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "annual",
+        "leave",
+        "plan"
+      ],
+      "required_boundaries": [
+        "来源"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/2021 Annual Leave Plan.md",
+        "content_hash": "a6acfd18d29e89756e0ec09a2e845887d63258805e70a79205c69b7a416ceba7",
+        "title": "2021 Annual Leave Plan",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "组织工作/团队流程/annualleaveplan/describe/procedure"
+      },
+      "product_or_domain": "组织与工作",
+      "module": "团队与流程",
+      "object_or_scenario": "AnnualLeavePlan",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-005",
+      "canonical_case_id": "canonical-851f3b6840948ec6",
+      "comparison_key": "goinsight/经验坑/goinsightv220buganalysis/describe/procedure",
+      "source_snapshot_id": "source-851f3b6840948ec6",
+      "target_title": "GoInsight V2.2.0 bug analysis",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "v2",
+        "bug",
+        "analysis"
+      ],
+      "required_boundaries": [
+        "来源"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/GoInsight V2.2.0 bug analysis.md",
+        "content_hash": "5c11720af889bccc74877c5be1035ed6e1f43d442cb3630d858cadd886812263",
+        "title": "GoInsight V2.2.0 bug analysis",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/经验坑/goinsightv220buganalysis/describe/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "经验与坑",
+      "object_or_scenario": "GoInsightV2.2.0buganalysis",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-006",
+      "canonical_case_id": "canonical-1cda3ba7f292ef4f",
+      "comparison_key": "goinsight/经验坑/sprint116retrospectivemeeting/describe/procedure",
+      "source_snapshot_id": "source-1cda3ba7f292ef4f",
+      "target_title": "Sprint 116 Retrospective meeting",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "sprint",
+        "116",
+        "retrospective"
+      ],
+      "required_boundaries": [
+        "来源"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/Sprint 116 Retrospective meeting.md",
+        "content_hash": "676177b722393ce8ce743e0182c8d147e1a4f0ceca824e124476454b8231e527",
+        "title": "Sprint 116 Retrospective meeting",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/经验坑/sprint116retrospectivemeeting/describe/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "经验与坑",
+      "object_or_scenario": "Sprint116Retrospectivemeeting",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-007",
+      "canonical_case_id": "canonical-edbe562ea7dc0e71",
+      "comparison_key": "goinsight/模块手册字段筛选/位置字段/filter/procedure",
+      "source_snapshot_id": "source-edbe562ea7dc0e71",
+      "target_title": "位置字段筛选",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "位置",
+        "筛选"
+      ],
+      "required_boundaries": [
+        "至少",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/位置字段筛选.md",
+        "content_hash": "32b3c01b03a44727c6a692e9b10e3ee71106abec1f90c45272cbd75c9bce32b1",
+        "title": "位置字段筛选",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册字段筛选/位置字段/filter/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/字段与筛选",
+      "object_or_scenario": "位置字段",
+      "task": "filter"
+    },
+    {
+      "case_id": "case-008",
+      "canonical_case_id": "canonical-e188aa9129d6da2c",
+      "comparison_key": "goinsight/模块手册报告快照/设备/create/procedure",
+      "source_snapshot_id": "source-e188aa9129d6da2c",
+      "target_title": "创建设备报告",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "创建",
+        "报告"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "不能"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/创建设备报告.md",
+        "content_hash": "c1ee20845ae9abee8b130a8fe7bd3cfd7264f4a2304686fc9f9bec558e5b222e",
+        "title": "创建设备报告",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册报告快照/设备/create/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/报告与快照",
+      "object_or_scenario": "设备",
+      "task": "create"
+    },
+    {
+      "case_id": "case-009",
+      "canonical_case_id": "canonical-f2990cf7e65a4f5e",
+      "comparison_key": "goinsight/模块手册图表展示/图表/reference/procedure",
+      "source_snapshot_id": "source-f2990cf7e65a4f5e",
+      "target_title": "图表类型",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "图表",
+        "类型"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/图表类型.md",
+        "content_hash": "2fb085f12322ed8a45563aabd8172f69ca9722a99af6890f756655f9f9217ad3",
+        "title": "图表类型",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册图表展示/图表/reference/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/图表与展示",
+      "object_or_scenario": "图表",
+      "task": "reference"
+    },
+    {
+      "case_id": "case-010",
+      "canonical_case_id": "canonical-9b101e2d2bdc0893",
+      "comparison_key": "goinsight/模块手册报告快照/市场/report/procedure",
+      "source_snapshot_id": "source-9b101e2d2bdc0893",
+      "target_title": "市场报告快照",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "市场",
+        "报告",
+        "快照"
+      ],
+      "required_boundaries": [
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/市场报告快照.md",
+        "content_hash": "fd020de7dd9ac3ea800c02723ab06089476f65257858937b713f488ec185c811",
+        "title": "市场报告快照",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册报告快照/市场/report/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/报告与快照",
+      "object_or_scenario": "市场",
+      "task": "report"
+    },
+    {
+      "case_id": "case-011",
+      "canonical_case_id": "canonical-063a21f2850f118f",
+      "comparison_key": "goinsight/模块手册图表展示/指标/browse/procedure",
+      "source_snapshot_id": "source-063a21f2850f118f",
+      "target_title": "指标详情页",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "指标",
+        "详情"
+      ],
+      "required_boundaries": [
+        "至少",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/指标详情页.md",
+        "content_hash": "1e3758853a89257fcf0b2d99c5d5f08cc95f968b7d70079c85299123a3f6fae7",
+        "title": "指标详情页",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册图表展示/指标/browse/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/图表与展示",
+      "object_or_scenario": "指标",
+      "task": "browse"
+    },
+    {
+      "case_id": "case-012",
+      "canonical_case_id": "canonical-a2ca47088539639e",
+      "comparison_key": "goinsight/模块手册数据集/收费应用安装统计/describe/procedure",
+      "source_snapshot_id": "source-a2ca47088539639e",
+      "target_title": "收费应用安装统计",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "收费",
+        "安装",
+        "统计"
+      ],
+      "required_boundaries": [
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/收费应用安装统计.md",
+        "content_hash": "5234687971c2941d8de787cff01187edb9a7227e54ef7eb64608a0011908023b",
+        "title": "收费应用安装统计",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册数据集/收费应用安装统计/describe/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/数据集",
+      "object_or_scenario": "收费应用安装统计",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-013",
+      "canonical_case_id": "canonical-7d71210e65c068fb",
+      "comparison_key": "goinsight/模块手册字段筛选/数据/analysis/procedure",
+      "source_snapshot_id": "source-7d71210e65c068fb",
+      "target_title": "数据分析",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "分析",
+        "标题",
+        "data"
+      ],
+      "required_boundaries": [
+        "不能",
+        "权限"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/数据分析.md",
+        "content_hash": "52abb4c14c9beb1f0752bb6c50a8da9bef225237fc46e76f5f9c471e87c42668",
+        "title": "数据分析",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册字段筛选/数据/analysis/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/字段与筛选",
+      "object_or_scenario": "数据",
+      "task": "analysis"
+    },
+    {
+      "case_id": "case-014",
+      "canonical_case_id": "canonical-e4b45c1d08eea85a",
+      "comparison_key": "goinsight/技术实现数据迁移/任务/create/procedure",
+      "source_snapshot_id": "source-e4b45c1d08eea85a",
+      "target_title": "新建迁移任务",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "新建",
+        "迁移",
+        "任务"
+      ],
+      "required_boundaries": [
+        "不能",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/新建迁移任务.md",
+        "content_hash": "d1e600db386a4002eee43a69fc8e94e32af8fb33ac55399bc4789da0e7f8bb28",
+        "title": "新建迁移任务",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/技术实现数据迁移/任务/create/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "技术实现/数据迁移",
+      "object_or_scenario": "任务",
+      "task": "create"
+    },
+    {
+      "case_id": "case-015",
+      "canonical_case_id": "canonical-29b7e7f80334b5f3",
+      "comparison_key": "goinsight/模块手册平台系统/日志管理/manage/procedure",
+      "source_snapshot_id": "source-29b7e7f80334b5f3",
+      "target_title": "日志管理",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "日志",
+        "跟踪",
+        "当前"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/日志管理.md",
+        "content_hash": "370fc8f996de01d759bfc1b438992a5e5827ae57c6791b25d74aa47e524f0b1c",
+        "title": "日志管理",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册平台系统/日志管理/manage/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/平台与系统",
+      "object_or_scenario": "日志管理",
+      "task": "manage"
+    },
+    {
+      "case_id": "case-016",
+      "canonical_case_id": "canonical-0cedc3c9ac283daf",
+      "comparison_key": "goinsight/模块手册智能问数ai/智能图表/delete/procedure",
+      "source_snapshot_id": "source-0cedc3c9ac283daf",
+      "target_title": "智能删除图表",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "智能",
+        "删除",
+        "图表"
+      ],
+      "required_boundaries": [
+        "最多",
+        "必须"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/智能删除图表.md",
+        "content_hash": "80a176eb1cfb6ef10be82c7c11201ab7d39296db0d6897537ce41e07926add62",
+        "title": "智能删除图表",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册智能问数ai/智能图表/delete/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/智能问数与AI",
+      "object_or_scenario": "智能图表",
+      "task": "delete"
+    },
+    {
+      "case_id": "case-017",
+      "canonical_case_id": "canonical-a543696e43f38d8d",
+      "comparison_key": "goinsight/模块手册智能问数ai/智能/browse/procedure",
+      "source_snapshot_id": "source-a543696e43f38d8d",
+      "target_title": "智能查询文档",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "智能",
+        "查询"
+      ],
+      "required_boundaries": [
+        "限制",
+        "条件"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/智能查询文档.md",
+        "content_hash": "23f9e16c27bf3fdd139668a3b5ea7a372f21f53dfd230bc769a77d8055b9a756",
+        "title": "智能查询文档",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册智能问数ai/智能/browse/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/智能问数与AI",
+      "object_or_scenario": "智能",
+      "task": "browse"
+    },
+    {
+      "case_id": "case-018",
+      "canonical_case_id": "canonical-8bad219625abda5e",
+      "comparison_key": "goinsight/模块手册数据集/关联数据/add/procedure",
+      "source_snapshot_id": "source-8bad219625abda5e",
+      "target_title": "添加关联数据",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "添加",
+        "关联"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "不能"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/添加关联数据.md",
+        "content_hash": "e669ce76f46b613b308ecdabf60d7ad2f96a5efc57ac4503f29e1fc553dd3ae5",
+        "title": "添加关联数据",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册数据集/关联数据/add/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/数据集",
+      "object_or_scenario": "关联数据",
+      "task": "add"
+    },
+    {
+      "case_id": "case-019",
+      "canonical_case_id": "canonical-bbe5f79e1f79b2cc",
+      "comparison_key": "goinsight/模块手册图表展示/指标页/add/procedure",
+      "source_snapshot_id": "source-bbe5f79e1f79b2cc",
+      "target_title": "添加指标页",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "添加",
+        "指标"
+      ],
+      "required_boundaries": [
+        "不能",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/添加指标页.md",
+        "content_hash": "66544230f10923384ed88723ab0467a86c508295597af05706b576e0241bf0d0",
+        "title": "添加指标页",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册图表展示/指标页/add/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/图表与展示",
+      "object_or_scenario": "指标页",
+      "task": "add"
+    },
+    {
+      "case_id": "case-020",
+      "canonical_case_id": "canonical-2a3d754a406a54f2",
+      "comparison_key": "goinsight/模块手册字段筛选/累计计算/describe/procedure",
+      "source_snapshot_id": "source-2a3d754a406a54f2",
+      "target_title": "累计计算",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "累计",
+        "计算"
+      ],
+      "required_boundaries": [
+        "来源"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/累计计算.md",
+        "content_hash": "d30d2efca1e75c35a8e1697476e95711e6ea48810c856adc170b925150305328",
+        "title": "累计计算",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册字段筛选/累计计算/describe/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/字段与筛选",
+      "object_or_scenario": "累计计算",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-021",
+      "canonical_case_id": "canonical-292513d4132deb53",
+      "comparison_key": "goinsight/模块手册数据集/设备位置历史/dataset/procedure",
+      "source_snapshot_id": "source-292513d4132deb53",
+      "target_title": "设备位置历史数据集",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "位置",
+        "历史"
+      ],
+      "required_boundaries": [
+        "必须",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/设备位置历史数据集.md",
+        "content_hash": "39b5bf52e177319239ebe6afb1df037163b6e567ef2ae2752bc46b3bab739cb6",
+        "title": "设备位置历史数据集",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/模块手册数据集/设备位置历史/dataset/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "模块手册/数据集",
+      "object_or_scenario": "设备位置历史",
+      "task": "dataset"
+    },
+    {
+      "case_id": "case-022",
+      "canonical_case_id": "canonical-e2ad89e398a74c8a",
+      "comparison_key": "goinsight/技术实现数据迁移/任务/browse/procedure",
+      "source_snapshot_id": "source-e2ad89e398a74c8a",
+      "target_title": "迁移任务列表",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "迁移",
+        "任务"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "不能"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "GoInsight/迁移任务列表.md",
+        "content_hash": "35499e746a06a158ae69b05254094decd71af6ba792a75125ee4f0ac9740871b",
+        "title": "迁移任务列表",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "goinsight/技术实现数据迁移/任务/browse/procedure"
+      },
+      "product_or_domain": "GoInsight",
+      "module": "技术实现/数据迁移",
+      "object_or_scenario": "任务",
+      "task": "browse"
+    },
+    {
+      "case_id": "case-023",
+      "canonical_case_id": "canonical-4fef4600b6629a02",
+      "comparison_key": "source/source-4fef4600b6629a02/procedure",
+      "source_snapshot_id": "source-4fef4600b6629a02",
+      "target_title": "AE - AirViewer厂商管理",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "厂商"
+      ],
+      "required_boundaries": [
+        "来源"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /AE - AirViewer厂商管理.md",
+        "content_hash": "8b28dec38f962c2a291b3063c3ea6e5e8a3f36e6f1884f9e88c449432b3be885",
+        "title": "AE - AirViewer厂商管理",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "source/source-4fef4600b6629a02/procedure"
+      }
+    },
+    {
+      "case_id": "case-024",
+      "canonical_case_id": "canonical-cdaa211a1f9d9e1b",
+      "comparison_key": "emm/模块手册emmforandroid集成sdk/goinsight数据收集/describe/procedure",
+      "source_snapshot_id": "source-cdaa211a1f9d9e1b",
+      "target_title": "AE - GoInsight数据收集",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "收集",
+        "为了",
+        "能让"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "不能"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /AE - GoInsight数据收集.md",
+        "content_hash": "8b90893e86e07875cb5d82f3c0b7f774018faaf87a52926b7ab47b9331e39a76",
+        "title": "GoInsight数据收集",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid集成sdk/goinsight数据收集/describe/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/集成与SDK",
+      "object_or_scenario": "GoInsight数据收集",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-025",
+      "canonical_case_id": "canonical-78e62a6a7dc33f89",
+      "comparison_key": "emm/模块手册emmforandroid应用管理/应用/distribute/procedure",
+      "source_snapshot_id": "source-78e62a6a7dc33f89",
+      "target_title": "AE - 应用定向发布",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "定向",
+        "发布"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /AE - 应用定向发布.md",
+        "content_hash": "b1871b739d9afa5a1765ffa139bacc42cc810355e68724c2aacd5e895935147a",
+        "title": "应用定向发布",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid应用管理/应用/distribute/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/应用管理",
+      "object_or_scenario": "应用",
+      "task": "distribute"
+    },
+    {
+      "case_id": "case-026",
+      "canonical_case_id": "canonical-53974a6187843668",
+      "comparison_key": "emm/模块手册emmforandroid应用管理/应用/browse/procedure",
+      "source_snapshot_id": "source-53974a6187843668",
+      "target_title": "AE - 应用详情",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "详情",
+        "用户",
+        "需要"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "不能"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /AE - 应用详情.md",
+        "content_hash": "214a12f2c5efc529a6698e41d2465bdca30491c36c527342adea8f88b92b1ca5",
+        "title": "应用详情",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid应用管理/应用/browse/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/应用管理",
+      "object_or_scenario": "应用",
+      "task": "browse"
+    },
+    {
+      "case_id": "case-027",
+      "canonical_case_id": "canonical-49ceb6bfea152580",
+      "comparison_key": "airviewer/模块手册远程协助/设备/remotecontrol/procedure",
+      "source_snapshot_id": "source-49ceb6bfea152580",
+      "target_title": "AE - 设备详情页远程控制",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "详情",
+        "页远",
+        "程控"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "仅支持"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /AE - 设备详情页远程控制.md",
+        "content_hash": "8ce21dbc0c51898ed650c157b542c243bdc78e310dfd7c714c4610ccd76fb741",
+        "title": "设备详情页远程控制",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "airviewer/模块手册远程协助/设备/remotecontrol/procedure"
+      },
+      "product_or_domain": "AirViewer",
+      "module": "模块手册/远程协助",
+      "object_or_scenario": "设备",
+      "task": "remote_control"
+    },
+    {
+      "case_id": "case-028",
+      "canonical_case_id": "canonical-93795d31a195deda",
+      "comparison_key": "emm/模块手册emmforandroid应用管理/分组/manage/procedure",
+      "source_snapshot_id": "source-93795d31a195deda",
+      "target_title": "AE-分组管理",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "分组",
+        "添加",
+        "共有"
+      ],
+      "required_boundaries": [
+        "不能",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /AE-分组管理.md",
+        "content_hash": "553f5543380401c8e2997acb462db10062f3a242e8e82a5353c1493ba02dba62",
+        "title": "分组管理",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid应用管理/分组/manage/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/应用管理",
+      "object_or_scenario": "分组",
+      "task": "manage"
+    },
+    {
+      "case_id": "case-029",
+      "canonical_case_id": "canonical-b9ec585564a5cd00",
+      "comparison_key": "emm/模块手册emmforandroid策略配置/推送/configure/procedure",
+      "source_snapshot_id": "source-b9ec585564a5cd00",
+      "target_title": "AE-参数推送",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "参数",
+        "推送"
+      ],
+      "required_boundaries": [
+        "不能",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /AE-参数推送.md",
+        "content_hash": "294d0283bd61b93e35ef31565c9da0630dfe3906f562e2545537bb9454a04b10",
+        "title": "参数推送",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid策略配置/推送/configure/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/策略与配置",
+      "object_or_scenario": "推送",
+      "task": "configure"
+    },
+    {
+      "case_id": "case-030",
+      "canonical_case_id": "canonical-d0c83fe63e060d09",
+      "comparison_key": "emm/模块手册emmforandroid策略配置/应用/configure/procedure",
+      "source_snapshot_id": "source-d0c83fe63e060d09",
+      "target_title": "AE-应用参数配置",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "参数",
+        "在应",
+        "用配"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /AE-应用参数配置.md",
+        "content_hash": "dfb520f863e41225e111d5647d7c057570f8520200953e44c9a6f36f23f91642",
+        "title": "应用参数配置",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid策略配置/应用/configure/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/策略与配置",
+      "object_or_scenario": "应用",
+      "task": "configure"
+    },
+    {
+      "case_id": "case-031",
+      "canonical_case_id": "canonical-313bbb41fa85a1bf",
+      "comparison_key": "emm/模块手册emmforandroid应用管理/开发者应用/upload/procedure",
+      "source_snapshot_id": "source-313bbb41fa85a1bf",
+      "target_title": "AE-开发者上传应用",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "开发",
+        "者上",
+        "传应"
+      ],
+      "required_boundaries": [
+        "不能",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /AE-开发者上传应用.md",
+        "content_hash": "3b158a0c34e651f00eef921f3290796b6e784d35d27cb98947b03ea536ceb422",
+        "title": "开发者上传应用",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid应用管理/开发者应用/upload/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/应用管理",
+      "object_or_scenario": "开发者应用",
+      "task": "upload"
+    },
+    {
+      "case_id": "case-032",
+      "canonical_case_id": "canonical-fcbb1280db963ca5",
+      "comparison_key": "emm/模块手册emmforandroid策略配置/安全通信网络项字典/configure/procedure",
+      "source_snapshot_id": "source-fcbb1280db963ca5",
+      "target_title": "AE-通信和网络配置",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "安全",
+        "通信",
+        "网络"
+      ],
+      "required_boundaries": [
+        "不能",
+        "必须"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /AE-通信和网络配置.md",
+        "content_hash": "c066483e58bfc8c26d2f737fbadd97e83850967b4db1f90377d4dd3d8b47dce0",
+        "title": "Android安全通信网络配置项字典",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid策略配置/安全通信网络项字典/configure/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/策略与配置",
+      "object_or_scenario": "安全通信网络项字典",
+      "task": "configure"
+    },
+    {
+      "case_id": "case-033",
+      "canonical_case_id": "canonical-49ab107a0c145879",
+      "comparison_key": "emm/模块手册emmforandroid集成sdk/forandroid应用数据sdk/describe/procedure",
+      "source_snapshot_id": "source-49ab107a0c145879",
+      "target_title": "EMM for Android应用数据SDK",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "for",
+        "sdk"
+      ],
+      "required_boundaries": [
+        "必须",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /EMM for Android应用数据SDK.md",
+        "content_hash": "337c740d2b02c42bb362ec32815a222020ceb0f0d0955e27f7d4590677925568",
+        "title": "EMM for Android应用数据SDK",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid集成sdk/forandroid应用数据sdk/describe/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/集成与SDK",
+      "object_or_scenario": "forAndroid应用数据SDK",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-034",
+      "canonical_case_id": "canonical-7784d9e562ecce98",
+      "comparison_key": "emm/模块手册emmforandroid服务订阅/企业升级/manage/procedure",
+      "source_snapshot_id": "source-7784d9e562ecce98",
+      "target_title": "EMM- 企业类型升级及管理",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "类型",
+        "升级",
+        "及管"
+      ],
+      "required_boundaries": [
+        "不能",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /EMM- 企业类型升级及管理.md",
+        "content_hash": "eafd4b9599032e7759f9ccefc9c60060feb2dbea1e9d8a8ccbc22f1f758c296e",
+        "title": "EMM- 企业类型升级及管理",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid服务订阅/企业升级/manage/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/服务订阅",
+      "object_or_scenario": "企业升级及",
+      "task": "manage"
+    },
+    {
+      "case_id": "case-035",
+      "canonical_case_id": "canonical-e74bbad1881c0fc6",
+      "comparison_key": "airviewer/模块手册文件硬件/airviewer插件包/configure/procedure",
+      "source_snapshot_id": "source-e74bbad1881c0fc6",
+      "target_title": "EMM-AirViewer插件包设置",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "插件",
+        "包设"
+      ],
+      "required_boundaries": [
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /EMM-AirViewer插件包设置.md",
+        "content_hash": "1c36216a783ed34ebacd7f60298101aba034b9fecf6dab8a63a03df2d64664c1",
+        "title": "EMM-AirViewer插件包设置",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "airviewer/模块手册文件硬件/airviewer插件包/configure/procedure"
+      },
+      "product_or_domain": "AirViewer",
+      "module": "模块手册/文件与硬件",
+      "object_or_scenario": "AirViewer插件包",
+      "task": "configure"
+    },
+    {
+      "case_id": "case-036",
+      "canonical_case_id": "canonical-3f948509b8ffa047",
+      "comparison_key": "emm/产品定位/介绍文档/overview/procedure",
+      "source_snapshot_id": "source-3f948509b8ffa047",
+      "target_title": "EMM介绍文档",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "介绍",
+        "需求",
+        "背景"
+      ],
+      "required_boundaries": [
+        "限制",
+        "权限"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /EMM介绍文档.md",
+        "content_hash": "227d51f282243d17ca1727f421c2c50933c02c0d2270d47c8eef455706521e8f",
+        "title": "EMM介绍文档",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/产品定位/介绍文档/overview/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "产品定位",
+      "object_or_scenario": "介绍文档",
+      "task": "overview"
+    },
+    {
+      "case_id": "case-037",
+      "canonical_case_id": "canonical-60a493104fa7d6b7",
+      "comparison_key": "emm/产品定位/售前确认/describe/procedure",
+      "source_snapshot_id": "source-60a493104fa7d6b7",
+      "target_title": "EMM售前确认",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "售前",
+        "确认"
+      ],
+      "required_boundaries": [
+        "必须"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /EMM售前确认.md",
+        "content_hash": "8d43aaa9a84fc3cfb644ed74da00e9e134a2c693febb332c08c121fe434b1f8c",
+        "title": "EMM售前确认",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/产品定位/售前确认/describe/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "产品定位",
+      "object_or_scenario": "售前确认",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-038",
+      "canonical_case_id": "canonical-57fed22fb5ad4e88",
+      "comparison_key": "emm/模块手册emmforandroid设备运维/客户端页面/describe/procedure",
+      "source_snapshot_id": "source-57fed22fb5ad4e88",
+      "target_title": "EMM客户端页面",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "客户",
+        "端页"
+      ],
+      "required_boundaries": [
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /EMM客户端页面.md",
+        "content_hash": "2529b2cc948b5ee6cb16697af5bd59a680b2f130c0e934ed2ba6926916facd16",
+        "title": "EMM客户端页面",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid设备运维/客户端页面/describe/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/设备运维",
+      "object_or_scenario": "客户端页面",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-039",
+      "canonical_case_id": "canonical-9445f3d6716a9612",
+      "comparison_key": "emm/规范资产/客户端隐私协议/describe/procedure",
+      "source_snapshot_id": "source-9445f3d6716a9612",
+      "target_title": "EMM客户端：隐私协议",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "客户",
+        "隐私",
+        "协议"
+      ],
+      "required_boundaries": [
+        "来源"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /EMM客户端：隐私协议.md",
+        "content_hash": "9e300954b01c354177ded86791a0cda852b81e72fec42c95d0b2c4ea0aa9731b",
+        "title": "EMM客户端：隐私协议",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/规范资产/客户端隐私协议/describe/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "规范与资产",
+      "object_or_scenario": "客户端隐私协议",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-040",
+      "canonical_case_id": "canonical-05e7770c870ca72d",
+      "comparison_key": "emm/模块手册emmforandroid服务订阅/服务定价/describe/procedure",
+      "source_snapshot_id": "source-05e7770c870ca72d",
+      "target_title": "EMM服务定价",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "定价",
+        "对于",
+        "global"
+      ],
+      "required_boundaries": [
+        "默认",
+        "权限"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /EMM服务定价.md",
+        "content_hash": "97cad2d0f934807213aaa319bda2f231f0994f91756d48efce7c54f1bf92b5be",
+        "title": "EMM服务定价",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid服务订阅/服务定价/describe/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/服务订阅",
+      "object_or_scenario": "服务定价",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-041",
+      "canonical_case_id": "canonical-746052e8629d47ac",
+      "comparison_key": "airviewer/模块手册远程协助/设备airviewer服务适配新厂商/describe/procedure",
+      "source_snapshot_id": "source-746052e8629d47ac",
+      "target_title": "EMM设备AirViewer服务适配新厂商",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "适配",
+        "新厂"
+      ],
+      "required_boundaries": [
+        "权限",
+        "失败"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /EMM设备AirViewer服务适配新厂商.md",
+        "content_hash": "795c3ddaab3c6243263a02004d4f9392bce05ba01d0c3b19d895c4ca22dd5bae",
+        "title": "EMM设备AirViewer服务适配新厂商",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "airviewer/模块手册远程协助/设备airviewer服务适配新厂商/describe/procedure"
+      },
+      "product_or_domain": "AirViewer",
+      "module": "模块手册/远程协助",
+      "object_or_scenario": "设备AirViewer服务适配新厂商",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-042",
+      "canonical_case_id": "canonical-986117e56c8fd5a6",
+      "comparison_key": "emm/模块手册emmforandroid设备运维/设备数据收集范围/describe/procedure",
+      "source_snapshot_id": "source-986117e56c8fd5a6",
+      "target_title": "EMM设备数据收集范围",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "收集",
+        "范围"
+      ],
+      "required_boundaries": [
+        "默认",
+        "权限"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /EMM设备数据收集范围.md",
+        "content_hash": "4e6e4ac10f9bd9a77405ace87c85add41eb3360bba6edf5cc46d9fec95ff0c0e",
+        "title": "EMM设备数据收集范围",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid设备运维/设备数据收集范围/describe/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/设备运维",
+      "object_or_scenario": "设备数据收集范围",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-043",
+      "canonical_case_id": "canonical-1dc89a88a06d7de3",
+      "comparison_key": "emm/模块手册emmforandroid服务订阅/开发者服务账号/manage/procedure",
+      "source_snapshot_id": "source-1dc89a88a06d7de3",
+      "target_title": "Global-开发者服务账号管理",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "global",
+        "开发",
+        "者服"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /Global-开发者服务账号管理.md",
+        "content_hash": "dacd7335e82cbd82d706736fa25341b688d59bade72813c30bf088e176ebee09",
+        "title": "Global-开发者服务账号管理",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid服务订阅/开发者服务账号/manage/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/服务订阅",
+      "object_or_scenario": "开发者服务账号",
+      "task": "manage"
+    },
+    {
+      "case_id": "case-044",
+      "canonical_case_id": "canonical-47e301d60394de24",
+      "comparison_key": "emm/模块手册emmforandroid服务订阅/服务企业/enroll/procedure",
+      "source_snapshot_id": "source-47e301d60394de24",
+      "target_title": "[AE] EMM服务订阅及企业注册",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "订阅",
+        "及企",
+        "业注"
+      ],
+      "required_boundaries": [
+        "不能",
+        "必须"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /[AE] EMM服务订阅及企业注册.md",
+        "content_hash": "a88a10cc09dd0b66d2f79b33cf84cc0ccd310e873244c0e2fabaa5a4e0bbb186",
+        "title": "EMM服务订阅及企业注册",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid服务订阅/服务企业/enroll/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/服务订阅",
+      "object_or_scenario": "服务及企业",
+      "task": "enroll"
+    },
+    {
+      "case_id": "case-045",
+      "canonical_case_id": "canonical-a439ed0a901a5e75",
+      "comparison_key": "emm/模块手册emmforandroid服务订阅/市场操作/browse/procedure",
+      "source_snapshot_id": "source-a439ed0a901a5e75",
+      "target_title": "[AE] 市场列表及操作",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "市场",
+        "及操"
+      ],
+      "required_boundaries": [
+        "默认",
+        "条件"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /[AE] 市场列表及操作.md",
+        "content_hash": "3498dc285cb577d1bed9df948ab437b0b7ee387ace3a75548693e8e463ad9e50",
+        "title": "市场列表及操作",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid服务订阅/市场操作/browse/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/服务订阅",
+      "object_or_scenario": "市场及操作",
+      "task": "browse"
+    },
+    {
+      "case_id": "case-046",
+      "canonical_case_id": "canonical-0179b30dd408c5fd",
+      "comparison_key": "emm/模块手册emmforandroid设备入网/弹窗输入标识符设备/enroll/procedure",
+      "source_snapshot_id": "source-0179b30dd408c5fd",
+      "target_title": "[AE] 弹窗输入标识符注册设备",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "弹窗",
+        "输入",
+        "标识"
+      ],
+      "required_boundaries": [
+        "不能",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /[AE] 弹窗输入标识符注册设备.md",
+        "content_hash": "868eecc7e6077969eb5e256e68becc819d2a3043123ab6b53aa487d4d2bd270d",
+        "title": "弹窗输入标识符注册设备",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid设备入网/弹窗输入标识符设备/enroll/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/设备入网",
+      "object_or_scenario": "弹窗输入标识符设备",
+      "task": "enroll"
+    },
+    {
+      "case_id": "case-047",
+      "canonical_case_id": "canonical-bc9bbd56483a281c",
+      "comparison_key": "emm/模块手册emmforandroid设备入网/设备/enroll/procedure",
+      "source_snapshot_id": "source-bc9bbd56483a281c",
+      "target_title": "[AE]创建二维码注册设备",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "创建",
+        "二维",
+        "码注"
+      ],
+      "required_boundaries": [
+        "默认",
+        "限制"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /[AE]创建二维码注册设备.md",
+        "content_hash": "392eca6a1dbd9f885ec0b157ff694ef284423bb1d5dfb528aaf90b780c93f8f1",
+        "title": "创建二维码注册设备",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid设备入网/设备/enroll/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/设备入网",
+      "object_or_scenario": "设备",
+      "task": "enroll"
+    },
+    {
+      "case_id": "case-048",
+      "canonical_case_id": "canonical-d79d864dac9128b4",
+      "comparison_key": "emm/模块手册emmforandroid策略配置/安全通信网络项字典/configure/procedure",
+      "source_snapshot_id": "source-d79d864dac9128b4",
+      "target_title": "全管理相关设备配置项注释更动",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "安全",
+        "通信",
+        "网络"
+      ],
+      "required_boundaries": [
+        "默认",
+        "仅支持"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /全管理相关设备配置项注释更动.md",
+        "content_hash": "df2a2dad6a90aebaef34092a548260684ab39f07ec8d88da251480cfd4142ccb",
+        "title": "Android安全通信网络配置项字典",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid策略配置/安全通信网络项字典/configure/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/策略与配置",
+      "object_or_scenario": "安全通信网络项字典",
+      "task": "configure"
+    },
+    {
+      "case_id": "case-049",
+      "canonical_case_id": "canonical-7ea957a17b73dcfd",
+      "comparison_key": "emm/模块手册emmforandroid设备入网/相关流程/enroll/procedure",
+      "source_snapshot_id": "source-7ea957a17b73dcfd",
+      "target_title": "零接触相关流程",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "零接",
+        "触相",
+        "关流"
+      ],
+      "required_boundaries": [
+        "不能",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for android /零接触相关流程.md",
+        "content_hash": "6687e16e350067f9d8fce6da8563049dbf1c6e231262e4d0d26afda23a9ad6b4",
+        "title": "零接触相关流程",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforandroid设备入网/相关流程/enroll/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for Android/设备入网",
+      "object_or_scenario": "相关流程",
+      "task": "enroll"
+    },
+    {
+      "case_id": "case-050",
+      "canonical_case_id": "canonical-df56c70403897c65",
+      "comparison_key": "maxstore/模块手册平台运营服务/paymentsettings/describe/procedure",
+      "source_snapshot_id": "source-df56c70403897c65",
+      "target_title": "Payment Settings_商户配置_商户管理_Merchant Management_Reseller Portal",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "payment",
+        "settings"
+      ],
+      "required_boundaries": [
+        "不能",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/Payment Settings_商户配置_商户管理_Merchant Management_Reseller Portal.md",
+        "content_hash": "1584d30a3ab43e0b749553cad8978524dc2daee2579fa8e4cb23aa4d37b7a9f6",
+        "title": "Payment Settings",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册平台运营服务/paymentsettings/describe/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/平台运营与服务",
+      "object_or_scenario": "PaymentSettings",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-051",
+      "canonical_case_id": "canonical-bd69df56864a92d7",
+      "comparison_key": "maxstore/模块手册账号组织权限/sso列表/browse/procedure",
+      "source_snapshot_id": "source-bd69df56864a92d7",
+      "target_title": "SSO列表_SSO_身份与域名配置_通用设置_Global System",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "sso",
+        "admin",
+        "portal"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/SSO列表_SSO_身份与域名配置_通用设置_Global System.md",
+        "content_hash": "66692435444d5d73b5302314d451ad8d859c4078f18f727efcc1be4d7dc610e1",
+        "title": "SSO列表",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册账号组织权限/sso列表/browse/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/账号组织与权限",
+      "object_or_scenario": "SSO列表",
+      "task": "browse"
+    },
+    {
+      "case_id": "case-052",
+      "canonical_case_id": "canonical-5bcb6e7c64202185",
+      "comparison_key": "emm/模块手册emmforios应用管理/storeapp应用效果/configure/procedure",
+      "source_snapshot_id": "source-5bcb6e7c64202185",
+      "target_title": "Store App应用策略配置效果",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "store",
+        "app",
+        "策略"
+      ],
+      "required_boundaries": [
+        "不能"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/Store App应用策略配置效果.md",
+        "content_hash": "7b880c9c18111964c8aad9030ac0c304d2d702a1bc647b7b764c624c42bfbe1f",
+        "title": "Store App应用策略配置效果",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios应用管理/storeapp应用效果/configure/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/应用管理",
+      "object_or_scenario": "StoreApp应用效果",
+      "task": "configure"
+    },
+    {
+      "case_id": "case-053",
+      "canonical_case_id": "canonical-907a1d028f190eff",
+      "comparison_key": "maxstore/模块手册平台运营服务日志邮件/uptrillion/manage/procedure",
+      "source_snapshot_id": "source-907a1d028f190eff",
+      "target_title": "Uptrillion日志管理",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "uptrillion",
+        "日志"
+      ],
+      "required_boundaries": [
+        "必须",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/Uptrillion日志管理.md",
+        "content_hash": "fd23ce9447ca3858422038fb8b52f50d8fe913928657995ed3e14e2e31e44c12",
+        "title": "Uptrillion日志管理",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册平台运营服务日志邮件/uptrillion/manage/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/平台运营与服务/日志与邮件",
+      "object_or_scenario": "Uptrillion",
+      "task": "manage"
+    },
+    {
+      "case_id": "case-054",
+      "canonical_case_id": "canonical-be4f3f5ca3273c49",
+      "comparison_key": "emm/模块手册emmforios组织成员/代理商商户/migrate/procedure",
+      "source_snapshot_id": "source-be4f3f5ca3273c49",
+      "target_title": "iOS - 代理商和商户迁移",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "代理",
+        "商和",
+        "商户"
+      ],
+      "required_boundaries": [
+        "失败"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS - 代理商和商户迁移.md",
+        "content_hash": "094f482222ec4d94148b40ec0f4a24dc53c4dd1e40d78135cea7dee8739fa65b",
+        "title": "iOS - 代理商和商户迁移",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios组织成员/代理商商户/migrate/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/组织与成员",
+      "object_or_scenario": "代理商和商户",
+      "task": "migrate"
+    },
+    {
+      "case_id": "case-055",
+      "canonical_case_id": "canonical-a52650f96d03f63e",
+      "comparison_key": "emm/模块手册emmforios组织成员/提示邮件汇总/describe/procedure",
+      "source_snapshot_id": "source-a52650f96d03f63e",
+      "target_title": "iOS - 提示邮件汇总",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "提示",
+        "邮件",
+        "汇总"
+      ],
+      "required_boundaries": [
+        "来源"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS - 提示邮件汇总.md",
+        "content_hash": "31b37b90426af16e5540bb56eb7be0bf24aa0210614b917bc7607467b833a583",
+        "title": "iOS - 提示邮件汇总",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios组织成员/提示邮件汇总/describe/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/组织与成员",
+      "object_or_scenario": "提示邮件汇总",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-056",
+      "canonical_case_id": "canonical-d5aa42f5f74e0225",
+      "comparison_key": "emm/模块手册emmforios服务订阅/子市场用量/manage/procedure",
+      "source_snapshot_id": "source-d5aa42f5f74e0225",
+      "target_title": "iOS-子市场用量管理",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "子市",
+        "场用",
+        "量管"
+      ],
+      "required_boundaries": [
+        "默认",
+        "权限"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS-子市场用量管理.md",
+        "content_hash": "3c9ed8800ed4a684f3fa064d2384608fa7e18f2e06537666da94d19ccfc11bb9",
+        "title": "iOS-子市场用量管理",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios服务订阅/子市场用量/manage/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/服务订阅",
+      "object_or_scenario": "子市场用量",
+      "task": "manage"
+    },
+    {
+      "case_id": "case-057",
+      "canonical_case_id": "canonical-e44fddfc14f75141",
+      "comparison_key": "emm/模块手册emmforios服务订阅/市场/manage/procedure",
+      "source_snapshot_id": "source-e44fddfc14f75141",
+      "target_title": "iOS-市场管理",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "市场",
+        "gloabal",
+        "员可"
+      ],
+      "required_boundaries": [
+        "默认",
+        "仅支持"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS-市场管理.md",
+        "content_hash": "51c84beb8d2f32eb1c2d91294220634990cb80d8531a988975737094ebca1571",
+        "title": "iOS-市场管理",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios服务订阅/市场/manage/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/服务订阅",
+      "object_or_scenario": "市场",
+      "task": "manage"
+    },
+    {
+      "case_id": "case-058",
+      "canonical_case_id": "canonical-d16df6bb75c47b2c",
+      "comparison_key": "emm/模块手册emmforios应用管理/应用移除/add/procedure",
+      "source_snapshot_id": "source-d16df6bb75c47b2c",
+      "target_title": "iOS-应用添加及移除",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "添加",
+        "及移"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS-应用添加及移除.md",
+        "content_hash": "0a1c2dabbe9359dc5500c82f7bb5a431443e9356ed2811e6ab5c89ec91320c7f",
+        "title": "iOS-应用添加及移除",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios应用管理/应用移除/add/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/应用管理",
+      "object_or_scenario": "应用及移除",
+      "task": "add"
+    },
+    {
+      "case_id": "case-059",
+      "canonical_case_id": "canonical-d954302496b06c31",
+      "comparison_key": "emm/模块手册emmforios应用管理/开发者企业应用/upload/procedure",
+      "source_snapshot_id": "source-d954302496b06c31",
+      "target_title": "iOS-开发者上传企业应用",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "开发",
+        "者上",
+        "传企"
+      ],
+      "required_boundaries": [
+        "不能",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS-开发者上传企业应用.md",
+        "content_hash": "f5c504e2f996721b38a34cbca13072dde5a70dfe57f5072a644f6704fdd6ba27",
+        "title": "iOS-开发者上传企业应用",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios应用管理/开发者企业应用/upload/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/应用管理",
+      "object_or_scenario": "开发者企业应用",
+      "task": "upload"
+    },
+    {
+      "case_id": "case-060",
+      "canonical_case_id": "canonical-f1332764b7592620",
+      "comparison_key": "emm/模块手册emmforios应用管理/开发者应用/browse/procedure",
+      "source_snapshot_id": "source-f1332764b7592620",
+      "target_title": "iOS-开发者应用列表",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "开发",
+        "者应",
+        "用列"
+      ],
+      "required_boundaries": [
+        "异常"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS-开发者应用列表.md",
+        "content_hash": "35e1313fd537aca198ba6ad567c21b31432a41c6c2554db7d051b4be3ecb5a0e",
+        "title": "iOS-开发者应用列表",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios应用管理/开发者应用/browse/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/应用管理",
+      "object_or_scenario": "开发者应用",
+      "task": "browse"
+    },
+    {
+      "case_id": "case-061",
+      "canonical_case_id": "canonical-6260658b6f4dd79b",
+      "comparison_key": "emm/模块手册emmforios应用管理/开发者应用/browse/procedure",
+      "source_snapshot_id": "source-6260658b6f4dd79b",
+      "target_title": "iOS-开发者应用详情",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "开发",
+        "者应",
+        "用详"
+      ],
+      "required_boundaries": [
+        "权限"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS-开发者应用详情.md",
+        "content_hash": "8a7ffd25b5a68bc22e2ea9c29fd959435032f9e1b9bf23764f0f3cdc8900968e",
+        "title": "iOS-开发者应用详情",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios应用管理/开发者应用/browse/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/应用管理",
+      "object_or_scenario": "开发者应用",
+      "task": "browse"
+    },
+    {
+      "case_id": "case-062",
+      "canonical_case_id": "canonical-7afc40131ff8c3df",
+      "comparison_key": "emm/模块手册emmforios组织成员日志审计/汇总/audit/procedure",
+      "source_snapshot_id": "source-7afc40131ff8c3df",
+      "target_title": "iOS-日志汇总",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "日志",
+        "汇总"
+      ],
+      "required_boundaries": [
+        "限制",
+        "失败"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS-日志汇总.md",
+        "content_hash": "3488bf5b35f9928cb5c2163e3533ec7f04cc0b06176dde1674f9005712d402a9",
+        "title": "iOS-日志汇总",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios组织成员日志审计/汇总/audit/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/组织与成员/日志与审计",
+      "object_or_scenario": "汇总",
+      "task": "audit"
+    },
+    {
+      "case_id": "case-063",
+      "canonical_case_id": "canonical-2daebd4e7295e924",
+      "comparison_key": "emm/模块手册emmforios策略配置/安全/configure/procedure",
+      "source_snapshot_id": "source-2daebd4e7295e924",
+      "target_title": "iOS-策略-安全配置",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "策略",
+        "安全"
+      ],
+      "required_boundaries": [
+        "不能",
+        "至少"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS-策略-安全配置.md",
+        "content_hash": "9f3b55dfed71c5842d70ae6de1061aca316cb415d3c891860c9a1505867e21c8",
+        "title": "iOS-策略-安全配置",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios策略配置/安全/configure/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/策略与配置",
+      "object_or_scenario": "安全",
+      "task": "configure"
+    },
+    {
+      "case_id": "case-064",
+      "canonical_case_id": "canonical-8b21a4296f11e0cb",
+      "comparison_key": "emm/模块手册emmforios策略配置/系统/configure/procedure",
+      "source_snapshot_id": "source-8b21a4296f11e0cb",
+      "target_title": "iOS-策略-系统配置",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "策略",
+        "在系",
+        "统配"
+      ],
+      "required_boundaries": [
+        "不能",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS-策略-系统配置.md",
+        "content_hash": "800142f8b584654b56ca389b72e37918679ec79655f6700fa6a201ce5d40c8ff",
+        "title": "iOS-策略-系统配置",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios策略配置/系统/configure/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/策略与配置",
+      "object_or_scenario": "系统",
+      "task": "configure"
+    },
+    {
+      "case_id": "case-065",
+      "canonical_case_id": "canonical-f3d1799d241f236f",
+      "comparison_key": "emm/模块手册emmforios策略配置/通用规则/configure/procedure",
+      "source_snapshot_id": "source-f3d1799d241f236f",
+      "target_title": "iOS-策略-通用规则",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "策略",
+        "通用"
+      ],
+      "required_boundaries": [
+        "不能",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS-策略-通用规则.md",
+        "content_hash": "5ecda14b8cb34a26789eb7b571cf96bf0983ffbefd4ce7ff9780b6592f6e6f09",
+        "title": "iOS-策略-通用规则",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios策略配置/通用规则/configure/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/策略与配置",
+      "object_or_scenario": "通用规则",
+      "task": "configure"
+    },
+    {
+      "case_id": "case-066",
+      "canonical_case_id": "canonical-cfee5a8669edecbf",
+      "comparison_key": "emm/模块手册emmforios设备入网/终端/manage/procedure",
+      "source_snapshot_id": "source-cfee5a8669edecbf",
+      "target_title": "iOS-终端管理",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "终端",
+        "本模",
+        "块主"
+      ],
+      "required_boundaries": [
+        "来源"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS-终端管理.md",
+        "content_hash": "69b6c8736cfc57020fb4354b65f51a672912a8f100bea57ee65c851752dfeb39",
+        "title": "iOS-终端管理",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios设备入网/终端/manage/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/设备入网",
+      "object_or_scenario": "终端",
+      "task": "manage"
+    },
+    {
+      "case_id": "case-067",
+      "canonical_case_id": "canonical-a62df9a1ef6fda4f",
+      "comparison_key": "emm/模块手册emmforios服务订阅/账单/billing/procedure",
+      "source_snapshot_id": "source-a62df9a1ef6fda4f",
+      "target_title": "iOS-账单",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "账单",
+        "global",
+        "市场"
+      ],
+      "required_boundaries": [
+        "来源"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS-账单.md",
+        "content_hash": "e309417bf3dfe94671af705c0b0a5e4d9ca03bb951789b554c6a615ba2a12ecf",
+        "title": "iOS-账单",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios服务订阅/账单/billing/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/服务订阅",
+      "object_or_scenario": "账单",
+      "task": "billing"
+    },
+    {
+      "case_id": "case-068",
+      "canonical_case_id": "canonical-efa2d0ae60ed8274",
+      "comparison_key": "emm/模块手册emmforios设备入网/资产/browse/procedure",
+      "source_snapshot_id": "source-efa2d0ae60ed8274",
+      "target_title": "iOS-资产列表",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "资产",
+        "for",
+        "的设"
+      ],
+      "required_boundaries": [
+        "不能",
+        "必须"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/iOS-资产列表.md",
+        "content_hash": "52598f7ac6d5e763bdd7d344c74ec2b091f200166fb7f4f3552a88bf3e68ff03",
+        "title": "iOS-资产列表",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios设备入网/资产/browse/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/设备入网",
+      "object_or_scenario": "资产",
+      "task": "browse"
+    },
+    {
+      "case_id": "case-069",
+      "canonical_case_id": "canonical-935397017aa1f82a",
+      "comparison_key": "emm/模块手册emmforios设备入网/ipad支持展示的机型图/describe/procedure",
+      "source_snapshot_id": "source-935397017aa1f82a",
+      "target_title": "ipad支持展示的机型图",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "ipad",
+        "展示",
+        "的机"
+      ],
+      "required_boundaries": [
+        "仅支持"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "emm for ios/ipad支持展示的机型图.md",
+        "content_hash": "0ddd69e5eb629d217cab4fd235ae092a1c549c78d26bacd398be8e8c1c63d941",
+        "title": "ipad支持展示的机型图",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "emm/模块手册emmforios设备入网/ipad支持展示的机型图/describe/procedure"
+      },
+      "product_or_domain": "EMM",
+      "module": "模块手册/EMM for iOS/设备入网",
+      "object_or_scenario": "ipad支持展示的机型图",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-070",
+      "canonical_case_id": "canonical-24c6dacdf0549c35",
+      "comparison_key": "maxstore/模块手册应用市场/appmanagement/describe/procedure",
+      "source_snapshot_id": "source-24c6dacdf0549c35",
+      "target_title": "App Management_Global System",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "app",
+        "management"
+      ],
+      "required_boundaries": [
+        "必须",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/App Management_Global System.md",
+        "content_hash": "c92d5a6b7193906c242eeaa35f19a54c1f0c281547098aee16744860e1b54325",
+        "title": "App Management",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册应用市场/appmanagement/describe/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/应用与市场",
+      "object_or_scenario": "AppManagement",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-071",
+      "canonical_case_id": "canonical-fd7a979d0f96a91b",
+      "comparison_key": "maxstore/模块手册终端设备设备入网策略/apple设备/enroll/procedure",
+      "source_snapshot_id": "source-fd7a979d0f96a91b",
+      "target_title": "Apple设备零接触注册流程",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "apple",
+        "零接",
+        "触注"
+      ],
+      "required_boundaries": [
+        "来源"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/Apple设备零接触注册流程.md",
+        "content_hash": "fe58f265c88929562c13b80577cf4586ce445c73e8e4996a4b24c787ed05c2f3",
+        "title": "Apple设备零接触注册流程",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册终端设备设备入网策略/apple设备/enroll/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/终端与设备/设备入网与策略",
+      "object_or_scenario": "Apple设备",
+      "task": "enroll"
+    },
+    {
+      "case_id": "case-072",
+      "canonical_case_id": "canonical-fb40b6315c86c7e7",
+      "comparison_key": "maxstore/模块手册平台运营服务/dashboard/overview/procedure",
+      "source_snapshot_id": "source-fb40b6315c86c7e7",
+      "target_title": "Dashboard_MerchantPortal",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "dashboard",
+        "简介"
+      ],
+      "required_boundaries": [
+        "最多",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/Dashboard_MerchantPortal.md",
+        "content_hash": "61f416abeb33660ff339446ca3e54a549636c94b32a593e8890b765d02c1d54e",
+        "title": "Dashboard简介",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册平台运营服务/dashboard/overview/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/平台运营与服务",
+      "object_or_scenario": "Dashboard",
+      "task": "overview"
+    },
+    {
+      "case_id": "case-073",
+      "canonical_case_id": "canonical-2e9cc8121208b53a",
+      "comparison_key": "maxstore/模块手册平台运营服务/dashboard/overview/procedure",
+      "source_snapshot_id": "source-2e9cc8121208b53a",
+      "target_title": "Dashboard_ResellerPortal",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "dashboard",
+        "简介"
+      ],
+      "required_boundaries": [
+        "最多",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/Dashboard_ResellerPortal.md",
+        "content_hash": "61f416abeb33660ff339446ca3e54a549636c94b32a593e8890b765d02c1d54e",
+        "title": "Dashboard简介",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册平台运营服务/dashboard/overview/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/平台运营与服务",
+      "object_or_scenario": "Dashboard",
+      "task": "overview"
+    },
+    {
+      "case_id": "case-074",
+      "canonical_case_id": "canonical-a45c1b748e280a33",
+      "comparison_key": "maxstore/模块手册平台运营服务日志邮件/emailactivity/describe/procedure",
+      "source_snapshot_id": "source-a45c1b748e280a33",
+      "target_title": "Email Activity_Audit Log_日志管理_Global System",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "email",
+        "activity"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "必须"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/Email Activity_Audit Log_日志管理_Global System.md",
+        "content_hash": "a2752aadb76540d442a70de9d2812a2bd82baf4c7c5d0637fb667afe9f51a169",
+        "title": "Email Activity",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册平台运营服务日志邮件/emailactivity/describe/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/平台运营与服务/日志与邮件",
+      "object_or_scenario": "EmailActivity",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-075",
+      "canonical_case_id": "canonical-0ee2b5d5d9cf3e08",
+      "comparison_key": "maxstore/模块手册终端设备设备入网策略/apple接口调用方式/describe/procedure",
+      "source_snapshot_id": "source-0ee2b5d5d9cf3e08",
+      "target_title": "apple接口调用方式",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "apple",
+        "接口",
+        "调用"
+      ],
+      "required_boundaries": [
+        "来源"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/apple接口调用方式.md",
+        "content_hash": "adecbce4e75a9d615433d505852da3685ae4dae787ed7e2fba630982b274ff1d",
+        "title": "apple接口调用方式",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册终端设备设备入网策略/apple接口调用方式/describe/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/终端与设备/设备入网与策略",
+      "object_or_scenario": "apple接口调用方式",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-076",
+      "canonical_case_id": "canonical-cbcb94745c571374",
+      "comparison_key": "maxstore/模块手册终端设备设备入网策略/初始化验证/configure/procedure",
+      "source_snapshot_id": "source-cbcb94745c571374",
+      "target_title": "初始化策略验证",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "初始",
+        "化策",
+        "略验"
+      ],
+      "required_boundaries": [
+        "来源"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/初始化策略验证.md",
+        "content_hash": "8761e96c45acffe47c170ace26bd24ec6210bc157549ff133a96b11745aa68ad",
+        "title": "初始化策略验证",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册终端设备设备入网策略/初始化验证/configure/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/终端与设备/设备入网与策略",
+      "object_or_scenario": "初始化验证",
+      "task": "configure"
+    },
+    {
+      "case_id": "case-077",
+      "canonical_case_id": "canonical-b7d131b392f4d6a2",
+      "comparison_key": "maxstore/规范资产/商户系统要求/reference/procedure",
+      "source_snapshot_id": "source-b7d131b392f4d6a2",
+      "target_title": "商户系统规范要求",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "商户",
+        "规范",
+        "要求"
+      ],
+      "required_boundaries": [
+        "默认",
+        "失败"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/商户系统规范要求.md",
+        "content_hash": "c80c8ceef82792e3a440b195def8295c16e6be8c1ea32394e2303bb1bf498fc3",
+        "title": "商户系统规范要求",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/规范资产/商户系统要求/reference/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "规范与资产",
+      "object_or_scenario": "商户系统要求",
+      "task": "reference"
+    },
+    {
+      "case_id": "case-078",
+      "canonical_case_id": "canonical-43ecd1832cff57fb",
+      "comparison_key": "maxstore/模块手册商户支付/小票/describe/procedure",
+      "source_snapshot_id": "source-43ecd1832cff57fb",
+      "target_title": "小票_商户管理_Merchant Management_Reseller Portal",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "小票",
+        "现在",
+        "uptrillion"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/小票_商户管理_Merchant Management_Reseller Portal.md",
+        "content_hash": "ddc2e854a60d6e3694bc5f89bd403445d3f62df55434301b5db3389b389a32ac",
+        "title": "小票",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册商户支付/小票/describe/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/商户与支付",
+      "object_or_scenario": "小票",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-079",
+      "canonical_case_id": "canonical-1b79af5353b00c68",
+      "comparison_key": "maxstore/模块手册商户支付/小票竞品/analysis/procedure",
+      "source_snapshot_id": "source-1b79af5353b00c68",
+      "target_title": "小票竞品分析",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "小票",
+        "竞品",
+        "分析"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "最多"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/小票竞品分析.md",
+        "content_hash": "9cdaa93733041920cb09715af0feb5f62386d5931d1d178d109b79112501aeb0",
+        "title": "小票竞品分析",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册商户支付/小票竞品/analysis/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/商户与支付",
+      "object_or_scenario": "小票竞品",
+      "task": "analysis"
+    },
+    {
+      "case_id": "case-080",
+      "canonical_case_id": "canonical-c566eb067fe64445",
+      "comparison_key": "maxstore/模块手册账号组织权限/新建sso/create/procedure",
+      "source_snapshot_id": "source-c566eb067fe64445",
+      "target_title": "新建SSO_SSO_身份与域名配置_通用设置_Global System",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "新建",
+        "sso"
+      ],
+      "required_boundaries": [
+        "必须",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/新建SSO_SSO_身份与域名配置_通用设置_Global System.md",
+        "content_hash": "652b6182dbcc815def20be1baaeca2094b1ac81428d825ba01ed2d694d771b18",
+        "title": "新建SSO",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册账号组织权限/新建sso/create/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/账号组织与权限",
+      "object_or_scenario": "新建SSO",
+      "task": "create"
+    },
+    {
+      "case_id": "case-081",
+      "canonical_case_id": "canonical-261d91e3643422fc",
+      "comparison_key": "maxstore/模块手册账号组织权限/新建角色/create/procedure",
+      "source_snapshot_id": "source-261d91e3643422fc",
+      "target_title": "新建角色_角色管理_ResellerPortal",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "新建",
+        "角色"
+      ],
+      "required_boundaries": [
+        "不能",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/新建角色_角色管理_ResellerPortal.md",
+        "content_hash": "0d87f777c18432634ea0079913c0120e0d1224b1ccf890364d1145afea9719d4",
+        "title": "新建角色",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册账号组织权限/新建角色/create/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/账号组织与权限",
+      "object_or_scenario": "新建角色",
+      "task": "create"
+    },
+    {
+      "case_id": "case-082",
+      "canonical_case_id": "canonical-737700cbe051fb39",
+      "comparison_key": "maxstore/模块手册账号组织权限/分类/permission/procedure",
+      "source_snapshot_id": "source-737700cbe051fb39",
+      "target_title": "权限分类_角色管理_MerchantPortal",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "权限",
+        "分类"
+      ],
+      "required_boundaries": [
+        "权限"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/权限分类_角色管理_MerchantPortal.md",
+        "content_hash": "c9495b8d0268aa7749aa706d0d143d32431bf22d4f87dc3232d8b66a336eae17",
+        "title": "权限分类",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册账号组织权限/分类/permission/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/账号组织与权限",
+      "object_or_scenario": "分类",
+      "task": "permission"
+    },
+    {
+      "case_id": "case-083",
+      "canonical_case_id": "canonical-333c50ca6ae7ffe3",
+      "comparison_key": "maxstore/模块手册终端设备/终端/lifecycle/procedure",
+      "source_snapshot_id": "source-333c50ca6ae7ffe3",
+      "target_title": "激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "激活",
+        "停用",
+        "终端"
+      ],
+      "required_boundaries": [
+        "权限"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md",
+        "content_hash": "83049ba1855ac9085b31a270a29223525ec6787fc5947c9093bc1ec4f1ede039",
+        "title": "激活&停用终端",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册终端设备/终端/lifecycle/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/终端与设备",
+      "object_or_scenario": "终端",
+      "task": "lifecycle"
+    },
+    {
+      "case_id": "case-084",
+      "canonical_case_id": "canonical-9277d065ab1f8820",
+      "comparison_key": "maxstore/模块手册平台运营服务日志邮件/系统邮件模板/describe/procedure",
+      "source_snapshot_id": "source-9277d065ab1f8820",
+      "target_title": "系统邮件模板_系统邮件管理_邮件管理_Global System",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "邮件",
+        "模板"
+      ],
+      "required_boundaries": [
+        "来源"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/系统邮件模板_系统邮件管理_邮件管理_Global System.md",
+        "content_hash": "77dde2804544a0cb8ed55000fefedad1dd62a1eccd057404935999b1e24dec7b",
+        "title": "系统邮件模板",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册平台运营服务日志邮件/系统邮件模板/describe/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/平台运营与服务/日志与邮件",
+      "object_or_scenario": "系统邮件模板",
+      "task": "describe"
+    },
+    {
+      "case_id": "case-085",
+      "canonical_case_id": "canonical-51b71ca28267ed10",
+      "comparison_key": "maxstore/模块手册终端设备/终端/browse/procedure",
+      "source_snapshot_id": "source-51b71ca28267ed10",
+      "target_title": "终端列表_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "终端",
+        "terminal",
+        "页是"
+      ],
+      "required_boundaries": [
+        "不支持",
+        "默认"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/终端列表_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md",
+        "content_hash": "70dc077de6e3ebd15e0698f2cc1cc75cadafc15c2071b61d5a2d708c6cb9b08a",
+        "title": "终端列表",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册终端设备/终端/browse/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/终端与设备",
+      "object_or_scenario": "终端",
+      "task": "browse"
+    },
+    {
+      "case_id": "case-086",
+      "canonical_case_id": "canonical-c64270d16f997750",
+      "comparison_key": "maxstore/模块手册商户支付/编辑删除/maintain/procedure",
+      "source_snapshot_id": "source-c64270d16f997750",
+      "target_title": "编辑&删除_Merchant Processor_商户管理_Merchant Management_Reseller Portal",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "编辑",
+        "删除"
+      ],
+      "required_boundaries": [
+        "限制",
+        "权限"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/编辑&删除_Merchant Processor_商户管理_Merchant Management_Reseller Portal.md",
+        "content_hash": "837d5a61c36b4cc80c78f4945a7b28b139e9b701f8e0fc4f1e5488e86b2ad962",
+        "title": "编辑&删除",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册商户支付/编辑删除/maintain/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/商户与支付",
+      "object_or_scenario": "编辑&删除",
+      "task": "maintain"
+    },
+    {
+      "case_id": "case-087",
+      "canonical_case_id": "canonical-2a4e914275caa5da",
+      "comparison_key": "maxstore/模块手册终端设备/制造商/maintain/procedure",
+      "source_snapshot_id": "source-2a4e914275caa5da",
+      "target_title": "编辑&删除制造商_制造商管理_机型管理_Global System",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "编辑",
+        "删除",
+        "制造"
+      ],
+      "required_boundaries": [
+        "限制",
+        "权限"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/编辑&删除制造商_制造商管理_机型管理_Global System.md",
+        "content_hash": "09fcee57cac216e29379c468e75f0bae654a46b090995cff52587f3dbd539e50",
+        "title": "编辑&删除制造商",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册终端设备/制造商/maintain/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/终端与设备",
+      "object_or_scenario": "制造商",
+      "task": "maintain"
+    },
+    {
+      "case_id": "case-088",
+      "canonical_case_id": "canonical-f45af2ebc67c7690",
+      "comparison_key": "maxstore/模块手册终端设备/终端/maintain/procedure",
+      "source_snapshot_id": "source-f45af2ebc67c7690",
+      "target_title": "编辑&删除终端_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "编辑",
+        "删除",
+        "终端"
+      ],
+      "required_boundaries": [
+        "默认",
+        "限制"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/编辑&删除终端_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md",
+        "content_hash": "6752d8786a13875cf9f99747b7dc33ade41e8db0484e76b019861543c2e6f354",
+        "title": "编辑&删除终端",
+        "mapping_status": "unmatched",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册终端设备/终端/maintain/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/终端与设备",
+      "object_or_scenario": "终端",
+      "task": "maintain"
+    },
+    {
+      "case_id": "case-089",
+      "canonical_case_id": "canonical-5434a6f997492fcb",
+      "comparison_key": "maxstore/模块手册账号组织权限/重置密码更改邮箱/account/procedure",
+      "source_snapshot_id": "source-5434a6f997492fcb",
+      "target_title": "重置密码&更改邮箱_用户_Merchant Management_Reseller Portal",
+      "page_type": "procedure",
+      "criticality": "non_critical",
+      "required_claims": [
+        "重置",
+        "密码",
+        "更改"
+      ],
+      "required_boundaries": [
+        "限制",
+        "权限"
+      ],
+      "companybrain_entry_path": null,
+      "companybrain_not_applicable_reason": "待基于冻结 CompanyBrain manifest 建立唯一映射",
+      "oracle_source": {
+        "source_uri": "merchant system/重置密码&更改邮箱_用户_Merchant Management_Reseller Portal.md",
+        "content_hash": "222ccaea14525b456077c955b29bcc6be12117df30efe4ff358dc39db4256226",
+        "title": "重置密码&更改邮箱",
+        "mapping_status": "unique",
+        "method": "title_boundary_and_semantic_key_v2",
+        "comparison_key": "maxstore/模块手册账号组织权限/重置密码更改邮箱/account/procedure"
+      },
+      "product_or_domain": "MAXSTORE",
+      "module": "模块手册/账号组织与权限",
+      "object_or_scenario": "重置密码&更改邮箱",
+      "task": "account"
+    }
+  ],
+  "oracle": {
+    "schema_version": "task4-content-oracle.v2",
+    "generated_by": "scripts/task4_generate_case_oracle.py",
+    "source_manifest_id": "confluence-raw-89-20260818-v1",
+    "source_content_tree_hash": "de977b151f07ad45ba14266efeba01e310dc6ef45900a9218889f9d5d72229a8",
+    "mapping_fixture": "task4-companybrain-mapping-20260819-v8.json",
+    "manual_review_required": false
+  }
+}

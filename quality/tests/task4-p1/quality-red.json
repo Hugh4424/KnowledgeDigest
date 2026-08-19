@@ -1,0 +1,8 @@
+{
+  "phase_id": "P1",
+  "task_ids": ["T005"],
+  "command": "env PYTHONDONTWRITEBYTECODE=1 uv run --frozen pytest -q -p no:cacheprovider tests/acceptance/test_task4_full_quality.py",
+  "exit_code": 1,
+  "oracle": "ORACLE-READER-COMPARE",
+  "result": "strict comparison target failed before source-anchor correction"
+}

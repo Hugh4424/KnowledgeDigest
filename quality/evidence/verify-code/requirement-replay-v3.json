@@ -1,0 +1,46 @@
+{
+  "schema_version": "task4-verify-requirement-replay.v3",
+  "stage": "verify-code",
+  "task_id": "task4-reader-quality-compiler",
+  "original_requirement": "让 KnowledgeDigest 的最终知识产物真实优于 CompanyBrain；89 条只是当前样本，后续要能扩展到数万条；不靠人工逐页检查；失败必须如实暴露。",
+  "user_flow": [
+    "原始资料 → 固定来源清单、source_id、content_hash、空源检查",
+    "来源 → 产品、模块、平台、主题、页面类型、可读标题和稳定路径",
+    "主题 → 合并证据 → Summary、答案、使用场景、操作/配置、排查、规则边界、相关主题、来源",
+    "主题 → Home/分类/主题页；Audit 保存来源、Claim、关系、失败和运行证据",
+    "候选包 → 先检查发布状态，再与 CompanyBrain 做路径、答案完整度、边界/来源清晰度三轴对照",
+    "任一空源、清单漂移、溯源缺失或生成失败 → not_released/failed"
+  ],
+  "page_scope": ["Home", "分类索引", "主题正文", "来源简表", "Audit 报告"],
+  "data_states": ["candidate", "not_released", "failed", "blocked", "cancelled", "pending", "conflict", "released"],
+  "success_boundary": [
+    "完整输入无失败且候选可发布",
+    "正文经过结构化编辑而不是原文平铺",
+    "标题、分类、路径可读且来源可回查",
+    "完整 canonical case 对照至少一轴严格更好、其余不差"
+  ],
+  "failure_boundary": [
+    "89 条任一空源阻止正式包发布",
+    "自动映射无法证明 CompanyBrain 对应主题时只能 undecidable，不能把未知当 N/A",
+    "基线 manifest 与规格或当前映射不一致时不能声称优于",
+    "独立 review 无可信终态时不能伪造通过"
+  ],
+  "non_goals": ["人工逐页审核队列", "把 89 条写死成永久分类", "复制 CompanyBrain 目录", "本任务内承诺数万条性能指标"],
+  "deferred_handoff": [
+    "补齐或明确处理空源后重跑正式 89 条",
+    "重新冻结与规格一致的 CompanyBrain baseline manifest，或经 make-decision 更新基线身份",
+    "补齐 53 条 baseline unmatched 的可证明映射/N/A 依据",
+    "再进入 verify-code 完整反向验收；当前不 close"
+  ],
+  "evidence": {
+    "implementation_receipt": "quality/evidence/implementation/local-worktree-snapshot-v2.json",
+    "workflowhub_canonical_receipt": "quality/evidence/implementation/c800fd07e4a67000c6b6e146c582db04f77817ae6283c0d8e74febcc15897bb6.json",
+    "test_receipt": "quality/tests/task4-final-aggregate-v10.json",
+    "mapping_config": "config/task4-companybrain-mapping-20260819-v6.json",
+    "official_candidate": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-candidate-20260819-v31-89-source",
+    "official_assessment": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-assessment-20260819-v33-89-formal",
+    "diagnostic_assessment": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-assessment-20260819-v34-88-diagnostic",
+    "current_code_tests": "30 focused passed; 727 full passed, 3 skipped"
+  },
+  "conclusion": "当前实现和自动化回归通过，但原始目标尚未被证明：正式 89 条 not_released，88 条诊断 undecidable，不能写成已超过 CompanyBrain。"
+}

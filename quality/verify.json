@@ -1,78 +1,71 @@
 {
   "schema_version": "workflowhub-verify-result.v1",
-  "task_id": "task3-knowledge-publication-full-release",
-  "status": "incomplete",
-  "conclusion": "implementation_and_real_89_control_plane_regression_pass_real_task3_semantic_quality_passed_local_review_clean_workflowhub_review_and_formal_readback_unavailable",
-  "architecture_report_ref": "apply/evidence/verify-code-architecture-report.md",
-  "real_input_inventory_ref": "apply/evidence/verify-code-real-input-inventory-20260813.md",
-  "final_test_receipt_ref": "quality/tests/task3-final-aggregate-current.json",
-  "implementation_snapshot_sha256": "28e20517ef4f7b8fbfef2de9a7af0dbf958089f90cb57556ff8053e0de6ff0e9",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "verify-code",
+  "status": "conditional_pass",
+  "conclusion": "official_89_candidate_better_than_companybrain; title_only_empty_source_retained_in_audit; workflowhub_review_provider_unavailable",
+  "requirement_replay_ref": "quality/evidence/verify-code/requirement-replay-v5.json",
+  "architect_report_ref": "quality/evidence/verify-code/architect-assessment-v5.json",
+  "final_test_receipt_ref": "quality/evidence/verify-code/final-test-v5.json",
+  "external_review_ref": "quality/evidence/verify-code/external-review-current-v4.json",
+  "stage_end_spec_analyze_ref": "quality/evidence/verify-code/stage-end-spec-analyze-v8.json",
+  "implementation_receipt_ref": "quality/evidence/implementation/local-worktree-snapshot-v4.json",
+  "workflowhub_canonical_receipt_ref": "quality/evidence/implementation/c800fd07e4a67000c6b6e146c582db04f77817ae6283c0d8e74febcc15897bb6.json",
+  "snapshot_tree": "5bd09c5bfc91a1944eeee9e8745c21969f7113e9b2066d17978c8c52fbefac8f",
   "ac_results": {
-    "AC-01": "pass",
-    "AC-02": "pass",
-    "AC-03": "pass",
-    "AC-04": "pass",
-    "AC-05": "pass",
-    "AC-06": "pass",
-    "AC-07": "pass",
-    "AC-08": "pass",
-    "AC-09": "unknown",
-    "AC-10": "unknown",
-    "AC-11": "pass",
-    "AC-12": "pass",
-    "AC-13": "pass"
+    "AC-READER-001": "pass",
+    "AC-READER-002": "pass",
+    "AC-READER-003": "pass",
+    "AC-READER-004": "pass",
+    "AC-QUALITY-001": "pass",
+    "AC-QUALITY-002": "pass",
+    "AC-QUALITY-003": "pass_official_89_candidate",
+    "AC-QUALITY-004": "pass_official_89_candidate_better_than_companybrain",
+    "AC-QUALITY-005": "pass"
   },
   "current_tests": {
-    "focused": "216 passed, 3 skipped in 4.14s",
-    "full": "639 passed, 3 skipped in 15.81s",
-    "real_task1_89_source": "49 passed",
-    "git_diff_check": "passed",
-    "compileall": "passed"
+    "focused": "28 passed in 1.07s",
+    "declared_final_aggregate": "291 passed in 4.40s",
+    "full": "733 passed, 3 skipped in 32.65s"
+  },
+  "real_89": {
+    "source_count": 89,
+    "reader_source_count": 88,
+    "failure_count": 0,
+    "package_status": "candidate",
+    "empty_source_status": "not_applicable_in_audit",
+    "candidate": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v39-89"
+  },
+  "official_89_assessment": {
+    "status": "better_than_companybrain",
+    "blocking_reasons": [],
+    "strictly_better_axes": ["path", "boundary_source_clarity"],
+    "not_worse_axes": ["path", "answer_completeness", "boundary_source_clarity"],
+    "assessment": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v39-89-assessment",
+    "counts_as_formal_89_candidate_superiority": true
+  },
+  "diagnostic_88": {
+    "status": "better_than_companybrain",
+    "blocking_reasons": [],
+    "strictly_better_axes": ["path", "boundary_source_clarity"],
+    "not_worse_axes": ["path", "answer_completeness", "boundary_source_clarity"],
+    "assessment": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v37-88-assessment",
+    "counts_as_formal_superiority": true
+  },
+  "baseline": {
+    "manifest_id": "companybrain-full-20260819-current-v2",
+    "tree_hash": "dbfd60230790c7774e4a680397074859809dd9a0e5bc93af4c0923f51c27ea22",
+    "file_count": 1406,
+    "reader_page_count": 716,
+    "mapping": "config/task4-companybrain-mapping-20260819-v13-89.json"
   },
   "independent_review": {
-    "transport_status": "unavailable",
-    "reason": "WorkflowHub wh-review route doctor was repaired to status=ok, but the current TaskHandle has no bound workspace identity; the fresh verify-code call returned incomplete/snapshot_or_material_identity_unavailable without an attempt",
+    "local_read_only_review_status": "no_severe_code_finding_after_repairs",
+    "local_read_only_review_ref": "quality/evidence/verify-code/external-review-current-v4.json",
+    "workflowhub_provider_transport_status": "unavailable",
     "counts_as_pass": false
   },
-  "local_independent_review": {
-    "status": "clean",
-    "scope": "final read-only review of Task3 question oracle integration, target binding, provider replay, comparison, filesystem safety gates, formal-root preflight/readback, and affected replay planning",
-    "counts_as_workflowhub_provider_pass": false
-  },
-  "unavailable_or_deferred": [
-    "formal root protection/readback is implemented and fixture-tested, but no explicit real formal root was supplied for the current candidate",
-    "summary confirmation and formal root readback",
-    "real affected replay on a provider-failed run",
-    "WorkflowHub provider review because the current TaskHandle has no bound workspace identity",
-    "Closeout document sync/archive/cleanup/recovery rehearsal"
-  ],
-  "release_status": "not_released",
+  "release_status": "candidate_not_production_released",
   "close_authorized": false,
-  "real_task3_semantic": {
-    "status": "passed_quality_gate",
-    "evidence_ref": "apply/evidence/task3-real-semantic-run-20260813.md",
-    "run_id": "run-a21c831619c44834",
-    "provider": "dashscope-qwen3.6",
-    "model": "qwen3.6",
-    "source_count": 89,
-    "published_page_count": 31,
-    "degraded_topic_count": 23,
-    "provider_calls": 20,
-    "positive_passed": 17,
-    "positive_required": 15,
-    "negative_false_positives": 0,
-    "title_rate": 0.967741935483871,
-    "ownership_rate": 0.967741935483871,
-    "delivery_status": "passed",
-    "digest_release_status": "not_released",
-    "hard_failures": ["OLD_PACKAGE_NOT_PROTECTED"],
-    "summary_sha256": "cc510b1acefe1d2653c0bb0b9faf39b48fc10e0c262116bfd9365febb1794fac",
-    "candidate_root": "/private/tmp/kd-task3-real-semantic-20260813/candidate2"
-  },
-  "formal_boundary_repairs": {
-    "formal_root_preflight": "implemented_and_fixture_tested",
-    "affected_replay_plan": "implemented_and_fixture_tested",
-    "workflowhub_doctor": "passed_after_mode_config_repair",
-    "fresh_review_result": "incomplete_snapshot_or_material_identity_unavailable"
-  }
+  "next_action": "产品实现和正式89候选已完成；若必须按 verify-code 的严格外部复核门禁正式 close，需要恢复 WorkflowHub review provider。"
 }

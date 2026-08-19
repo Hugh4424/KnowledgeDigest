@@ -1,0 +1,92 @@
+{
+  "schema_version": "task4-verify-architect-assessment.v1",
+  "stage": "verify-code",
+  "status": "incomplete",
+  "reverse_check": {
+    "original_requirement": "让 KnowledgeDigest 的全量知识产物真实优于 CompanyBrain；不把目录、文件名或单页样例当成质量证明；失败要如实暴露。",
+    "decision": "task4-reader-quality-compiler 将 89 条来源编译为读者知识包，并用机器同题比较；不做逐页人工审核。",
+    "spec": "覆盖来源、语义识别、标题分类、正文、导航、Reader/Audit 分离、失败状态、全量报告和三轴比较。",
+    "plan_and_tasks": "T001-T007 已实现并有聚合回归；当前候选仍需 verify-code 反向验收。",
+    "flow": [
+      "原始目录 → 89 条来源清单、稳定 source_id、内容 hash 和快照",
+      "来源 → 产品/模块/主题、标题、页面类型和主题关系",
+      "主题 → Summary、答案、规则边界、相关主题、来源入口和 Audit 证据",
+      "候选包 → Home/索引/主题页可达性与失败状态",
+      "候选包 → 读者质量评估；非 candidate 只能 undecidable/not_released",
+      "失败/取消/冲突/manifest 漂移 → 保留 Audit，删除可见 bundle，不覆盖正式入口"
+    ],
+    "page_scope": ["候选 Reader Home/索引/主题页", "Reader source projection", "Audit 快照、Claim、关系、失败和运行报告"],
+    "non_goals": ["不复制 CompanyBrain 目录", "不把 89 条路径写死为永久规则", "不加入人工逐页/逐题审核", "不进入数万条吞吐和成本验收"],
+    "deferred": ["数万条资料的规模、成本、并发和恢复", "完整冻结的 CompanyBrain 89 案例唯一映射", "正文达到 CompanyBrain 编辑深度后的最终优于结论"]
+  },
+  "findings": [
+    {
+      "id": "ARCH-001",
+      "severity": "major",
+      "status": "needs_human",
+      "anchor": "真实 89 编译证据；status.json; quality/evidence/build-plan/T007-final.json",
+      "impact": "1 条空来源 emm for android /AE - AirViewer厂商管理.md 使全量包 not_released；不能声称 89 条已发布或优于 CompanyBrain。",
+      "recommendation": "保留 fail-closed；补齐来源后新 run，不能用 fallback 绕过。"
+    },
+    {
+      "id": "ARCH-002",
+      "severity": "major",
+      "status": "needs_human",
+      "anchor": "config/task4-reader-case-matrix-89-input.v1.json: cases 与 source_to_case_map；全 89 条 companybrain_entry_path=null",
+      "impact": "当前比较没有有效 CompanyBrain 对照。null 原因写的是待建立唯一映射，不是已确认 N/A；因此质量评估只能 undecidable。",
+      "recommendation": "读取冻结 CompanyBrain manifest，给每个 canonical case 建立唯一 key→entry_path；确实不存在才填 N/A。"
+    },
+    {
+      "id": "ARCH-003",
+      "severity": "major",
+      "status": "accepted_risk",
+      "anchor": "src/knowledge_digest/task4_reader_quality.py:_extract_content 与 _render_page",
+      "impact": "当前正文主要是清洗后的首行和 bullet 平铺，虽然去掉了部分噪声，但还没有 CompanyBrain 那种按对象、操作、规则、异常组织的知识编辑；文件名/目录变好不等于正文变好。",
+      "recommendation": "本次先修复硬性 seam；正文编辑深度仍不得标 pass，需继续做分段/表格/步骤/规则编译并用同题 oracle 验证。"
+    },
+    {
+      "id": "ARCH-004",
+      "severity": "major",
+      "status": "fixed_in_next_action",
+      "anchor": "src/knowledge_digest/task4_reader_quality.py:_load_config、assess_reader_quality",
+      "impact": "编译器没有加载 page_type_fixture；评估器按 canonical_case_id 或标题找主题，但 89 案例的 canonical_case_id 与编译主题身份不稳定，source_to_case_map 未真正参与匹配。",
+      "recommendation": "编译配置加载页面类型注册表；评估器按 case 的 source_snapshot_id/source_id 通过 topic.source_ids 找主题，保留 ID/标题作为回退且显式记录。"
+    },
+    {
+      "id": "ARCH-005",
+      "severity": "major",
+      "status": "needs_human",
+      "anchor": "spec FR-READER-002/AC-READER-003 与当前主题页正文",
+      "impact": "当前实现与 Design 的“整理后的知识、不能是原文片段简单拼接”仍有差距；即使测试绿，也不能把 reader quality 说成达标。",
+      "recommendation": "继续在同一 task 修正文编译；最终质量只能以完整案例、有效 CompanyBrain baseline 和正文 oracle 共同判定。"
+    }
+  ],
+  "acceptance": {
+    "AC-001": "pass：真实 89 条都有 manifest 行，失败源有明确记录；不等于发布成功。",
+    "AC-SOURCE-002": "pass：source_id、content_hash、lineage 和唯一 target_path 由当前测试覆盖；真实空源按失败处理。",
+    "AC-COMPILER-001": "pass：配置化分类和语义节点有当前回归；全量有 1 条 source failure。",
+    "AC-COMPILER-002": "pass：标题清洗和 Android 语义标题有断言；全量质量仍未证明。",
+    "AC-COMPILER-003": "pass：证据不足不进通用，进入 pending/Audit。",
+    "AC-COMPILER-004": "pass：主题合并、关系和显式冲突有回归；复杂语义关系仍有限。",
+    "AC-COMPILER-005": "pass：配置变体不依赖 89 条输入路径。",
+    "AC-READER-001": "unknown：真实 89 未生成 candidate bundle，不能证明全量入口可达。",
+    "AC-READER-002": "pass：当前测试覆盖标题污染和稳定路径；历史入口映射仍不是本样本的最终证明。",
+    "AC-READER-003": "fail：页面有固定 section，但正文编辑深度不足，且 page type fixture 尚未进入编译 seam。",
+    "AC-READER-004": "pass：Reader/Audit 泄漏和来源入口有回归；真实全量因 not_released 未发布。",
+    "AC-STATE-001": "pass：失败、取消、冲突不生成 bundle；真实 89 明确 not_released。",
+    "AC-STATE-002": "pass：pending/conflict 不进入默认 Reader。",
+    "AC-AUDIT-001": "pass：89 行 manifest、失败、去向和运行报告存在；候选页面可达性因未发布为 unknown。",
+    "AC-AUDIT-002": "unknown：机器根因结构存在，但正文和 CompanyBrain 差距的完整复跑闭环未完成。",
+    "AC-QUALITY-001": "pass：没有 human_reviewed 状态或人工队列。",
+    "AC-QUALITY-002": "unknown：当前 case matrix 的 CompanyBrain 映射全部待建立，无法证明同题条件一致。",
+    "AC-QUALITY-003": "unknown：评估器有回查字段，但真实 baseline mapping 和 candidate package 不完整。",
+    "AC-QUALITY-004": "fail：真实结果是 undecidable/not_released，不能声称优于 CompanyBrain。",
+    "AC-QUALITY-005": "unknown：七类差距报告骨架存在，但正文质量和全量可发布结果仍未证实。"
+  },
+  "test_fact": {
+    "command": "env PYTHONDONTWRITEBYTECODE=1 uv run --frozen pytest -q -p no:cacheprovider tests/acceptance/test_task4_full_compiler.py tests/acceptance/test_task4_full_quality.py tests/acceptance/test_task4_location_compiler.py tests/acceptance/test_task4_location_gate.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task2b_body_compiler.py tests/acceptance/test_task2c_reader_quality.py tests/acceptance/test_task3_projection.py tests/acceptance/test_task3_quality_release.py tests/acceptance/test_task3_closeout.py",
+    "result": "276 passed in 5.99s",
+    "real_89": "source_count=89; reader_source_count=88; failure_count=1; package_status=not_released; assessment=undecidable/candidate_not_released",
+    "coverage_limit": "绿色回归证明实现行为，不证明正文已超过 CompanyBrain，也不替代有效 baseline mapping。"
+  }
+}

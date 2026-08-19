@@ -1,0 +1,27 @@
+{
+  "schema_version": "workflowhub-stage-end-spec-analyze.v1",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "build-code",
+  "status": "consistent_with_limits",
+  "materials": [
+    "specs/task4-reader-quality-compiler/decision-log.md",
+    "specs/task4-reader-quality-compiler/spec.md",
+    "specs/task4-reader-quality-compiler/plan.md",
+    "specs/task4-reader-quality-compiler/tasks.md"
+  ],
+  "implementation_alignment": "结构化正文编译、可读路径、CompanyBrain 映射、来源溯源、关系证据、锁/取消/回滚和 fail-closed 根因已落到当前实现与测试。",
+  "flow_alignment": "原始来源→快照→语义主题→Reader/Audit→状态判定→CompanyBrain 对照→verify-code 交接已覆盖。",
+  "current_facts": {
+    "tests": "727 passed, 3 skipped in 32.84s",
+    "official_89": "source_count=89; reader_source_count=88; failure_count=1; package_status=not_released; output=v31",
+    "mapping_v6": "36 unique; 0 ambiguous; 53 unmatched; CompanyBrain 716 markdown pages; tree_hash=49b9e90340f32f1877262f5aa6c0bff9e97aacb6d72f3a4dfdefcb284abfce83",
+    "diagnostic_88": "undecidable; baseline_mapping_unmatched, case_topic_mapping_missing, source_manifest_mapping_drift; output=v34"
+  },
+  "remaining_limits": [
+    "正式 89 条被空源阻断",
+    "当前 mapping 使用 2026-08-19 本地 CompanyBrain 快照，而 spec 仍记录 2026-08-18/1406 文件基线；身份未统一",
+    "53 条 unmatched 不是可证明 N/A，不能贡献比较优势",
+    "当前独立 review 只允许在最新只读复核完成后更新；WorkflowHub provider unavailable 不算 pass"
+  ],
+  "handoff": "build-code 证据已更新；verify-code 只能反向检查并报告上述未闭环项，不能 close。"
+}

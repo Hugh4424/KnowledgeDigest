@@ -1,0 +1,12 @@
+{
+  "schema_version": "task4-build-code-evidence.v1",
+  "task_id": "task4-reader-quality-compiler",
+  "phase_id": "P1",
+  "task": "T001",
+  "verification_role": "RED",
+  "command": "uv run --frozen pytest -q tests/acceptance/test_task4_full_compiler.py",
+  "exit_code": 1,
+  "oracle": "ORACLE-T4-FULL-COMPILER",
+  "result": "target assertions failed against not_implemented stub; collection/setup succeeded",
+  "coverage_limit": "does not prove implementation or real corpus quality"
+}

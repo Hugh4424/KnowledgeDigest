@@ -1499,6 +1499,118 @@ def _source_chain(bundle_dir: Path, page_path: str, evidence_root: Path | None) 
     return True, "passed"
 
 
+def build_task4_reader_snapshot(package_dir: Path) -> ReaderSnapshot:
+    """Build a Reader-only snapshot for the isolated Task4 candidate.
+
+    The formal reader gate consumes a ``bundle`` directory and keeps its
+    historical allowlist.  Task4 candidates keep Reader pages, short source
+    projections, Audit, and reports as sibling directories, so this seam
+    projects only the Reader-visible siblings without changing the formal
+    gate's behavior.
+    """
+
+    root = Path(package_dir)
+    if root.is_symlink() or not root.is_dir():
+        raise ValidationError("reader-quality", root, "Task4 Reader package must be a real directory")
+    files: dict[str, str] = {}
+    for path in sorted(root.rglob("*")):
+        rel = path.relative_to(root).as_posix()
+        if path.is_dir():
+            continue
+        if path.is_symlink():
+            if rel == "audit" or rel.startswith(("audit/", "reports/")):
+                continue
+            raise ValidationError("reader-quality", rel, "Task4 Reader snapshot cannot include symlinks")
+        if rel.startswith(("audit/", "reports/")):
+            continue
+        allowlisted = (
+            rel in {"README.md", "Home.md", "index.md"}
+            or rel.startswith(("products/", "Products/", "sources/", "references/"))
+        )
+        if not allowlisted:
+            # A candidate/CompanyBrain root also contains Audit, archive,
+            # editor metadata, and unrelated product areas. Those files are
+            # outside the Reader package; only files in the explicit Reader
+            # projection above are admitted to the snapshot.
+            continue
+        if path.suffix != ".md":
+            continue
+        try:
+            files[rel] = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            raise ValidationError("reader-quality", rel, f"Reader file is unreadable: {exc}") from exc
+    if not files:
+        raise ValidationError("reader-quality", root, "Task4 Reader package is empty")
+    digest_rows = [{"path": path, "sha256": _sha256(files[path])} for path in sorted(files)]
+    return ReaderSnapshot(tuple(sorted(files)), files, _json_hash(digest_rows))
+
+
+_TASK4_WIKILINK_RE = re.compile(r"(?<!!)\[\[([^\]]+)\]\]")
+
+
+def _task4_reader_links(path: str, text: str) -> tuple[str, ...]:
+    links = list(_reader_links(path, text))
+    for raw_target in _TASK4_WIKILINK_RE.findall(text):
+        target = raw_target.split("|", 1)[0].split("#", 1)[0].strip()
+        if not target or "://" in target or target.startswith(("mailto:", "/")):
+            continue
+        target_path = PurePosixPath(unquote(target))
+        if target_path.is_absolute() or ".." in target_path.parts:
+            continue
+        if target_path.suffix.lower() != ".md":
+            target_path = PurePosixPath(f"{target_path}.md")
+        resolved = PurePosixPath(path).parent.joinpath(target_path).as_posix()
+        if resolved == ".":
+            resolved = PurePosixPath(path).name
+        links.append(resolved)
+    return tuple(dict.fromkeys(links))
+
+
+def task4_reader_route(snapshot: ReaderSnapshot, entry_path: str, target_path: str) -> tuple[str, ...]:
+    """Expose the existing deterministic Reader route calculation to Task4."""
+
+    if entry_path not in snapshot.files or target_path not in snapshot.files:
+        return ()
+    queue: list[tuple[str, tuple[str, ...]]] = [(entry_path, (entry_path,))]
+    visited = {entry_path}
+    while queue:
+        current, route = queue.pop(0)
+        if current == target_path:
+            return route
+        for target in _task4_reader_links(current, snapshot.files[current]):
+            if target in snapshot.files and target not in visited:
+                visited.add(target)
+                queue.append((target, (*route, target)))
+    return ()
+
+
+def task4_reader_reachable_paths(snapshot: ReaderSnapshot, entry_path: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Expose reachable-path and missing-link facts without changing formal gates."""
+
+    if entry_path not in snapshot.files:
+        return (), (entry_path,)
+    queue = [entry_path]
+    visited: list[str] = []
+    missing: list[str] = []
+    while queue:
+        current = queue.pop(0)
+        if current in visited:
+            continue
+        visited.append(current)
+        for target in _task4_reader_links(current, snapshot.files[current]):
+            if target not in snapshot.files:
+                missing.append(target)
+            elif target not in visited:
+                queue.append(target)
+    return tuple(visited), tuple(dict.fromkeys(missing))
+
+
+def task4_reader_source_chain(bundle_dir: Path, page_path: str, evidence_root: Path | None) -> tuple[bool, str]:
+    """Expose the existing source-chain validator for the Task4 pilot seam."""
+
+    return _source_chain(Path(bundle_dir), page_path, evidence_root)
+
+
 def _reader_prompt_text(text: str, *, source_path: str | None = None) -> str:
     """Redact internal Markdown link targets without dropping reader prose."""
 

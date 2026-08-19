@@ -1,0 +1,30 @@
+{
+  "schema_version": "task4-verify-final-test.v3",
+  "task_id": "task4-reader-quality-compiler",
+  "implementation_receipt_ref": "quality/evidence/implementation/local-worktree-snapshot-v2.json",
+  "workflowhub_canonical_receipt_ref": "quality/evidence/implementation/c800fd07e4a67000c6b6e146c582db04f77817ae6283c0d8e74febcc15897bb6.json",
+  "implementation_snapshot": "9876f5cb40df8d31f43c20f8e3911af2a97a21908f4c6550f0d2656a37b4592f",
+  "test_receipt_ref": "quality/tests/task4-final-aggregate-v10.json",
+  "command": "env PYTHONDONTWRITEBYTECODE=1 uv run --frozen pytest -q",
+  "exit_code": 0,
+  "result": "727 passed, 3 skipped in 32.84s",
+  "focused_result": "30 passed in 0.78s",
+  "real_89_compile": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-candidate-20260819-v31-89-source",
+    "source_count": 89,
+    "reader_source_count": 88,
+    "failure_count": 1,
+    "package_status": "not_released",
+    "failure_reason": "empty_body",
+    "failure_source": "emm for android /AE - AirViewer厂商管理.md"
+  },
+  "valid_88_diagnostic": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-assessment-20260819-v34-88-diagnostic",
+    "status": "undecidable",
+    "blocking_reasons": ["baseline_mapping_unmatched", "case_topic_mapping_missing", "source_manifest_mapping_drift"],
+    "strictly_better_axes_observed": ["path", "answer_completeness", "boundary_source_clarity"],
+    "counts_as_formal_pass": false
+  },
+  "independent_review": {"status": "current_recheck_has_open_mapping_findings", "counts_as_pass": false},
+  "conclusion": "自动化测试通过；业务目标仍未闭环，保持 not_released/undecidable。"
+}

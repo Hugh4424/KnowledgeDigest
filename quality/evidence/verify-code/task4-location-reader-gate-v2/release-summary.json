@@ -1,0 +1,10 @@
+{
+  "candidate_status": "candidate",
+  "decision": "undecidable",
+  "delivery_status": "not_released",
+  "failure_reasons": [
+    "evaluator record unavailable"
+  ],
+  "schema_version": "task4-location-release-summary.v1",
+  "status": "undecidable"
+}

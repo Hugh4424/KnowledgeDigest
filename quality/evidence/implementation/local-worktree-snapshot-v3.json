@@ -1,0 +1,14 @@
+{
+  "schema_version": "task4-local-worktree-evidence.v3",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "verify-code",
+  "worktree": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task4-reader-quality-compiler",
+  "git_head": "3be7492f4d6610f2bc72764a7f962d69fb730202",
+  "worktree_manifest_sha256": "838ca7efcdb71402af897ff6a364972d213b2c5cfc88564ea4a15fdd927d9ef7",
+  "worktree_file_count": 1288,
+  "test_receipt": "quality/tests/task4-final-aggregate-v11.json",
+  "official_candidate": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v38-89",
+  "diagnostic_candidate": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v37-88",
+  "manifest_scope": "all regular non-symlink files except this receipt, quality/verify.json, quality/evidence/verify-code/final-test-v4.json, quality/evidence/verify-code/architect-assessment-v4.json, .git and __pycache__",
+  "note": "这是当前 in-worktree 的只读绑定证据；不冒充 WorkflowHub canonical implementation receipt。"
+}

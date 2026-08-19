@@ -1,0 +1,49 @@
+{
+  "schema_version": "workflowhub-receipt.v1",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "build-code",
+  "producer": {
+    "stage": "build-code",
+    "component": "build-code-test-capture",
+    "version": "1.0.0"
+  },
+  "command": "env PYTHONDONTWRITEBYTECODE=1 uv run --frozen pytest -q",
+  "command_hash": "17358f45254601a25c9605225ec6800629e958e9bfe642e182290768d44192ac",
+  "exit_code": 0,
+  "snapshot_head": "3be7492f4d6610f2bc72764a7f962d69fb730202",
+  "snapshot_tree": "899028c794b8e52b26fbe6283457ca8fec25de12929631f91f58af43a2c9e4f4",
+  "snapshot_scope": "Task4 compiler, mapping, oracle, configuration, and acceptance tests",
+  "observed": {
+    "focused": "23 passed in 0.32s",
+    "full": "720 passed, 3 skipped in 29.45s"
+  },
+  "output_ref": "quality/tests/output/task4-final-aggregate-v9.output",
+  "real_corpus_compile": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-candidate-20260819-v16-89-source",
+    "source_count": 89,
+    "reader_source_count": 88,
+    "failure_count": 1,
+    "package_status": "not_released",
+    "failure_reason": "empty_body",
+    "failure_source": "emm for android /AE - AirViewer厂商管理.md"
+  },
+  "valid_source_comparison": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-assessment-20260819-v12-88-source/reports/comparison-table.json",
+    "status": "better_than_companybrain",
+    "strictly_better_axes": ["path", "answer_completeness", "boundary_source_clarity"],
+    "not_worse_axes": ["path", "answer_completeness", "boundary_source_clarity"],
+    "candidate_covered": 88,
+    "candidate_not_applicable": 1
+  },
+  "oracle": "ORACLE-TASK4-AGGREGATE",
+  "skip_facts": [
+    "three acceptance cases require optional Task1/Task2 baseline fixtures",
+    "the official 89-source package remains not_released until the empty source is repaired or explicitly excluded by an upstream decision"
+  ],
+  "coverage_limits": [
+    "this receipt proves local automated regression, not a formal release",
+    "the 88-source superiority result is a diagnostic comparison after excluding the objectively empty source",
+    "external wh-review remains unavailable from the recorded provider attempt"
+  ],
+  "status": "passed"
+}

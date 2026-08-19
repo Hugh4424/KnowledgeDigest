@@ -1,0 +1,25 @@
+{
+  "schema_version": "task4-page-type-registry.v1",
+  "version": "v1",
+  "page_types": {
+    "procedure": {
+      "required_sections": [
+        "Summary",
+        "答案",
+        "规则和边界",
+        "相关主题",
+        "来源（简表）"
+      ],
+      "body_oracle": "summary_answer_boundary_relation_source"
+    },
+    "diagnostic": {
+      "required_sections": [
+        "Summary",
+        "排查路径",
+        "规则和边界",
+        "来源（简表）"
+      ],
+      "body_oracle": "diagnostic_route_boundary_source"
+    }
+  }
+}

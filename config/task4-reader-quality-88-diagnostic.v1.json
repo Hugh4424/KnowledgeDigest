@@ -1,0 +1,539 @@
+{
+  "schema_version": "task4-reader-quality.v1",
+  "source_coverage": {
+    "manifest_id": "confluence-raw-88-diagnostic-20260819-v1",
+    "expected_count": 88
+  },
+  "case_matrix_fixture": "task4-reader-case-matrix-88-diagnostic-v1.json",
+  "companybrain_mapping_fixture": "task4-companybrain-mapping-20260819-v13-88.json",
+  "evaluator_fixture": "task4-reader-evaluator.v1.json",
+  "page_type_fixture": "task4-page-type-registry.v1.json",
+  "source_extensions": [
+    ".md",
+    ".txt",
+    ".json"
+  ],
+  "excluded_names": [
+    ".DS_Store"
+  ],
+  "max_page_lines": 300,
+  "core_source_patterns": [],
+  "taxonomy": {
+    "root_aliases": {
+      "GoInsight": {
+        "product": "GoInsight",
+        "fallback_module": "待分类"
+      },
+      "emm for android": {
+        "product": "EMM",
+        "fallback_module": "模块手册/EMM for Android/待分类"
+      },
+      "emm for ios": {
+        "product": "EMM",
+        "fallback_module": "模块手册/EMM for iOS/待分类"
+      },
+      "merchant system": {
+        "product": "MAXSTORE",
+        "fallback_module": "待分类"
+      }
+    },
+    "match_title_only": true,
+    "rules": [
+      {
+        "id": "goinsight-dc-deployment",
+        "roots": [
+          "GoInsight"
+        ],
+        "any": [
+          "DC部署方案"
+        ],
+        "module": "技术实现/部署与迁移"
+      },
+      {
+        "id": "goinsight-ai",
+        "roots": [
+          "GoInsight"
+        ],
+        "any": [
+          "问数自动识别",
+          "智能搭建",
+          "智能删除图表",
+          "智能查询文档"
+        ],
+        "module": "模块手册/智能问数与AI"
+      },
+      {
+        "id": "goinsight-field-filter",
+        "roots": [
+          "GoInsight"
+        ],
+        "any": [
+          "位置字段筛选",
+          "数据分析",
+          "累计计算"
+        ],
+        "module": "模块手册/字段与筛选"
+      },
+      {
+        "id": "goinsight-reports",
+        "roots": [
+          "GoInsight"
+        ],
+        "any": [
+          "创建设备报告",
+          "市场报告快照"
+        ],
+        "module": "模块手册/报告与快照"
+      },
+      {
+        "id": "goinsight-charts",
+        "roots": [
+          "GoInsight"
+        ],
+        "any": [
+          "图表类型",
+          "指标详情页",
+          "添加指标页"
+        ],
+        "module": "模块手册/图表与展示"
+      },
+      {
+        "id": "goinsight-datasets",
+        "roots": [
+          "GoInsight"
+        ],
+        "any": [
+          "收费应用安装统计",
+          "添加关联数据",
+          "设备位置历史数据集"
+        ],
+        "module": "模块手册/数据集"
+      },
+      {
+        "id": "goinsight-migrations",
+        "roots": [
+          "GoInsight"
+        ],
+        "any": [
+          "新建迁移任务",
+          "迁移任务列表"
+        ],
+        "module": "技术实现/数据迁移"
+      },
+      {
+        "id": "goinsight-platform",
+        "roots": [
+          "GoInsight"
+        ],
+        "any": [
+          "日志管理"
+        ],
+        "module": "模块手册/平台与系统"
+      },
+      {
+        "id": "goinsight-experience",
+        "roots": [
+          "GoInsight"
+        ],
+        "any": [
+          "bug analysis",
+          "Retrospective"
+        ],
+        "module": "经验与坑"
+      },
+      {
+        "id": "airviewer-files",
+        "roots": [
+          "emm for android"
+        ],
+        "any": [
+          "AirViewer厂商管理",
+          "AirViewer插件包设置"
+        ],
+        "product": "AirViewer",
+        "module": "模块手册/文件与硬件"
+      },
+      {
+        "id": "airviewer-remote",
+        "roots": [
+          "emm for android"
+        ],
+        "any": [
+          "设备详情页远程控制",
+          "设备AirViewer服务适配新厂商"
+        ],
+        "product": "AirViewer",
+        "module": "模块手册/远程协助"
+      },
+      {
+        "id": "emm-android-integration",
+        "roots": [
+          "emm for android"
+        ],
+        "any": [
+          "GoInsight数据收集",
+          "应用数据SDK"
+        ],
+        "product": "EMM",
+        "module": "模块手册/EMM for Android/集成与SDK"
+      },
+      {
+        "id": "emm-android-policy",
+        "roots": [
+          "emm for android"
+        ],
+        "any": [
+          "参数推送",
+          "应用参数配置",
+          "通信和网络配置",
+          "全管理相关设备配置"
+        ],
+        "product": "EMM",
+        "module": "模块手册/EMM for Android/策略与配置"
+      },
+      {
+        "id": "emm-android-apps",
+        "roots": [
+          "emm for android"
+        ],
+        "any": [
+          "应用定向发布",
+          "应用详情",
+          "分组管理",
+          "开发者上传应用"
+        ],
+        "product": "EMM",
+        "module": "模块手册/EMM for Android/应用管理"
+      },
+      {
+        "id": "emm-android-service",
+        "roots": [
+          "emm for android"
+        ],
+        "any": [
+          "企业类型升级",
+          "EMM服务定价",
+          "开发者服务账号",
+          "EMM服务订阅",
+          "市场列表及操作"
+        ],
+        "product": "EMM",
+        "module": "模块手册/EMM for Android/服务订阅"
+      },
+      {
+        "id": "emm-android-enrollment",
+        "roots": [
+          "emm for android"
+        ],
+        "any": [
+          "输入标识符注册设备",
+          "创建二维码注册设备",
+          "零接触相关流程"
+        ],
+        "product": "EMM",
+        "module": "模块手册/EMM for Android/设备入网"
+      },
+      {
+        "id": "emm-android-privacy",
+        "roots": [
+          "emm for android"
+        ],
+        "any": [
+          "隐私协议"
+        ],
+        "product": "EMM",
+        "module": "规范与资产"
+      },
+      {
+        "id": "emm-android-operations",
+        "roots": [
+          "emm for android"
+        ],
+        "any": [
+          "EMM客户端",
+          "设备数据收集"
+        ],
+        "product": "EMM",
+        "module": "模块手册/EMM for Android/设备运维"
+      },
+      {
+        "id": "emm-android-positioning",
+        "roots": [
+          "emm for android"
+        ],
+        "any": [
+          "EMM介绍",
+          "售前确认",
+          "隐私协议"
+        ],
+        "product": "EMM",
+        "module": "产品定位"
+      },
+      {
+        "id": "maxstore-payment-settings",
+        "roots": [
+          "emm for ios"
+        ],
+        "any": [
+          "Payment Settings"
+        ],
+        "product": "MAXSTORE",
+        "module": "模块手册/平台运营与服务"
+      },
+      {
+        "id": "maxstore-sso",
+        "roots": [
+          "emm for ios"
+        ],
+        "any": [
+          "SSO列表"
+        ],
+        "product": "MAXSTORE",
+        "module": "模块手册/账号组织与权限"
+      },
+      {
+        "id": "maxstore-uptrillion-audit",
+        "roots": [
+          "emm for ios"
+        ],
+        "any": [
+          "Uptrillion日志管理"
+        ],
+        "product": "MAXSTORE",
+        "module": "模块手册/平台运营与服务/日志与邮件"
+      },
+      {
+        "id": "emm-ios-apps",
+        "roots": [
+          "emm for ios"
+        ],
+        "any": [
+          "Store App",
+          "应用添加及移除",
+          "开发者上传企业应用",
+          "开发者应用列表",
+          "开发者应用详情"
+        ],
+        "product": "EMM",
+        "module": "模块手册/EMM for iOS/应用管理"
+      },
+      {
+        "id": "emm-ios-policy",
+        "roots": [
+          "emm for ios"
+        ],
+        "any": [
+          "策略-安全配置",
+          "策略-系统配置",
+          "策略-通用规则"
+        ],
+        "product": "EMM",
+        "module": "模块手册/EMM for iOS/策略与配置"
+      },
+      {
+        "id": "emm-ios-enrollment",
+        "roots": [
+          "emm for ios"
+        ],
+        "any": [
+          "终端管理",
+          "资产列表",
+          "ipad支持展示的机型图"
+        ],
+        "product": "EMM",
+        "module": "模块手册/EMM for iOS/设备入网"
+      },
+      {
+        "id": "emm-ios-service",
+        "roots": [
+          "emm for ios"
+        ],
+        "any": [
+          "Payment Settings",
+          "子市场用量管理",
+          "市场管理",
+          "账单"
+        ],
+        "product": "EMM",
+        "module": "模块手册/EMM for iOS/服务订阅"
+      },
+      {
+        "id": "emm-ios-audit",
+        "roots": [
+          "emm for ios"
+        ],
+        "any": [
+          "日志管理",
+          "日志汇总"
+        ],
+        "product": "EMM",
+        "module": "模块手册/EMM for iOS/组织与成员/日志与审计"
+      },
+      {
+        "id": "emm-ios-organization",
+        "roots": [
+          "emm for ios"
+        ],
+        "any": [
+          "SSO列表",
+          "代理商和商户迁移",
+          "提示邮件汇总"
+        ],
+        "product": "EMM",
+        "module": "模块手册/EMM for iOS/组织与成员"
+      },
+      {
+        "id": "maxstore-apps",
+        "roots": [
+          "merchant system"
+        ],
+        "any": [
+          "App Management"
+        ],
+        "product": "MAXSTORE",
+        "module": "模块手册/应用与市场"
+      },
+      {
+        "id": "maxstore-terminal",
+        "roots": [
+          "merchant system"
+        ],
+        "any": [
+          "终端列表",
+          "激活&停用终端",
+          "编辑&删除终端",
+          "编辑&删除制造商"
+        ],
+        "product": "MAXSTORE",
+        "module": "模块手册/终端与设备"
+      },
+      {
+        "id": "maxstore-terminal-enrollment",
+        "roots": [
+          "merchant system"
+        ],
+        "any": [
+          "Apple设备零接触注册流程",
+          "apple接口调用方式",
+          "初始化策略验证"
+        ],
+        "product": "MAXSTORE",
+        "module": "模块手册/终端与设备/设备入网与策略"
+      },
+      {
+        "id": "maxstore-dashboard",
+        "roots": [
+          "merchant system"
+        ],
+        "any": [
+          "Dashboard_MerchantPortal",
+          "Dashboard_ResellerPortal"
+        ],
+        "product": "MAXSTORE",
+        "module": "模块手册/平台运营与服务"
+      },
+      {
+        "id": "maxstore-audit",
+        "roots": [
+          "merchant system"
+        ],
+        "any": [
+          "Email Activity",
+          "系统邮件模板"
+        ],
+        "product": "MAXSTORE",
+        "module": "模块手册/平台运营与服务/日志与邮件"
+      },
+      {
+        "id": "maxstore-receipts",
+        "roots": [
+          "merchant system"
+        ],
+        "any": [
+          "小票_",
+          "小票竞品分析",
+          "Merchant Processor"
+        ],
+        "product": "MAXSTORE",
+        "module": "模块手册/商户与支付"
+      },
+      {
+        "id": "maxstore-organization",
+        "roots": [
+          "merchant system"
+        ],
+        "any": [
+          "新建SSO",
+          "新建角色",
+          "权限分类",
+          "重置密码"
+        ],
+        "product": "MAXSTORE",
+        "module": "模块手册/账号组织与权限"
+      },
+      {
+        "id": "maxstore-standard",
+        "roots": [
+          "merchant system"
+        ],
+        "any": [
+          "商户系统规范要求"
+        ],
+        "product": "MAXSTORE",
+        "module": "规范与资产"
+      },
+      {
+        "id": "general-annual-leave",
+        "roots": [
+          "GoInsight"
+        ],
+        "any": [
+          "Annual Leave Plan"
+        ],
+        "product": "组织与工作",
+        "module": "团队与流程"
+      }
+    ]
+  },
+  "semantic": {
+    "title_rules": [
+      {
+        "id": "emm-android-network-dictionary",
+        "any": [
+          "通信和网络配置"
+        ],
+        "title": "Android安全通信网络配置项字典"
+      }
+    ]
+  },
+  "related_topic_groups": [
+    {
+      "topic_key": "GoInsight/模块手册/字段与筛选/位置字段筛选",
+      "related_topic_keys": [
+        "GoInsight/模块手册/字段与筛选/数据分析",
+        "GoInsight/模块手册/字段与筛选/累计计算"
+      ]
+    },
+    {
+      "topic_key": "GoInsight/模块手册/数据集/设备位置历史数据集",
+      "related_topic_keys": [
+        "GoInsight/模块手册/数据集/添加关联数据",
+        "GoInsight/模块手册/数据集/收费应用安装统计"
+      ]
+    },
+    {
+      "topic_key": "EMM/模块手册/EMM for Android/应用管理/应用详情",
+      "related_topic_keys": [
+        "EMM/模块手册/EMM for Android/应用管理/应用定向发布",
+        "EMM/模块手册/EMM for Android/应用管理/分组管理"
+      ]
+    },
+    {
+      "topic_key": "MAXSTORE/模块手册/终端与设备/终端列表",
+      "related_topic_keys": [
+        "MAXSTORE/模块手册/终端与设备/激活&停用终端",
+        "MAXSTORE/模块手册/终端与设备/编辑&删除终端"
+      ]
+    }
+  ]
+}

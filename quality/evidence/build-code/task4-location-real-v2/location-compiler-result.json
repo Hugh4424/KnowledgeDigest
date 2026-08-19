@@ -1,0 +1,13 @@
+{
+  "candidate_status": "candidate",
+  "canonical_page": "products/GoInsight/字段与筛选/位置字段筛选.md",
+  "canonical_page_hash": "42ce8e960c94437f83c45a519ba312fb64496d55d99ab349bf17d53a4afd5549",
+  "claim_count": 15,
+  "delivery_status": "not_released",
+  "failure_reasons": [],
+  "output_root": "/Users/Hugh/Hugh/Project/KnowledgeDigest-task4-location-candidate-20260817-v2",
+  "reader_eligible": true,
+  "reader_snapshot_hash": "3bfcdba9bed1238a1fd8417ab4570e4090048f38d769edae7cb62c54d7db7828",
+  "source_manifest_hash": "dd316959e88bc557e19ac968e98886b088b8bb3aa668a076792eece149f9f36f",
+  "status": "completed"
+}

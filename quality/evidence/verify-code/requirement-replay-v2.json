@@ -1,0 +1,51 @@
+{
+  "schema_version": "task4-verify-requirement-replay.v2",
+  "superseded_by": "quality/evidence/verify-code/requirement-replay-v3.json",
+  "stage": "verify-code",
+  "task_id": "task4-reader-quality-compiler",
+  "original_requirement": "让 KnowledgeDigest 的最终知识产物真实优于 CompanyBrain；89 条只是当前样本，后续要能扩展到数万条；不靠人工逐页检查；失败必须如实暴露。",
+  "decision_boundary": "沿用 CompanyBrain 的成熟知识编辑方法作为参照，但不照抄目录；按产品、模块、平台、主题和页面类型重新识别，未知知识进入可读的新分类；以完整机器对比验证质量。",
+  "user_flow": [
+    "原始 Markdown/JSON → 固定来源清单、source_id、content_hash、空源检查",
+    "来源 → 产品、模块、平台、主题、页面类型、语义标题和稳定路径",
+    "主题 → 合并完整证据 → Summary、答案、使用场景、操作/配置、排查路径、规则边界、相关主题、来源",
+    "主题 → 读者导航 Home/index/category/page；Audit 保存来源、Claim、关系、失败和运行证据",
+    "候选包 → 先检查可发布状态，再与 CompanyBrain 做路径、答案完整度、边界/来源清晰度三轴对比",
+    "任何空源、冲突、清单漂移、溯源缺失或生成失败 → not_released/failed，不进入正式 Reader 入口"
+  ],
+  "page_scope": {
+    "reader": ["Home", "分类索引", "主题正文", "来源简表"],
+    "audit": ["source inventory", "failure ledger", "claims/provenance", "mapping", "comparison report", "run receipt"]
+  },
+  "data_states": ["candidate", "released", "not_released", "failed", "blocked", "cancelled", "pending", "conflict"],
+  "success_boundary": [
+    "完整输入无失败且候选可发布",
+    "正文不是原文平铺，能按页面类型组织答案、步骤、规则和边界",
+    "标题和路径可读，且保留稳定身份与来源追溯",
+    "机器对比在既定轴上严格优于且不劣于 CompanyBrain"
+  ],
+  "failure_boundary": [
+    "89 条中任意来源为空时，正式 89 包保持 not_released",
+    "CompanyBrain 不存在对应主题时只能标记 N/A，不得伪造对照",
+    "外部独立 review 无结果时，verify-code 不能标记完整通过"
+  ],
+  "non_goals": [
+    "不做人工逐页、逐题审核队列",
+    "不把 89 条路径写死成永久分类规则",
+    "不把 CompanyBrain 目录直接复制为唯一分类",
+    "不在本任务内承诺数万条的吞吐、成本和并发指标"
+  ],
+  "deferred_handoff": [
+    "修复或上游处理空源后，重新跑正式 89 条",
+    "用同一编译器跑更大样本，观察分类、标题和长文分页的稳定性",
+    "保留机器对比作为持续回归，不增加人工逐页门禁"
+  ],
+  "evidence": {
+    "implementation_receipt": "quality/evidence/implementation/6aa6f6a6831c9ce961cd6cf1a31cdacee2e61573bc77f619eecae3bc2c374df4.json",
+    "test_receipt": "quality/tests/task4-final-aggregate-v9.json",
+    "mapping_config": "config/task4-companybrain-mapping-20260819-v3.json",
+    "oracle_config": "config/task4-reader-case-matrix-89-input-oracle-v2.json",
+    "current_code_tests": "23 focused passed; 720 full passed, 3 skipped"
+  },
+  "conclusion": "历史证据，已被 v3 supersede；其中 88 条 better_than_companybrain 结论不得继续使用。"
+}

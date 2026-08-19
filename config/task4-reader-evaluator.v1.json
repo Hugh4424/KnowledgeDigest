@@ -1,0 +1,16 @@
+{
+  "schema_version": "task4-reader-evaluator.v1",
+  "protocol_id": "reader-compare-v1",
+  "evaluator_id": "reader-evaluator-v1",
+  "axes": {
+    "path": "tuple_first_hit_then_hops",
+    "answer_completeness": "fixed_m_average",
+    "boundary_source_clarity": "fixed_m_average"
+  },
+  "unknown_statuses": [
+    "unknown",
+    "evidence_missing",
+    "contradictory"
+  ],
+  "machine_only": true
+}
