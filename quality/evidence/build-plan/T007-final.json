@@ -1,0 +1,48 @@
+{
+  "schema_version": "task4-build-code-aggregate.v2",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "build-code",
+  "command": "env PYTHONDONTWRITEBYTECODE=1 uv run --frozen pytest -q",
+  "exit_code": 0,
+  "pytest_summary": "727 passed, 3 skipped in 31.93s",
+  "focused_summary": "30 passed in 0.78s",
+  "test_receipt": "quality/tests/task4-final-aggregate-v10.json",
+  "real_89_compile": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-candidate-20260819-v31-89-source",
+    "package_status": "not_released",
+    "source_count": 89,
+    "reader_source_count": 88,
+    "failure_count": 1,
+    "failure_reason": "empty_body",
+    "failure_source_uri": "emm for android /AE - AirViewer厂商管理.md"
+  },
+  "real_89_assessment": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-assessment-20260819-v33-89-formal",
+    "status": "undecidable",
+    "release_status": "not_released",
+    "blocking_reasons": ["candidate_not_released"]
+  },
+  "valid_88_diagnostic": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-assessment-20260819-v34-88-diagnostic",
+    "status": "undecidable",
+    "blocking_reasons": ["baseline_mapping_unmatched", "case_topic_mapping_missing", "source_manifest_mapping_drift"],
+    "strictly_better_axes_observed": ["path", "answer_completeness", "boundary_source_clarity"],
+    "counts_as_formal_superiority": false
+  },
+  "mapping": {
+    "fixture": "config/task4-companybrain-mapping-20260819-v6.json",
+    "unique": 36,
+    "ambiguous": 0,
+    "unmatched": 53,
+    "case_088": "unmatched; no false PUK mapping"
+  },
+  "covered": ["source contract", "structured Reader", "navigation", "provenance", "relations", "fail-closed compiler", "machine evaluator"],
+  "not_proven": ["formal superiority over CompanyBrain", "released 89-source package", "WorkflowHub provider review clean"],
+  "review_fact": {
+    "status": "current local read-only recheck pending",
+    "workflowhub_provider_status": "unavailable",
+    "counts_as_pass": false
+  },
+  "status": "completed_with_open_handoff",
+  "handoff": "进入 verify-code 做原始需求、Design、完整用户流程和失败边界反向检查；不得 close。"
+}

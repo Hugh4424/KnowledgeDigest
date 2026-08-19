@@ -1,0 +1,48 @@
+{
+  "schema_version": "task4-verify-architect-assessment.v4",
+  "stage": "verify-code",
+  "task_id": "task4-reader-quality-compiler",
+  "status": "incomplete",
+  "findings": [
+    {
+      "id": "ARCH-010",
+      "status": "open",
+      "severity": "blocking",
+      "fact": "正式 89 条中 emm for android /AE - AirViewer厂商管理.md 只有 5 bytes 空白内容；v36 source_count=89、reader_source_count=88、failure_count=1、package_status=not_released。",
+      "action": "保持 fail-closed；由输入侧补正文或经新的 make-decision 明确处理后，再重跑正式 89 条。"
+    },
+    {
+      "id": "ARCH-011",
+      "status": "resolved",
+      "severity": "resolved",
+      "fact": "CompanyBrain 当前实际范围已冻结为 1,406 个非系统常规文件，tree_hash=dbfd6023...；716 个正式 Markdown 页作为 Reader 对照范围，完整 manifest 不再缩小为 716 文件。",
+      "action": "保持 mapping v12 与 D-025 绑定；旧 20260818 身份只保留历史。"
+    },
+    {
+      "id": "ARCH-012",
+      "status": "resolved",
+      "severity": "resolved",
+      "fact": "exact_semantic_key_v1 使用 typed ck1 hash、页面标题/小节证据和 exhaustive Reader scope；89 行 mapping v13-89 为 5 unique、83 not_applicable、1 undecidable，88 行诊断 mapping 为 5 unique、83 not_applicable、0 undecidable。",
+      "action": "不恢复 fuzzy unique；source 缺失、身份冲突和重复保持 undecidable。"
+    },
+    {
+      "id": "ARCH-013",
+      "status": "resolved",
+      "severity": "resolved",
+      "fact": "完整 pytest 为 731 passed、3 skipped；88 条可读诊断无 blocking reason，并报告 better_than_companybrain。",
+      "action": "该结果只作为可读 88 条诊断，不替代正式 89 条结论。"
+    }
+  ],
+  "acceptance": {
+    "AC-READER-001": "conditional_pass：88 条有效来源产生 Reader，正式 89 因空源 not_released。",
+    "AC-READER-002": "pass：标题和路径不再使用 cluster/raw slug，通用标题 Q&A 不覆盖语义文件名。",
+    "AC-READER-003": "conditional_pass：正文结构化与来源锚点通过 88 条诊断，正式 89 未发布。",
+    "AC-READER-004": "pass：来源、关系、锁、取消、回滚和 Reader/Audit 边界有测试。",
+    "AC-QUALITY-001": "pass：无人工逐页审核队列。",
+    "AC-QUALITY-002": "pass_for_88_diagnostic：精确键与 N/A/undecidable 边界已实现。",
+    "AC-QUALITY-003": "conditional_pass：88 条无阻断，89 条被真实空源阻断。",
+    "AC-QUALITY-004": "undecidable_for_official_89：不能把 88 条诊断提升为正式 89 条。",
+    "AC-QUALITY-005": "pass：失败根因和延期交接已记录。"
+  },
+  "conclusion": "没有发现新的严重代码缺陷；唯一未关闭的是正式输入空源这一真实业务阻断，因此 verify-code 必须在 close 前停下。"
+}

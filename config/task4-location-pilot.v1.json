@@ -1,0 +1,268 @@
+{
+  "schema_version": "task4-location-pilot.v1",
+  "manifest_id": "goinsight-location-pilot-20260817-v1",
+  "required_source_count": 3,
+  "source_uri_prefix": "raw://confluence/",
+  "required_sources": [
+    {
+      "source_uri": "GoInsight/数据分析.md",
+      "source_id": "goinsight-data-analysis",
+      "title": "数据分析",
+      "role": "primary-context",
+      "line_count": 54,
+      "sha256": "52abb4c14c9beb1f0752bb6c50a8da9bef225237fc46e76f5f9c471e87c42668"
+    },
+    {
+      "source_uri": "GoInsight/位置字段筛选.md",
+      "source_id": "goinsight-location-field-filter",
+      "title": "位置字段筛选",
+      "role": "primary-feature",
+      "line_count": 72,
+      "sha256": "32b3c01b03a44727c6a692e9b10e3ee71106abec1f90c45272cbd75c9bce32b1"
+    },
+    {
+      "source_uri": "GoInsight/设备位置历史数据集.md",
+      "source_id": "goinsight-device-location-history",
+      "title": "设备位置历史数据集",
+      "role": "evaluation-context",
+      "line_count": 44,
+      "sha256": "39b5bf52e177319239ebe6afb1df037163b6e567ef2ae2752bc46b3bab739cb6"
+    }
+  ],
+  "excluded_sources": [
+    {
+      "source_uri": "GoInsight/添加指标页.md",
+      "reason": "scope is metric creation, not location-field filtering",
+      "line_count": 143,
+      "sha256": "66544230f10923384ed88723ab0467a86c508295597af05706b576e0241bf0d0"
+    },
+    {
+      "source_uri": "GoInsight/指标详情页.md",
+      "reason": "scope is metric detail, not location-field filtering",
+      "line_count": 151,
+      "sha256": "1e3758853a89257fcf0b2d99c5d5f08cc95f968b7d70079c85299123a3f6fae7"
+    },
+    {
+      "source_uri": "GoInsight/图表类型.md",
+      "reason": "scope is chart types, not location-field filtering",
+      "line_count": 53,
+      "sha256": "2fb085f12322ed8a45563aabd8172f69ca9722a99af6890f756655f9f9217ad3"
+    },
+    {
+      "source_uri": "GoInsight/添加关联数据.md",
+      "reason": "scope is related-data setup, not location-field filtering",
+      "line_count": 304,
+      "sha256": "e669ce76f46b613b308ecdabf60d7ad2f96a5efc57ac4503f29e1fc553dd3ae5"
+    }
+  ],
+  "canonical_topic": {
+    "topic_id": "goinsight-location-field-filter",
+    "title": "位置字段筛选",
+    "category_path": "products/GoInsight/字段与筛选",
+    "page_path": "products/GoInsight/字段与筛选/位置字段筛选.md",
+    "index_path": "products/GoInsight/字段与筛选/index.md",
+    "related_topics": [
+      {
+        "topic_id": "goinsight-data-analysis",
+        "title": "数据分析",
+        "page_path": "products/GoInsight/数据分析.md"
+      },
+      {
+        "topic_id": "goinsight-device-location-history",
+        "title": "设备位置历史数据集",
+        "page_path": "products/GoInsight/设备位置历史数据集.md"
+      }
+    ]
+  },
+  "claims": [
+    {
+      "claim_id": "S-01-entry",
+      "layer": "usage",
+      "section_id": "usage-entry",
+      "text": "在数据分析页面，将位置字段拖入筛选栏时，会出现位置字段筛选弹窗。",
+      "source_uri": "GoInsight/位置字段筛选.md",
+      "line_start": 22,
+      "line_end": 24
+    },
+    {
+      "claim_id": "S-01-draw",
+      "layer": "usage",
+      "section_id": "usage-draw",
+      "text": "在位置筛选弹窗中，可以在地图上画区域来指定数据筛选范围。",
+      "source_uri": "GoInsight/位置字段筛选.md",
+      "line_start": 23,
+      "line_end": 25
+    },
+    {
+      "claim_id": "S-01-condition",
+      "layer": "usage",
+      "section_id": "usage-condition",
+      "text": "区域内/Inside 筛选出绘制区域内的数据，默认值；区域外/Outside 筛选出绘制区域外的数据。",
+      "source_uri": "GoInsight/位置字段筛选.md",
+      "line_start": 26,
+      "line_end": 30
+    },
+    {
+      "claim_id": "S-01-points",
+      "layer": "usage",
+      "section_id": "usage-points",
+      "text": "最多可添加100个点；点位少于3个时不能构成封闭图形。",
+      "source_uri": "GoInsight/位置字段筛选.md",
+      "line_start": 31,
+      "line_end": 49
+    },
+    {
+      "claim_id": "S-01-edit",
+      "layer": "usage",
+      "section_id": "usage-points",
+      "text": "可以双击点位删除单个点位，也可以点击清空/Clear按钮清除所有点位。",
+      "source_uri": "GoInsight/位置字段筛选.md",
+      "line_start": 33,
+      "line_end": 38
+    },
+    {
+      "claim_id": "S-01-map-controls",
+      "layer": "usage",
+      "section_id": "usage-points",
+      "text": "地图支持滚动缩放和按住拖动，便于定位不同精准度的点。",
+      "source_uri": "GoInsight/位置字段筛选.md",
+      "line_start": 39,
+      "line_end": 42
+    },
+    {
+      "claim_id": "S-01-submit",
+      "layer": "usage",
+      "section_id": "usage-submit",
+      "text": "提交/Submit 在点位少于3个或绘制区域有交叉时不可提交。",
+      "source_uri": "GoInsight/位置字段筛选.md",
+      "line_start": 46,
+      "line_end": 51
+    },
+    {
+      "claim_id": "S-01-cancel-result",
+      "layer": "usage",
+      "section_id": "usage-submit",
+      "text": "取消/Cancel 会丢弃编辑并关闭弹窗；筛选框会显示已添加点位的纬经度，迷你地图预览暂时不做。",
+      "source_uri": "GoInsight/位置字段筛选.md",
+      "line_start": 52,
+      "line_end": 57
+    },
+    {
+      "claim_id": "T-01-data-analysis",
+      "layer": "rules",
+      "section_id": "rules-supported",
+      "text": "位置字段筛选属于数据分析页面的筛选能力。",
+      "source_uri": "GoInsight/数据分析.md",
+      "line_start": 5,
+      "line_end": 8
+    },
+    {
+      "claim_id": "T-01-history-context",
+      "layer": "rules",
+      "section_id": "rules-supported",
+      "text": "设备位置历史数据集的上下文字段包括 Location、Reseller、Merchant、Terminal SN、Event Time。",
+      "source_uri": "GoInsight/设备位置历史数据集.md",
+      "line_start": 3,
+      "line_end": 8
+    },
+    {
+      "claim_id": "T-01-history-questions",
+      "layer": "rules",
+      "section_id": "rules-supported",
+      "text": "位置历史评测上下文包括近30天、设备SN移动轨迹、位置变化最频繁设备和商户等问题。",
+      "source_uri": "GoInsight/设备位置历史数据集.md",
+      "line_start": 23,
+      "line_end": 31
+    },
+    {
+      "claim_id": "T-01-performance-context",
+      "layer": "rules",
+      "section_id": "rules-supported",
+      "text": "一百万终端同时检查位置数据是来源中的查询性能背景，不是本次编译或单机实测结论。",
+      "source_uri": "GoInsight/位置字段筛选.md",
+      "line_start": 3,
+      "line_end": 6
+    },
+    {
+      "claim_id": "N-01-detail-global",
+      "layer": "rules",
+      "section_id": "rules-unsupported",
+      "text": "在数据集详情页和全局筛选卡片中，位置字段不可添加筛选。",
+      "source_uri": "GoInsight/位置字段筛选.md",
+      "line_start": 58,
+      "line_end": 60
+    },
+    {
+      "claim_id": "N-02-report-metric",
+      "layer": "rules",
+      "section_id": "rules-deferred",
+      "text": "设备报告中可以将地理位置作为计算指标，但当前暂时不做；它不是普通的位置筛选规则。",
+      "source_uri": "GoInsight/位置字段筛选.md",
+      "line_start": 60,
+      "line_end": 61
+    },
+    {
+      "claim_id": "T-01-save-analysis",
+      "layer": "rules",
+      "section_id": "rules-supported",
+      "text": "数据分析结果可以保存为工作表，供其他人查看、添加到仪表盘或创建定期报告。",
+      "source_uri": "GoInsight/数据分析.md",
+      "line_start": 5,
+      "line_end": 8
+    }
+  ],
+  "sections": [
+    {
+      "section_id": "usage-entry",
+      "layer": "usage",
+      "heading": "适用入口",
+      "claim_ids": ["S-01-entry", "S-01-draw"]
+    },
+    {
+      "section_id": "usage-condition",
+      "layer": "usage",
+      "heading": "筛选条件",
+      "claim_ids": ["S-01-condition"]
+    },
+    {
+      "section_id": "usage-points",
+      "layer": "usage",
+      "heading": "画区域和改点位",
+      "claim_ids": ["S-01-points", "S-01-edit", "S-01-map-controls"]
+    },
+    {
+      "section_id": "usage-submit",
+      "layer": "usage",
+      "heading": "提交、取消和结果",
+      "claim_ids": ["S-01-submit", "S-01-cancel-result"]
+    },
+    {
+      "section_id": "rules-supported",
+      "layer": "rules",
+      "heading": "支持范围和数据上下文",
+      "claim_ids": ["T-01-data-analysis", "T-01-history-context", "T-01-history-questions", "T-01-performance-context", "T-01-save-analysis"]
+    },
+    {
+      "section_id": "rules-unsupported",
+      "layer": "rules",
+      "heading": "明确不支持的入口",
+      "claim_ids": ["N-01-detail-global"]
+    },
+    {
+      "section_id": "rules-deferred",
+      "layer": "rules",
+      "heading": "延期和容易混淆的能力",
+      "claim_ids": ["N-02-report-metric"]
+    }
+  ],
+  "companybrain_manifest": {
+    "manifest_id": "companybrain-goinsight-field-filter-20260817-v1",
+    "target_path": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+    "target_sha256": "9ac850ad9816a422997f99a4564b55ea84dc2834171e7a853bdecbc03c0f4edf"
+  },
+  "provider": {
+    "mode": "structure-only",
+    "model": "qwen3.6",
+    "prompt_contract": "task4-location-structure-only.v1"
+  }
+}

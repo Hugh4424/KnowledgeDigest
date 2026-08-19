@@ -1,0 +1,41 @@
+{
+  "schema_version": "task4-verify-final-test.v2",
+  "superseded_by": "quality/evidence/verify-code/final-test-v3.json",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "verify-code",
+  "implementation_receipt_ref": "quality/evidence/implementation/6aa6f6a6831c9ce961cd6cf1a31cdacee2e61573bc77f619eecae3bc2c374df4.json",
+  "implementation_receipt_sha256": "6aa6f6a6831c9ce961cd6cf1a31cdacee2e61573bc77f619eecae3bc2c374df4",
+  "test_receipt_ref": "quality/tests/task4-final-aggregate-v9.json",
+  "test_receipt_sha256": "264f4e0f8e0522b9e08b8f6b335b5ecb34d3718c9eb0c1df51e8a1d320a12478",
+  "snapshot_tree": "3ff7a276d425b424d80c28f9119ff5216c3de2d3",
+  "command": "env PYTHONDONTWRITEBYTECODE=1 uv run --frozen pytest -q",
+  "exit_code": 0,
+  "result": "720 passed, 3 skipped",
+  "focused_result": "23 passed in 0.32s",
+  "real_89_compile": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-candidate-20260819-v16-89-source",
+    "source_count": 89,
+    "reader_source_count": 88,
+    "failure_count": 1,
+    "package_status": "not_released",
+    "failure_reason": "empty_body",
+    "failure_source": "emm for android /AE - AirViewer厂商管理.md"
+  },
+  "valid_88_comparison": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-assessment-20260819-v14-88-valid",
+    "comparison": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-assessment-20260819-v14-88-valid/reports/comparison-table.json",
+    "release_summary": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-assessment-20260819-v14-88-valid/reports/release-summary.json",
+    "status": "historical_claim_superseded",
+    "strictly_better_axes": ["path", "answer_completeness", "boundary_source_clarity"],
+    "not_worse_axes": ["path", "answer_completeness", "boundary_source_clarity"],
+    "case_count": 88
+  },
+  "independent_review": {
+    "status": "unavailable",
+    "counts_as_pass": false,
+    "attempt_ref": "quality/reviews/attempts/c4a957b3-e28e-44d3-9788-fa077f991f7b/attempt.json",
+    "report_ref": "quality/reviews/reports/c4a957b3-e28e-44d3-9788-fa077f991f7b.md",
+    "reason": "first current review input was rejected by MATERIAL_FORBIDDEN; corrected broker wait was manually stopped after no terminal result"
+  },
+  "conclusion": "历史测试证据，已被 final-test-v3 supersede；不得使用其中的 better_than_companybrain 结论。"
+}

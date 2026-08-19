@@ -1,0 +1,24 @@
+{
+  "candidate_status": "candidate",
+  "decision": "stop",
+  "delivery_status": "not_released",
+  "failure_reasons": [
+    "companybrain/N-01: answer completeness failed",
+    "companybrain/N-01: boundary checklist failed",
+    "companybrain/N-01: negative question was misleading",
+    "companybrain/N-02: boundary checklist failed",
+    "companybrain/S-01: answer completeness failed",
+    "companybrain/S-01: boundary checklist failed",
+    "companybrain/T-01: answer completeness failed",
+    "companybrain/T-01: boundary checklist failed",
+    "knowledge_digest/N-01: boundary checklist failed",
+    "knowledge_digest/N-02: answer completeness failed",
+    "knowledge_digest/N-02: boundary checklist failed",
+    "knowledge_digest/N-02: negative question was misleading",
+    "knowledge_digest/S-01: answer completeness failed",
+    "knowledge_digest/S-01: boundary checklist failed",
+    "knowledge_digest/T-01: boundary checklist failed"
+  ],
+  "schema_version": "task4-location-release-summary.v1",
+  "status": "stop"
+}

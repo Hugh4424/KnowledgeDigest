@@ -1,0 +1,64 @@
+{
+  "schema_version": "task4-verify-architect-assessment.v2",
+  "superseded_by": "quality/evidence/verify-code/architect-assessment-v3.json",
+  "stage": "verify-code",
+  "task_id": "task4-reader-quality-compiler",
+  "status": "incomplete",
+  "snapshot_tree": "3ff7a276d425b424d80c28f9119ff5216c3de2d3",
+  "reverse_check_ref": "quality/evidence/verify-code/requirement-replay-v2.json",
+  "findings": [
+    {
+      "id": "ARCH-001",
+      "status": "open",
+      "severity": "blocking",
+      "fact": "正式 89 条中 emm for android /AE - AirViewer厂商管理.md 只有 5 bytes，empty_body；因此 89 条候选 package_status=not_released。",
+      "action": "保持 fail-closed；修复原始输入或明确上游排除后重新运行。"
+    },
+    {
+      "id": "ARCH-002",
+      "status": "fixed_for_current_machine_gate",
+      "severity": "resolved",
+      "fact": "CompanyBrain mapping v3 绑定 tree_hash=49b9e90340f32f1877262f5aa6c0bff9e97aacb6d72f3a4dfdefcb284abfce83，15 unique、0 ambiguous、74 unmatched；unmatched 只按 N/A 处理，不冒充匹配。",
+      "action": "后续样本继续复用信号映射和 tree hash；不把当前 89 条硬编码成永久规则。"
+    },
+    {
+      "id": "ARCH-003",
+      "status": "fixed_for_current_compiler",
+      "severity": "resolved_with_limit",
+      "fact": "正文已从首行/bullet 平铺改为按页面类型编译 Summary、答案、使用场景、操作/配置、排查、规则边界、相关主题和来源；Markdown 表格保留为表格，修订噪声被移除，长页按语义段分页。",
+      "action": "当前机器门只证明结构化和三轴结果；不把它扩展解释成完整人工编辑质量证明。"
+    },
+    {
+      "id": "ARCH-004",
+      "status": "fixed",
+      "severity": "resolved",
+      "fact": "评估器使用 source_id/source_snapshot_id 到 topic.source_ids 的绑定，并保留稳定 ID、标题和路径回退；page type 和 CompanyBrain mapping 已进入配置。",
+      "action": "保持来源优先，避免输入顺序和 cluster-N 影响正式路径。"
+    },
+    {
+      "id": "ARCH-005",
+      "status": "remaining_limit",
+      "severity": "major",
+      "fact": "历史记录曾把 88 条诊断写成 better_than_companybrain；该结论已被当前 mapping v5 的未证明映射事实推翻。",
+      "action": "以 architect-assessment-v3 为准，不使用旧结论。"
+    }
+  ],
+  "acceptance": {
+    "AC-READER-001": "conditional_pass：88 条有效输入有可读 Reader bundle；正式 89 因空源 not_released。",
+    "AC-READER-002": "pass：标题清洗、稳定路径、Android 语义命名和分类映射有回归。",
+    "AC-READER-003": "conditional_pass：正文有结构化语义段和表格；完整 89 release 仍未达成。",
+    "AC-READER-004": "pass：Reader/Audit 分离、来源和失败记录有回归。",
+    "AC-QUALITY-001": "pass：无人工逐页审核门禁。",
+    "AC-QUALITY-002": "pass_for_machine_mapping：mapping v3 有唯一/不适用区分，tree hash 已绑定。",
+    "AC-QUALITY-003": "pass_for_88_diagnostic：候选和 CompanyBrain 对照均按有效 case 评估。",
+    "AC-QUALITY-004": "pass_for_88_diagnostic_only：path、answer_completeness、boundary_source_clarity 三轴严格更好且不更差；正式 89 仍 not_released。",
+    "AC-QUALITY-005": "conditional_pass：根因、差距和输出报告已生成；外部 review unavailable。"
+  },
+  "test_fact": {
+    "focused": "23 passed in 0.32s",
+    "full": "720 passed, 3 skipped",
+    "real_89": "source_count=89; reader_source_count=88; failure_count=1; package_status=not_released",
+    "valid_88": "历史记录，已被当前 v22 undecidable 诊断 supersede"
+  },
+  "conclusion": "历史评估，已被 architect-assessment-v3 supersede；不得作为当前通过依据。"
+}

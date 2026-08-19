@@ -1,0 +1,32 @@
+{
+  "schema_version": "task4-stage-end-spec-analyze.v1",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "build-code",
+  "status": "consistent_with_limits",
+  "original_requirement": "KnowledgeDigest 的最终知识结果要比 CompanyBrain 更适合阅读、检索和继续扩展；不能靠人工逐页审核，也不能把新知识塞进通用目录。",
+  "materials": {
+    "decision_log": "specs/task4-reader-quality-compiler/decision-log.md",
+    "spec": "specs/task4-reader-quality-compiler/spec.md",
+    "plan": "specs/task4-reader-quality-compiler/plan.md",
+    "tasks": "specs/task4-reader-quality-compiler/tasks.md"
+  },
+  "implementation_trace": {
+    "structured_body": "src/knowledge_digest/task4_reader_quality.py",
+    "companybrain_mapping": "src/knowledge_digest/companybrain_mapping.py",
+    "source_first_oracle": "scripts/task4_generate_case_oracle.py",
+    "acceptance_tests": "tests/acceptance/test_task4_full_compiler.py; tests/acceptance/test_task4_full_quality.py"
+  },
+  "user_flow": "raw markdown -> source validation -> semantic title/category mapping -> structured reader page -> Home/index/page navigation -> source traceability",
+  "coverage": {
+    "valid_sources": "88/88 compiled and covered",
+    "comparison": "path, answer_completeness, boundary_source_clarity are all strictly better on the 88 valid-source diagnostic",
+    "regression": "720 passed, 3 skipped"
+  },
+  "failure_boundary": "The official 89-source package is not_released because one input is 5 bytes with no readable content; the compiler preserves this failure instead of publishing a fake page.",
+  "remaining_limits": [
+    "The 88-source result is a diagnostic comparison, not an official 89-source release.",
+    "The recorded external wh-review attempt is unavailable.",
+    "No commit or formal close is authorized in this turn."
+  ],
+  "next_boundary": "After build-code evidence is recorded, enter verify-code for independent reverse-check of original requirement, four materials, implementation, tests, and full user flow."
+}

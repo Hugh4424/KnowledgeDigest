@@ -1,0 +1,43 @@
+{
+  "schema_version": "task4-verify-external-review.v3",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "verify-code",
+  "status": "findings_open",
+  "transport_status": "local_read_only_subagent_recheck_complete",
+  "providers": [
+    {
+      "agent": "Cicero",
+      "agent_id": "01a01831-4789-7652-8563-873514157b50",
+      "scope": "mapping and evidence consistency",
+      "result": "blocking_findings_open",
+      "findings": [
+        "current 53 unmatched cannot be treated as unique or not_applicable",
+        "case matrix lacks the semantic comparison_key fields required for exact mapping",
+        "current mapping is fuzzy retrieval evidence, not proof of exact baseline correspondence",
+        "CompanyBrain baseline scope and identity differ between spec and current mapping"
+      ],
+      "counts_as_pass": false
+    },
+    {
+      "agent": "Averroes",
+      "agent_id": "01a01831-4860-7fb2-8cce-fe5079ed0228",
+      "scope": "compiler transaction, cancellation, relation and root-cause boundaries",
+      "result": "no_severe_code_finding_after_repairs",
+      "findings": [
+        "latest transaction rollback registration, persistent lock, and post-publish interrupt handling were repaired",
+        "current evidence must bind the candidate run and source manifest before comparison"
+      ],
+      "counts_as_pass": true
+    }
+  ],
+  "previous_findings_disposition": [
+    "case-088 false unique mapping fixed by v5/v6 regeneration",
+    "stale evidence refs replaced by current v31/v32/v33/v34 refs",
+    "transaction, cancellation, relation evidence and missing-report fail-closed fixes covered by latest focused/full tests"
+  ],
+  "workflowhub_provider_review": {
+    "status": "unavailable",
+    "counts_as_pass": false,
+    "note": "没有把 unavailable 或 pending 当成 clean。"
+  }
+}

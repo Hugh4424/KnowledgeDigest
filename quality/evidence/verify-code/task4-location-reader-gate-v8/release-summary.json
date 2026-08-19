@@ -1,0 +1,11 @@
+{
+  "candidate_status": "candidate",
+  "decision": "stop",
+  "delivery_status": "not_released",
+  "failure_reasons": [
+    "companybrain/S-01: answer completeness failed",
+    "companybrain/T-01: answer completeness failed"
+  ],
+  "schema_version": "task4-location-release-summary.v1",
+  "status": "stop"
+}

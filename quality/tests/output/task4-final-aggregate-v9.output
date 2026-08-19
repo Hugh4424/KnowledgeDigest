@@ -1,0 +1,7 @@
+Focused Task4 compiler/quality regression: 23 passed in 0.32s
+Full repository gate: 720 passed, 3 skipped in 29.45s
+All observed exits: 0
+Skip facts: three pre-existing acceptance cases require optional Task1/Task2 baseline fixtures; skips are not passes.
+Real 89-source compile: source_count=89, reader_source_count=88, failure_count=1, package_status=not_released
+Real 89-source failure: empty_body; emm for android /AE - AirViewer厂商管理.md is 5 bytes and has no readable content.
+Real 88-valid-source comparison: path, answer_completeness, boundary_source_clarity all strictly better than CompanyBrain; status=better_than_companybrain for the valid-source diagnostic.

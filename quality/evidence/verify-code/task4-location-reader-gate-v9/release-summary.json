@@ -1,0 +1,8 @@
+{
+  "candidate_status": "candidate",
+  "decision": "continue",
+  "delivery_status": "not_released",
+  "failure_reasons": [],
+  "schema_version": "task4-location-release-summary.v1",
+  "status": "continue"
+}

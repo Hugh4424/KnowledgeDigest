@@ -1,0 +1,556 @@
+{
+  "companybrain_binding": {
+    "entries": [
+      {
+        "path": "Home.md",
+        "role": "home",
+        "sha256": "cac402ccaef6bc55bef765ea93405a6af4c315d35cb68ecca7448249e729be2f"
+      },
+      {
+        "path": "Products/产品索引.md",
+        "role": "product-index",
+        "sha256": "75e3b641ea4506c67cc4f209b1322a5a0c5381b295243fc0826299e32ae449d7"
+      },
+      {
+        "path": "Products/GoInsight/文档总览.md",
+        "role": "goinsight-overview",
+        "sha256": "0a22821c27352cb31f6c39e7b44e229d54fba82f2f5de0e4e99cd3b2ebe399f9"
+      },
+      {
+        "path": "Products/GoInsight/模块手册/模块总览.md",
+        "role": "module-index",
+        "sha256": "daea01ef80111682ce15ae79b9accc4251e3889d5dbf154c128e6c31f7448cae"
+      },
+      {
+        "path": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+        "role": "target",
+        "sha256": "9ac850ad9816a422997f99a4564b55ea84dc2834171e7a853bdecbc03c0f4edf"
+      }
+    ],
+    "entry_chain_version": "companybrain-entry-chain-v1",
+    "manifest_id": "companybrain-goinsight-field-filter-20260817-v1",
+    "target_path": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+    "target_sha256": "9ac850ad9816a422997f99a4564b55ea84dc2834171e7a853bdecbc03c0f4edf"
+  },
+  "evaluation_mode": "reader-only-deterministic-observation-v1",
+  "evaluator_config_hash": "e016f01c00056c0b480c29233c7567a37fc265041b26ccf95f1f79c2c86165bc",
+  "evaluator_config_id": "reader-evaluator-v1",
+  "isolation": {
+    "no_network": true,
+    "private_session": true,
+    "reader_only": true
+  },
+  "package_order": [
+    "knowledge_digest",
+    "companybrain"
+  ],
+  "protocol_hash": "ffc2d0fa46fc9690431de489f177a7c755f79f285a29089cfdcfc7fd769a4958",
+  "protocol_id": "reader-compare-v1",
+  "question_set_hash": "a05e7f4b385a8b6c072396072eb5736d34cef0eb0b3dcebc67f65dab69b9330a",
+  "question_set_id": "goinsight-location-reader-gate-v1",
+  "reader_snapshots": {
+    "companybrain": "d6175d5eb2b5584abb1cf68d1dc6b611358fa9f7af9555697f2d0c3d0ed7f84a",
+    "knowledge_digest": "03a34471be8f1ddbdc28993c8797767045a6fcd1e5fc64b8440484e78481ebe4"
+  },
+  "schema_version": "reader-evaluator-record.v1",
+  "sessions": [
+    {
+      "cases": [
+        {
+          "answer_checklist": {
+            "S-01-cancel-result": false,
+            "S-01-condition": true,
+            "S-01-draw": true,
+            "S-01-edit": true,
+            "S-01-entry": true,
+            "S-01-map-controls": true,
+            "S-01-points": true,
+            "S-01-submit": true
+          },
+          "answer_result": "hit",
+          "boundary_checklist": {
+            "distinguish-report-metric": true,
+            "only-data-analysis": true,
+            "reject-detail-global": true,
+            "troubleshoot-location": true
+          },
+          "case_id": "S-01",
+          "claim_anchors": [
+            {
+              "claim_id": "S-01-entry",
+              "content_hash": "f67fe98a92e8cd9aceb44bf9c3ae7f14ade375171cd4df14f2467bea6dd25eda",
+              "fragment_locator": "lines:22-24",
+              "source_uri": "GoInsight/位置字段筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "S-01-draw",
+              "content_hash": "86ca5f42d87d9a50bada2837c1ca71823479fd8875369f64a6aa0394107ec5dc",
+              "fragment_locator": "lines:23-25",
+              "source_uri": "GoInsight/位置字段筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "S-01-condition",
+              "content_hash": "1085129571ae40d9b4578e0fc147af7cc08b8317567b6c81395736e9727894b4",
+              "fragment_locator": "lines:26-30",
+              "source_uri": "GoInsight/位置字段筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "S-01-points",
+              "content_hash": "5a64ce63e969622db252e03713fa7e5efde7d98f690f92d2fda692ab55c88e24",
+              "fragment_locator": "lines:31-49",
+              "source_uri": "GoInsight/位置字段筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "S-01-edit",
+              "content_hash": "6ba682f0aa758bb03afb9ca7e843c3b9a25a928106df11fe5934a58636393070",
+              "fragment_locator": "lines:33-38",
+              "source_uri": "GoInsight/位置字段筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "S-01-map-controls",
+              "content_hash": "74b25df57530529f1f8b6c3c8bc772344fb92aeda747c4d467be3260e0f9b6f3",
+              "fragment_locator": "lines:39-42",
+              "source_uri": "GoInsight/位置字段筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "S-01-submit",
+              "content_hash": "e64cefee6e3277202083a98e95acc0a79432c6604313c1bd2561fc7afed111ae",
+              "fragment_locator": "lines:46-51",
+              "source_uri": "GoInsight/位置字段筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "S-01-cancel-result",
+              "content_hash": "0f52780589e309c0e0037cd4408d501392f042cd17ab9f551f53369ce34f9494",
+              "fragment_locator": "lines:52-57",
+              "source_uri": "GoInsight/位置字段筛选.md",
+              "validation_status": "verified"
+            }
+          ],
+          "entry_path": "Home.md",
+          "first_hit_kind": 2,
+          "first_hit_page": "products/GoInsight/字段与筛选/位置字段筛选.md",
+          "hop_count": 3,
+          "jumps": [
+            "Home.md",
+            "products/GoInsight/index.md",
+            "products/GoInsight/字段与筛选/index.md",
+            "products/GoInsight/字段与筛选/位置字段筛选.md"
+          ],
+          "misleading_support": false,
+          "order": 1,
+          "reachable": true,
+          "target_page": "products/GoInsight/字段与筛选/位置字段筛选.md"
+        },
+        {
+          "answer_checklist": {
+            "T-01-data-analysis": true,
+            "T-01-history-context": true,
+            "T-01-history-questions": true,
+            "T-01-performance-context": true,
+            "T-01-save-analysis": true
+          },
+          "answer_result": "hit",
+          "boundary_checklist": {
+            "distinguish-report-metric": true,
+            "only-data-analysis": true,
+            "reject-detail-global": true,
+            "troubleshoot-location": true
+          },
+          "case_id": "T-01",
+          "claim_anchors": [
+            {
+              "claim_id": "T-01-data-analysis",
+              "content_hash": "e5e1cb2eee09f1194faf5c792381d0e91eada07f639bac4721617d04740d7bca",
+              "fragment_locator": "lines:5-8",
+              "source_uri": "GoInsight/数据分析.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "T-01-history-context",
+              "content_hash": "fdc5591dc5073750bc278bee78d869987bb78526f8fb91f351485431b95305ab",
+              "fragment_locator": "lines:3-8",
+              "source_uri": "GoInsight/设备位置历史数据集.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "T-01-history-questions",
+              "content_hash": "ffa1e79dbae57808014e698ed01c107ee80caf9beb69e743b5cd5b150bd374a0",
+              "fragment_locator": "lines:23-31",
+              "source_uri": "GoInsight/设备位置历史数据集.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "T-01-performance-context",
+              "content_hash": "66315c84a1f8630d7217d34288bfd474df5ea370927bc0ad449a1d4b069c38b9",
+              "fragment_locator": "lines:3-6",
+              "source_uri": "GoInsight/位置字段筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "T-01-save-analysis",
+              "content_hash": "e5e1cb2eee09f1194faf5c792381d0e91eada07f639bac4721617d04740d7bca",
+              "fragment_locator": "lines:5-8",
+              "source_uri": "GoInsight/数据分析.md",
+              "validation_status": "verified"
+            }
+          ],
+          "entry_path": "Home.md",
+          "first_hit_kind": 2,
+          "first_hit_page": "products/GoInsight/字段与筛选/位置字段筛选.md",
+          "hop_count": 3,
+          "jumps": [
+            "Home.md",
+            "products/GoInsight/index.md",
+            "products/GoInsight/字段与筛选/index.md",
+            "products/GoInsight/字段与筛选/位置字段筛选.md"
+          ],
+          "misleading_support": false,
+          "order": 2,
+          "reachable": true,
+          "target_page": "products/GoInsight/字段与筛选/位置字段筛选.md"
+        },
+        {
+          "answer_checklist": {
+            "N-01-detail-global": true
+          },
+          "answer_result": "no_match",
+          "boundary_checklist": {
+            "distinguish-report-metric": true,
+            "only-data-analysis": true,
+            "reject-detail-global": true,
+            "troubleshoot-location": true
+          },
+          "case_id": "N-01",
+          "claim_anchors": [
+            {
+              "claim_id": "N-01-detail-global",
+              "content_hash": "cd9138128ad7a8ae3ecbf49e9009e0c75659b2fd61551fda02d9d76ee0a014a8",
+              "fragment_locator": "lines:58-60",
+              "source_uri": "GoInsight/位置字段筛选.md",
+              "validation_status": "verified"
+            }
+          ],
+          "entry_path": "Home.md",
+          "first_hit_kind": 2,
+          "first_hit_page": "products/GoInsight/字段与筛选/位置字段筛选.md",
+          "hop_count": 3,
+          "jumps": [
+            "Home.md",
+            "products/GoInsight/index.md",
+            "products/GoInsight/字段与筛选/index.md",
+            "products/GoInsight/字段与筛选/位置字段筛选.md"
+          ],
+          "misleading_support": false,
+          "order": 3,
+          "reachable": true,
+          "target_page": "products/GoInsight/字段与筛选/位置字段筛选.md"
+        },
+        {
+          "answer_checklist": {
+            "N-02-report-metric": true
+          },
+          "answer_result": "no_match",
+          "boundary_checklist": {
+            "distinguish-report-metric": true,
+            "only-data-analysis": true,
+            "reject-detail-global": true,
+            "troubleshoot-location": true
+          },
+          "case_id": "N-02",
+          "claim_anchors": [
+            {
+              "claim_id": "N-02-report-metric",
+              "content_hash": "c1254a6ddd4002dcd3195a290adebce72316cf6c0306d5f7c89e41b827980d38",
+              "fragment_locator": "lines:60-61",
+              "source_uri": "GoInsight/位置字段筛选.md",
+              "validation_status": "verified"
+            }
+          ],
+          "entry_path": "Home.md",
+          "first_hit_kind": 2,
+          "first_hit_page": "products/GoInsight/字段与筛选/位置字段筛选.md",
+          "hop_count": 3,
+          "jumps": [
+            "Home.md",
+            "products/GoInsight/index.md",
+            "products/GoInsight/字段与筛选/index.md",
+            "products/GoInsight/字段与筛选/位置字段筛选.md"
+          ],
+          "misleading_support": false,
+          "order": 4,
+          "reachable": true,
+          "target_page": "products/GoInsight/字段与筛选/位置字段筛选.md"
+        }
+      ],
+      "package_id": "knowledge_digest",
+      "reader_only_observed_paths": [
+        "Home.md",
+        "products/GoInsight/index.md",
+        "products/GoInsight/字段与筛选/index.md",
+        "products/GoInsight/字段与筛选/位置字段筛选.md"
+      ],
+      "session_id": "2ef338d2094230a0"
+    },
+    {
+      "cases": [
+        {
+          "answer_checklist": {
+            "S-01-cancel-result": false,
+            "S-01-condition": true,
+            "S-01-draw": true,
+            "S-01-edit": true,
+            "S-01-entry": true,
+            "S-01-map-controls": true,
+            "S-01-points": true,
+            "S-01-submit": true
+          },
+          "answer_result": "hit",
+          "boundary_checklist": {
+            "distinguish-report-metric": true,
+            "only-data-analysis": true,
+            "reject-detail-global": true,
+            "troubleshoot-location": true
+          },
+          "case_id": "S-01",
+          "claim_anchors": [
+            {
+              "claim_id": "S-01-entry",
+              "content_hash": "6d8ab4a822d270d7f4b58cc99b7d31351e313631e420f7aaeaf2d2595ad35244",
+              "fragment_locator": "lines:110",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "S-01-draw",
+              "content_hash": "acac7016a785f9b78a4f23066a8af6f33c24532049a17f99a1250f2fdf6ceb7b",
+              "fragment_locator": "lines:114",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "S-01-condition",
+              "content_hash": "4d33d3e815a92460341927011b87c40f7e3ddebf12e96919218e37b5838f7599",
+              "fragment_locator": "lines:112",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "S-01-points",
+              "content_hash": "b9c55d863b44dcdc9b053091f240c034183862d1c22a65f68f38693de4f064ff",
+              "fragment_locator": "lines:116-120",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "S-01-edit",
+              "content_hash": "acac7016a785f9b78a4f23066a8af6f33c24532049a17f99a1250f2fdf6ceb7b",
+              "fragment_locator": "lines:114",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "S-01-map-controls",
+              "content_hash": "16b8e78a0234fd6c90bb0c5fa4980320f433be59eb9da6f4bf574ad280bcf9b5",
+              "fragment_locator": "lines:121",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "S-01-submit",
+              "content_hash": "4119b41e6c5c1f0b1b38979c43196c5de029e71a4eff99b42f547a8d996e5ff8",
+              "fragment_locator": "lines:120",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "S-01-cancel-result",
+              "content_hash": "cc49f22d44fc2e53ec0aee785743d1521e3dd23114409a6c6dff5a86c099e10d",
+              "fragment_locator": "lines:123",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            }
+          ],
+          "entry_path": "Home.md",
+          "first_hit_kind": 2,
+          "first_hit_page": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+          "hop_count": 5,
+          "jumps": [
+            "Home.md",
+            "Products/产品索引.md",
+            "Products/GoInsight/文档总览.md",
+            "Products/GoInsight/模块手册/模块总览.md",
+            "Products/GoInsight/模块手册/字段与筛选/字段与筛选总览.md",
+            "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md"
+          ],
+          "misleading_support": false,
+          "order": 1,
+          "reachable": true,
+          "target_page": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md"
+        },
+        {
+          "answer_checklist": {
+            "T-01-data-analysis": true,
+            "T-01-history-context": false,
+            "T-01-history-questions": false,
+            "T-01-performance-context": false,
+            "T-01-save-analysis": false
+          },
+          "answer_result": "hit",
+          "boundary_checklist": {
+            "distinguish-report-metric": true,
+            "only-data-analysis": true,
+            "reject-detail-global": true,
+            "troubleshoot-location": true
+          },
+          "case_id": "T-01",
+          "claim_anchors": [
+            {
+              "claim_id": "T-01-data-analysis",
+              "content_hash": "8b845444d295c9fd0b6e119da0a4cf035c45209e1678982b6c9a7940eb32c6eb",
+              "fragment_locator": "lines:108-110",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "T-01-history-context",
+              "content_hash": "023e9aef9472963d60e6735d03fe8740e16cc7a54ea6ef41aa09b9c9a22f1100",
+              "fragment_locator": "lines:108-125",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "T-01-history-questions",
+              "content_hash": "023e9aef9472963d60e6735d03fe8740e16cc7a54ea6ef41aa09b9c9a22f1100",
+              "fragment_locator": "lines:108-125",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "T-01-performance-context",
+              "content_hash": "023e9aef9472963d60e6735d03fe8740e16cc7a54ea6ef41aa09b9c9a22f1100",
+              "fragment_locator": "lines:108-125",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            },
+            {
+              "claim_id": "T-01-save-analysis",
+              "content_hash": "023e9aef9472963d60e6735d03fe8740e16cc7a54ea6ef41aa09b9c9a22f1100",
+              "fragment_locator": "lines:108-125",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            }
+          ],
+          "entry_path": "Home.md",
+          "first_hit_kind": 2,
+          "first_hit_page": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+          "hop_count": 5,
+          "jumps": [
+            "Home.md",
+            "Products/产品索引.md",
+            "Products/GoInsight/文档总览.md",
+            "Products/GoInsight/模块手册/模块总览.md",
+            "Products/GoInsight/模块手册/字段与筛选/字段与筛选总览.md",
+            "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md"
+          ],
+          "misleading_support": false,
+          "order": 2,
+          "reachable": true,
+          "target_page": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md"
+        },
+        {
+          "answer_checklist": {
+            "N-01-detail-global": true
+          },
+          "answer_result": "no_match",
+          "boundary_checklist": {
+            "distinguish-report-metric": true,
+            "only-data-analysis": true,
+            "reject-detail-global": true,
+            "troubleshoot-location": true
+          },
+          "case_id": "N-01",
+          "claim_anchors": [
+            {
+              "claim_id": "N-01-detail-global",
+              "content_hash": "6d8ab4a822d270d7f4b58cc99b7d31351e313631e420f7aaeaf2d2595ad35244",
+              "fragment_locator": "lines:110",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            }
+          ],
+          "entry_path": "Home.md",
+          "first_hit_kind": 2,
+          "first_hit_page": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+          "hop_count": 5,
+          "jumps": [
+            "Home.md",
+            "Products/产品索引.md",
+            "Products/GoInsight/文档总览.md",
+            "Products/GoInsight/模块手册/模块总览.md",
+            "Products/GoInsight/模块手册/字段与筛选/字段与筛选总览.md",
+            "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md"
+          ],
+          "misleading_support": false,
+          "order": 3,
+          "reachable": true,
+          "target_page": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md"
+        },
+        {
+          "answer_checklist": {
+            "N-02-report-metric": true
+          },
+          "answer_result": "no_match",
+          "boundary_checklist": {
+            "distinguish-report-metric": true,
+            "only-data-analysis": true,
+            "reject-detail-global": true,
+            "troubleshoot-location": true
+          },
+          "case_id": "N-02",
+          "claim_anchors": [
+            {
+              "claim_id": "N-02-report-metric",
+              "content_hash": "9b06649bbc1e33658b0441bd1c5917e4218d133f3ef1c9ecc10c47e766471100",
+              "fragment_locator": "lines:125",
+              "source_uri": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+              "validation_status": "verified"
+            }
+          ],
+          "entry_path": "Home.md",
+          "first_hit_kind": 2,
+          "first_hit_page": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md",
+          "hop_count": 5,
+          "jumps": [
+            "Home.md",
+            "Products/产品索引.md",
+            "Products/GoInsight/文档总览.md",
+            "Products/GoInsight/模块手册/模块总览.md",
+            "Products/GoInsight/模块手册/字段与筛选/字段与筛选总览.md",
+            "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md"
+          ],
+          "misleading_support": false,
+          "order": 4,
+          "reachable": true,
+          "target_page": "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md"
+        }
+      ],
+      "package_id": "companybrain",
+      "reader_only_observed_paths": [
+        "Home.md",
+        "Products/产品索引.md",
+        "Products/GoInsight/文档总览.md",
+        "Products/GoInsight/模块手册/模块总览.md",
+        "Products/GoInsight/模块手册/字段与筛选/字段与筛选总览.md",
+        "Products/GoInsight/模块手册/字段与筛选/文本、数值与位置筛选.md"
+      ],
+      "session_id": "33e29d14bc45b1ce"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "schema_version": "task4-verify-final-test.v5",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "verify-code",
+  "declared_final_command": "env PYTHONDONTWRITEBYTECODE=1 uv run --frozen pytest -q -p no:cacheprovider tests/acceptance/test_task4_full_compiler.py tests/acceptance/test_task4_full_quality.py tests/acceptance/test_task4_location_compiler.py tests/acceptance/test_task4_location_gate.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task2b_body_compiler.py tests/acceptance/test_task2c_reader_quality.py tests/acceptance/test_task3_projection.py tests/acceptance/test_task3_quality_release.py tests/acceptance/test_task3_closeout.py",
+  "declared_final_result": "291 passed in 4.40s",
+  "focused_result": "28 passed in 1.07s",
+  "full_repo_result": "733 passed, 3 skipped in 32.65s",
+  "official_89": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v39-89",
+    "source_count": 89,
+    "reader_source_count": 88,
+    "failure_count": 0,
+    "package_status": "candidate",
+    "run_id": "run-20260819T053316920319Z",
+    "empty_source_policy": "audit_only_exact_allowlist",
+    "empty_source": {
+      "source_uri": "emm for android /AE - AirViewer厂商管理.md",
+      "content_hash": "8b28dec38f962c2a291b3063c3ea6e5e8a3f36e6f1884f9e88c449432b3be885",
+      "status": "not_applicable",
+      "reader_page": false,
+      "audit_snapshot": true
+    }
+  },
+  "official_89_assessment": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v39-89-assessment",
+    "status": "better_than_companybrain",
+    "blocking_reasons": [],
+    "case_count": 89,
+    "not_applicable_count": 84,
+    "strictly_better_axes": ["path", "boundary_source_clarity"],
+    "not_worse_axes": ["path", "answer_completeness", "boundary_source_clarity"],
+    "axis_delta": {
+      "path": 0.033707865168539325,
+      "answer_completeness": 0.0,
+      "boundary_source_clarity": 0.013108614232209739
+    }
+  },
+  "conclusion": "正式 89 条候选编译、质量对照和回归测试通过；已知 title-only 空页保留在 Audit，不伪造 Reader 知识。"
+}

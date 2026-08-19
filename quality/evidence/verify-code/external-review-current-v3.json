@@ -1,0 +1,36 @@
+{
+  "schema_version": "task4-verify-external-review.v4",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "verify-code",
+  "status": "conditional_pass",
+  "transport_status": "local_read_only_subagent_recheck_complete",
+  "providers": [
+    {
+      "agent": "Beauvoir",
+      "agent_id": "01a0184b-547b-79b0-b306-f830705bfd7d",
+      "scope": "exact identity, mapping and evidence semantics",
+      "result": "findings_integrated",
+      "findings": [
+        "source_id、文件名和输入顺序不能进入 comparison_key",
+        "缺页只有在 exhaustive baseline scope 中才能是 not_applicable",
+        "空源、身份缺失、冲突和重复必须保持 undecidable",
+        "89 条来源不是固定 89 个 canonical case"
+      ],
+      "disposition": "已实现 typed ck1、页面小节 evidence refs、exhaustive scope 和 undecidable 分支；当前 89 条空源仍按规则阻断。",
+      "counts_as_pass": true
+    },
+    {
+      "agent": "Averroes",
+      "scope": "compiler transaction, cancellation, relation and root-cause boundaries",
+      "result": "no_severe_code_finding_after_repairs",
+      "disposition": "保留原有锁、回滚、取消、关系溯源和缺报告 fail-closed 修复。",
+      "counts_as_pass": true
+    }
+  ],
+  "workflowhub_provider_review": {
+    "status": "unavailable",
+    "counts_as_pass": false,
+    "note": "没有把 unavailable 写成 clean；本地代码和真实运行证据独立保存。"
+  },
+  "conclusion": "当前代码没有严重 finding；正式 89 条仍受原始空文件阻断。"
+}

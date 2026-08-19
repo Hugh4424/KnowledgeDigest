@@ -1,0 +1,20 @@
+{
+  "schema_version": "task4-verify-external-review.v1",
+  "status": "unavailable",
+  "adapter": "wh-review",
+  "attempt_ref": "quality/reviews/attempts/6732b51c-95f6-421f-8951-69e26ab16450/attempt.json",
+  "report_ref": "quality/reviews/reports/6732b51c-95f6-421f-8951-69e26ab16450.md",
+  "snapshot_tree": "73452e9bddc07f874f24f6c39ca987ecfed0350c",
+  "transport_status": "unavailable",
+  "error_code": "PROTOCOL_INCOMPATIBLE",
+  "error": "3rd-review public run did not return JSON; exit=1; only 0 valid reviewer result(s); 1 required",
+  "provider_attempts": [],
+  "findings": null,
+  "provenance": {
+    "requested_profiles": ["kimi/coding", "codex/luna"],
+    "selected_count": 2,
+    "valid_provider_count": 0,
+    "minimum_required": 1
+  },
+  "disposition": "unavailable_is_not_pass; no provider finding was available for repair"
+}

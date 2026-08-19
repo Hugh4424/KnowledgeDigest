@@ -1,0 +1,14 @@
+{
+  "schema_version": "task4-verify-external-review.v2",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "verify-code",
+  "status": "unavailable",
+  "adapter": "wh-review",
+  "attempt_ref": "quality/reviews/attempts/c4a957b3-e28e-44d3-9788-fa077f991f7b/attempt.json",
+  "report_ref": "quality/reviews/reports/c4a957b3-e28e-44d3-9788-fa077f991f7b.md",
+  "transport_status": "unavailable",
+  "error_code": "MATERIAL_FORBIDDEN",
+  "provider_findings": null,
+  "counts_as_pass": false,
+  "note": "第二次修正输入后的 broker 等待没有产生可持久化终态，已停止；不能把无结果当成通过。"
+}

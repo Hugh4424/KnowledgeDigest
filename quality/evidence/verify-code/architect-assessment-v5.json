@@ -1,0 +1,34 @@
+{
+  "schema_version": "task4-verify-architect-assessment.v5",
+  "stage": "verify-code",
+  "task_id": "task4-reader-quality-compiler",
+  "status": "conditional_pass",
+  "findings": [
+    {
+      "id": "ARCH-010",
+      "status": "resolved",
+      "severity": "resolved",
+      "fact": "正式 89 条中的 AirViewer title-only 空页为 5 字节空白内容，已按 source_uri+content_hash 精确 allowlist 保留在 Audit；不生成 Reader、不生成 Claim、不丢来源。",
+      "action": "保持仅此一条的 audit_only 边界；任何其他空源和内容变化继续 hard fail。"
+    },
+    {
+      "id": "ARCH-011",
+      "status": "resolved",
+      "severity": "resolved",
+      "fact": "CompanyBrain 当前完整 baseline 继续绑定 1,406 个常规文件和 716 个 Reader 页面；89 行 mapping 为 5 unique、84 not_applicable、0 undecidable。",
+      "action": "继续使用固定 manifest、typed semantic key 和 exhaustive scope。"
+    }
+  ],
+  "acceptance": {
+    "AC-READER-001": "pass：89 条来源入 manifest，88 条有效来源进入 Reader。",
+    "AC-READER-002": "pass：标题和路径使用语义识别结果，不使用 cluster/raw slug。",
+    "AC-READER-003": "pass：正文结构化、证据锚点、来源追溯和 Audit 边界通过。",
+    "AC-READER-004": "pass：锁、取消、回滚、关系溯源和失败边界保留。",
+    "AC-QUALITY-001": "pass：无需人工逐页审核队列。",
+    "AC-QUALITY-002": "pass：89 行对照边界可计算，title-only case 为双方 N/A。",
+    "AC-QUALITY-003": "pass：正式 89 对照无 blocking_reasons。",
+    "AC-QUALITY-004": "pass：89 条正式对照为 better_than_companybrain，且没有轴变差。",
+    "AC-QUALITY-005": "pass：空源根因、处理理由和后续限制已写入 decision-log。"
+  },
+  "remaining_risk": "WorkflowHub 外部 review provider 当前不可用；本地独立只读复核未发现严重代码问题，因此本证据保持 conditional_pass，不把 provider unavailable 改写成 pass。"
+}

@@ -1,0 +1,19 @@
+{
+  "schema_version": "task4-verify-final-test.v1",
+  "command": "env PYTHONDONTWRITEBYTECODE=1 uv run --frozen pytest -q -p no:cacheprovider tests/acceptance/test_task4_full_compiler.py tests/acceptance/test_task4_full_quality.py tests/acceptance/test_task4_location_compiler.py tests/acceptance/test_task4_location_gate.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task2b_body_compiler.py tests/acceptance/test_task2c_reader_quality.py tests/acceptance/test_task3_projection.py tests/acceptance/test_task3_quality_release.py tests/acceptance/test_task3_closeout.py",
+  "receipt_ref": "quality/tests/task4-final-aggregate-v8.json",
+  "receipt_hash": "fef53fef333d1c6f96deb7fb3fb4a83ad1242fff5260b584daf76c386e59ff96",
+  "snapshot_tree": "73452e9bddc07f874f24f6c39ca987ecfed0350c",
+  "exit_code": 0,
+  "result": "278 passed in 3.93s",
+  "focused_after_repair": "15 passed in 0.27s",
+  "real_89": {
+    "source_count": 89,
+    "reader_source_count": 88,
+    "failure_count": 1,
+    "package_status": "not_released",
+    "assessment": "undecidable",
+    "blocking_reason": "candidate_not_released"
+  },
+  "coverage_limit": "绿色测试不证明正文超过 CompanyBrain；CompanyBrain 89 条唯一映射仍未冻结；独立 review unavailable。"
+}

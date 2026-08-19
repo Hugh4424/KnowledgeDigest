@@ -1,0 +1,8 @@
+Focused: 30 passed in 0.78s
+Full repository gate: 727 passed, 3 skipped in 32.84s
+Official 89-source compile: exit 1; source_count=89; reader_source_count=88; failure_count=1; package_status=not_released
+Official output: /Users/Hugh/Downloads/KnowledgeDigest-task4-real-candidate-20260819-v31-89-source
+Official assessment: /Users/Hugh/Downloads/KnowledgeDigest-task4-real-assessment-20260819-v33-89-formal
+Diagnostic 88-source compile: candidate; output=/Users/Hugh/Downloads/KnowledgeDigest-task4-real-candidate-20260819-v32-88-valid
+Diagnostic 88-source assessment: undecidable; blocking=baseline_mapping_unmatched,case_topic_mapping_missing,source_manifest_mapping_drift; assessment=v34
+Diagnostic axes were positive but are not a superiority claim because the baseline mapping is incomplete.

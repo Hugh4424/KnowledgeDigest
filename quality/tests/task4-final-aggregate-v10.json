@@ -1,0 +1,52 @@
+{
+  "schema_version": "workflowhub-receipt.v1",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "build-code",
+  "producer": {
+    "stage": "build-code",
+    "component": "build-code-test-capture",
+    "version": "1.0.0"
+  },
+  "command": "env PYTHONDONTWRITEBYTECODE=1 uv run --frozen pytest -q",
+  "exit_code": 0,
+  "observed": {
+    "focused": "30 passed in 0.78s",
+    "full": "727 passed, 3 skipped in 32.84s"
+  },
+  "output_ref": "quality/tests/output/task4-final-aggregate-v10.output",
+  "real_corpus_compile": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-candidate-20260819-v31-89-source",
+    "assessment": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-assessment-20260819-v33-89-formal",
+    "source_count": 89,
+    "reader_source_count": 88,
+    "failure_count": 1,
+    "package_status": "not_released",
+    "failure_reason": "empty_body",
+    "failure_source": "emm for android /AE - AirViewer厂商管理.md"
+  },
+  "valid_source_diagnostic": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-candidate-20260819-v32-88-valid",
+    "assessment": "/Users/Hugh/Downloads/KnowledgeDigest-task4-real-assessment-20260819-v34-88-diagnostic",
+    "status": "undecidable",
+    "blocking_reasons": ["baseline_mapping_unmatched", "case_topic_mapping_missing", "source_manifest_mapping_drift"],
+    "axis_delta": {
+      "path": 0.8876404494382022,
+      "answer_completeness": 0.6797752808988764,
+      "boundary_source_clarity": 0.7209737827715357
+    },
+    "claim": "diagnostic only; no formal superiority claim"
+  },
+  "mapping_fixture": {
+    "path": "config/task4-companybrain-mapping-20260819-v6.json",
+    "companybrain_manifest_id": "companybrain-full-20260819-current-v1",
+    "companybrain_page_count": 716,
+    "companybrain_tree_hash": "49b9e90340f32f1877262f5aa6c0bff9e97aacb6d72f3a4dfdefcb284abfce83",
+    "counts": {"unique": 36, "ambiguous": 0, "unmatched": 53}
+  },
+  "status": "passed",
+  "coverage_limits": [
+    "local automated regression passed",
+    "official 89 package is not released",
+    "comparison is undecidable until baseline mapping and manifest identity are resolved"
+  ]
+}

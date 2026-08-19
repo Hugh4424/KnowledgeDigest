@@ -1,0 +1,15 @@
+{
+  "schema_version": "task4-verify-external-review.v5",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "verify-code",
+  "status": "conditional_pass",
+  "transport_status": "workflowhub_provider_unavailable_local_review_pending",
+  "local_review_scope": "read-only current diff, empty-source allowlist boundary, manifest preservation, no Reader/Claim for not_applicable source",
+  "local_review_disposition": "no_severe_code_finding_observed_in_available_review",
+  "workflowhub_provider_review": {
+    "status": "unavailable",
+    "counts_as_pass": false,
+    "note": "workflowhub-capability wh-review-provider 不存在；未把 unavailable 写成 clean。"
+  },
+  "conclusion": "本地可用的独立只读复核未发现严重代码问题；外部 provider 传输缺失保留为证据限制。"
+}

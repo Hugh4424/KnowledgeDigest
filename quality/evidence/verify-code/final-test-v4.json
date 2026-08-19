@@ -1,0 +1,29 @@
+{
+  "schema_version": "task4-verify-final-test.v4",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "verify-code",
+  "command": "env PYTHONDONTWRITEBYTECODE=1 uv run --frozen pytest -q",
+  "exit_code": 0,
+  "focused_result": "34 passed in 0.62s",
+  "full_result": "731 passed, 3 skipped in 28.73s",
+  "official_89": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v38-89",
+    "source_count": 89,
+    "reader_source_count": 88,
+    "failure_count": 1,
+    "package_status": "not_released",
+    "failure_reason": "empty_body",
+    "failure_source": "emm for android /AE - AirViewer厂商管理.md"
+  },
+  "diagnostic_88": {
+    "candidate": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v37-88",
+    "assessment": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v37-88-assessment",
+    "status": "better_than_companybrain",
+    "blocking_reasons": [],
+    "strictly_better_axes": ["path", "boundary_source_clarity"],
+    "not_worse_axes": ["path", "answer_completeness", "boundary_source_clarity"],
+    "counts_as_formal_89_pass": false
+  },
+  "mapping_fixture": "config/task4-companybrain-mapping-20260819-v13-89.json",
+  "conclusion": "测试与可读子集对比通过；正式样本因原始空文件未发布，verify-code 停在 close 前。"
+}

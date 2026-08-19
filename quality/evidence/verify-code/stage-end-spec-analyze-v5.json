@@ -1,0 +1,22 @@
+{
+  "schema_version": "workflowhub-stage-end-spec-analyze.v1",
+  "superseded_by": "quality/evidence/verify-code/stage-end-spec-analyze-v6.json",
+  "task_id": "task4-reader-quality-compiler",
+  "stage": "verify-code",
+  "status": "consistent_with_limits",
+  "original_requirement_ref": "quality/evidence/verify-code/requirement-replay-v2.json",
+  "materials": [
+    "specs/task4-reader-quality-compiler/",
+    "quality/evidence/verify-code/architect-assessment-v2.json",
+    "quality/evidence/verify-code/final-test-v2.json",
+    "quality/evidence/verify-code/external-review-current-v1.json"
+  ],
+  "implementation_alignment": "正文编译、CompanyBrain mapping、source-first oracle、失败状态和 89/88 对比均已落到当前代码与证据。",
+  "flow_alignment": "原始来源→识别分类→正文编译→Reader/Audit→状态判定→对照评估的完整流程已覆盖。",
+  "remaining_limits": [
+    "一条 5-byte 空源阻止正式 89 发布",
+    "历史 88 条 better_than_companybrain 结论已被 v22 undecidable 诊断 supersede",
+    "外部独立 review unavailable"
+  ],
+  "handoff": "修复空源或明确上游处理后，重新跑官方 89 编译、对比和 verify-code；在此之前保持 not_released，不 close。"
+}

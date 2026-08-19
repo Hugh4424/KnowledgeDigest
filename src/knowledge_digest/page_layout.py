@@ -381,6 +381,105 @@ def validate_semantic_parts(
     return {"valid": not reasons, "reasons": list(dict.fromkeys(reasons))}
 
 
+def render_task4_two_layer_page(
+    *,
+    topic_id: str,
+    title: str,
+    canonical_path: str,
+    usage_sections: list[Mapping[str, Any]],
+    rules_sections: list[Mapping[str, Any]],
+    claims: list[Mapping[str, Any]],
+    related_links: list[Mapping[str, Any]],
+    source_projection: list[Mapping[str, Any]],
+    max_page_lines: int = 300,
+) -> dict[str, Any]:
+    """Render the isolated Task4 Reader page from one shared claim catalog.
+
+    Task4 intentionally does not reuse the old formal page renderer: its
+    reader route and two-layer shape are part of the pilot contract.  The
+    helper still enforces the same important invariant as the old semantic
+    layout code: every claim is owned exactly once by one semantic section.
+    """
+
+    if not topic_id or not title or not canonical_path:
+        raise ValidationError("task4-layout", "identity", "topic identity, title and path are required")
+    if any(token in canonical_path for token in ("cluster-", "draft-", "..")):
+        raise ValidationError("task4-layout", "identity", "Task4 path must be stable and root-safe")
+    if not usage_sections or not rules_sections:
+        raise ValidationError("task4-layout", "layers", "both usage and rules layers are required")
+
+    claim_by_id = {
+        str(claim.get("claim_id")): claim
+        for claim in claims
+        if isinstance(claim, Mapping) and claim.get("claim_id")
+    }
+    if len(claim_by_id) != len(claims):
+        raise ValidationError("task4-layout", "claims", "claim catalog contains duplicate or empty identities")
+    section_rows = [*usage_sections, *rules_sections]
+    section_ids: set[str] = set()
+    assigned: list[str] = []
+    for section in section_rows:
+        section_id = str(section.get("section_id", ""))
+        if not section_id or section_id in section_ids:
+            raise ValidationError("task4-layout", "sections", "section identities must be unique")
+        section_ids.add(section_id)
+        claim_ids = section.get("claim_ids")
+        bullets = section.get("bullets")
+        if not isinstance(claim_ids, list) or not claim_ids:
+            raise ValidationError("task4-layout", "sections", f"section {section_id} has no claims")
+        if not isinstance(bullets, list) or len(bullets) != len(claim_ids) or any(not str(item).strip() for item in bullets):
+            raise ValidationError("task4-layout", "sections", f"section {section_id} has unaligned content")
+        for claim_id in claim_ids:
+            claim_id = str(claim_id)
+            if claim_id not in claim_by_id:
+                raise ValidationError("task4-layout", "claims", f"unknown claim {claim_id}")
+            assigned.append(claim_id)
+    if sorted(assigned) != sorted(claim_by_id) or len(assigned) != len(set(assigned)):
+        raise ValidationError("task4-layout", "claims", "each claim must be owned by exactly one section")
+
+    lines: list[str] = [f"# {title}", "", "这页先讲怎么操作，再讲适用边界；两层使用同一份已验证事实。", ""]
+
+    def add_layer(heading: str, sections: list[Mapping[str, Any]]) -> None:
+        lines.extend([heading, ""])
+        for section in sections:
+            lines.extend([f"### {section.get('heading') or section.get('section_id')}", ""])
+            for bullet in section.get("bullets", []):
+                lines.append(f"- {bullet}")
+            lines.append("")
+
+    add_layer("## 先看：怎么用", usage_sections)
+    add_layer("## 再看：规则和边界", rules_sections)
+    lines.extend(["## 相关主题", ""])
+    for link in related_links:
+        href = str(link.get("href", ""))
+        if not href or href.startswith("/") or ".." not in href:
+            raise ValidationError("task4-layout", "related", "related links must be local relative links")
+        if any(token in href.lower() for token in ("audit", "raw", "provider")):
+            raise ValidationError("task4-layout", "related", "Reader cannot link to Audit/raw/provider")
+        lines.append(f"- [{link.get('title', '相关主题')}]({href})")
+    lines.append("")
+    lines.extend(["## 来源（简表）", ""])
+    for source in source_projection:
+        href = str(source.get("href", ""))
+        if not href or href.startswith("/") or "audit" in href.lower() or "raw" in href.lower():
+            raise ValidationError("task4-layout", "source_projection", "Reader source projection must stay local")
+        lines.append(f"- [{source.get('title', source.get('source_uri', '来源'))}]({href})")
+    lines.append("")
+    if len(lines) > max_page_lines:
+        raise ValidationError("task4-layout", "size", f"Task4 page exceeds {max_page_lines} lines")
+    return {
+        "status": "published",
+        "valid": True,
+        "topic_id": topic_id,
+        "canonical_path": canonical_path,
+        "body": "\n".join(lines),
+        "line_count": len(lines),
+        "section_ids": [str(section.get("section_id")) for section in section_rows],
+        "claim_ids": assigned,
+        "shared_claim_catalog": True,
+    }
+
+
 def _claim_key(claim: dict[str, Any]) -> tuple[str, str, str]:
     return claim_entity_key(claim)
 

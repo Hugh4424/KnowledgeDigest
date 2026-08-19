@@ -1,0 +1,55 @@
+{
+  "schema_version": "task4-verify-architect-assessment.v3",
+  "stage": "verify-code",
+  "task_id": "task4-reader-quality-compiler",
+  "status": "incomplete",
+  "snapshot_tree": "9876f5cb40df8d31f43c20f8e3911af2a97a21908f4c6550f0d2656a37b4592f",
+  "findings": [
+    {
+      "id": "ARCH-006",
+      "status": "open",
+      "severity": "blocking",
+      "fact": "正式 89 条中 emm for android /AE - AirViewer厂商管理.md 只有 5 bytes 空白内容；v31 source_count=89、reader_source_count=88、failure_count=1、package_status=not_released。",
+      "action": "保持 fail-closed；修复原始输入或经过 make-decision 明确排除后再重跑。"
+    },
+    {
+      "id": "ARCH-007",
+      "status": "open",
+      "severity": "blocking",
+      "fact": "mapping v6 已消除 case-088 错配，但只证明 36 unique，另有 53 unmatched；v34 评估因此触发 baseline_mapping_unmatched 和 case_topic_mapping_missing，不能把未知行当 N/A。",
+      "action": "补齐可证明的 comparison_key→entry_path，或生成有事实依据的 not_applicable；不得恢复 v4 的弱匹配猜测。"
+    },
+    {
+      "id": "ARCH-008",
+      "status": "open",
+      "severity": "blocking",
+      "fact": "当前 mapping v6 绑定 companybrain-full-20260819-current-v1、716 个 Markdown、tree_hash=49b9e90340f32f1877262f5aa6c0bff9e97aacb6d72f3a4dfdefcb284abfce83；当前 CompanyBrain 实际有 1406 个非系统文件，spec 仍记录 companybrain-full-20260818-v1、1406 文件和另一 hash，当前 mapping 既有 hash 漂移也有 scope 缩小。",
+      "action": "先经 make-decision 统一冻结基线身份和 scope，再生成覆盖 1406 个非系统文件的 manifest/key index；在基线事实未统一前，比较只能 undecidable。"
+    },
+    {
+      "id": "ARCH-009",
+      "status": "fixed_for_current_compiler",
+      "severity": "resolved",
+      "fact": "结构化正文、可读标题/路径、Reader/Audit 分离、关系来源证据、输出锁、取消检查、回滚、发布后中断状态和缺报告 fail-closed 均有代码与 acceptance 覆盖；最新全量回归 727 passed、3 skipped in 32.84s。",
+      "action": "保持当前实现；继续用真实 89 产物复核，不把自动回归当成业务优于证明。"
+    }
+  ],
+  "acceptance": {
+    "AC-READER-001": "conditional_pass：88 条有效输入产生 Reader；正式 89 因空源 not_released。",
+    "AC-READER-002": "pass_for_current_compiler：标题和路径不再使用 case-088 的错误 baseline 猜测。",
+    "AC-READER-003": "conditional_pass：正文有结构化语义段，但正式 89 未发布。",
+    "AC-READER-004": "pass_for_current_compiler：来源、关系和 Reader/Audit 边界有回归。",
+    "AC-QUALITY-001": "pass：无人工逐页审核队列。",
+    "AC-QUALITY-002": "undecidable：mapping v6 对 unmatched 保持诚实，但覆盖不足。",
+    "AC-QUALITY-003": "undecidable：v34 只有诊断结果，且 source manifest 与 mapping 不一致。",
+    "AC-QUALITY-004": "undecidable：不能声称超过 CompanyBrain。",
+    "AC-QUALITY-005": "conditional_pass：根因报告和限制已记录，业务结论未闭环。"
+  },
+  "test_fact": {
+    "focused": "30 passed in 0.78s",
+    "full": "727 passed, 3 skipped in 32.84s",
+    "real_89": "source_count=89; reader_source_count=88; failure_count=1; package_status=not_released; output=v31",
+    "valid_88": "status=undecidable; mapping v6=36 unique/53 unmatched; observed positive axes are diagnostic only; output=v34"
+  },
+    "conclusion": "实现回归没有严重代码缺陷证据，但原始业务目标仍被空源、基线身份漂移和 53 条未证明映射阻断；不得 close。"
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": "task4-final-aggregate.v12",
+  "task_id": "task4-reader-quality-compiler",
+  "status": "passed_with_candidate_scope",
+  "declared_acceptance_command_result": "291 passed in 4.40s",
+  "focused_result": "28 passed in 1.07s",
+  "full_repo_result": "733 passed, 3 skipped in 32.65s",
+  "real_run": {
+    "output": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v39-89",
+    "source_count": 89,
+    "reader_source_count": 88,
+    "failure_count": 0,
+    "package_status": "candidate",
+    "assessment": "/Users/Hugh/Downloads/KnowledgeDigest-task4-reader-quality-compiler-real-20260819-v39-89-assessment",
+    "quality_status": "better_than_companybrain",
+    "blocking_reasons": [],
+    "strictly_better_axes": ["path", "boundary_source_clarity"],
+    "not_worse_axes": ["path", "answer_completeness", "boundary_source_clarity"]
+  },
+  "mapping_counts": {
+    "unique": 5,
+    "not_applicable": 84,
+    "undecidable": 0,
+    "ambiguous": 0,
+    "unmatched": 0
+  },
+  "conclusion": "当前 89 条正式候选编译和 CompanyBrain 机器对照通过；不把 candidate 改写成生产 released。"
+}

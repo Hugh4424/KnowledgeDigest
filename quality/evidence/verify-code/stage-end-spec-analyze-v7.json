@@ -1,0 +1,21 @@
+{
+  "schema_version": "task4-stage-end-spec-analyze.v7",
+  "stage": "verify-code",
+  "task_id": "task4-reader-quality-compiler",
+  "status": "conditional_pass",
+  "spec_hash": "efb6acc8b1abf56d1a2c8423193f322e146970471575a7983bc0bc4b6455cc0c",
+  "plan_hash": "fc5ce744e9fd245c4b7d1702d7731ceb1b3f413987a77f2c7abb67a8bfad1299",
+  "decision_log_hash": "197a1068b06ccf84b22ed5e9b1cbf7e4174cea68b398d81ad501b052850ab36e",
+  "checks": {
+    "original_requirement_replayed": true,
+    "user_flow_covered": true,
+    "page_scope_covered": true,
+    "data_states_covered": true,
+    "success_failure_boundaries_covered": true,
+    "non_goals_and_deferred_handoff_recorded": true,
+    "current_companybrain_baseline_rebound_by_D025": true,
+    "official_89_release": false
+  },
+  "findings": [],
+  "conclusion": "规格、计划、决策日志与当前实现口径一致；正式 89 条未发布是输入事实阻断，不是遗漏的需求。"
+}

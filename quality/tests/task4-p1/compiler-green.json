@@ -1,0 +1,9 @@
+{
+  "phase_id": "P1",
+  "task_ids": ["T001", "T002"],
+  "command": "env PYTHONDONTWRITEBYTECODE=1 uv run --frozen pytest -q -p no:cacheprovider tests/acceptance/test_task4_full_compiler.py",
+  "exit_code": 0,
+  "passed": 7,
+  "oracle": "ORACLE-COMPILER-FULL",
+  "coverage_limits": ["does not prove CompanyBrain superiority", "does not run real 89 corpus"]
+}

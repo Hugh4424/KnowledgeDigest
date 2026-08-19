@@ -1,0 +1,10 @@
+{
+  "candidate_status": "candidate",
+  "decision": "stop",
+  "delivery_status": "not_released",
+  "failure_reasons": [
+    "validate: stage=reader-quality; failed input Products/.DS_Store: Task4 Reader snapshot only accepts Markdown. Rerun after correcting the input."
+  ],
+  "schema_version": "task4-location-release-summary.v1",
+  "status": "failed"
+}

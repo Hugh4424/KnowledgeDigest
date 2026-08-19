@@ -1,0 +1,17 @@
+{
+  "schema_version": "task4-build-code-evidence.v1",
+  "task_id": "task4-reader-quality-compiler",
+  "phase_id": "P2",
+  "task": "T005",
+  "verification_role": "FINAL",
+  "command": "uv run --frozen pytest -q tests/acceptance/test_task4_full_compiler.py tests/acceptance/test_task4_full_quality.py tests/acceptance/test_reader_compiler.py tests/acceptance/test_task2c_reader_quality.py tests/acceptance/test_task3_projection.py tests/acceptance/test_task3_quality_release.py tests/acceptance/test_task3_closeout.py",
+  "exit_code": 0,
+  "result": "138 passed in 3.30s",
+  "snapshot_tree": "5dcb89ee8641ca638bb52885a637747954e25e89",
+  "receipt_ref": "quality/tests/task4-final-aggregate-v4.json",
+  "receipt_hash": "881f75301a4881c73c658c81cc941cb68dcfafacfec866131ca8c5c5c7845826",
+  "implementation_receipt_ref": "quality/evidence/implementation/7fd800953f9461362445c00a867f794f28ddb78d5b433f69b59f4fe5a2ec6b47.json",
+  "integration_review_ref": "quality/reviews/reports/2f1ca7fd-9129-4824-ab40-f9e85d38a2b9.md",
+  "oracle": "ORACLE-FINAL",
+  "coverage_limit": "does not prove formal human superiority or released writeback"
+}
