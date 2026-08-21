@@ -1126,7 +1126,11 @@ def resolve_generator(settings: DigestSettings) -> Generator:
 
     provider_env = dict(os.environ)
     provider_env["KD_LLM_TIMEOUT_SECONDS"] = str(settings.runtime.request_timeout_seconds)
-    return generator_from_env(api_format=settings.llm_format, env=provider_env)
+    return generator_from_env(
+        api_format=settings.llm_format,
+        env=provider_env,
+        provider_config_path=getattr(settings, "provider_config_path", None),
+    )
 
 
 def _invoke_generator(generator: Generator, context: dict[str, Any]) -> Any:

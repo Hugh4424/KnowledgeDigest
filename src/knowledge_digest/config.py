@@ -95,6 +95,7 @@ class DigestSettings:
     llm_batch_concurrency: int = DEFAULT_LLM_BATCH_CONCURRENCY
     runtime: RuntimePolicy = RuntimePolicy()
     similarity: SimilaritySettings = SimilaritySettings()
+    provider_config_path: Path | None = None
 
 
 def _load_json(path: Path | None) -> dict[str, Any]:
@@ -236,6 +237,7 @@ def resolve_settings(
     llm_batch_max_claims: int | None = None,
     llm_batch_max_source_chars: int | None = None,
     llm_batch_concurrency: int | None = None,
+    provider_config_path: Path | None = None,
     env: dict[str, str] | None = None,
 ) -> DigestSettings:
     """Apply bundled defaults, JSON defaults, environment, then CLI overrides."""
@@ -300,6 +302,7 @@ def resolve_settings(
         ),
         runtime=_runtime_policy(values["runtime"]),
         similarity=_similarity_settings(values["similarity"]),
+        provider_config_path=provider_config_path,
     )
     if settings.llm_format not in SUPPORTED_LLM_FORMATS:
         raise ValidationError(

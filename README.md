@@ -23,3 +23,5 @@ uv run --frozen digest NEW_DIR KB_DIR --config offline.json --no-llm
 ```
 
 `--no-llm` 仍会走 preflight，但不会调用模型或 embedding provider。
+
+语义运行默认读取用户级 provider 配置 `~/.config/knowledge-digest/config.json` 的 LLM/embedding URL、model 和 key；也支持 `XDG_CONFIG_HOME`，可用 `--provider-config PATH` 覆盖。环境变量仅作兼容回退，凭据不会写入运行报告。

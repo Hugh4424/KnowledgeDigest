@@ -7,7 +7,7 @@ import json
 import math
 import os
 import ssl
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from ipaddress import ip_address
 from typing import Any, Callable
 from urllib.error import HTTPError, URLError
@@ -22,6 +22,7 @@ from urllib.request import (
 
 from .calibration_artifact import load_calibration_artifact
 from .config import DigestSettings, EmbeddingSettings
+from .provider_config import effective_embedding_provider
 
 
 class EmbeddingError(RuntimeError):
@@ -253,27 +254,44 @@ def resolve_similarity_backend(
     embedding = similarity.embedding
     if embedding is None:
         return BackendResolution("embedding", "jaccard", "embedding_config_missing")
+    source = os.environ if env is None else env
     try:
-        endpoint = normalize_endpoint_identity(embedding.base_url)
+        provider = effective_embedding_provider(
+            provider_config_path=getattr(settings, "provider_config_path", None),
+            base_url=embedding.base_url,
+            model=embedding.model,
+            expected_dimension=embedding.expected_dimension,
+            api_key_env=embedding.api_key_env,
+            env=source,
+        )
+        effective_embedding = replace(
+            embedding,
+            base_url=provider["base_url"],
+            model=provider["model"],
+            expected_dimension=provider["expected_dimension"],
+        )
+    except ValueError:
+        return BackendResolution("embedding", "jaccard", "provider_config_invalid")
+    try:
+        endpoint = normalize_endpoint_identity(effective_embedding.base_url)
     except ValueError:
         return BackendResolution("embedding", "jaccard", "endpoint_not_approved")
     try:
-        artifact = load_calibration_artifact(embedding.calibration_artifact)
+        artifact = load_calibration_artifact(effective_embedding.calibration_artifact)
     except ValueError:
         return BackendResolution("embedding", "jaccard", "artifact_missing_or_invalid")
     if artifact.adoption_status != "adopted":
         return BackendResolution("embedding", "jaccard", "artifact_not_adopted")
     if (
         artifact["endpoint_identity"] != endpoint
-        or artifact["model"] != embedding.model
-        or artifact["dimension"] != embedding.expected_dimension
+        or artifact["model"] != effective_embedding.model
+        or artifact["dimension"] != effective_embedding.expected_dimension
     ):
         return BackendResolution("embedding", "jaccard", "artifact_identity_mismatch")
-    source = os.environ if env is None else env
-    api_key = source.get(embedding.api_key_env)
+    api_key = provider["api_key"]
     if not api_key:
         return BackendResolution("embedding", "jaccard", "embedding_api_key_missing")
-    client = client_factory(embedding, api_key=api_key)
+    client = client_factory(effective_embedding, api_key=api_key)
     actual_probe = probe_fingerprint if probe_fingerprint is not None else client.probe_fingerprint()
     if actual_probe != artifact["probe_fingerprint"]:
         return BackendResolution("embedding", "jaccard", "probe_identity_mismatch")

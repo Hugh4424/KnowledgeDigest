@@ -13,6 +13,7 @@ from .errors import ValidationError
 from .kb_structure import DEFAULT_ROOTS, parse_roots
 from .paths import validate_paths
 from .pipeline import audit_run
+from .provider_config import configured_provider_config_path
 
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "knowledge-digest.json"
 
@@ -36,6 +37,12 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_CONFIG_PATH,
         help="JSON settings file (defaults to the KnowledgeDigest project configuration)",
+    )
+    parser.add_argument(
+        "--provider-config",
+        type=Path,
+        default=None,
+        help="user provider JSON (defaults to ~/.config/knowledge-digest/config.json)",
     )
     parser.add_argument("--dry-run", action="store_true", help="write only a run audit report")
     parser.add_argument("--batch-size", type=int, default=None, help="process the fixed source manifest in batches")
@@ -95,6 +102,7 @@ def main(argv: list[str] | None = None) -> int:
             llm_batch_max_claims=args.llm_batch_max_claims,
             llm_batch_max_source_chars=args.llm_batch_max_source_chars,
             llm_batch_concurrency=args.llm_batch_concurrency,
+            provider_config_path=args.provider_config or configured_provider_config_path(),
         )
         if args.resume and args.batch_state is None:
             raise ValidationError("arguments", "--resume", "requires --batch-state")

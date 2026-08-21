@@ -25,6 +25,7 @@ from typing import Any
 from urllib.parse import unquote
 
 from .errors import ValidationError
+from .provider_config import configured_provider_config_path, effective_llm_environment
 from .lock import kb_lock
 from .reader_frontmatter import parse_concept_document
 
@@ -1641,12 +1642,19 @@ def _invoke_agent(llm_call: Callable[..., Any], prompt: str, config: Mapping[str
     parameters = inspect.signature(llm_call).parameters
     is_project_llm = {"api_format", "base_url", "api_key", "model"} <= set(parameters)
     if is_project_llm:
+        provider_path_value = config.get("provider_config_path")
+        provider_path = (
+            Path(str(provider_path_value))
+            if isinstance(provider_path_value, (str, os.PathLike))
+            else configured_provider_config_path()
+        )
+        provider_env = effective_llm_environment(provider_config_path=provider_path)
         call_config = {
-            "api_format": str(config.get("api_format") or "openai"),
-            "base_url": str(config.get("base_url") or os.environ.get("KD_LLM_BASE_URL") or ""),
-            "api_key": str(config.get("api_key") or os.environ.get("KD_LLM_API_KEY") or ""),
-            "model": str(config.get("model") or os.environ.get("KD_LLM_MODEL") or ""),
-            "timeout": int(config.get("timeout") or 60),
+            "api_format": str(config.get("api_format") or provider_env.get("KD_LLM_FORMAT") or "openai"),
+            "base_url": str(config.get("base_url") or provider_env.get("KD_LLM_BASE_URL") or ""),
+            "api_key": str(config.get("api_key") or provider_env.get("KD_LLM_API_KEY") or ""),
+            "model": str(config.get("model") or provider_env.get("KD_LLM_MODEL") or ""),
+            "timeout": int(config.get("timeout") or provider_env.get("KD_LLM_TIMEOUT_SECONDS") or 60),
             "max_tokens": int(config.get("max_tokens") or 8192),
         }
         # Reader-gate responses are parsed as a strict JSON contract. Force

@@ -28,6 +28,7 @@ from .publication import (
     _claim_is_supported_by_body,
     _continuous_source_block_check,
 )
+from .provider_config import effective_llm_environment
 
 
 OPENAI_FORMAT = "openai"
@@ -1348,10 +1349,13 @@ def build_generator(
 
 
 def generator_from_env(
-    *, api_format: str | None = None, env: dict[str, str] | None = None
+    *,
+    api_format: str | None = None,
+    env: dict[str, str] | None = None,
+    provider_config_path: Any | None = None,
 ) -> Callable[[dict[str, Any]], dict[str, Any]]:
-    """Build a provider generator from ``KD_LLM_*`` environment variables."""
-    source = dict(os.environ if env is None else env)
+    """Build a provider generator from user config, then env fallback."""
+    source = effective_llm_environment(provider_config_path=provider_config_path, env=env)
     timeout_text = source.get(TIMEOUT_ENV)
     if timeout_text is None:
         timeout = DEFAULT_TIMEOUT_SECONDS

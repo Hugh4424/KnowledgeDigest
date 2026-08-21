@@ -39,6 +39,11 @@ from .identity import source_id, topic_id
 from .faithfulness import claim_entity_key
 from .lock import kb_lock
 from .paths import DigestPaths, is_new_kb_container
+from .provider_config import (
+    credential_source,
+    effective_embedding_provider,
+    effective_llm_environment,
+)
 from .provenance import (
     archive_claim_records,
     audit_provenance,
@@ -855,9 +860,12 @@ def _task0_budget_status(
 def _task0_llm_allowlist(settings: DigestSettings) -> bool:
     if not settings.llm_enabled:
         return True
+    provider_env = effective_llm_environment(
+        provider_config_path=getattr(settings, "provider_config_path", None)
+    )
     return (
-        os.environ.get("KD_LLM_MODEL") == PUBLICATION_LLM_MODEL
-        and os.environ.get("KD_LLM_BASE_URL", "").rstrip("/") == PUBLICATION_LLM_BASE_URL
+        provider_env.get("KD_LLM_MODEL") == PUBLICATION_LLM_MODEL
+        and provider_env.get("KD_LLM_BASE_URL", "").rstrip("/") == PUBLICATION_LLM_BASE_URL
     )
 
 
@@ -865,9 +873,17 @@ def _task0_embedding_allowlist(settings: DigestSettings) -> bool:
     embedding = settings.similarity.embedding
     if embedding is None:
         return True
+    provider = effective_embedding_provider(
+        provider_config_path=getattr(settings, "provider_config_path", None),
+        base_url=embedding.base_url,
+        model=embedding.model,
+        expected_dimension=embedding.expected_dimension,
+        api_key_env=embedding.api_key_env,
+        env={},
+    )
     return (
-        embedding.model == "jina-embeddings"
-        and _task0_canonical_endpoint(embedding.base_url) == "https://llm.paxszapp.com/v1"
+        provider["model"] == "jina-embeddings"
+        and _task0_canonical_endpoint(provider["base_url"]) == "https://llm.paxszapp.com/v1"
     )
 
 
@@ -887,13 +903,27 @@ def _task0_runtime_audit(
     calibration_sha256 = None
     if embedding and embedding.calibration_artifact.is_file():
         calibration_sha256 = hashlib.sha256(embedding.calibration_artifact.read_bytes()).hexdigest()
+    effective_embedding = None
+    if embedding:
+        effective_embedding = effective_embedding_provider(
+            provider_config_path=getattr(settings, "provider_config_path", None),
+            base_url=embedding.base_url,
+            model=embedding.model,
+            expected_dimension=embedding.expected_dimension,
+            api_key_env=embedding.api_key_env,
+            env={},
+        )
     embedding_provider = {
-        "model": embedding.model if embedding else None,
-        "endpoint": _task0_canonical_endpoint(embedding.base_url) if embedding else None,
-        "dimension": embedding.expected_dimension if embedding else None,
+        "model": effective_embedding["model"] if effective_embedding else None,
+        "endpoint": _task0_canonical_endpoint(effective_embedding["base_url"]) if effective_embedding else None,
+        "dimension": effective_embedding["expected_dimension"] if effective_embedding else None,
         "probe_fingerprint": similarity_audit.get("probe_fingerprint") if embedding else None,
         "calibration_sha256": calibration_sha256,
-        "credential_source": f"environment:{embedding.api_key_env}" if embedding else None,
+        "credential_source": (
+            credential_source(getattr(settings, "provider_config_path", None))
+            if getattr(settings, "provider_config_path", None) is not None
+            else f"environment:{embedding.api_key_env}"
+        ) if embedding else None,
         "allowlist": "passed" if _task0_embedding_allowlist(settings) else "failed",
     }
     page_status = None if not page_statuses else "published" if all(status == "published" for status in page_statuses) else "degraded"
@@ -904,8 +934,11 @@ def _task0_runtime_audit(
     budget_status = _task0_budget_status(cost, source_count=source_count, policy=settings.runtime)
     if budget_status != "within_budget" and page_status == "published":
         page_status = "degraded"
-    llm_model = os.environ.get("KD_LLM_MODEL") if settings.llm_enabled else None
-    llm_endpoint = _task0_canonical_endpoint(os.environ.get("KD_LLM_BASE_URL", "")) if settings.llm_enabled else None
+    provider_env = effective_llm_environment(
+        provider_config_path=getattr(settings, "provider_config_path", None)
+    )
+    llm_model = provider_env.get("KD_LLM_MODEL") if settings.llm_enabled else None
+    llm_endpoint = _task0_canonical_endpoint(provider_env.get("KD_LLM_BASE_URL", "")) if settings.llm_enabled else None
     llm_allowlist = _task0_llm_allowlist(settings)
     return {
         "schema_version": "task0-runtime-audit.v1",
@@ -913,7 +946,7 @@ def _task0_runtime_audit(
             "llm": {
                 "model": llm_model,
                 "endpoint": llm_endpoint,
-                "credential_source": "environment:KD_LLM_API_KEY" if settings.llm_enabled else None,
+                "credential_source": credential_source(getattr(settings, "provider_config_path", None)) if settings.llm_enabled else None,
                 "allowlist": "passed" if llm_allowlist else "failed",
             },
             "embedding": embedding_provider,
@@ -2593,11 +2626,14 @@ def write_semantic_evidence_file(
         except (OSError, UnicodeDecodeError, json.JSONDecodeError):
             cost = {}
     execution_mode = "real_semantic" if settings.llm_enabled else "jaccard_only"
+    provider_env = effective_llm_environment(
+        provider_config_path=getattr(settings, "provider_config_path", None)
+    )
     provider = {
         "provider": "qwen3.6" if settings.llm_enabled else "none",
-        "model": os.environ.get("KD_LLM_MODEL") if settings.llm_enabled else None,
-        "base_url": os.environ.get("KD_LLM_BASE_URL") if settings.llm_enabled else None,
-        "credential": "environment-only",
+        "model": provider_env.get("KD_LLM_MODEL") if settings.llm_enabled else None,
+        "base_url": provider_env.get("KD_LLM_BASE_URL") if settings.llm_enabled else None,
+        "credential": credential_source(getattr(settings, "provider_config_path", None)) if settings.llm_enabled else "none",
     }
     evidence = {
         "schema_version": "task2b-semantic-evidence.v1",

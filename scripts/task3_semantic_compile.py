@@ -10,12 +10,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import os
 import sys
 from pathlib import Path
 from typing import Any, Mapping
 
 from knowledge_digest.llm import OPENAI_FORMAT, call_llm
+from knowledge_digest.provider_config import configured_provider_config_path, effective_llm_environment
 from knowledge_digest.reader_compiler import SUPPORTED_SUFFIXES, _normalize_label, _product_label, _slug
 
 
@@ -227,13 +227,17 @@ def main() -> int:
     parser.add_argument("--batch-size", type=int, default=4)
     parser.add_argument("--max-chars-per-source", type=int, default=9000)
     parser.add_argument("--timeout", type=int, default=60)
+    parser.add_argument("--provider-config", type=Path, default=None)
     args = parser.parse_args()
+    provider_env = effective_llm_environment(
+        provider_config_path=args.provider_config or configured_provider_config_path()
+    )
     report = compile_semantic_candidates(
         args.input,
         args.output,
-        api_key=os.environ.get("KD_LLM_API_KEY", ""),
-        base_url=os.environ.get("KD_LLM_BASE_URL", "https://dashscope.in.whatspos.cn/v1"),
-        model=os.environ.get("KD_LLM_MODEL", "qwen3.6"),
+        api_key=provider_env.get("KD_LLM_API_KEY", ""),
+        base_url=provider_env.get("KD_LLM_BASE_URL", "https://dashscope.in.whatspos.cn/v1"),
+        model=provider_env.get("KD_LLM_MODEL", "qwen3.6"),
         batch_size=args.batch_size,
         max_chars_per_source=args.max_chars_per_source,
         timeout=args.timeout,

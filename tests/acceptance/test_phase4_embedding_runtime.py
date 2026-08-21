@@ -298,6 +298,70 @@ def test_embedding_requires_matching_adopted_artifact(
     assert "super-secret" not in repr(resolved)
 
 
+def test_embedding_reads_user_provider_config_before_environment(tmp_path: Path) -> None:
+    endpoint = "http://127.0.0.1:7777/v1"
+    artifact_path = tmp_path / "artifact.json"
+    artifact_path.write_text(json.dumps(_valid_artifact(endpoint)), encoding="utf-8")
+    digest_config = tmp_path / "digest.json"
+    digest_config.write_text(
+        json.dumps(
+            {
+                "similarity": {
+                    "backend": "embedding",
+                    "embedding": {
+                        "base_url": "https://llm.paxszapp.com/v1",
+                        "model": "wrong-model",
+                        "expected_dimension": 3,
+                        "calibration_artifact": str(artifact_path),
+                        "api_key_env": "KD_EMBEDDING_KEY",
+                    },
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    provider_config = tmp_path / "provider.json"
+    provider_config.write_text(
+        json.dumps(
+            {
+                "embedding": {
+                    "base_url": endpoint,
+                    "model": "embed-model",
+                    "expected_dimension": 3,
+                    "api_key": "config-key",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    settings = resolve_settings(
+        digest_config,
+        top_k=None,
+        high=None,
+        medium=None,
+        max_lines=None,
+        provider_config_path=provider_config,
+        env={},
+    )
+    captured: dict[str, object] = {}
+
+    def factory(client_settings, *, api_key):
+        captured["settings"] = client_settings
+        captured["api_key"] = api_key
+        return object()
+
+    resolved = resolve_similarity_backend(
+        settings,
+        env={"KD_EMBEDDING_KEY": "env-key"},
+        probe_fingerprint="a" * 64,
+        client_factory=factory,
+    )
+    assert resolved.effective_backend == "embedding"
+    assert captured["api_key"] == "config-key"
+    assert captured["settings"].base_url == endpoint
+    assert captured["settings"].model == "embed-model"
+
+
 def test_adopted_embedding_without_api_key_falls_back_without_probe(
     tmp_path: Path,
 ) -> None:
