@@ -53,6 +53,9 @@ def run_digest(*args: str) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     source_root = str(PROJECT_ROOT / "src")
     env["PYTHONPATH"] = source_root + os.pathsep + env.get("PYTHONPATH", "")
+    # Keep legacy phase-0 fixture expectations independent of a real user
+    # provider file installed on the developer machine.
+    env["KD_PROVIDER_CONFIG"] = str(PROJECT_ROOT / "tests" / "fixtures" / "missing-provider-config.json")
     return subprocess.run(
         [sys.executable, "-m", "knowledge_digest.cli", *args],
         cwd=PROJECT_ROOT,

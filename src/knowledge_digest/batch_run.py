@@ -18,6 +18,7 @@ from .jsonl import read_jsonl
 from .kb_structure import DEFAULT_ROOTS, inspect_structure
 from .paths import DigestPaths
 from .pipeline import _run_similarity_stages, _runtime_policy_values, audit_run
+from .provider_config import effective_llm_environment, redacted_provider_identity
 
 
 _INGESTIBLE_SUFFIXES = {".md", ".txt", ".json"}
@@ -312,12 +313,16 @@ def build_affected_replay_plan(
 def _runtime_identity(paths: DigestPaths, settings: DigestSettings) -> dict[str, Any]:
     publication = inspect_structure(paths.structure_path).publication
     runtime_policy, runtime_policy_error = _runtime_policy_values(settings.runtime)
+    provider_env = effective_llm_environment(
+        provider_config_path=getattr(settings, "provider_config_path", None)
+    )
     return {
-        "llm_model": os.environ.get("KD_LLM_MODEL", "") if settings.llm_enabled else None,
-        "llm_base_url": os.environ.get("KD_LLM_BASE_URL", "") if settings.llm_enabled else None,
+        "llm_model": provider_env.get("KD_LLM_MODEL", "") if settings.llm_enabled else None,
+        "llm_base_url": provider_env.get("KD_LLM_BASE_URL", "") if settings.llm_enabled else None,
         "llm_format": settings.llm_format if settings.llm_enabled else None,
         "similarity_backend": settings.similarity.backend,
         "embedding_model": settings.similarity.embedding.model if settings.similarity.embedding else None,
+        "provider_identity": redacted_provider_identity(getattr(settings, "provider_config_path", None)),
         "taxonomy_version": publication.taxonomy_version if publication else None,
         "publication_prompt_contract": "task2-publication-v1" if publication else None,
         "llm_batch_max_claims": settings.llm_batch_max_claims if settings.llm_enabled else None,

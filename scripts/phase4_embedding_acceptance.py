@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import tempfile
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
@@ -28,6 +29,7 @@ from knowledge_digest.embedding import (
     OpenAIEmbeddingClient,
     normalize_endpoint_identity,
 )
+from knowledge_digest.provider_config import configured_provider_config_path, effective_embedding_provider
 from knowledge_digest.text_similarity import _similarity, _tokens
 from knowledge_digest.gold import canonical_json_bytes, load_confirmed_gold
 
@@ -100,13 +102,16 @@ def validate_paths(
     return resolved
 
 
-def _embedding_settings(config: Path) -> tuple[EmbeddingSettings, DigestSettings]:
+def _embedding_settings(
+    config: Path, *, provider_config_path: Path | None = None
+) -> tuple[EmbeddingSettings, DigestSettings]:
     settings = resolve_settings(
         config,
         top_k=None,
         high=None,
         medium=None,
         max_lines=None,
+        provider_config_path=provider_config_path,
     )
     if settings.similarity.backend != "jaccard":
         raise ValueError(
@@ -115,7 +120,19 @@ def _embedding_settings(config: Path) -> tuple[EmbeddingSettings, DigestSettings
     embedding = settings.similarity.embedding
     if embedding is None:
         raise ValueError("similarity.embedding connection settings are required")
-    return embedding, settings
+    provider = effective_embedding_provider(
+        provider_config_path=settings.provider_config_path,
+        base_url=embedding.base_url,
+        model=embedding.model,
+        expected_dimension=embedding.expected_dimension,
+        api_key_env=embedding.api_key_env,
+    )
+    return replace(
+        embedding,
+        base_url=provider["base_url"],
+        model=provider["model"],
+        expected_dimension=provider["expected_dimension"],
+    ), settings
 
 
 def real_probe(
@@ -606,6 +623,7 @@ def run_acceptance(
     config: Path,
     cases: Path | None = None,
     env: dict[str, str] | None = None,
+    provider_config_path: Path | None = None,
     probe: Callable[[EmbeddingSettings, dict[str, str]], dict[str, Any]] = real_probe,
     calibrate: Callable[..., dict[str, Any]] = _default_calibrate,
 ) -> dict[str, Any]:
@@ -619,10 +637,22 @@ def run_acceptance(
     source_before = tree_manifest(corpus)
     kb_before = tree_manifest(kb)
     config_before = config.read_bytes()
-    embedding, digest_settings = _embedding_settings(config)
+    embedding, digest_settings = _embedding_settings(
+        config, provider_config_path=provider_config_path
+    )
     requested_backend = digest_settings.similarity.backend
     endpoint_identity = normalize_endpoint_identity(embedding.base_url)
     source_env = dict(os.environ if env is None else env)
+    provider = effective_embedding_provider(
+        provider_config_path=provider_config_path,
+        base_url=embedding.base_url,
+        model=embedding.model,
+        expected_dimension=embedding.expected_dimension,
+        api_key_env=embedding.api_key_env,
+        env=source_env,
+    )
+    if provider.get("api_key"):
+        source_env[embedding.api_key_env] = str(provider["api_key"])
     service: dict[str, Any] = {
         "probe_kind": "real_endpoint_request",
         "endpoint_identity": endpoint_identity,
@@ -769,6 +799,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--evidence-dir", type=Path, required=True)
     parser.add_argument("--cases", type=Path)
+    parser.add_argument("--provider-config", type=Path)
     return parser
 
 
@@ -782,6 +813,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             evidence_dir=args.evidence_dir,
             config=args.config,
             cases=args.cases,
+            provider_config_path=args.provider_config or configured_provider_config_path(),
         )
     except (ValueError, OSError, json.JSONDecodeError) as error:
         print(str(error))

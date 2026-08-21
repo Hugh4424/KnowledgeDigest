@@ -258,6 +258,38 @@ def test_generator_from_env_accepts_a_configurable_timeout() -> None:
     assert generator.__closure__ is not None
 
 
+def test_generator_reads_user_provider_config_before_environment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    config = tmp_path / "provider.json"
+    config.write_text(
+        json.dumps(
+            {
+                "llm": {
+                    "api_format": "openai",
+                    "base_url": "https://config.example/v1",
+                    "api_key": "config-key",
+                    "model": "config-model",
+                    "timeout_seconds": 9,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    seen = _capture(monkeypatch, _openai_payload(json.dumps({"final_body": "config ok"})))
+    generator = llm.generator_from_env(
+        env={
+            "KD_LLM_BASE_URL": "https://env.example/v1",
+            "KD_LLM_API_KEY": "env-key",
+            "KD_LLM_MODEL": "env-model",
+        },
+        provider_config_path=config,
+    )
+
+    assert generator({"initial_body": "body", "claims": []})["final_body"] == "config ok"
+    assert seen[0].full_url == "https://config.example/v1/chat/completions"
+    assert seen[0].get_header("Authorization") == "Bearer config-key"
+    assert json.loads(seen[0].data.decode("utf-8"))["model"] == "config-model"
+
+
 @pytest.mark.parametrize("value", ["0", "-1", "not-an-int"])
 def test_generator_from_env_rejects_invalid_timeout(value: str) -> None:
     with pytest.raises(ValidationError, match="KD_LLM_TIMEOUT_SECONDS"):
