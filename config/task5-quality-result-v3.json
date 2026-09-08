@@ -1,0 +1,72 @@
+{
+  "schema_version": "task5-quality-result.v3",
+  "canonical_bytes": "UTF-8 canonical JSON with recursively Unicode-code-point-sorted object keys, arrays preserved, no spaces, trailing LF, ensure_ascii=false, allow_nan=false",
+  "dimensions": ["DIM-01.route", "DIM-02.taxonomy", "DIM-03.business-answer", "DIM-04.page-type", "DIM-05.reader-audit"],
+  "verdicts": ["KD_WIN", "TIE", "CB_WIN", "UNKNOWN", "INVALID", "N/A", "CB_MISSING"],
+  "companybrain_observation_schema": {
+    "ref": "config/task5-companybrain-observation-v2.json",
+    "sha256": "b14036b8f8e4a59834bdb9c5e12f5bb9dc0e5cf5a9e8b75e815fe4f258fd34a0"
+  },
+  "gap_atom_mapping": {
+    "schema_version": "task5-gap-atom-map.v1",
+    "atom_id_rule": "canonical atom id is <projection_key>::<dimension>::<frozen_required_atom>; the required atom name must come from task5-quality-cases-v2.json for that exact projection and dimension",
+    "gap_atom_refs_rule": "quality_result.gap_atom_refs must equal CompanyBrainObservation.gap_atom_mapping.atom_ids, in frozen rubric order; implementation may not invent, rename or select atoms from prose",
+    "cb_status_required": "absent",
+    "mapping": {
+      "route": {
+        "unreachable": {"observation_field": "route_replay_path.missing_atom_ids", "evidence_field": "route_replay_path", "relation": "strict_improvement"},
+        "wrong_relation": {"observation_field": "relation_observations.wrong_relation_atom_ids", "evidence_field": "relation_observations", "relation": "strict_improvement"}
+      },
+      "taxonomy": {
+        "missing_taxonomy_axis": {"observation_field": "taxonomy_observations.missing_axis_atom_ids", "evidence_field": "taxonomy_observations", "relation": "strict_improvement"},
+        "wrong_relation": {"observation_field": "relation_observations.wrong_relation_atom_ids", "evidence_field": "relation_observations", "relation": "strict_improvement"}
+      },
+      "business-answer": {
+        "missing_stage": {"observation_field": "stage_observations.missing_stage_atom_ids", "evidence_field": "stage_observations", "relation": "strict_improvement"},
+        "unsupported_answer_claim": {"observation_field": "visible_atom_observations.unsupported_atom_ids", "evidence_field": "visible_atom_observations", "relation": "strict_improvement"},
+        "wrong_relation": {"observation_field": "relation_observations.wrong_relation_atom_ids", "evidence_field": "relation_observations", "relation": "strict_improvement"}
+      },
+      "page-type": {
+        "untyped_contract": {"observation_field": "stage_observations.untyped_atom_ids", "evidence_field": "stage_observations", "relation": "strict_improvement"},
+        "wrong_page_type": {"observation_field": "observed_page_type.mismatch_atom_ids", "evidence_field": "observed_page_type", "relation": "strict_improvement"}
+      },
+      "Reader-Audit": {
+        "missing_provenance": {"observation_field": "provenance_observations.missing_atom_ids", "evidence_field": "provenance_observations", "relation": "strict_improvement"},
+        "untraceable_claim": {"observation_field": "provenance_observations.untraceable_atom_ids", "evidence_field": "provenance_observations", "relation": "strict_improvement"}
+      }
+    },
+    "missing_or_mismatched": "UNKNOWN"
+  },
+  "dimension_result": {
+    "required": ["projection_key", "dimension_id", "verdict", "kd_observation_ref", "cb_observation_ref", "observation_digests", "advantage_basis"],
+    "kd_observation_ref_rule": "must resolve to the same KnowledgeDigest Reader page_path#unit_id or page_path#surface for this projection and dimension; an Audit-only ref is invalid",
+    "advantage_basis_required_when": "verdict=KD_WIN",
+    "advantage_basis": {
+      "required": ["projection_key", "dimension_id", "cb_observation_ref", "cb_observation_digest", "cb_gap_type", "cb_gap_locator", "atom_observations", "gap_atom_refs", "stage_observations", "gap_stage_refs", "quality_feature_observations", "gap_quality_feature_refs", "strict_improvement_refs", "non_regression", "kd_completion_refs", "kd_completion_surfaces", "kd_completion_digest"],
+      "cb_gap_type": ["missing_stage", "wrong_relation", "unreachable", "untyped_contract", "missing_taxonomy_axis", "unsupported_answer_claim", "wrong_page_type", "missing_provenance", "untraceable_claim"],
+      "atom_observation_contract": {
+        "required_fields": ["atom_id", "applicable", "cb_status", "kd_status", "cb_evidence_refs", "kd_evidence_refs", "relation"],
+        "status": ["present", "absent", "unknown", "forbidden"],
+        "relation": ["strict_improvement", "non_regression", "tie", "regression", "unknown"],
+        "binding_rule": "one item per frozen required atom; applicable is copied from the rubric; unknown never passes"
+      },
+      "strict_advantage_rule": "gap_atom_refs must be a subset of applicable atoms whose CompanyBrain status is absent and whose observation maps to cb_gap_locator; semantic stage gaps are recorded in gap_stage_refs and may prove a win when the frozen atom rubric has no corresponding literal gap; strict_improvement_refs must be non-empty and each must be cb absent plus kd present; non_regression is true only when no applicable atom or stage regresses and no status is unknown or forbidden; KD_WIN requires these checks plus all existing hard gates",
+      "semantic_stage_observation_contract": {
+        "required_fields": ["stage_id", "applicable", "cb_status", "kd_status", "cb_evidence_refs", "kd_evidence_refs", "relation"],
+        "status": ["present", "absent", "unknown", "forbidden"],
+        "relation": ["strict_improvement", "non_regression", "tie", "regression", "unknown"],
+        "binding_rule": "one item per frozen semantic stage for the same projection and dimension; stage definitions come from task5-quality-cases.v2 semantic_contracts; unknown never passes"
+      },
+      "quality_feature_observation_contract": {
+        "schema_version": "task5-reader-quality-features.v1",
+        "required_fields": ["feature_id", "applicable", "blocking", "cb_score", "kd_score", "cb_status", "kd_status", "cb_evidence_refs", "kd_evidence_refs", "relation"],
+        "relation_rule": "feature scores compare the same evidence-backed feature on both Reader surfaces; blocking regression or unknown prevents a strict win, and at least one strict feature or stage improvement is required",
+        "binding_rule": "feature definitions and weights come only from task5-quality-cases-v2 semantic_contracts.quality_features; labels alone never create a feature improvement"
+      },
+      "allowed_gap_types_by_dimension": {"route": ["unreachable", "wrong_relation"], "taxonomy": ["missing_taxonomy_axis", "wrong_relation"], "business-answer": ["missing_stage", "unsupported_answer_claim", "wrong_relation"], "page-type": ["untyped_contract", "wrong_page_type"], "Reader-Audit": ["missing_provenance", "untraceable_claim"]},
+      "binding_rule": "exactly one basis per applicable projection_key x dimension; no basis may be reused across dimensions",
+      "missing_or_mismatched": "UNKNOWN"
+    }
+  },
+  "top_level_required": ["case_id", "projection_key", "dimension_results", "reader_hash", "audit_hash", "route_ref", "render_ledger_ref", "source_closure", "path_replay_ref", "companybrain_snapshot_ref", "cb_observation_ref", "feasibility_matrix_ref", "publication_status"]
+}

@@ -1,0 +1,96 @@
+{
+  "schema_version": "task5-reader-path-relation-contract.v1",
+  "contract_id": "task5-reader-path-relation-v1",
+  "canonical_bytes": "UTF-8 JSON, recursively Unicode-code-point-sorted object keys, arrays preserved, no spaces, ensure_ascii=false, allow_nan=false, trailing LF",
+  "relation_parser": {
+    "parser_id": "relation-parser-v1",
+    "offsets": "Unicode code-point offsets plus raw locator; protected tokens are atomic",
+    "protected_tokens": ["URLs", "commands", "version numbers", "product names", "field names", "numeric quantities"],
+    "cue_precedence": ["negation", "condition/scope", "subject-object", "action/order", "co_support/conflict"],
+    "ambiguity_rule": "same-distance competing subjects/objects, cue conflict, table cross-column relation or non-unique condition boundary is unknown; never guess",
+    "required_relation_fields": ["relation_id", "subject_claim_id", "predicate", "object_claim_id", "scope", "polarity", "locator", "candidate_digest", "status"],
+    "status": ["supported", "conflict", "unknown"],
+    "failure_codes": ["RELATION_OFFSET_DRIFT", "RELATION_CUE_CONFLICT", "RELATION_AMBIGUOUS", "RELATION_SCOPE_DRIFT", "RELATION_UNSUPPORTED"]
+  },
+  "reader_task_path": {
+    "path_id": "reader-task-path-v1",
+    "page_types": {
+      "positioning": ["identify", "audience/scope", "distinction", "boundary/choice"],
+      "concept": ["definition", "object/relation", "condition", "misuse boundary"],
+      "operation": ["precondition/permission", "ordered steps", "result/verification", "failure/recovery/limit"],
+      "diagnosis": ["symptom", "check order", "cause/evidence", "action", "escalation"],
+      "experience": ["context/version", "decision/tradeoff", "lesson/pitfall", "applicability/limit"]
+    },
+    "stage_heading_aliases": {
+      "identify": ["identify", "定位"],
+      "audience/scope": ["audience/scope", "适用对象", "适用范围"],
+      "distinction": ["distinction", "区别"],
+      "boundary/choice": ["boundary/choice", "边界", "选择"],
+      "definition": ["definition", "定义", "是什么"],
+      "object/relation": ["object/relation", "对象关系"],
+      "condition": ["condition", "条件", "前提"],
+      "misuse boundary": ["misuse boundary", "误用边界"],
+      "precondition/permission": ["precondition/permission", "前置条件", "权限"],
+      "ordered steps": ["ordered steps", "操作步骤", "步骤"],
+      "result/verification": ["result/verification", "结果验证", "验证"],
+      "failure/recovery/limit": ["failure/recovery/limit", "失败恢复限制", "失败处理"],
+      "symptom": ["symptom", "现象"],
+      "check order": ["check order", "排查顺序"],
+      "cause/evidence": ["cause/evidence", "原因证据"],
+      "action": ["action", "处理动作", "处理"],
+      "escalation": ["escalation", "升级"],
+      "context/version": ["context/version", "上下文版本", "版本"],
+      "decision/tradeoff": ["decision/tradeoff", "决策取舍", "取舍"],
+      "lesson/pitfall": ["lesson/pitfall", "经验坑点", "坑点"],
+      "applicability/limit": ["applicability/limit", "适用边界", "限制"]
+    },
+    "path_rule": "page_type selects exactly one ordered path; missing, duplicate, reordered or unknown stages fail closed",
+    "reader_surface_rule": "stage must be visible in Reader; Audit-only stage evidence cannot satisfy the path",
+    "failure_codes": ["PATH_TYPE_MISMATCH", "PATH_STAGE_MISSING", "PATH_STAGE_DUPLICATE", "PATH_STAGE_ORDER", "PATH_STAGE_UNSUPPORTED"]
+  },
+  "embedding_route_descriptor": {
+    "schema_version": "route-descriptor.v1",
+    "required_fields": [
+      "title",
+      "question",
+      "page_type",
+      "source_id_or_projection_key",
+      "selected_source_closure_sha256",
+      "support_refs",
+      "support_sha256"
+    ],
+    "support_sources": ["current_raw_block_claim_ledger", "authenticated_companybrain_route_observation"],
+    "field_support_rule": "title, question and page_type each require at least one support_ref; a support_ref must point to the current raw Block/Claim semantic frame or an authenticated CompanyBrain route observation, and every descriptor field must be supported by the field named in that ref",
+    "support_ref_required_fields": [
+      "support_kind",
+      "source_id",
+      "block_id",
+      "claim_id",
+      "semantic_frame_field",
+      "source_block_sha256",
+      "claim_sha256",
+      "raw_coordinate_span",
+      "observation_ref",
+      "observation_sha256"
+    ],
+    "verification_algorithm": [
+      "normalize descriptor text with Unicode NFC, trim and collapse only internal ASCII whitespace",
+      "recompute source/block/claim and selected closure hashes from the current ledger or authenticated observation",
+      "recompute support_sha256 from the normalized descriptor, ordered support_refs and closure identity",
+      "verify every title/question/page_type support_ref and reject any cross-source or stale locator"
+    ],
+    "failure_status": "route_status=unknown; do not send an embedding request; do not produce KD_WIN",
+    "failure_codes": ["ROUTE_DESCRIPTOR_UNSUPPORTED", "ROUTE_DESCRIPTOR_FIELD_UNSUPPORTED", "ROUTE_DESCRIPTOR_HASH_DRIFT", "ROUTE_DESCRIPTOR_CLOSURE_DRIFT", "ROUTE_DESCRIPTOR_CROSS_SOURCE"],
+    "negative_cases": [
+      {"id": "RD-001", "input": "wrong page_type while path and hashes are closed", "expected": "unknown"},
+      {"id": "RD-002", "input": "question has no support in the selected current Block/Claim", "expected": "unknown"},
+      {"id": "RD-003", "input": "title is supported only by a different source closure", "expected": "blocked"}
+    ]
+  },
+  "identity_binding": {
+    "fields": ["parser_id", "path_id", "page_types", "stage_heading_aliases", "embedding_route_descriptor", "canonical_contract_sha256"],
+    "canonical_contract_sha256_rule": "loader computes SHA-256 over this file's canonical bytes (UTF-8, recursive Unicode-code-point key sort, no spaces, trailing LF); the derived value is written into runtime/request/replay/receipt identity and is never stored inside this file",
+    "self_reference": false
+  },
+  "negative_cases": ["unicode_offset", "protected_token_split", "negation_scope", "condition_boundary", "same_distance_subject", "table_cross_column", "missing_stage", "duplicate_stage", "wrong_order", "wrong_page_type", "audit_only_stage"]
+}

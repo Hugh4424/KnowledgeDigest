@@ -1,0 +1,95 @@
+{
+  "schema_version": "task5-semantic-output.v2",
+  "purpose": "当前 Task5 provider parser 实际消费的 typed JSON 合同；模型返回 JSON，编译器再做 Claim/Block 闭包校验并渲染 Markdown。",
+  "route_binding": {
+    "route_kind_is_receipt_bound": true,
+    "quality_case_kind": "quality_case",
+    "source_digest_kind": "source-digest",
+    "explicit_audit_kind": "source-direct-audit"
+  },
+  "title_binding": {
+    "ownership": "frozen_route_projection",
+    "request_field": "expected_title",
+    "must_equal_request": true,
+    "path_uses": "frozen_route_projection_title",
+    "claim_ids_not_required": true,
+    "model_may_not_invent": true,
+    "mismatch": "blocked_audit_only"
+  },
+  "required_top_level": [
+    "schema_version",
+    "title",
+    "page_type",
+    "page_type_claim_ids",
+    "axis",
+    "axis_claim_ids",
+    "summary",
+    "sections"
+  ],
+  "page_types": [
+    "positioning",
+    "concept",
+    "operation",
+    "diagnosis",
+    "experience"
+  ],
+  "axis": [
+    "product",
+    "module",
+    "object",
+    "scene",
+    "boundary"
+  ],
+  "claim_binding": {
+    "claim_refs_must_be_from_request": true,
+    "route_scopes": {
+      "source-digest": {
+        "claim_scope": "single_source_closure",
+        "cross_source_claims": false,
+        "claim_owner_required": true,
+        "relation_required": true
+      },
+      "source-direct-audit": {
+        "claim_scope": "single_source_closure",
+        "cross_source_claims": false,
+        "claim_owner_required": true,
+        "relation_required": true
+      },
+      "quality-reader": {
+        "claim_scope": "selected_source_closure",
+        "cross_source_claims": true,
+        "claim_owner_required": true,
+        "relation_required": true,
+        "co_support_or_conflict_required": true
+      }
+    },
+    "summary_requires_supported_claims": true,
+    "section_requires_supported_claims_unless_status_is": "source_not_documented",
+    "unsupported_sentence": "drop_or_fail_to_audit",
+    "raw_full_source_copy": "reject",
+    "unknown_fields": "reject"
+  },
+  "semantic_frame": {
+    "authority_path": "config/task5-semantic-frame-v1.json",
+    "authority_sha256": "e864fd5f976a5641ffda5db662eceb2ce85687f5fabf250dc7e337b73f264ae6",
+    "schema": "task5-semantic-frame.v1",
+    "provider_may_return": false,
+    "compiler_must_derive_before_render": true,
+    "every_supported_claim_requires_frame": true,
+    "statement_frame_binding": "each Reader statement must close subject/predicate/object/action/order/quantity/conditions/polarity/scope to source support spans",
+    "unknown_or_conflict": "audit_only_or_blocked"
+  },
+  "section_slots": {
+    "positioning": ["definition", "audience", "difference", "boundary"],
+    "concept": ["terms", "object", "relationship", "boundary"],
+    "operation": ["preconditions", "steps", "expected_result", "verification", "failure_boundary"],
+    "diagnosis": ["symptom", "checks", "possible_causes", "actions", "escalation_boundary"],
+    "experience": ["context", "tradeoffs", "version", "lessons", "applicability_boundary"]
+  },
+  "forbidden": [
+    "full-source",
+    "compiler-invented-facts",
+    "quality-case-answer-in-source-digest",
+    "raw_source_fallback"
+  ]
+}

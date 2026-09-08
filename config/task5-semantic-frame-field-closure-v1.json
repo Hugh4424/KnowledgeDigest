@@ -1,0 +1,70 @@
+{
+  "schema_version": "task5-semantic-frame-field-closure.v1",
+  "contract_id": "task5-semantic-frame-field-closure-v1",
+  "purpose": "固定 Reader 语义放行的逐字段闭合算法，禁止仅凭词面覆盖率或 Claim lineage 生成 supported。",
+  "canonical_bytes": {
+    "encoding": "utf-8",
+    "json": "recursive_unicode_code_point_sorted_keys_no_spaces_ensure_ascii_false_allow_nan_false",
+    "arrays": "preserve_order",
+    "trailing_newline": true
+  },
+  "input_contract": {
+    "source_frame": "task5-semantic-frame.v1",
+    "candidate_frame": "provider typed semantic frame",
+    "raw_coordinate_map": "raw-coordinate-map.v1",
+    "required_identity": ["source_id", "block_id", "claim_id", "source_block_sha256", "candidate_claim_sha256"],
+    "required_fields": ["subject", "predicate", "object", "action", "order", "quantity", "conditions", "polarity", "scope"],
+    "field_order": "the listed order is canonical and must not be changed"
+  },
+  "algorithm": {
+    "version": "semantic-frame-field-closure-v1",
+    "steps": [
+      "resolve exactly one source frame by source_id/block_id/claim_id and verify its block and claim hashes",
+      "for every required field compare candidate and source values after only the declared normalizer",
+      "concrete values require one or more non-empty replayable raw-coordinate spans whose text and locator hash match the source frame",
+      "unknown and not_applicable are explicit states with an empty span list and never satisfy a Reader-required field",
+      "protected semantics must match exactly: subject, predicate, object, action, order, quantity, conditions, polarity and scope",
+      "return supported only when every required field is closed and no conflict, ambiguity, copy or unsupported state exists"
+    ],
+    "normalizer": {
+      "version": "unicode-nfc-trim-whitespace-v1",
+      "allowed": ["Unicode NFC", "trim leading/trailing whitespace", "collapse internal ASCII whitespace only for comparison"],
+      "forbidden": ["synonym expansion", "translation", "inferred actor/object", "paragraph-order inference", "unit conversion", "polarity weakening", "scope broadening"]
+    },
+    "result": {
+      "supported": "all fields closed and protected semantics equivalent",
+      "blocked": "any missing identity, hash, span, field mismatch, conflict, ambiguity, raw copy or forbidden inference",
+      "audit_only": "diagnostic result retained with reason codes but never rendered to Reader"
+    }
+  },
+  "reason_codes": [
+    "SOURCE_FRAME_MISSING",
+    "SOURCE_HASH_MISMATCH",
+    "CANDIDATE_IDENTITY_MISMATCH",
+    "FIELD_MISSING",
+    "FIELD_VALUE_MISMATCH",
+    "SPAN_MISSING",
+    "SPAN_NOT_REPLAYABLE",
+    "SPAN_HASH_MISMATCH",
+    "UNKNOWN_REQUIRED_FIELD",
+    "NOT_APPLICABLE_REQUIRED_FIELD",
+    "CONFLICT",
+    "AMBIGUOUS",
+    "RAW_COPY",
+    "FORBIDDEN_INFERENCE"
+  ],
+  "negative_cases": [
+    {"id": "NC-001", "input": "lexical coverage >= 0.80 but object or scope differs", "expected": "blocked"},
+    {"id": "NC-002", "input": "Claim lineage exists but one concrete field has no replayable span", "expected": "blocked"},
+    {"id": "NC-003", "input": "unknown or not_applicable is used for subject, predicate, object, polarity or scope", "expected": "audit_only"},
+    {"id": "NC-004", "input": "candidate copies the source Claim or rewrites one Claim one-to-one", "expected": "blocked"},
+    {"id": "NC-005", "input": "candidate weakens negation, condition, quantity, order or applicability scope", "expected": "blocked"},
+    {"id": "NC-006", "input": "source block hash, Claim hash or coordinate span hash drifts", "expected": "blocked"}
+  ],
+  "acceptance": {
+    "reader_gate": "only supported with verification_method=semantic-frame-field-closure-v1",
+    "diagnostics_only": ["bounded-lexical-v1", "claim-lineage-v1"],
+    "audit_binding": ["source_id", "block_id", "claim_id", "source_block_sha256", "candidate_claim_sha256", "reason_codes"],
+    "fail_closed": true
+  }
+}

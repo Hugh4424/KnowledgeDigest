@@ -1,0 +1,61 @@
+{
+  "schema_version": "task5-semantic-frame.v1",
+  "frame_id": "claim-semantic-frame-v1",
+  "purpose": "把来源 Claim 转成可验证的业务语义中间层；Reader 只允许渲染通过该层的事实。",
+  "canonical_bytes": "UTF-8 JSON, recursively sort object keys by Unicode code point, arrays keep order, separators=(',', ':'), ensure_ascii=false, trailing LF",
+  "required_fields": [
+    "claim_id",
+    "owner",
+    "support_span",
+    "subject",
+    "predicate",
+    "object",
+    "action",
+    "order",
+    "quantity",
+    "conditions",
+    "polarity",
+    "scope",
+    "version"
+  ],
+  "field_shape": {
+    "concrete_value": "field-specific value supported by one or more raw-coordinate support spans",
+    "unknown": {"value": "unknown", "support_span": [], "evidence_state": "unknown"},
+    "not_applicable": {"value": "not_applicable", "support_span": [], "evidence_state": "not_applicable"},
+    "support_span_rule": "concrete values require one or more non-empty replayable spans; unknown and not_applicable require an empty span list and never satisfy a Reader-required field"
+  },
+  "field_contract": {
+    "subject": "entity; concrete value has source span, otherwise the explicit unknown shape",
+    "predicate": "typed relation or action verb; concrete value has source span, otherwise the explicit unknown shape",
+    "object": "entity/value; concrete value has source span, otherwise the explicit unknown shape",
+    "action": "operation verb and actor/target when present; otherwise unknown or not_applicable shape",
+    "order": "ordered step ordinal or explicit not_applicable; never inferred from paragraph order",
+    "quantity": "comparator/value/unit tuple or explicit not_applicable; never inferred",
+    "conditions": "closed list of condition cues and scoped conclusion spans, or explicit not_applicable",
+    "polarity": "positive|negative|conditional|unknown with evidence span only for concrete polarity",
+    "scope": "applicability, version, role, product and boundary qualifiers, or explicit unknown",
+    "version": "frame schema and parser version"
+  },
+  "closed_world": {
+    "new_entities_forbidden": true,
+    "new_relations_forbidden": true,
+    "missing_field": {"value": "unknown", "support_span": [], "evidence_state": "unknown"},
+    "not_applicable_field": {"value": "not_applicable", "support_span": [], "evidence_state": "not_applicable"},
+    "required_for_reader": ["subject", "predicate", "object", "polarity", "scope"],
+    "unknown_required_field": "audit_only_or_blocked"
+  },
+  "verification": {
+    "reader_acceptance": "semantic-frame-field-closure-v1",
+    "diagnostic_only": ["bounded-lexical-v1", "claim-lineage-v1"],
+    "reader_acceptance_rule": "每个 concrete frame field 的 subject/predicate/object/action/order/quantity/conditions/polarity/scope 必须逐字段与 source frame 对齐；词面覆盖率或 claim lineage 不能单独产生 supported。"
+  },
+  "render_rule": "业务化连接词可以新增；每个 concrete 主体、关系、客体、动作、顺序、数量、条件、否定和适用范围必须逐项闭合到 support_span；unknown/not_applicable 不得被渲染成具体事实。",
+  "acceptance": [
+    "every supported Claim has exactly one owner source/block/locator",
+    "every concrete frame field is replayable against raw-coordinate-map.v1; unknown and not_applicable use the explicit empty-span shape",
+    "statement frames and supporting Claim frames are equivalent for protected semantics",
+    "semantic-frame-field-closure-v1 is required for Reader; bounded-lexical-v1 and claim-lineage-v1 are diagnostic only",
+    "raw-copy and one-to-one rewrite are rejected after frame validation",
+    "unknown, conflict or ambiguous frames never enter Reader"
+  ]
+}

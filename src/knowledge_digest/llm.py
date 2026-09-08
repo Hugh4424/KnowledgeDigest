@@ -40,7 +40,7 @@ DEFAULT_TIMEOUT_SECONDS = 60
 # object that references a large claim batch; the parser still rejects any
 # non-JSON or truncated final content.
 DEFAULT_MAX_TOKENS = 8192
-# qwen3.6 may spend part of the completion budget on hidden reasoning even
+# qwen3.8 may spend part of the completion budget on hidden reasoning even
 # when the publication prompt asks for compact JSON.  Keep enough room for the
 # contract instead of treating a truncated empty content field as a semantic
 # result.
@@ -48,8 +48,11 @@ PUBLICATION_MAX_TOKENS = 8192
 TIMEOUT_ENV = "KD_LLM_TIMEOUT_SECONDS"
 RETRY_ENV = "KD_LLM_RETRY_ATTEMPTS"
 DEFAULT_RETRY_ATTEMPTS = 0
-PUBLICATION_LLM_MODEL = "qwen3.6"
+PUBLICATION_LLM_MODEL = "qwen3.8"
 PUBLICATION_LLM_BASE_URL = "https://dashscope.in.whatspos.cn/v1"
+# Task5 has one approved Qwen identity.  Keep the transport controls aligned
+# with that contract instead of silently accepting a different model.
+QWEN_NO_THINK_MODELS = frozenset({"qwen3.8"})
 _ORIGINAL_URLOPEN = urllib.request.urlopen
 
 
@@ -150,7 +153,7 @@ def _request_payload(
     messages = [{"role": "user", "content": prompt}]
     if api_format == OPENAI_FORMAT:
         # Bound provider output for OpenAI-compatible endpoints. Without an
-        # explicit cap, qwen3.6 may spend the entire transport deadline on
+        # explicit cap, qwen3.8 may spend the entire transport deadline on
         # unbounded reasoning/output before it can return the JSON contract.
         payload = {
             "model": model,
@@ -158,9 +161,9 @@ def _request_payload(
             "temperature": 0,
             "max_tokens": max_tokens,
         }
-        if json_mode or model == PUBLICATION_LLM_MODEL:
+        if json_mode or model in QWEN_NO_THINK_MODELS:
             payload["response_format"] = {"type": "json_object"}
-        if model == PUBLICATION_LLM_MODEL:
+        if model in QWEN_NO_THINK_MODELS:
             # The approved qwen OpenAI bridge understands JSON mode.  It does
             # not expose reasoning_content to the client.  The bridge only
             # honors the no-thinking switch through chat_template_kwargs;
@@ -537,7 +540,7 @@ def _typed_source_section_rule(contract: Mapping[str, Any]) -> str:
 def validate_publication_provider_identity(*, model: str, base_url: str) -> None:
     """Reject providers outside the user-approved Task2 publication seam."""
     if model != PUBLICATION_LLM_MODEL or base_url.rstrip("/") != PUBLICATION_LLM_BASE_URL:
-        raise ValidationError("llm", model or base_url, "Task2 publication allows only qwen3.6 at the approved endpoint")
+        raise ValidationError("llm", model or base_url, "Task2 publication allows only qwen3.8 at the approved endpoint")
 
 
 def publication_prompt_sections(context: dict[str, Any]) -> str:
@@ -1313,7 +1316,7 @@ def build_generator(
         # user prompt; without it, reasoning consumes the response budget and
         # frequently truncates the required JSON contract.  The client still
         # reads only message.content, never reasoning_content.
-        if model == PUBLICATION_LLM_MODEL and api_format == OPENAI_FORMAT:
+        if model in QWEN_NO_THINK_MODELS and api_format == OPENAI_FORMAT:
             prompt = "/no_think\n" + prompt
         for attempt in range(1, retry_attempts + 2):
             try:

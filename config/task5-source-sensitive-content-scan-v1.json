@@ -1,0 +1,63 @@
+{
+  "schema_version": "source-sensitive-content-scan.v1",
+  "scanner_id": "task5-source-sensitive-content-scanner-v1",
+  "canonical_bytes": "UTF-8 JSON, recursively sort object keys by Unicode code point, arrays keep order, separators=(',', ':'), ensure_ascii=false, trailing LF",
+  "scope": "each selected canonical source Block, every text-bearing route descriptor/query field, and the final serialized LLM wire payload before socket send",
+  "input_algorithm": [
+    "read the exact frozen UTF-8 Block bytes",
+    "scan raw bytes decoded as UTF-8 and a CRLF/CR-to-LF plus NFKC view",
+    "do not trim, redact, truncate or persist the matched value",
+    "apply every rule; a Block is safe only when all rules have zero matches"
+  ],
+  "outbound_scopes": {
+    "llm_selected_block": {
+      "fields": ["provider_visible_source_uri", "section_heading", "block_text", "claim_text", "structured_text", "link_text", "media_alt_text", "command_text"],
+      "scan_text_fields": ["section_heading", "block_text", "claim_text", "structured_text", "link_text", "media_alt_text", "command_text"],
+      "identity_fields": ["source_id", "source_snapshot_id", "content_hash", "block_id", "block_content_hash", "locator"]
+    },
+    "llm_wire_payload": {
+      "fields": ["messages[*].content", "request_metadata.title", "request_metadata.question", "request_metadata.page_type", "request_metadata.provider_visible_source_uri", "request_metadata.source_id", "request_metadata.source_snapshot_id", "request_metadata.claim_text", "request_metadata.route_metadata", "request_metadata.semantic_frame"],
+      "scan_text_fields": ["messages[*].content", "request_metadata.title", "request_metadata.question", "request_metadata.page_type", "request_metadata.provider_visible_source_uri", "request_metadata.claim_text", "request_metadata.route_metadata", "request_metadata.semantic_frame"],
+      "identity_fields": ["request_id", "source_id", "source_snapshot_id", "content_hash", "closure_sha256", "prompt_contract_sha256"],
+      "require_scan_after_payload_assembly_before_socket": true,
+      "missing_or_drift_action": "SOURCE_POLICY_UNVERIFIED"
+    },
+    "embedding_route_descriptor": {
+      "fields": ["title", "question", "page_type", "provider_visible_source_uri", "query_text", "source_id", "source_snapshot_id", "raw_content_hash", "descriptor_sha256", "canonical_text_sha256", "byte_count", "line_count"],
+      "scan_text_fields": ["title", "question", "page_type", "provider_visible_source_uri", "query_text"],
+      "identity_fields": ["source_id", "source_snapshot_id", "raw_content_hash", "descriptor_sha256", "canonical_text_sha256", "byte_count", "line_count"],
+      "require_scan_before_serialization": true
+    },
+    "embedding_query": {
+      "fields": ["query_text", "provider_visible_source_uri", "source_id", "source_snapshot_id"],
+      "scan_text_fields": ["query_text", "provider_visible_source_uri"],
+      "identity_fields": ["source_id", "source_snapshot_id"],
+      "require_scan_before_serialization": true
+    }
+  },
+  "rules": [
+    {"id": "private_key", "matcher": "regex", "expression": "-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"},
+    {"id": "bearer_or_jwt", "matcher": "regex", "expression": "(?i)\\bBearer\\s+[A-Za-z0-9._~+/=-]{20,}\\b|\\beyJ[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}\\b"},
+    {"id": "cookie_or_session", "matcher": "regex", "expression": "(?i)\\b(?:cookie|set-cookie|session(?:id)?|sid)\\s*[:=]\\s*[^\\s;]{8,}"},
+    {"id": "password_or_secret_assignment", "matcher": "regex", "expression": "(?i)\\b(?:password|passwd|secret|token|credential)\\s*[:=]\\s*[\\\"']?[^\\s,;\\\"']{8,}"},
+    {"id": "api_key_assignment", "matcher": "regex", "expression": "(?i)\\b(?:api[_-]?key|access[_-]?key|client[_-]?secret)\\s*[:=]\\s*[\\\"']?[^\\s,;\\\"']{8,}"},
+    {"id": "email", "matcher": "regex", "expression": "(?i)\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b"},
+    {"id": "phone", "matcher": "regex", "expression": "(?<!\\d)(?:\\+?\\d[\\d ()-]{8,}\\d)(?!\\d)"},
+    {"id": "government_id", "matcher": "regex", "expression": "(?<!\\d)(?:[1-9]\\d{5}(?:19|20)\\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\\d|3[01])\\d{3}[0-9Xx]|[A-Z]{1,3}\\d{6,12})(?!\\d)"},
+    {"id": "bank_card", "matcher": "luhn", "expression": "contiguous digit run length 13..19; accept only if Luhn checksum passes"},
+    {"id": "unknown_high_entropy_credential", "matcher": "entropy", "expression": "token alphabet [A-Za-z0-9_-], length >=20, Shannon entropy >=4.0 bits/character, and not an approved public identifier"}
+  ],
+  "receipt": {
+    "safe_fields": ["source_id", "block_id", "locator", "content_hash", "rule_id", "category", "match_digest"],
+    "match_digest": "sha256(canonical_json({rule_id,source_id,block_id,locator,content_hash}) + LF)",
+    "raw_match_persistence": false,
+    "response_persistence": false,
+    "outbound_scope": "all text fields in outbound_scopes are scanned; identity_fields are emitted only after source identity validation"
+  },
+  "failure": {
+    "match": "SOURCE_SENSITIVE_CONTENT",
+    "scanner_missing_or_drift": "SOURCE_POLICY_UNVERIFIED",
+    "match_action": "block_selected_block_without_redaction",
+    "scanner_error_action": "global_block_calls_0_exit_2"
+  }
+}

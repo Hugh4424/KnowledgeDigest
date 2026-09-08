@@ -1,0 +1,40 @@
+{
+  "schema_version": "task5-source-block-claim-contract.v1",
+  "contract_id": "task5-source-block-claim-v1",
+  "purpose": "冻结 Source→Block→Claim 的确定性生产边界；Claim 是来源证据指针，不是已理解的业务事实。",
+  "canonical_bytes": "UTF-8 JSON, recursively Unicode-code-point-sorted object keys, arrays preserved, no spaces, ensure_ascii=false, allow_nan=false, trailing LF",
+  "input_contract": {
+    "source": "immutable UTF-8 source snapshot selected by task5-source-page-manifest-v2",
+    "normalization": "raw bytes and raw coordinates remain authoritative; CRLF/CR→LF and NFKC are derived views only",
+    "source_scope": "one source snapshot per ledger; no cross-source merge"
+  },
+  "block_parser": {
+    "parser_id": "task5-block-parser-v1",
+    "unit_order": "source byte order, then start byte, end byte, block kind",
+    "block_kinds": ["heading", "paragraph", "list_item", "quote", "table_cell", "code", "config", "image_caption", "link_target"],
+    "boundary_rules": [
+      "fenced code/config is one block per fenced region and is never split by punctuation",
+      "each non-empty table cell is one block with its row/column locator; cells never merge across columns",
+      "each list item is one block; nested items keep parent/list locator",
+      "headings, paragraphs, quotes, image captions and resolved link targets keep their own source spans",
+      "blank separators are not blocks, but a non-empty source is not complete unless every text-bearing unit is covered"
+    ],
+    "required_block_fields": ["source_id", "block_id", "ordinal", "kind", "raw_start_byte", "raw_end_byte", "raw_start_line", "raw_end_line", "block_content_hash", "locator"],
+    "block_id_rule": "blk-<sha256(canonical_json({schema:'task5-block-id.v1',source_id,raw_start_byte,raw_end_byte,block_content_hash})+LF)>",
+    "coverage_invariant": "text-bearing units form a non-overlapping, source-order-complete partition; every unit has exactly one block_id and every block span replays to the snapshot bytes",
+    "failure_codes": ["BLOCK_PARSE_GAP", "BLOCK_OVERLAP", "BLOCK_COORDINATE_DRIFT", "BLOCK_KIND_UNSUPPORTED", "BLOCK_ID_DRIFT"]
+  },
+  "claim_ledger": {
+    "extractor_id": "task5-claim-ledger-v1",
+    "claim_role": "raw evidence pointer; semantic support is assigned only after ClaimSemanticFrame and relation validation",
+    "claim_granularity": "exactly one EvidenceClaim for each parsed text-bearing Block; no sentence splitting, cross-block merging or external claim generation",
+    "required_claim_fields": ["claim_id", "claim_key", "source_id", "block_id", "source_uri", "raw_start_byte", "raw_end_byte", "claim_content_hash", "locator", "state", "conflict_refs"],
+    "claim_key_rule": "block:<block_id>",
+    "claim_id_rule": "clm-<sha256(canonical_json({schema:'task5-claim-id.v1',provider_visible_source_uri,source_id,block_id,claim_key,raw_start_byte,raw_end_byte,claim_content_hash})+LF)>",
+    "coverage_invariant": "claim_keys are unique; every parsed block has exactly one claim; no claim points outside its owner block; source closure is the union of its selected block and claim ids",
+    "state_boundary": "extracted|supported|unsupported|conflict are distinct; extraction never implies semantic support",
+    "public_projection": "Reader/Audit may expose claim_id, source/block identity, hashes and relative locator; raw claim text is not copied into failure evidence or public Audit index"
+  },
+  "identity_binding": ["source_snapshot_id", "content_hash", "provider_visible_source_uri", "source_id", "block_id", "claim_id", "block_content_hash", "claim_content_hash"],
+  "negative_cases": ["crlf_coordinate_replay", "fenced_code_not_split", "table_cell_boundary", "nested_list_locator", "missing_block", "overlapping_block", "duplicate_claim", "claim_outside_owner_block", "source_reorder_changes_identity"]
+}

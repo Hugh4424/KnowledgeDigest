@@ -1,0 +1,2603 @@
+{
+  "schema_version": "task5-quality-cases.v1",
+  "quality_case_version": "task5-cases-v1",
+  "dimensions": [
+    "route",
+    "taxonomy",
+    "business-answer",
+    "page-type",
+    "Reader-Audit"
+  ],
+  "cases": [
+    {
+      "case_id": "Q-POS-01",
+      "role": "产品/售前读者",
+      "question": "EMM 是什么、服务谁，与相邻产品的边界是什么？",
+      "question_aliases": [
+        "EMM for Android 适合哪些设备？",
+        "EMM 和 MAXSTORE 的设备管理有什么区别？",
+        "员工手机、公司设备和单应用设备应该怎么选管理模式？",
+        "Android 企业设备管理从哪里进入？"
+      ],
+      "answer_lede": "要管 GMS 认证的其他品牌 Android 设备走 EMM for Android；ABM 监管的 Apple 设备走 EMM for iOS；传统/智能支付、商用和已集成厂商设备走 MAXSTORE，AirViewer 只在受支持设备详情页提供远程服务。",
+      "slot_labels": {
+        "definition": "它是什么",
+        "audience": "服务谁",
+        "difference": "和相邻产品的区别",
+        "boundary": "适用边界"
+      },
+      "slot_ledes": {
+        "definition": "EMM 是企业移动终端管理能力集合；本页的 EMM for Android 接入 MAXSTORE，基于 Android Enterprise 解决企业 Android 设备注册、保护、策略配置、应用部署和设备/应用生命周期管理问题。",
+        "audience": "它服务企业设备管理员，并覆盖员工 BYOD、公司所有和单一应用霸屏三种 Android 管理模式。",
+        "difference": "EMM for Android 和 EMM for iOS 是两条不同产品线：前者围绕 Android Enterprise 的企业设备/BYOD 注册、策略和生命周期，后者围绕 ABM 监管设备、设备服务器、注册和远程操作；MAXSTORE 原生侧覆盖支付和商用设备，AirViewer 只在受支持设备详情页提供远程服务。",
+        "boundary": "其他品牌 GMS Android 走 EMM for Android，ABM 监管的 Apple 设备走 EMM for iOS，传统/智能支付及已集成厂商设备走 MAXSTORE 原生侧。"
+      },
+      "slot_table_rows": {
+        "definition": [
+          {"label":"能力基础","text":"Android Enterprise 负责企业及员工 BYOD 设备的注册、管理和保护；MAXSTORE 与 Android Enterprise 集成，在一个平台配置和部署策略、应用和企业设置。","source_block_refs":["emm for android /EMM介绍文档.md#L36-L38::definition"]},
+          {"label":"企业与服务","text":"开始管理 EMM for Android 前，需要创建企业，并将 MAXSTORE-EMM 设置为企业移动管理提供商；企业信息包括企业名称、企业 ID、管理员账号和创建时间。","source_block_refs":["emm for android /[AE] EMM服务订阅及企业注册.md#L108-L113::enterprise-setup","emm for android /[AE] EMM服务订阅及企业注册.md#L197-L214::enterprise-info"]},
+          {"label":"策略与应用对象","text":"EMM for Android 的管理对象包括设备上的密码、通信和安全策略、应用限制与权限，以及从 Google Play Store 搜索发布或上传 APK 的应用。","source_block_refs":["emm for android /[AE] EMM服务订阅及企业注册.md#L30-L49::policy-app-management"]}
+          ,{"label":"解决的问题","text":"EMM 面向企业 Android 设备的注册、保护、策略配置、应用部署和设备/应用生命周期管理；它把设备管理从单一厂商设备扩展到企业与员工设备的统一入口。","source_block_refs":["emm for android /EMM介绍文档.md#L34-L38::definition","emm for android /EMM介绍文档.md#L112-L119::device-scope"]}
+          ,{"label":"设备与活动数据","text":"EMM 不只下发设备策略，也会把设备状态、应用和位置活动交给 GoInsight 做分析；这条协同关系属于数据分析入口，不是新的设备管理入口。","source_block_refs":["emm for android /EMM介绍文档.md#L229-L232::device-scope"]}
+        ],
+        "audience": [
+          {"label":"员工设备 / BYOD","text":"员工所有设备可以同时用于工作和个人场景，工作与个人数据隔离，IT 只访问工作容器。","source_block_refs":["emm for android /EMM介绍文档.md#L55-L70::management-mode"]},
+          {"label":"公司设备","text":"公司所有设备采用全管理模式，对设备上的数据和应用有完整控制，适合需要严格网络和数据管理的企业。","source_block_refs":["emm for android /EMM介绍文档.md#L74-L89::management-mode"]},
+          {"label":"单应用设备","text":"单一应用霸屏模式限制设备使用特定数量的应用，适合点餐设备和智能支付设备。","source_block_refs":["emm for android /EMM介绍文档.md#L93-L106::management-mode"]}
+        ],
+        "difference": [
+          {"label":"产品线分层","text":"EMM for Android 基于 Android Enterprise 管理企业设备与 BYOD Android；EMM for iOS 负责 iOS 初始化、二维码/编号注册、设备列表和远程移除/重启，不能把两条产品线合并成一个配置入口。","source_block_refs":["emm for android /EMM介绍文档.md#L34-L38::definition","emm for ios/iOS-终端管理.md#L1-L6::ios-scope"]},
+          {"label":"设备范围","text":"MAXSTORE 原生侧覆盖传统支付、智能支付、商用设备和已集成厂商支付设备；EMM for Android 管理 GMS 认证的其他品牌 Android 设备，并在平台内配置策略、应用和企业设置。","source_block_refs":["emm for android /EMM介绍文档.md#L123-L130::device-scope","emm for android /EMM介绍文档.md#L36-L38::definition"]},
+          {"label":"注册方式","text":"公司设备可按预定义策略通过 Android for Work 手动注册或 Android Zero Touch 云端自动注册，员工设备可扫描二维码手动注册。","source_block_refs":["emm for android /EMM介绍文档.md#L135-L149::device-scope"]}
+          ,{"label":"选择路径","text":"要管理 GMS 认证的其他品牌 Android 设备，进入 EMM for Android；要管理支付终端、商用设备或 MAXSTORE 已集成的其他厂商支付设备，走 MAXSTORE 原生侧；iOS 设备走 iOS 终端管理并支持二维码/编号注册和远程移除、重启。","source_block_refs":["emm for android /EMM介绍文档.md#L123-L130::device-scope","emm for ios/iOS-终端管理.md#L1-L6::ios-scope"]},
+          {"label":"远程服务入口","text":"EMM 设备详情页只有支持的设备才显示 AirViewer；已签名厂商支持全部功能，未签名厂商即使打开策略也可能只有远程查看。","source_block_refs":["emm for android /AE - 设备详情页远程控制.md#L20-L37::airviewer-scope"]}
+          ,{"label":"分析服务边界","text":"GoInsight 负责分析 EMM 设备的状态、应用和活动数据，不替代 EMM 的设备注册、策略下发和设备管理入口；设备监控与策略管理仍从 EMM 入口进入。","source_block_refs":["emm for android /EMM介绍文档.md#L229-L232::device-scope"]}
+          ,{"label":"管理能力覆盖","text":"EMM 的设备管理正文覆盖组织/设备批量管理、网络与应用策略、密码和硬件密钥配置；应用侧支持 Google Play、APK、应用黑白名单，不能把这些能力归到 MAXSTORE 原生设备范围。","source_block_refs":["emm for android /EMM介绍文档.md#L161-L164::policy-app-management","emm for android /EMM介绍文档.md#L184-L187::policy-app-management"]}
+        ],
+        "boundary": [
+          {"label":"支持范围","text":"本页的 Android 设备范围是其他品牌 GMS 认证设备；MAXSTORE 原生设备范围和 EMM for Android 设备范围不能混为一谈。","source_block_refs":["emm for android /EMM介绍文档.md#L116-L130::device-scope"]},
+          {"label":"管理与分析边界","text":"GoInsight 的分析资料不能反推 EMM 的注册或策略操作；本页只确认 EMM 设备状态、应用和位置可被分析，不把分析平台写成设备管理入口。","source_block_refs":["emm for android /EMM介绍文档.md#L229-L232::device-scope"]}
+        ]
+      },
+      "page_type": "positioning",
+      "projection_keys": [
+        "positioning"
+      ],
+      "axis": {
+        "product": "EMM",
+        "module": "产品定位",
+        "object": "EMM for Android、EMM for iOS、MAXSTORE、AirViewer 与受管设备",
+        "scene": "产品选择、设备归属与远程服务入口",
+        "boundary": "产品线开通依赖、设备范围与 AirViewer 能力边界"
+      },
+      "source_paths": [
+        "emm for android /EMM介绍文档.md",
+        "emm for android /[AE] EMM服务订阅及企业注册.md",
+        "emm for ios/iOS-终端管理.md",
+        "emm for android /EMM-AirViewer插件包设置.md",
+        "emm for android /AE - 设备详情页远程控制.md",
+        "emm for ios/iOS-资产列表.md"
+      ],
+      "source_block_refs": [
+        "emm for android /EMM介绍文档.md#L36-L38::definition",
+        "emm for android /[AE] EMM服务订阅及企业注册.md#L30-L49::policy-app-management",
+        "emm for android /[AE] EMM服务订阅及企业注册.md#L108-L113::enterprise-setup",
+        "emm for android /[AE] EMM服务订阅及企业注册.md#L197-L214::enterprise-info",
+        "emm for android /EMM介绍文档.md#L116-L119::device-scope",
+        "emm for android /EMM介绍文档.md#L123-L130::device-scope",
+        "emm for ios/iOS-终端管理.md#L1-L6::ios-scope",
+        "emm for android /EMM-AirViewer插件包设置.md#L1-L4::airviewer-scope",
+        "emm for android /AE - 设备详情页远程控制.md#L22-L30::airviewer-scope",
+        "emm for android /AE - 设备详情页远程控制.md#L37-L39::airviewer-scope",
+        "emm for ios/iOS-资产列表.md#L1-L4::ios-scope",
+        "emm for ios/iOS-资产列表.md#L56-L60::ios-scope"
+      ],
+      "baseline_ids": [
+        "cb-pos-value",
+        "cb-pos-overview"
+      ],
+      "applicable_dimensions": [
+        "route",
+        "taxonomy",
+        "business-answer",
+        "page-type",
+        "Reader-Audit"
+      ],
+      "risk_tags": [
+        "route",
+        "type",
+        "boundary",
+        "lineage"
+      ],
+      "required_claim_refs": [
+        "definition",
+        "audience",
+        "problem",
+        "difference"
+      ],
+      "required_boundary_refs": [
+        "boundary"
+      ],
+      "forbidden_claim_refs": [
+        "EMM 等于 MAXSTORE",
+        "无证据 slogan"
+      ],
+      "required_atoms": [
+        "是什么",
+        "服务谁",
+        "解决什么问题",
+        "相邻产品区别",
+        "边界"
+      ],
+      "forbidden_atoms": [
+        "EMM 等于 MAXSTORE",
+        "无证据 slogan"
+      ],
+      "strict_advantage": [
+        "完整五轴问题入口",
+        "正文与 Audit 逐 Claim 回查"
+      ],
+      "slot_source_block_refs": {
+        "definition": [
+          "emm for android /EMM介绍文档.md#L36-L38::definition",
+          "emm for android /[AE] EMM服务订阅及企业注册.md#L30-L49::policy-app-management",
+          "emm for android /[AE] EMM服务订阅及企业注册.md#L108-L113::enterprise-setup",
+          "emm for android /[AE] EMM服务订阅及企业注册.md#L197-L214::enterprise-info"
+        ],
+        "audience": [
+          "emm for android /EMM介绍文档.md#L36-L38::definition",
+          "emm for android /[AE] EMM服务订阅及企业注册.md#L108-L113::enterprise-setup",
+          "emm for android /EMM介绍文档.md#L55-L70::management-mode",
+          "emm for android /EMM介绍文档.md#L74-L89::management-mode",
+          "emm for android /EMM介绍文档.md#L93-L106::management-mode"
+        ],
+        "difference": [
+          "emm for android /EMM介绍文档.md#L116-L119::device-scope",
+          "emm for android /EMM介绍文档.md#L123-L130::device-scope",
+          "emm for ios/iOS-终端管理.md#L1-L6::ios-scope"
+          ,"emm for android /EMM-AirViewer插件包设置.md#L1-L4::airviewer-scope"
+          ,"emm for android /AE - 设备详情页远程控制.md#L22-L30::airviewer-scope"
+          ,"emm for android /AE - 设备详情页远程控制.md#L37-L39::airviewer-scope"
+        ],
+        "boundary": [
+          "emm for android /EMM介绍文档.md#L123-L130::device-scope",
+          "emm for ios/iOS-终端管理.md#L1-L6::ios-scope"
+          ,"emm for ios/iOS-资产列表.md#L1-L4::ios-scope"
+          ,"emm for ios/iOS-资产列表.md#L56-L60::ios-scope"
+        ]
+      },
+      "axis_source_block_refs": {
+        "product": [
+          "emm for android /EMM介绍文档.md#L40-L40::definition",
+          "emm for android /EMM介绍文档.md#L42-L42::definition",
+          "emm for android /EMM介绍文档.md#L34-L34::definition",
+          "emm for android /EMM介绍文档.md#L36-L38::definition"
+        ],
+        "module": [
+          "emm for android /EMM介绍文档.md#L40-L40::definition",
+          "emm for android /EMM介绍文档.md#L42-L42::definition",
+          "emm for android /EMM介绍文档.md#L34-L34::definition",
+          "emm for android /EMM介绍文档.md#L36-L38::definition"
+        ],
+        "object": [
+          "emm for android /EMM介绍文档.md#L116-L119::device-scope",
+          "emm for android /EMM介绍文档.md#L123-L130::device-scope",
+          "emm for android /EMM介绍文档.md#L131-L131::device-scope",
+          "emm for android /EMM介绍文档.md#L112-L112::device-scope",
+          "emm for ios/iOS-终端管理.md#L1-L6::ios-scope"
+          ,"emm for android /EMM-AirViewer插件包设置.md#L1-L4::airviewer-scope"
+          ,"emm for android /AE - 设备详情页远程控制.md#L22-L30::airviewer-scope"
+          ,"emm for android /AE - 设备详情页远程控制.md#L37-L39::airviewer-scope"
+          ,"emm for ios/iOS-资产列表.md#L1-L4::ios-scope"
+          ,"emm for ios/iOS-资产列表.md#L56-L60::ios-scope"
+        ],
+        "scene": [
+          "emm for android /EMM介绍文档.md#L40-L40::device-scope",
+          "emm for android /EMM介绍文档.md#L42-L42::device-scope",
+          "emm for android /EMM介绍文档.md#L34-L34::device-scope",
+          "emm for android /EMM介绍文档.md#L36-L38::device-scope",
+          "emm for android /EMM介绍文档.md#L116-L119::device-scope",
+          "emm for android /EMM介绍文档.md#L123-L130::device-scope",
+          "emm for android /EMM介绍文档.md#L131-L131::device-scope",
+          "emm for android /EMM介绍文档.md#L112-L112::device-scope",
+          "emm for ios/iOS-终端管理.md#L1-L6::ios-scope"
+          ,"emm for android /EMM-AirViewer插件包设置.md#L1-L4::airviewer-scope"
+          ,"emm for android /AE - 设备详情页远程控制.md#L22-L30::airviewer-scope"
+          ,"emm for android /AE - 设备详情页远程控制.md#L37-L39::airviewer-scope"
+          ,"emm for ios/iOS-资产列表.md#L1-L4::ios-scope"
+          ,"emm for ios/iOS-资产列表.md#L56-L60::ios-scope"
+        ],
+        "boundary": [
+          "emm for android /EMM介绍文档.md#L116-L119::device-scope",
+          "emm for android /EMM介绍文档.md#L123-L130::device-scope",
+          "emm for android /EMM介绍文档.md#L131-L131::device-scope",
+          "emm for android /EMM介绍文档.md#L112-L112::device-scope",
+          "emm for ios/iOS-终端管理.md#L1-L6::ios-scope"
+        ]
+      }
+    },
+    {
+      "case_id": "Q-CON-01",
+      "role": "策略配置维护者",
+      "question": "Android 通信和网络配置项分别作用于什么对象？",
+      "question_aliases": [
+        "EMM 的 Wi-Fi、VPN 和 APN 怎么配置？",
+        "Android 通信与网络策略分别管什么？",
+        "Wi-Fi、VPN、APN 和网络共享在哪里配置？"
+      ],
+      "answer_lede": "本页只回答 Communication and Network 的五组配置：先按手机通信、Wi‑Fi、手机网络、VPN 和网络共享找到配置组，再展开具体字段、依赖和生效条件；配置不生效时优先核对 Android 版本、托管模式、必填项和厂商实现。",
+      "slot_labels": {
+        "terms": "配置分组",
+        "object": "配置对象",
+        "relationship": "配置项关系",
+        "boundary": "版本与托管边界"
+      },
+      "slot_ledes": {
+        "terms": "通信和网络配置分为手机通信/蓝牙、Wi‑Fi、手机网络、VPN 和网络共享五组，并只展示当前生效的配置项。",
+        "object": "手机通信/蓝牙包含禁用飞行模式、去电、短信、Android Beam、小区广播、蓝牙和联系人共享；Wi‑Fi包含 Wi‑Fi 状态、配置权限、Wi‑Fi Direct、最低安全等级和配置设备 Wi‑Fi；手机网络包含禁用 2G、移动网络配置、数据漫游、网络重置、网络应急路径、UWB、自定义 APN 和设备 APN；VPN包含禁用 VPN、Always-on、VPN 包名、Lockdown 和建议全局代理；网络共享包含允许全部、禁用 Wi‑Fi、禁用全部三种状态。配置细节按条件展开：Wi‑Fi 的安全性决定密码、EAP/证书、域名和代理字段，WEP 密码只能 10/26 位，WPA/WPA2 PSK 为 8–63 位，企业证书支持 p12/pfx 与 cer/pem/der 且文件不超过 1 MB；APN 的类型、名称、端口和协议字段有必填与范围限制。",
+          "relationship": "按配置大组→配置项→可选值/依赖→生效条件阅读：页面只展示当前生效的配置，没有生效项的组不显示标题；APN、VPN 和 Wi‑Fi 继续展开下级字段，自定义策略可以新增或移除配置组。",
+        "boundary": "具体能力受 Android 版本和设备托管范围约束：Wi‑Fi 最低安全等级和 Wi‑Fi 配置标注 Android 13+ 全托管，UWB 标注 Android 14+ 全托管，网络共享的禁用 Wi‑Fi 也标注 Android 13+；自定义 APN 需要先启用 Enable Custom APN。0.1 后资料不再沿用个人设备管理的旧表述。"
+      },
+      "slot_table_rows": {
+        "terms": [
+          {"label":"字典层级","text":"通信和网络配置按手机通信/蓝牙、Wi‑Fi、手机网络、VPN、网络共享分组；每组继续展开具体配置项和字段，不把整组名称当成可直接操作的开关。","source_block_refs":["emm for android /AE-通信和网络配置.md#L17-L27::module-scope"]}
+        ],
+        "object": [
+          {"label":"手机通信 / 蓝牙","text":"禁用飞行模式、去电、短信、小区广播、蓝牙和联系人共享；Android Beam 只在 Android 10 以下设备存在，蓝牙联系人共享的测试标记为无效并移除。","source_block_refs":["emm for android /AE-通信和网络配置.md#L64-L73::phone-config"]},
+          {"label":"Wi‑Fi","text":"Wi‑Fi 状态和配置权限只作用于 Android 13 及以上全托管设备；配置权限区分允许配置、禁止新增配置和禁止配置，禁止配置时全托管设备只保留 openNetworkConfiguration 下发的网络；最低安全等级区分开放、个人、企业和 192 位企业网络。","source_block_refs":["emm for android /AE-通信和网络配置.md#L101-L111::wifi-config"]},
+          {"label":"Wi‑Fi 具体配置","text":"Wi‑Fi 配置对象包含网络名称、安全性、密码、EAP/企业认证、身份认证、匿名身份、域名、代理和证书等字段；WEP 密码为 10 或 26 位，WPA/WPA2 PSK 为 8–63 位，企业证书支持 p12/pfx 与 cer/pem/der，文件不超过 1 MB。","source_block_refs":["emm for android /AE-通信和网络配置.md#L137-L161::wifi-config"]},
+          {"label":"Wi‑Fi 设备与已知网络","text":"Wi‑Fi 配置对象还包括配置设备 Wi‑Fi 和已知网络；配置项从策略中的通信和网络分组进入，不把页面分组名称误当成直接开关。","source_block_refs":["emm for android /AE-通信和网络配置.md#L137-L160::wifi-config"]},
+          {"label":"手机网络 / APN","text":"手机网络包含 2G、移动网络、数据漫游、网络重置、网络应急路径、UWB、自定义 APN 和设备 APN；自定义 APN 先由 Enable Custom APN 开关控制，APN 类型和名称必填，名称最长 50，端口与 MTU 的范围为 (0,65535]，协议和漫游协议支持 IP、IPv4、IPv6 等选项。","source_block_refs":["emm for android /AE-通信和网络配置.md#L201-L214::phone-network-config","emm for android /AE-通信和网络配置.md#L253-L276::apn-config"]},
+          {"label":"VPN","text":"VPN 配置包含禁用 VPN、Always-on、VPN 应用包名、Lockdown 和建议全局代理；代理可选 Manual 或 Proxy Auto-Config，Manual 需要 Host、Port、Excluded Hosts，端口为 1–65535，PAC 需要 PAC URI。","source_block_refs":["emm for android /AE-通信和网络配置.md#L319-L332::vpn-config"]},
+          {"label":"网络共享","text":"网络共享提供 Allow All Tethering、Disallow Wi‑Fi Tethering 和 Disallow All Tethering；禁用 Wi‑Fi 网络共享适用于 Android 13 及以上，默认 Allow All Tethering 且只支持全托管设备。","source_block_refs":["emm for android /AE-通信和网络配置.md#L362-L366::tethering-config"]},
+          {"label":"手机通信开关","text":"手机通信/蓝牙组的开关分别控制飞行模式、去电、短信、小区广播和蓝牙；Android Beam 只适用于 Android 10 以下，蓝牙联系人共享的测试无效并移除。","source_block_refs":["emm for android /AE-通信和网络配置.md#L64-L73::phone-config"]},
+          {"label":"Wi‑Fi 控制选项","text":"Wi‑Fi State 提供 User Choice、Wi‑Fi Enabled、Wi‑Fi Disabled；Wi‑Fi Configuration Permission 提供 Allow Configuring Wi‑Fi、Disallow Add Wi‑Fi Config、Disallow Configuring Wi‑Fi。后两者改变用户能否新增或配置网络，且仅作用于 Android 13 及以上全托管设备。","source_block_refs":["emm for android /AE-通信和网络配置.md#L97-L111::wifi-config"]},
+          {"label":"Wi‑Fi 最低安全等级","text":"最低安全等级可选开放网络、个人网络、企业网络和 192 位企业网络；选择个人或企业等级后，设备不能连接低于该等级的网络。","source_block_refs":["emm for android /AE-通信和网络配置.md#L101-L114::wifi-config"]},
+          {"label":"网络应急路径","text":"启动时无法建立网络连接时，Network Escape Hatch 允许设备临时联网刷新设备策略；策略应用后临时网络会被遗忘并继续启动。","source_block_refs":["emm for android /AE-通信和网络配置.md#L201-L214::phone-network-config"]},
+          {"label":"自定义 APN 开关","text":"Enable Custom APN 控制平台配置的自定义 APN 是否启用，默认关闭；APN Config 负责进入 APN 配置弹窗。","source_block_refs":["emm for android /AE-通信和网络配置.md#L201-L214::phone-network-config"]},
+          {"label":"APN 必填字段","text":"APN Type、APN 和 APN Display Name 为必填；APN Type 不可重复多选，APN 和显示名最大 50 个字符。","source_block_refs":["emm for android /AE-通信和网络配置.md#L201-L214::phone-network-config","emm for android /AE-通信和网络配置.md#L253-L276::apn-config"]},
+          {"label":"APN 数值与协议","text":"Carrier ID 和 Numeric Operator Id 最长 6 位；MMS Proxy、MMSC、Proxy Address 最长 64 个字符；端口和 MTU 在 (0,65535]；Protocol 与 Roaming Protocol 可选 IP、IPv4、IPv6 等值。","source_block_refs":["emm for android /AE-通信和网络配置.md#L201-L214::phone-network-config","emm for android /AE-通信和网络配置.md#L253-L276::apn-config"]},
+          {"label":"VPN 依赖关系","text":"Always On VPN 打开后才展开 VPN App Package Name 和 Enable Lockdown；Lockdown 表示 VPN 未连接时禁止联网。","source_block_refs":["emm for android /AE-通信和网络配置.md#L315-L319::vpn-config","emm for android /AE-通信和网络配置.md#L320-L325::vpn-config"]},
+          {"label":"全局代理","text":"建议全局代理可选 Manual 或 Proxy Auto‑Config；Manual 要求 Host、Port、Excluded Hosts，Port 为 1–65535；PAC 要求 PAC URI。代理不可访问时可能导致网络中断，且部分应用可能忽略建议代理。","source_block_refs":["emm for android /AE-通信和网络配置.md#L327-L333::vpn-config"]}
+        ],
+        "relationship": [
+          {"label":"配置模块操作","text":"模块按五组显示当前生效配置；没有生效项的组不显示标题。新增配置项从对应分组打开弹窗，自定义策略中非锁定项可移除；确认未修改时按钮不可用，取消只关闭弹窗。","source_block_refs":["emm for android /AE-通信和网络配置.md#L17-L27::module-scope","emm for android /AE-通信和网络配置.md#L64-L73::phone-config"]}
+        ],
+        "boundary": [
+          {"label":"本页覆盖范围","text":"本页覆盖通信和网络配置的五组：手机通信/蓝牙、Wi‑Fi、手机网络、VPN 和网络共享；没有来源支持的其他配置类别不在本页推断。","source_block_refs":["emm for android /AE-通信和网络配置.md#L17-L27::module-scope"]},
+          {"label":"Wi‑Fi 不生效先查","text":"先确认设备是 Android 13 及以上全托管，再看 Wi‑Fi 状态、配置权限和最低安全等级；禁止配置时，全托管设备只保留 openNetworkConfiguration 下发的网络。","source_block_refs":["emm for android /AE-通信和网络配置.md#L101-L114::wifi-config"]},
+          {"label":"APN 不生效先查","text":"先确认 Enable Custom APN 已开启，再检查 APN Type、APN、显示名等必填项和端口、MTU 范围。","source_block_refs":["emm for android /AE-通信和网络配置.md#L201-L214::phone-network-config","emm for android /AE-通信和网络配置.md#L253-L276::apn-config"]},
+          {"label":"VPN 代理异常先查","text":"先确认 VPN 应用包名和 Lockdown 依赖，再核对 Manual 的 Host/Port 或 PAC URI；代理不可访问时网络可能中断。","source_block_refs":["emm for android /AE-通信和网络配置.md#L315-L319::vpn-config","emm for android /AE-通信和网络配置.md#L327-L333::vpn-config"]}
+        ]
+      },
+      "page_type": "concept",
+      "projection_keys": [
+        "concept"
+      ],
+      "projection_overrides": {
+        "concept": {
+          "title_suffix": "（配置项字典）"
+        }
+      },
+      "axis": {
+        "product": "EMM",
+        "module": "策略与配置",
+        "object": "通信和网络配置组、配置项与生效条件",
+        "scene": "配置项查阅与不生效排查",
+        "boundary": "Android 版本、托管模式与厂商实现"
+      },
+      "source_paths": [
+        "emm for android /AE-通信和网络配置.md",
+        "emm for android /全管理相关设备配置项注释更动.md"
+      ],
+      "source_block_refs": [
+        "emm for android /AE-通信和网络配置.md#L3-L3::module-scope",
+        "emm for android /AE-通信和网络配置.md#L17-L27::module-scope",
+        "emm for android /AE-通信和网络配置.md#L66-L74::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L64-L65::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L97-L105::wifi-config",
+        "emm for android /AE-通信和网络配置.md#L190-L190::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L201-L205::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L194-L196::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L249-L252::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L220-L225::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L226-L248::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L305-L305::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L336-L341::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L315-L319::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L326-L326::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L309-L311::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L320-L325::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L327-L333::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L363-L367::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L370-L375::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L352-L354::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L348-L348::tethering-config",
+        "emm for android /AE-通信和网络配置.md#L358-L362::tethering-config",
+        "emm for android /全管理相关设备配置项注释更动.md#L3-L3::scope-change"
+      ],
+      "slot_source_block_refs": {
+        "terms": [
+          "emm for android /AE-通信和网络配置.md#L17-L27::module-scope"
+        ],
+        "object": [
+          "emm for android /AE-通信和网络配置.md#L66-L74::tethering-config",
+          "emm for android /AE-通信和网络配置.md#L64-L65::tethering-config",
+          "emm for android /AE-通信和网络配置.md#L97-L113::wifi-config",
+          "emm for android /AE-通信和网络配置.md#L190-L190::tethering-config",
+          "emm for android /AE-通信和网络配置.md#L201-L205::tethering-config",
+          "emm for android /AE-通信和网络配置.md#L194-L196::tethering-config",
+          "emm for android /AE-通信和网络配置.md#L305-L305::tethering-config",
+          "emm for android /AE-通信和网络配置.md#L315-L319::tethering-config",
+          "emm for android /AE-通信和网络配置.md#L309-L311::tethering-config",
+          "emm for android /AE-通信和网络配置.md#L320-L325::tethering-config",
+          "emm for android /AE-通信和网络配置.md#L352-L354::tethering-config",
+          "emm for android /AE-通信和网络配置.md#L348-L348::tethering-config",
+          "emm for android /AE-通信和网络配置.md#L358-L362::tethering-config",
+          "emm for android /AE-通信和网络配置.md#L137-L160::wifi-config",
+          "emm for android /AE-通信和网络配置.md#L140-L161::wifi-config",
+          "emm for android /AE-通信和网络配置.md#L253-L276::apn-config"
+        ],
+        "relationship": [
+          "emm for android /AE-通信和网络配置.md#L17-L27::module-scope",
+          "emm for android /AE-通信和网络配置.md#L220-L225::vpn-config",
+          "emm for android /AE-通信和网络配置.md#L226-L248::vpn-config",
+          "emm for android /AE-通信和网络配置.md#L305-L305::vpn-config",
+          "emm for android /AE-通信和网络配置.md#L336-L341::vpn-config",
+          "emm for android /AE-通信和网络配置.md#L315-L319::vpn-config",
+          "emm for android /AE-通信和网络配置.md#L326-L326::vpn-config",
+          "emm for android /AE-通信和网络配置.md#L309-L311::vpn-config",
+          "emm for android /AE-通信和网络配置.md#L320-L325::vpn-config",
+          "emm for android /AE-通信和网络配置.md#L327-L333::vpn-config",
+          "emm for android /AE-通信和网络配置.md#L137-L160::wifi-config",
+          "emm for android /AE-通信和网络配置.md#L140-L161::wifi-config",
+          "emm for android /AE-通信和网络配置.md#L253-L276::apn-config"
+        ],
+        "boundary": [
+          "emm for android /AE-通信和网络配置.md#L101-L114::android-managed-boundary",
+          "emm for android /AE-通信和网络配置.md#L206-L215::android-managed-boundary",
+          "emm for android /AE-通信和网络配置.md#L363-L367::android-managed-boundary",
+          "emm for android /全管理相关设备配置项注释更动.md#L3-L3::scope-change"
+        ]
+      },
+      "baseline_ids": [
+        "cb-con-network"
+      ],
+      "applicable_dimensions": [
+        "route",
+        "taxonomy",
+        "business-answer",
+        "page-type",
+        "Reader-Audit"
+      ],
+      "risk_tags": [
+        "media",
+        "structure",
+        "claim-loss",
+        "boundary"
+      ],
+      "required_claim_refs": [
+        "terms",
+        "object",
+        "relationship",
+        "scope"
+      ],
+      "required_boundary_refs": [
+        "boundary"
+      ],
+      "forbidden_claim_refs": [
+        "丢失设备适用条件",
+        "无条件结论"
+      ],
+      "required_atoms": [
+        "术语",
+        "配置对象",
+        "对象关系",
+        "范围",
+        "误用边界"
+      ],
+      "forbidden_atoms": [
+        "丢失设备适用条件",
+        "无条件结论"
+      ],
+      "strict_advantage": [
+        "表格/媒体保真并可回查",
+        "五轴分类完整"
+      ],
+      "axis_source_block_refs": {
+        "product": [
+          "emm for android /AE-通信和网络配置.md#L15-L15::module-scope",
+          "emm for android /AE-通信和网络配置.md#L13-L13::module-scope",
+          "emm for android /AE-通信和网络配置.md#L8-L8::module-scope",
+          "emm for android /AE-通信和网络配置.md#L11-L11::module-scope",
+          "emm for android /AE-通信和网络配置.md#L3-L3::module-scope"
+        ],
+        "module": [
+          "emm for android /AE-通信和网络配置.md#L15-L15::module-scope",
+          "emm for android /AE-通信和网络配置.md#L13-L13::module-scope",
+          "emm for android /AE-通信和网络配置.md#L8-L8::module-scope",
+          "emm for android /AE-通信和网络配置.md#L11-L11::module-scope",
+          "emm for android /AE-通信和网络配置.md#L3-L3::module-scope"
+        ],
+        "object": [
+          "emm for android /AE-通信和网络配置.md#L66-L74::phone-config",
+          "emm for android /AE-通信和网络配置.md#L64-L65::phone-config"
+        ],
+        "scene": [
+          "emm for android /AE-通信和网络配置.md#L15-L15::wifi-config",
+          "emm for android /AE-通信和网络配置.md#L13-L13::wifi-config",
+          "emm for android /AE-通信和网络配置.md#L8-L8::wifi-config",
+          "emm for android /AE-通信和网络配置.md#L11-L11::wifi-config",
+          "emm for android /AE-通信和网络配置.md#L3-L3::wifi-config",
+          "emm for android /AE-通信和网络配置.md#L66-L74::wifi-config",
+          "emm for android /AE-通信和网络配置.md#L64-L65::wifi-config",
+          "emm for android /AE-通信和网络配置.md#L97-L105::wifi-config",
+          "emm for android /全管理相关设备配置项注释更动.md#L7-L16::scope-change"
+        ],
+        "boundary": [
+          "emm for android /AE-通信和网络配置.md#L66-L74::phone-config",
+          "emm for android /AE-通信和网络配置.md#L64-L65::phone-config"
+        ]
+      }
+    },
+    {
+      "case_id": "Q-OPR-01",
+      "role": "设备部署操作员",
+      "question": "如何用二维码或 Zero Touch 完成设备入网？",
+      "question_aliases": [
+        "Android 设备怎么用二维码入网？",
+        "Zero Touch 自动注册设备怎么做？",
+        "设备注册后怎么确认已经进入 EMM？"
+      ],
+      "answer_lede": "二维码适合手动注册，Zero Touch 适合由门户配置自动注册；先确认市场、商户、策略和网络，再按对应分支操作，并以设备出现在 EMM 列表为结果验证。",
+      "slot_labels": {
+        "preconditions": "前置条件",
+        "steps": "操作步骤",
+        "expected_result": "预期结果",
+        "verification": "验证方式",
+        "failure_boundary": "失败与限制"
+      },
+      "projection_overrides": {
+        "qr.operation": {
+          "axis": {
+            "product": "EMM",
+            "module": "设备入网",
+            "object": "Enrollment QR Code、企业设备与 EMM 设备列表",
+            "scene": "手动二维码入网",
+            "boundary": "注册码有效期、组织归属、网络与同步"
+          },
+          "source_paths": [
+            "emm for android /[AE]创建二维码注册设备.md"
+          ],
+          "source_block_refs": [
+            "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+            "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+            "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+            "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+            "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+            "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+            "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+            "emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow",
+            "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow"
+          ],
+          "slot_source_block_refs": {
+            "preconditions": [
+              "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow"
+            ],
+            "steps": [
+              "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow"
+            ],
+            "expected_result": [
+              "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow"
+            ],
+            "verification": [
+              "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow"
+            ],
+            "failure_boundary": [
+              "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow"
+            ]
+          },
+          "slot_ledes": {
+            "preconditions": "二维码分支从 EMM 设备列表进入 +设备/创建二维码；操作者必须拥有当前市场的终端基本操作权限，并填写商户、注册类型和二维码有效期；企业设备恢复出厂后，在欢迎页任意位置连续轻点六次进入二维码扫描页。",
+            "steps": "打开创建二维码弹窗，填写商户、注册类型和过期时间并生成二维码；需要时下载二维码和注册流程，设备恢复出厂后连续轻点欢迎页六次、扫描二维码，配置 Wi‑Fi 或插入 SIM 卡，授予必要权限并完成配置。",
+            "expected_result": "设备扫码后自动注册到对应市场和商户，设备出现在 EMM 列表并可打开详情。",
+            "verification": "检查设备是否出现在对应市场/商户的 EMM 列表，并确认注册后的同步结果。",
+            "failure_boundary": "二维码有明确失效时间；商户或代理商被停用、删除时不能继续注册；二维码对应的市场、代理商和商户决定设备归属，商户移动后旧二维码按来源规则跟随新的组织关系。"
+          },
+          "slot_table_rows": {
+            "preconditions": [
+              {"label":"注册码对象","text":"弹窗标题是 Configure Enrollment QR Code；必须选择代理商和商户，并设置二维码过期时间。一个商户只生成一个二维码，过期时间可以更新。","source_block_refs":["emm for android /[AE]创建二维码注册设备.md#L28-L39::qr-flow","emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow"]}
+            ],
+            "steps": [
+              {"label":"企业设备流程","text":"恢复出厂后在欢迎页任意位置轻点六次进入扫描页，扫描二维码，配置 Wi‑Fi 或插入 SIM 卡，授予权限、确认协议并完成配置。","source_block_refs":["emm for android /[AE]创建二维码注册设备.md#L51-L71::qr-flow"]},
+              {"label":"分发方式","text":"可下载二维码和注册流程图片，图片包含 Marketplace、Reseller、Merchant、创建人、注册流程和失效时间。","source_block_refs":["emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow"]}
+            ],
+            "expected_result": [
+              {"label":"注册与同步","text":"扫码后设备自动注册到对应市场和商户，设备列表出现设备并可打开详情；注册后会安装 MAXSTORE 客户端用于数据同步，后台定期同步 Google 设备列表。","source_block_refs":["emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow"]}
+            ],
+            "verification": [
+              {"label":"验证重点","text":"检查设备是否立即同步到 MAXSTORE；设备恢复出厂后重新注册时，系统应清除旧设备数据，包括 Google 侧数据。","source_block_refs":["emm for android /[AE]创建二维码注册设备.md#L117-L125::qr-flow"]}
+            ],
+            "failure_boundary": [
+              {"label":"设备与组织","text":"注册依赖 Google GMS EMM 能力，不是 MAXSTORE 自己完成；商户或代理商停用、删除后二维码失效，商户迁移后旧二维码按新的组织关系注册。","source_block_refs":["emm for android /[AE]创建二维码注册设备.md#L102-L115::qr-flow"]}
+            ]
+          },
+          "axis_source_block_refs": {
+            "product": [
+              "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L4::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L18-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L40-L57::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L79::zte-flow",
+              "emm for android /零接触相关流程.md#L89-L110::zte-flow",
+              "emm for android /零接触相关流程.md#L120-L125::zte-flow",
+              "emm for android /零接触相关流程.md#L26-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L45-L57::non-zolon-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L55::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L123::zte-flow"
+            ],
+            "module": [
+              "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L4::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L18-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L40-L57::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L79::zte-flow",
+              "emm for android /零接触相关流程.md#L89-L110::zte-flow",
+              "emm for android /零接触相关流程.md#L120-L125::zte-flow",
+              "emm for android /零接触相关流程.md#L26-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L45-L57::non-zolon-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L55::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L123::zte-flow"
+            ],
+            "object": [
+              "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L4::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L18-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L40-L57::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L79::zte-flow",
+              "emm for android /零接触相关流程.md#L89-L110::zte-flow",
+              "emm for android /零接触相关流程.md#L120-L125::zte-flow",
+              "emm for android /零接触相关流程.md#L26-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L45-L57::non-zolon-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L55::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L123::zte-flow"
+            ],
+            "scene": [
+              "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L4::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L18-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L40-L57::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L79::zte-flow",
+              "emm for android /零接触相关流程.md#L89-L110::zte-flow",
+              "emm for android /零接触相关流程.md#L120-L125::zte-flow",
+              "emm for android /零接触相关流程.md#L26-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L45-L57::non-zolon-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L55::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L123::zte-flow"
+            ],
+            "boundary": [
+              "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L4::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L18-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L40-L57::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L79::zte-flow",
+              "emm for android /零接触相关流程.md#L89-L110::zte-flow",
+              "emm for android /零接触相关流程.md#L120-L125::zte-flow",
+              "emm for android /零接触相关流程.md#L26-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L45-L57::non-zolon-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L55::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L123::zte-flow"
+            ]
+          }
+        },
+        "zero-touch.operation": {
+          "axis": {
+            "product": "EMM",
+            "module": "设备入网",
+            "object": "Zero Touch Configuration、DPC Extra 与 ZOLON 设备",
+            "scene": "门户自动入网与设备分配",
+            "boundary": "Configuration、设备厂商、商户状态、联网与 ZTE"
+          },
+          "source_paths": [
+            "emm for android /零接触相关流程.md",
+            "emm for android /[AE] 弹窗输入标识符注册设备.md"
+          ],
+          "source_block_refs": [
+            "emm for android /零接触相关流程.md#L1-L4::non-zolon-flow",
+            "emm for android /零接触相关流程.md#L23-L23::zte-flow",
+            "emm for android /零接触相关流程.md#L21-L21::zte-flow",
+            "emm for android /零接触相关流程.md#L26-L30::zte-flow",
+            "emm for android /零接触相关流程.md#L18-L19::zte-flow",
+            "emm for android /零接触相关流程.md#L49-L50::zte-flow",
+            "emm for android /零接触相关流程.md#L46-L47::zte-flow",
+            "emm for android /零接触相关流程.md#L55-L57::zte-flow",
+            "emm for android /零接触相关流程.md#L48-L48::zte-flow",
+            "emm for android /零接触相关流程.md#L45-L45::zte-flow",
+            "emm for android /零接触相关流程.md#L40-L41::zte-flow",
+            "emm for android /零接触相关流程.md#L44-L44::zte-flow",
+            "emm for android /零接触相关流程.md#L54-L54::zte-flow",
+            "emm for android /零接触相关流程.md#L52-L53::zte-flow",
+            "emm for android /零接触相关流程.md#L51-L51::zte-flow",
+            "emm for android /零接触相关流程.md#L42-L43::zte-flow",
+            "emm for android /零接触相关流程.md#L66-L66::zte-flow",
+            "emm for android /零接触相关流程.md#L72-L79::zte-flow",
+            "emm for android /零接触相关流程.md#L68-L68::zte-flow",
+            "emm for android /零接触相关流程.md#L101-L110::zte-flow",
+            "emm for android /零接触相关流程.md#L91-L93::zte-flow",
+            "emm for android /零接触相关流程.md#L97-L97::zte-flow",
+            "emm for android /零接触相关流程.md#L95-L95::zte-flow",
+            "emm for android /零接触相关流程.md#L120-L120::zte-flow",
+            "emm for android /零接触相关流程.md#L122-L125::zte-flow"
+          ],
+          "slot_source_block_refs": {
+            "preconditions": [
+              "emm for android /零接触相关流程.md#L1-L4::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L23-L23::zte-flow",
+              "emm for android /零接触相关流程.md#L21-L21::zte-flow",
+              "emm for android /零接触相关流程.md#L26-L30::zte-flow",
+              "emm for android /零接触相关流程.md#L18-L19::zte-flow",
+              "emm for android /零接触相关流程.md#L66-L66::zte-flow",
+              "emm for android /零接触相关流程.md#L72-L79::zte-flow",
+              "emm for android /零接触相关流程.md#L68-L68::zte-flow"
+            ],
+            "steps": [
+              "emm for android /零接触相关流程.md#L23-L23::zte-flow",
+              "emm for android /零接触相关流程.md#L21-L21::zte-flow",
+              "emm for android /零接触相关流程.md#L26-L30::zte-flow",
+              "emm for android /零接触相关流程.md#L18-L19::zte-flow",
+              "emm for android /零接触相关流程.md#L101-L110::zte-flow",
+              "emm for android /零接触相关流程.md#L91-L93::zte-flow",
+              "emm for android /零接触相关流程.md#L97-L97::zte-flow",
+              "emm for android /零接触相关流程.md#L95-L95::zte-flow",
+              "emm for android /零接触相关流程.md#L120-L120::zte-flow",
+              "emm for android /零接触相关流程.md#L122-L125::zte-flow"
+            ],
+            "expected_result": [
+              "emm for android /零接触相关流程.md#L26-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L120-L120::zte-flow",
+              "emm for android /零接触相关流程.md#L122-L125::zte-flow"
+            ],
+            "verification": [
+              "emm for android /零接触相关流程.md#L49-L50::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L46-L47::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L55-L57::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L48-L48::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L45-L45::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L40-L41::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L44-L44::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L54-L54::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L52-L53::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L51-L51::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L42-L43::non-zolon-flow"
+            ],
+            "failure_boundary": [
+              "emm for android /零接触相关流程.md#L49-L50::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L46-L47::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L55-L57::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L48-L48::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L45-L45::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L40-L41::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L44-L44::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L54-L54::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L52-L53::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L51-L51::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L42-L43::non-zolon-flow"
+            ]
+          },
+          "slot_ledes": {
+            "preconditions": "Zero Touch 分支先为市场创建客户账号并绑定 EMM 企业；每个 Configuration 代表一个组织，同一 Configuration 下的设备归入同一商户；非 ZOLON 设备还要由厂商或 reseller 分配到客户门户，兆珑设备需要完成 ZTE 开通前置工作。",
+            "steps": "复制 MAXSTORE 的 DPC Extra，在 Zero Touch Portal 创建对应 Configuration 并将设备手动或批量分配进去；设备开机激活时联网。兆珑设备还要申请 API、通过客户协议，收到回执后开通 ZTE。",
+            "expected_result": "非 ZOLON 设备开机激活后出现在 MAXSTORE 的 EMM 列表；ZTE 开通后，设备列表出现 Import Terminal，厂商下拉框可选 ZOLON。",
+            "verification": "先检查门户中的设备 Configuration 是否正确、Configuration 对应商户是否正常、设备开机是否联网；再确认设备是否进入 EMM 列表。若配置已完成但设备仍需操作，按来源说明由设备端继续完成注册步骤。",
+            "failure_boundary": "设备未分配正确 Configuration、商户被停用导致 Configuration 失效、或初始化时未联网，都会导致注册异常；配置代表组织和商户归属，不能把不同商户的设备混用同一 Configuration。"
+          },
+          "slot_table_rows": {
+            "preconditions": [
+              {"label":"非 ZOLON 门户前置","text":"市场订阅 EMM 并创建企业后，默认可用扫码注册和基础的非兆珑零接触注册；上传文件注册和兆珑注册需要额外开通。","source_block_refs":["emm for android /零接触相关流程.md#L3-L4::non-zolon-flow"]},
+              {"label":"Configuration 字段","text":"Zero Touch Portal 的 Configuration 至少要配置名称、Android Device Policy、DPC Extras、公司名称、支持邮箱和支持电话；这些信息会在设备配置前显示给用户。","source_block_refs":["emm for android /零接触相关流程.md#L42-L43::non-zolon-flow"]}
+            ],
+            "steps": [
+              {"label":"ZOLON 设备直接录入","text":"在零接触注册弹窗选择 ZOLON 后，可按 IMEI 或设备序列号录入设备；提交后会新增注册记录并等待 Global 管理员审核。","source_block_refs":["emm for android /[AE] 弹窗输入标识符注册设备.md#L49-L64::zolon-flow"]},
+              {"label":"IMEI / SN 校验","text":"IMEI 只能输入数字且不能重复，SN 不能重复；两种标识符单次最多输入 200 个。","source_block_refs":["emm for android /[AE] 弹窗输入标识符注册设备.md#L69-L82::identifier-validation","emm for android /[AE] 弹窗输入标识符注册设备.md#L86-L100::identifier-validation"]},
+              {"label":"非 ZOLON 设备","text":"选择非 ZOLON 设备后，基于当前代理商和商户生成 DPC Extras，再到 Zero Touch Portal 创建 Configuration。","source_block_refs":["emm for android /[AE] 弹窗输入标识符注册设备.md#L117-L194::identifier-flow"]}
+            ],
+            "failure_boundary": [
+              {"label":"门户配置失败","text":"设备没有反应时按顺序检查：设备是否分配了正确 Configuration、商户和 Configuration 是否正常、设备开机时是否联网；初始化时未联网会先按普通设备启动，联网后才提示 Android for Work，并自动恢复出厂和重启。","source_block_refs":["emm for android /零接触相关流程.md#L46-L47::non-zolon-flow"]},
+              {"label":"直接录入失败","text":"IMEI 为空、包含非数字、重复或超过 200 个时提示校验错误；SN 重复或超过 200 个时也不能提交。","source_block_refs":["emm for android /[AE] 弹窗输入标识符注册设备.md#L69-L82::identifier-validation","emm for android /[AE] 弹窗输入标识符注册设备.md#L86-L100::identifier-validation"]}
+            ],
+            "verification": [
+              {"label":"归属验证","text":"一个 Configuration 代表一个组织；把所有设备放进同一个 Configuration 会使它们归属于同一个商户。现有设备可用 CSV 批量分配，新的设备可将 Configuration 设为默认。","source_block_refs":["emm for android /零接触相关流程.md#L52-L53::non-zolon-flow","emm for android /零接触相关流程.md#L55-L57::non-zolon-flow"]},
+              {"label":"兆珑开通验证","text":"收到 Google API 通过邮件后，开启 ZOLON ZTE；设备列表应出现 Import Terminal，添加设备时厂商选项可使用 ZOLON。","source_block_refs":["emm for android /零接触相关流程.md#L122-L125::zte-flow"]}
+            ]
+          },
+          "axis_source_block_refs": {
+            "product": [
+              "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L4::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L23-L23::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L21-L21::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L26-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L18-L19::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L49-L50::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L46-L47::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L48-L48::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L45-L45::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L40-L41::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L44-L44::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L54-L54::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L52-L53::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L51-L51::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L42-L43::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L66::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L72-L79::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L68-L68::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L101-L110::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L91-L93::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L97-L97::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L95-L95::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L120-L120::non-zolon-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+              "emm for android /零接触相关流程.md#L36-L36::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L14-L14::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L34-L34::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L32-L32::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L38-L38::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L112-L112::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L87-L87::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L116-L116::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L85-L85::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L81-L81::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L114-L114::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L118-L118::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L83-L83::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L23-L23::zte-flow",
+              "emm for android /零接触相关流程.md#L21-L21::zte-flow",
+              "emm for android /零接触相关流程.md#L26-L30::zte-flow",
+              "emm for android /零接触相关流程.md#L18-L19::zte-flow",
+              "emm for android /零接触相关流程.md#L49-L50::zte-flow",
+              "emm for android /零接触相关流程.md#L46-L47::zte-flow",
+              "emm for android /零接触相关流程.md#L55-L57::zte-flow",
+              "emm for android /零接触相关流程.md#L48-L48::zte-flow",
+              "emm for android /零接触相关流程.md#L45-L45::zte-flow",
+              "emm for android /零接触相关流程.md#L40-L41::zte-flow",
+              "emm for android /零接触相关流程.md#L44-L44::zte-flow",
+              "emm for android /零接触相关流程.md#L54-L54::zte-flow",
+              "emm for android /零接触相关流程.md#L52-L53::zte-flow",
+              "emm for android /零接触相关流程.md#L51-L51::zte-flow",
+              "emm for android /零接触相关流程.md#L42-L43::zte-flow",
+              "emm for android /零接触相关流程.md#L66-L66::zte-flow",
+              "emm for android /零接触相关流程.md#L72-L79::zte-flow",
+              "emm for android /零接触相关流程.md#L68-L68::zte-flow",
+              "emm for android /零接触相关流程.md#L101-L110::zte-flow",
+              "emm for android /零接触相关流程.md#L91-L93::zte-flow",
+              "emm for android /零接触相关流程.md#L97-L97::zte-flow",
+              "emm for android /零接触相关流程.md#L95-L95::zte-flow",
+              "emm for android /零接触相关流程.md#L120-L120::zte-flow",
+              "emm for android /零接触相关流程.md#L122-L125::zte-flow",
+              "emm for android /零接触相关流程.md#L55-L57::non-zolon-flow"
+            ],
+            "module": [
+              "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L4::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L23-L23::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L21-L21::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L26-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L18-L19::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L49-L50::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L46-L47::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L48-L48::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L45-L45::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L40-L41::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L44-L44::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L54-L54::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L52-L53::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L51-L51::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L42-L43::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L66::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L72-L79::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L68-L68::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L101-L110::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L91-L93::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L97-L97::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L95-L95::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L120-L120::non-zolon-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+              "emm for android /零接触相关流程.md#L36-L36::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L14-L14::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L34-L34::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L32-L32::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L38-L38::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L112-L112::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L87-L87::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L116-L116::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L85-L85::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L81-L81::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L114-L114::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L118-L118::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L83-L83::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L23-L23::zte-flow",
+              "emm for android /零接触相关流程.md#L21-L21::zte-flow",
+              "emm for android /零接触相关流程.md#L26-L30::zte-flow",
+              "emm for android /零接触相关流程.md#L18-L19::zte-flow",
+              "emm for android /零接触相关流程.md#L49-L50::zte-flow",
+              "emm for android /零接触相关流程.md#L46-L47::zte-flow",
+              "emm for android /零接触相关流程.md#L55-L57::zte-flow",
+              "emm for android /零接触相关流程.md#L48-L48::zte-flow",
+              "emm for android /零接触相关流程.md#L45-L45::zte-flow",
+              "emm for android /零接触相关流程.md#L40-L41::zte-flow",
+              "emm for android /零接触相关流程.md#L44-L44::zte-flow",
+              "emm for android /零接触相关流程.md#L54-L54::zte-flow",
+              "emm for android /零接触相关流程.md#L52-L53::zte-flow",
+              "emm for android /零接触相关流程.md#L51-L51::zte-flow",
+              "emm for android /零接触相关流程.md#L42-L43::zte-flow",
+              "emm for android /零接触相关流程.md#L66-L66::zte-flow",
+              "emm for android /零接触相关流程.md#L72-L79::zte-flow",
+              "emm for android /零接触相关流程.md#L68-L68::zte-flow",
+              "emm for android /零接触相关流程.md#L101-L110::zte-flow",
+              "emm for android /零接触相关流程.md#L91-L93::zte-flow",
+              "emm for android /零接触相关流程.md#L97-L97::zte-flow",
+              "emm for android /零接触相关流程.md#L95-L95::zte-flow",
+              "emm for android /零接触相关流程.md#L120-L120::zte-flow",
+              "emm for android /零接触相关流程.md#L122-L125::zte-flow",
+              "emm for android /零接触相关流程.md#L55-L57::non-zolon-flow"
+            ],
+            "object": [
+              "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L4::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L23-L23::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L21-L21::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L26-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L18-L19::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L49-L50::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L46-L47::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L48-L48::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L45-L45::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L40-L41::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L44-L44::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L54-L54::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L52-L53::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L51-L51::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L42-L43::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L66::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L72-L79::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L68-L68::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L101-L110::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L91-L93::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L97-L97::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L95-L95::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L120-L120::non-zolon-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+              "emm for android /零接触相关流程.md#L36-L36::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L14-L14::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L34-L34::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L32-L32::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L38-L38::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L112-L112::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L87-L87::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L116-L116::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L85-L85::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L81-L81::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L114-L114::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L118-L118::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L83-L83::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L23-L23::zte-flow",
+              "emm for android /零接触相关流程.md#L21-L21::zte-flow",
+              "emm for android /零接触相关流程.md#L26-L30::zte-flow",
+              "emm for android /零接触相关流程.md#L18-L19::zte-flow",
+              "emm for android /零接触相关流程.md#L49-L50::zte-flow",
+              "emm for android /零接触相关流程.md#L46-L47::zte-flow",
+              "emm for android /零接触相关流程.md#L55-L57::zte-flow",
+              "emm for android /零接触相关流程.md#L48-L48::zte-flow",
+              "emm for android /零接触相关流程.md#L45-L45::zte-flow",
+              "emm for android /零接触相关流程.md#L40-L41::zte-flow",
+              "emm for android /零接触相关流程.md#L44-L44::zte-flow",
+              "emm for android /零接触相关流程.md#L54-L54::zte-flow",
+              "emm for android /零接触相关流程.md#L52-L53::zte-flow",
+              "emm for android /零接触相关流程.md#L51-L51::zte-flow",
+              "emm for android /零接触相关流程.md#L42-L43::zte-flow",
+              "emm for android /零接触相关流程.md#L66-L66::zte-flow",
+              "emm for android /零接触相关流程.md#L72-L79::zte-flow",
+              "emm for android /零接触相关流程.md#L68-L68::zte-flow",
+              "emm for android /零接触相关流程.md#L101-L110::zte-flow",
+              "emm for android /零接触相关流程.md#L91-L93::zte-flow",
+              "emm for android /零接触相关流程.md#L97-L97::zte-flow",
+              "emm for android /零接触相关流程.md#L95-L95::zte-flow",
+              "emm for android /零接触相关流程.md#L120-L120::zte-flow",
+              "emm for android /零接触相关流程.md#L122-L125::zte-flow",
+              "emm for android /零接触相关流程.md#L55-L57::non-zolon-flow"
+            ],
+            "scene": [
+              "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L4::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L23-L23::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L21-L21::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L26-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L18-L19::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L49-L50::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L46-L47::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L48-L48::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L45-L45::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L40-L41::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L44-L44::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L54-L54::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L52-L53::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L51-L51::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L42-L43::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L66::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L72-L79::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L68-L68::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L101-L110::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L91-L93::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L97-L97::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L95-L95::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L120-L120::non-zolon-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+              "emm for android /零接触相关流程.md#L36-L36::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L14-L14::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L34-L34::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L32-L32::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L38-L38::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L112-L112::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L87-L87::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L116-L116::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L85-L85::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L81-L81::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L114-L114::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L118-L118::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L83-L83::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L23-L23::zte-flow",
+              "emm for android /零接触相关流程.md#L21-L21::zte-flow",
+              "emm for android /零接触相关流程.md#L26-L30::zte-flow",
+              "emm for android /零接触相关流程.md#L18-L19::zte-flow",
+              "emm for android /零接触相关流程.md#L49-L50::zte-flow",
+              "emm for android /零接触相关流程.md#L46-L47::zte-flow",
+              "emm for android /零接触相关流程.md#L55-L57::zte-flow",
+              "emm for android /零接触相关流程.md#L48-L48::zte-flow",
+              "emm for android /零接触相关流程.md#L45-L45::zte-flow",
+              "emm for android /零接触相关流程.md#L40-L41::zte-flow",
+              "emm for android /零接触相关流程.md#L44-L44::zte-flow",
+              "emm for android /零接触相关流程.md#L54-L54::zte-flow",
+              "emm for android /零接触相关流程.md#L52-L53::zte-flow",
+              "emm for android /零接触相关流程.md#L51-L51::zte-flow",
+              "emm for android /零接触相关流程.md#L42-L43::zte-flow",
+              "emm for android /零接触相关流程.md#L66-L66::zte-flow",
+              "emm for android /零接触相关流程.md#L72-L79::zte-flow",
+              "emm for android /零接触相关流程.md#L68-L68::zte-flow",
+              "emm for android /零接触相关流程.md#L101-L110::zte-flow",
+              "emm for android /零接触相关流程.md#L91-L93::zte-flow",
+              "emm for android /零接触相关流程.md#L97-L97::zte-flow",
+              "emm for android /零接触相关流程.md#L95-L95::zte-flow",
+              "emm for android /零接触相关流程.md#L120-L120::zte-flow",
+              "emm for android /零接触相关流程.md#L122-L125::zte-flow",
+              "emm for android /零接触相关流程.md#L55-L57::non-zolon-flow"
+            ],
+            "boundary": [
+              "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow",
+              "emm for android /零接触相关流程.md#L1-L4::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L23-L23::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L21-L21::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L26-L30::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L18-L19::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L49-L50::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L46-L47::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L48-L48::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L45-L45::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L40-L41::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L44-L44::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L54-L54::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L52-L53::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L51-L51::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L42-L43::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L66-L66::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L72-L79::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L68-L68::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L101-L110::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L91-L93::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L97-L97::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L95-L95::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L120-L120::non-zolon-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+              "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+              "emm for android /零接触相关流程.md#L36-L36::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L14-L14::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L34-L34::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L32-L32::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L38-L38::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L112-L112::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L87-L87::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L116-L116::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L85-L85::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L81-L81::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L114-L114::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L118-L118::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L83-L83::non-zolon-flow",
+              "emm for android /零接触相关流程.md#L23-L23::zte-flow",
+              "emm for android /零接触相关流程.md#L21-L21::zte-flow",
+              "emm for android /零接触相关流程.md#L26-L30::zte-flow",
+              "emm for android /零接触相关流程.md#L18-L19::zte-flow",
+              "emm for android /零接触相关流程.md#L49-L50::zte-flow",
+              "emm for android /零接触相关流程.md#L46-L47::zte-flow",
+              "emm for android /零接触相关流程.md#L55-L57::zte-flow",
+              "emm for android /零接触相关流程.md#L48-L48::zte-flow",
+              "emm for android /零接触相关流程.md#L45-L45::zte-flow",
+              "emm for android /零接触相关流程.md#L40-L41::zte-flow",
+              "emm for android /零接触相关流程.md#L44-L44::zte-flow",
+              "emm for android /零接触相关流程.md#L54-L54::zte-flow",
+              "emm for android /零接触相关流程.md#L52-L53::zte-flow",
+              "emm for android /零接触相关流程.md#L51-L51::zte-flow",
+              "emm for android /零接触相关流程.md#L42-L43::zte-flow",
+              "emm for android /零接触相关流程.md#L66-L66::zte-flow",
+              "emm for android /零接触相关流程.md#L72-L79::zte-flow",
+              "emm for android /零接触相关流程.md#L68-L68::zte-flow",
+              "emm for android /零接触相关流程.md#L101-L110::zte-flow",
+              "emm for android /零接触相关流程.md#L91-L93::zte-flow",
+              "emm for android /零接触相关流程.md#L97-L97::zte-flow",
+              "emm for android /零接触相关流程.md#L95-L95::zte-flow",
+              "emm for android /零接触相关流程.md#L120-L120::zte-flow",
+              "emm for android /零接触相关流程.md#L122-L125::zte-flow",
+              "emm for android /零接触相关流程.md#L55-L57::non-zolon-flow"
+            ]
+          }
+        }
+      },
+      "page_type": "operation",
+      "projection_keys": [
+        "qr.operation",
+        "zero-touch.operation"
+      ],
+      "axis": {
+        "product": "EMM",
+        "module": "设备入网",
+        "object": "QR Code 与 Zero Touch",
+        "scene": "新设备入网",
+        "boundary": "组织、网络、门户和设备分配边界"
+      },
+      "source_paths": [
+        "emm for android /[AE]创建二维码注册设备.md",
+        "emm for android /零接触相关流程.md"
+      ],
+      "source_block_refs": [
+        "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+        "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+        "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+        "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+        "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+        "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+        "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+        "emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow",
+        "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow",
+        "emm for android /零接触相关流程.md#L1-L4::non-zolon-flow",
+        "emm for android /零接触相关流程.md#L18-L30::non-zolon-flow",
+        "emm for android /零接触相关流程.md#L40-L57::non-zolon-flow",
+        "emm for android /零接触相关流程.md#L66-L79::zte-flow",
+        "emm for android /零接触相关流程.md#L89-L110::zte-flow",
+            "emm for android /零接触相关流程.md#L120-L125::zte-flow",
+            "emm for android /[AE] 弹窗输入标识符注册设备.md#L49-L64::identifier-validation",
+            "emm for android /[AE] 弹窗输入标识符注册设备.md#L67-L100::identifier-validation",
+            "emm for android /[AE] 弹窗输入标识符注册设备.md#L108-L126::identifier-flow"
+          ],
+      "baseline_ids": [
+        "cb-op-enroll"
+      ],
+      "applicable_dimensions": [
+        "route",
+        "taxonomy",
+        "business-answer",
+        "page-type",
+        "Reader-Audit"
+      ],
+      "risk_tags": [
+        "operation",
+        "branch",
+        "recovery",
+        "media"
+      ],
+      "required_claim_refs": [
+        "preconditions",
+        "steps",
+        "expected_result",
+        "verification"
+      ],
+      "required_boundary_refs": [
+        "failure_boundary"
+      ],
+      "forbidden_claim_refs": [
+        "混合 QR 与 Zero Touch",
+        "补写成功条件"
+      ],
+      "required_atoms": [
+        "前置条件",
+        "步骤",
+        "预期结果",
+        "验证",
+        "失败和限制"
+      ],
+      "forbidden_atoms": [
+        "混合 QR 与 Zero Touch",
+        "补写成功条件"
+      ],
+      "strict_advantage": [
+        "两个流程独立投影",
+        "问题入口到唯一答案页"
+      ],
+      "slot_source_block_refs": {
+        "preconditions": [
+          "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+          "emm for android /零接触相关流程.md#L1-L4::non-zolon-flow",
+          "emm for android /零接触相关流程.md#L18-L30::non-zolon-flow",
+          "emm for android /零接触相关流程.md#L66-L79::zte-flow"
+        ],
+        "steps": [
+          "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L79-L96::qr-flow",
+          "emm for android /零接触相关流程.md#L18-L30::non-zolon-flow",
+          "emm for android /零接触相关流程.md#L89-L110::zte-flow",
+          "emm for android /零接触相关流程.md#L120-L125::zte-flow"
+        ],
+        "expected_result": [
+          "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow",
+          "emm for android /零接触相关流程.md#L26-L30::non-zolon-flow",
+          "emm for android /零接触相关流程.md#L120-L125::zte-flow"
+        ],
+        "verification": [
+          "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow",
+          "emm for android /零接触相关流程.md#L45-L57::non-zolon-flow"
+        ],
+        "failure_boundary": [
+          "emm for android /[AE]创建二维码注册设备.md#L102-L125::qr-flow",
+          "emm for android /零接触相关流程.md#L45-L57::non-zolon-flow"
+        ]
+      },
+      "axis_source_block_refs": {
+        "product": [
+          "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+          "emm for android /零接触相关流程.md#L1-L55::non-zolon-flow",
+          "emm for android /零接触相关流程.md#L66-L123::zte-flow"
+        ],
+        "module": [
+          "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+          "emm for android /零接触相关流程.md#L1-L55::non-zolon-flow",
+          "emm for android /零接触相关流程.md#L66-L123::zte-flow"
+        ],
+        "object": [
+          "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+          "emm for android /零接触相关流程.md#L1-L55::non-zolon-flow",
+          "emm for android /零接触相关流程.md#L66-L123::zte-flow"
+        ],
+        "scene": [
+          "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+          "emm for android /零接触相关流程.md#L1-L55::non-zolon-flow",
+          "emm for android /零接触相关流程.md#L66-L123::zte-flow"
+        ],
+        "boundary": [
+          "emm for android /[AE]创建二维码注册设备.md#L24-L24::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L58-L71::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L51-L57::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L28-L30::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L37-L39::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L77-L77::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L42-L42::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L13-L13::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L26-L26::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L48-L50::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L9-L9::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L17-L20::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L44-L44::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L75-L75::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L46-L46::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L3-L3::qr-flow",
+          "emm for android /[AE]创建二维码注册设备.md#L31-L36::qr-flow",
+          "emm for android /零接触相关流程.md#L1-L55::non-zolon-flow",
+          "emm for android /零接触相关流程.md#L66-L123::zte-flow"
+        ]
+      }
+    },
+    {
+      "case_id": "Q-DIA-01",
+      "role": "产品/测试/支持人员",
+      "question": "GoInsight 出现异常时如何定位、处理和升级？",
+      "answer_lede": "先按对象分流：指标、迁移任务、问数数据集、智能删除和文档代理各有自己的检查入口；只执行来源明确写出的动作，历史缺陷统计不能直接当作当前版本根因。",
+      "slot_labels": {
+        "symptom": "已记录的现象",
+        "checks": "可执行检查",
+        "possible_causes": "可能原因",
+        "actions": "已记录动作",
+        "escalation_boundary": "升级边界"
+      },
+      "slot_ledes": {
+        "symptom": "V2.2.0 资料记录 404 个 bug，其中回归测试 158 个；指标详情把当前值高于 2σ、低于 2σ、轻微偏高/偏低和正常分开，并单独处理样本不足。",
+        "checks": "先判断指标异常状态和样本是否足够，再看异常设备集中在哪些代理商、机型或固件版本；迁移类失败按状态核对时间、原因、重试次数和日志；问数和智能删除异常再检查数据集、字段/值/表描述和工作表匹配。",
+        "possible_causes": "已记录根因包括代码逻辑错误和环境问题；指标异常要结合异常集中维度继续定位；问数或文档代理无结果时，先区分没有匹配数据集、没有命中知识库，还是工作表名称未识别。",
+        "actions": "迁移任务只在来源允许的状态下重试、重新同步或重新开始；问数识别不到数据集时按来源规则手动选择并重新回答；智能删除必须先预览和确认，取消后保持列表但禁止继续操作。",
+        "escalation_boundary": "当前页面只覆盖来源明确写出的处理动作：迁移受并发、限流和线上查询边界约束。"
+      },
+      "slot_table_rows": {
+        "symptom": [
+          {"label":"指标异常","text":"当前值高于 2σ 上限为异常偏高，低于 2σ 下限为异常偏低；位于 1σ 与 2σ 之间为偏高或偏低；历史样本不足时标记为样本不足。","source_block_refs":["GoInsight/指标详情页.md#L25-L61::metric-anomaly"]},
+          {"label":"迁移异常","text":"迁移任务按迁移失败、任务失败、S3 同步失败和已停止等状态区分待处理异常。","source_block_refs":["GoInsight/迁移任务列表.md#L104-L117::migration-state"]},
+          {"label":"迁移中的数据风险","text":"迁移期间查询仍走旧集群，新上送数据进入 S3 暂存；全量迁移后必须先做数据校验，校验通过才进入集群验证和切换。","source_block_refs":["GoInsight/迁移任务列表.md#L118-L138::migration-state"]},
+          {"label":"问数数据集未识别","text":"未识别到数据集时，回答内容为空，因为数据集来自接口选择，不是大模型直接回答；该资料把影响范围限定为问数。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L35-L42::dataset-selection"]},
+          {"label":"智能删除对象未找到","text":"没有识别到工作表时，系统提示用户补充具体工作表名称；没有匹配数据集时，进入手动选择分支。","source_block_refs":["GoInsight/智能删除图表.md#L30-L38::smart-delete","GoInsight/智能删除图表.md#L42-L48::smart-delete"]}
+        ],
+        "checks": [
+          {"label":"指标分支","text":"先看异常状态和样本是否足够，再在设备列表中查看命中设备，并按代理商、机型或固件版本查看异常集中度。","source_block_refs":["GoInsight/指标详情页.md#L25-L61::metric-anomaly","GoInsight/指标详情页.md#L108-L133::metric-analysis"]},
+          {"label":"迁移分支","text":"先按状态筛选，再核对失败时间、失败原因、重试次数和操作日志；迁移失败可重试，S3 同步失败可重新同步，已停止任务可重新开始。","source_block_refs":["GoInsight/迁移任务列表.md#L104-L117::migration-state","GoInsight/迁移任务列表.md#L162-L167::migration-failure","GoInsight/迁移任务列表.md#L182-L191::migration-recovery"]},
+          {"label":"迁移校验分支","text":"迁移校验不能只看总条目数：至少比较总量、分区和抽样字段/整行 hash；目标集群还要检查表结构、字段类型、磁盘配额、S3 路径以及基础查询和写入超时。","source_block_refs":["GoInsight/迁移任务列表.md#L199-L210::migration-recovery","GoInsight/迁移任务列表.md#L214-L223::migration-recovery"]},
+          {"label":"数据集识别分支","text":"先匹配字段或同义词，再按关键词值寻找字段/表，最后用表描述核对用户意图；该分支可以不使用大模型上下文对话。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection","GoInsight/16 问数自动识别数据集.md#L16-L19::dataset-selection"]},
+          {"label":"智能删除分支","text":"先确定数据集：当前详情页优先，其次看最近使用或近 30 天用量，仍无法匹配就手动选择；再识别工作表，最后检查当前用户有权限的私有组和共享组。","source_block_refs":["GoInsight/智能删除图表.md#L30-L38::smart-delete","GoInsight/智能删除图表.md#L42-L48::smart-delete"]}
+        ],
+        "possible_causes": [
+          {"label":"缺陷根因","text":"V2.2.0 回归测试分析记录的根因包括代码逻辑错误和环境问题；这只是该版本的统计，不是当前异常的直接定论。","source_block_refs":["GoInsight/GoInsight V2.2.0 bug analysis.md#L18-L19::bug-profile"]},
+          {"label":"迁移环境原因","text":"迁移失败还可能来自目标集群表结构/字段类型不兼容、磁盘或配额不足、S3 暂存路径不可读，以及基础查询或写入超时；这些要通过目标集群验证确认。","source_block_refs":["GoInsight/迁移任务列表.md#L199-L210::migration-recovery"]},
+          {"label":"指标集中因素","text":"指标智能洞察可按代理商、机型和固件版本等维度查看异常设备集中在哪些对象，以及可能相关的因素。","source_block_refs":["GoInsight/指标详情页.md#L108-L133::metric-analysis"]},
+          {"label":"识别匹配不足","text":"问数数据集识别可能因为字段、字段值或表描述与问题意图不匹配而没有结果；未识别数据集时不能把空回答解释成业务结论。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection","GoInsight/16 问数自动识别数据集.md#L40-L42::dataset-selection"]},
+          {"label":"知识库没有答案","text":"文档代理的限制是只能基于知识库回答；找不到答案时返回明确的升级提示，不能从知识库之外补写结论。","source_block_refs":["GoInsight/智能查询文档.md#L23-L31::document-agent"]}
+        ],
+        "actions": [
+          {"label":"迁移失败","text":"迁移失败时按来源提供的失败重试动作处理；任务失败或 S3 同步失败先保留失败状态并查看日志，不能把指标统计直接当成根因。","source_block_refs":["GoInsight/迁移任务列表.md#L253-L261::migration-failure","GoInsight/GoInsight V2.2.0 bug analysis.md#L7-L19::bug-profile"]},
+          {"label":"切换失败","text":"集群验证或切换失败时，任务进入任务失败；查询和写入不切到目标集群，停止 S3 同步，目标集群迁移数据默认保留用于排查。","source_block_refs":["GoInsight/迁移任务列表.md#L251-L261::migration-failure"]},
+          {"label":"高风险操作","text":"数据集处于迁移中、集群验证中、待 S3 同步等未结束状态时，限制删除、清空、改字段和改高级配置；失败或完成状态才允许再次创建任务。","source_block_refs":["GoInsight/迁移任务列表.md#L233-L238::migration-state","GoInsight/迁移任务列表.md#L242-L249::migration-state"]},
+          {"label":"删除前确认","text":"检索到的工作表先以列表展示，默认不选中；全选作用于所有分页，确认删除后生成新的指令和完成结果，取消则保留列表但禁用操作。","source_block_refs":["GoInsight/智能删除图表.md#L52-L75::smart-delete"]},
+          {"label":"问数重新回答","text":"用户点击已识别的数据集后重新回答；未识别数据集时保留点赞/点踩入口，但不把空回答当成内容命中。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L27-L32::dataset-selection","GoInsight/16 问数自动识别数据集.md#L40-L42::dataset-selection"]}
+        ],
+        "escalation_boundary": [
+          {"label":"完成条件","text":"迁移只有在全量迁移、数据校验、目标集群验证与切换、S3 回补及回补校验都通过后才算完成；批量迁移还受并发、源/目标集群限流和不影响线上查询的约束。","source_block_refs":["GoInsight/迁移任务列表.md#L253-L261::migration-failure","GoInsight/迁移任务列表.md#L265-L278::migration-failure"]},
+          {"label":"失败后的边界","text":"失败重试、S3 重同步不能产生重复数据或重复回补；未知中间态要进入失败状态并要求人工处理，不能继续自动推进。","source_block_refs":["GoInsight/迁移任务列表.md#L233-L238::migration-recovery","GoInsight/迁移任务列表.md#L273-L278::migration-failure"]},
+          {"label":"知识边界","text":"文档代理只读知识库，链接内容也应保留；找不到答案时必须返回升级提示，不能把未命中当成系统不存在。","source_block_refs":["GoInsight/智能查询文档.md#L27-L31::document-agent"]},
+          {"label":"问数影响范围","text":"数据集识别方案的影响范围只写明为问数；它减少 token 和识别错误，但不会保留选择数据集的对话内容。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L16-L19::dataset-selection","GoInsight/16 问数自动识别数据集.md#L35-L37::dataset-selection"]}
+        ]
+      },
+      "page_type": "diagnosis",
+      "projection_keys": [
+        "diagnosis.metric",
+        "diagnosis.migration",
+        "diagnosis.query",
+        "diagnosis.delete",
+        "diagnosis.doc"
+      ],
+      "allow_source_not_documented": false,
+      "source_not_documented_path": "GoInsight/17  智能搭建.md",
+      "axis": {
+        "product": "GoInsight",
+        "module": "指标、AI 任务与数据迁移异常",
+        "object": "指标、字段、数据集、工作表、迁移任务与日志",
+        "scene": "指标/问数/智能操作异常排查与迁移恢复",
+        "boundary": "匹配失败、操作确认、迁移验证与升级边界"
+      },
+      "source_paths": [
+        "GoInsight/GoInsight V2.2.0 bug analysis.md",
+        "GoInsight/指标详情页.md",
+        "GoInsight/迁移任务列表.md",
+        "GoInsight/16 问数自动识别数据集.md",
+        "GoInsight/智能删除图表.md",
+        "GoInsight/智能查询文档.md",
+        "GoInsight/17  智能搭建.md"
+      ],
+      "source_block_refs": [
+        "GoInsight/GoInsight V2.2.0 bug analysis.md#L7-L13::bug-profile",
+        "GoInsight/GoInsight V2.2.0 bug analysis.md#L5-L5::bug-profile",
+        "GoInsight/GoInsight V2.2.0 bug analysis.md#L14-L14::bug-profile",
+        "GoInsight/指标详情页.md#L25-L61::metric-anomaly",
+        "GoInsight/指标详情页.md#L108-L133::metric-analysis",
+        "GoInsight/指标详情页.md#L106-L106::metric-analysis",
+        "GoInsight/迁移任务列表.md#L104-L115::migration-state",
+        "GoInsight/迁移任务列表.md#L162-L162::migration-failure",
+        "GoInsight/迁移任务列表.md#L164-L167::migration-failure",
+        "GoInsight/迁移任务列表.md#L182-L191::migration-failure",
+        "GoInsight/迁移任务列表.md#L253-L261::migration-failure",
+        "GoInsight/迁移任务列表.md#L273-L278::migration-failure",
+    "GoInsight/迁移任务列表.md#L265-L269::migration-failure"
+      ],
+      "baseline_ids": [
+        "cb-dia-conflict",
+        "cb-dia-root"
+      ],
+      "applicable_dimensions": [
+        "route",
+        "taxonomy",
+        "business-answer",
+        "page-type",
+        "Reader-Audit"
+      ],
+      "risk_tags": [
+        "diagnosis",
+        "source-not-documented",
+        "ambiguity"
+      ],
+      "required_claim_refs": [
+        "symptom",
+        "checks",
+        "possible_causes",
+        "actions"
+      ],
+      "required_boundary_refs": [
+        "escalation_boundary"
+      ],
+      "forbidden_claim_refs": [
+        "把统计数字当根因",
+        "资料未记录等于系统不存在"
+      ],
+      "required_atoms": [
+        "症状",
+        "检查顺序",
+        "可能原因",
+        "处理动作",
+        "升级边界"
+      ],
+      "forbidden_atoms": [
+        "把统计数字当根因",
+        "资料未记录等于系统不存在"
+      ],
+      "strict_advantage": [
+        "异常规则和未记录边界分开",
+        "Audit 保留诊断证据"
+      ],
+      "slot_source_block_refs": {
+        "symptom": [
+          "GoInsight/GoInsight V2.2.0 bug analysis.md#L7-L13::bug-profile",
+          "GoInsight/GoInsight V2.2.0 bug analysis.md#L5-L5::bug-profile",
+          "GoInsight/GoInsight V2.2.0 bug analysis.md#L14-L14::bug-profile",
+          "GoInsight/指标详情页.md#L25-L61::metric-anomaly"
+        ],
+        "checks": [
+          "GoInsight/指标详情页.md#L25-L61::metric-anomaly",
+          "GoInsight/指标详情页.md#L108-L133::metric-analysis",
+          "GoInsight/迁移任务列表.md#L182-L191::migration-recovery",
+          "GoInsight/智能删除图表.md#L30-L38::smart-delete",
+          "GoInsight/智能删除图表.md#L42-L48::smart-delete"
+        ],
+        "possible_causes": [
+          "GoInsight/GoInsight V2.2.0 bug analysis.md#L18-L19::bug-profile",
+          "GoInsight/指标详情页.md#L108-L133::metric-analysis",
+          "GoInsight/指标详情页.md#L106-L106::metric-analysis"
+        ],
+        "actions": [
+          "GoInsight/迁移任务列表.md#L162-L162::migration-failure",
+          "GoInsight/迁移任务列表.md#L164-L167::migration-failure",
+          "GoInsight/迁移任务列表.md#L182-L191::migration-failure",
+          "GoInsight/迁移任务列表.md#L253-L260::migration-failure",
+          "GoInsight/智能删除图表.md#L52-L75::smart-delete"
+        ],
+        "escalation_boundary": [
+          "GoInsight/迁移任务列表.md#L253-L261::migration-failure",
+          "GoInsight/迁移任务列表.md#L273-L278::migration-failure",
+    "GoInsight/迁移任务列表.md#L265-L269::migration-failure"
+        ]
+      },
+      "axis_source_block_refs": {
+        "product": [
+          "GoInsight/GoInsight V2.2.0 bug analysis.md#L7-L13::bug-profile",
+          "GoInsight/GoInsight V2.2.0 bug analysis.md#L5-L5::bug-profile",
+          "GoInsight/GoInsight V2.2.0 bug analysis.md#L14-L14::bug-profile"
+        ],
+        "module": [
+          "GoInsight/GoInsight V2.2.0 bug analysis.md#L7-L13::bug-profile",
+          "GoInsight/GoInsight V2.2.0 bug analysis.md#L5-L5::bug-profile",
+          "GoInsight/GoInsight V2.2.0 bug analysis.md#L14-L14::bug-profile"
+        ],
+        "object": [
+          "GoInsight/GoInsight V2.2.0 bug analysis.md#L5-L5::bug-profile",
+          "GoInsight/指标详情页.md#L25-L61::metric-anomaly"
+        ],
+        "scene": [
+          "GoInsight/GoInsight V2.2.0 bug analysis.md#L7-L13::bug-profile",
+          "GoInsight/GoInsight V2.2.0 bug analysis.md#L5-L5::bug-profile",
+          "GoInsight/GoInsight V2.2.0 bug analysis.md#L14-L14::bug-profile",
+          "GoInsight/指标详情页.md#L25-L61::metric-anomaly"
+        ],
+        "boundary": [
+          "GoInsight/迁移任务列表.md#L253-L261::migration-failure",
+    "GoInsight/迁移任务列表.md#L265-L269::migration-failure"
+        ]
+      },
+      "projection_overrides": {
+        "diagnosis.metric": {
+          "question_aliases": ["GoInsight 指标异常怎么查？", "异常设备集中在哪些维度？"],
+          "allow_source_not_documented": false,
+          "title": "GoInsight 指标异常如何定位和处理？",
+          "answer_lede": "指标异常先确认统计规则和样本是否足够，再定位命中设备与集中维度；超过数据范围时只保留聚合结果。",
+          "source_paths": [
+            "GoInsight/GoInsight V2.2.0 bug analysis.md",
+            "GoInsight/指标详情页.md"
+          ],
+          "source_block_refs": [
+            "GoInsight/GoInsight V2.2.0 bug analysis.md#L5-L5::bug-profile",
+            "GoInsight/GoInsight V2.2.0 bug analysis.md#L18-L19::bug-profile",
+            "GoInsight/指标详情页.md#L25-L61::metric-anomaly",
+            "GoInsight/指标详情页.md#L63-L104::metric-analysis",
+            "GoInsight/指标详情页.md#L108-L133::metric-analysis",
+            "GoInsight/指标详情页.md#L137-L140::metric-anomaly"
+          ],
+          "slot_ledes": {},
+          "axis": {
+            "product": "GoInsight",
+            "module": "指标详情与智能洞察",
+            "object": "指标、历史样本、命中设备和分析维度",
+            "scene": "指标异常识别、集中度定位与设备下钻",
+            "boundary": "样本不足、数据量过大和无上期对比时的展示限制"
+          },
+          "axis_source_block_refs": {
+            "product": ["GoInsight/指标详情页.md#L13-L21::metric-analysis"],
+            "module": ["GoInsight/指标详情页.md#L23-L61::metric-anomaly", "GoInsight/指标详情页.md#L106-L133::metric-analysis"],
+            "object": ["GoInsight/指标详情页.md#L63-L104::metric-analysis"],
+            "scene": ["GoInsight/指标详情页.md#L25-L61::metric-anomaly", "GoInsight/指标详情页.md#L108-L133::metric-analysis"],
+            "boundary": ["GoInsight/指标详情页.md#L139-L140::metric-anomaly"]
+          },
+          "slot_source_block_refs": {
+            "symptom": ["GoInsight/指标详情页.md#L25-L61::metric-anomaly"],
+            "checks": ["GoInsight/指标详情页.md#L25-L61::metric-anomaly", "GoInsight/指标详情页.md#L63-L104::metric-analysis", "GoInsight/指标详情页.md#L108-L133::metric-analysis"],
+            "possible_causes": ["GoInsight/GoInsight V2.2.0 bug analysis.md#L18-L19::bug-profile", "GoInsight/指标详情页.md#L108-L133::metric-analysis"],
+            "actions": ["GoInsight/指标详情页.md#L65-L104::metric-analysis"],
+            "escalation_boundary": ["GoInsight/指标详情页.md#L139-L140::metric-anomaly", "GoInsight/指标详情页.md#L108-L133::metric-analysis"]
+          },
+          "slot_table_rows": {
+            "symptom": [{"label":"异常状态","text":"当前值高于 2σ 上限为异常偏高，低于 2σ 下限为异常偏低，1σ 与 2σ 之间为轻微偏高/偏低；σ=0 和历史样本不足有单独处理。","source_block_refs":["GoInsight/指标详情页.md#L25-L61::metric-anomaly"]}],
+            "checks": [{"label":"定位顺序","text":"先看异常状态与样本，再看命中设备，最后按代理商、机型或固件版本检查异常集中度。","source_block_refs":["GoInsight/指标详情页.md#L25-L61::metric-anomaly","GoInsight/指标详情页.md#L63-L104::metric-analysis","GoInsight/指标详情页.md#L108-L133::metric-analysis"]}],
+            "possible_causes": [{"label":"只能作为线索","text":"智能洞察展示异常设备集中维度；V2.2.0 回归统计中的代码逻辑错误和环境问题只是历史版本背景，不能直接判定当前根因。","source_block_refs":["GoInsight/GoInsight V2.2.0 bug analysis.md#L18-L19::bug-profile","GoInsight/指标详情页.md#L108-L133::metric-analysis"]}],
+            "actions": [{"label":"设备下钻","text":"可以切换列表/卡片、查看设备详情、导出当前周期数据，或将当前指标条件带入设备报告。","source_block_refs":["GoInsight/指标详情页.md#L65-L104::metric-analysis"]}],
+            "escalation_boundary": [{"label":"数据量限制","text":"超过 200,000 台设备时只展示聚合统计；只有本期数据时不展示指标波动和变化贡献。","source_block_refs":["GoInsight/指标详情页.md#L139-L140::metric-anomaly","GoInsight/指标详情页.md#L108-L133::metric-analysis"]}]
+          }
+        },
+        "diagnosis.migration": {
+          "question_aliases": ["迁移任务失败后怎么排查和恢复？", "集群切换失败时怎么办？"],
+          "allow_source_not_documented": false,
+          "title": "GoInsight 迁移任务失败如何定位、恢复和升级？",
+          "answer_lede": "迁移任务按状态分流；迁移校验、集群验证、S3 回补都通过后才算完成，切换失败时旧集群继续提供服务。",
+          "source_paths": ["GoInsight/迁移任务列表.md", "GoInsight/新建迁移任务.md"],
+          "source_block_refs": [
+            "GoInsight/迁移任务列表.md#L104-L138::migration-state",
+            "GoInsight/迁移任务列表.md#L162-L191::migration-recovery",
+            "GoInsight/迁移任务列表.md#L197-L223::migration-recovery",
+            "GoInsight/迁移任务列表.md#L231-L249::migration-recovery",
+            "GoInsight/迁移任务列表.md#L251-L278::migration-failure"
+          ],
+          "summary_source_block_refs": ["GoInsight/迁移任务列表.md#L104-L117::migration-state", "GoInsight/迁移任务列表.md#L253-L261::migration-failure"],
+          "slot_ledes": {},
+          "axis": {
+            "product": "GoInsight",
+            "module": "数据迁移任务与集群切换",
+            "object": "迁移任务、源/目标集群、S3 暂存数据和校验结果",
+            "scene": "迁移失败、集群验证失败与 S3 回补恢复",
+            "boundary": "状态幂等、数据一致性、切换保守策略与未知中间态升级"
+          },
+          "axis_source_block_refs": {
+            "product": ["GoInsight/迁移任务列表.md#L3-L11::migration-state"],
+            "module": ["GoInsight/迁移任务列表.md#L104-L117::migration-state"],
+            "object": ["GoInsight/迁移任务列表.md#L118-L138::migration-state", "GoInsight/迁移任务列表.md#L225-L229::migration-recovery"],
+            "scene": ["GoInsight/迁移任务列表.md#L164-L167::migration-recovery", "GoInsight/迁移任务列表.md#L253-L261::migration-failure"],
+            "boundary": ["GoInsight/迁移任务列表.md#L233-L238::migration-recovery", "GoInsight/迁移任务列表.md#L273-L278::migration-failure"]
+          },
+          "slot_source_block_refs": {
+            "symptom": ["GoInsight/迁移任务列表.md#L104-L117::migration-state"],
+            "checks": ["GoInsight/迁移任务列表.md#L182-L191::migration-recovery", "GoInsight/迁移任务列表.md#L197-L223::migration-recovery"],
+            "possible_causes": ["GoInsight/迁移任务列表.md#L197-L210::migration-recovery", "GoInsight/迁移任务列表.md#L231-L238::migration-recovery"],
+            "actions": ["GoInsight/迁移任务列表.md#L164-L167::migration-recovery", "GoInsight/迁移任务列表.md#L171-L178::migration-recovery", "GoInsight/迁移任务列表.md#L251-L261::migration-failure"],
+            "escalation_boundary": ["GoInsight/迁移任务列表.md#L231-L238::migration-recovery", "GoInsight/迁移任务列表.md#L271-L278::migration-failure", "GoInsight/迁移任务列表.md#L253-L261::migration-failure"]
+          },
+          "slot_table_rows": {
+            "symptom": [
+              {"label":"状态分流","text":"迁移失败表示迁移或数据校验失败，任务失败表示集群验证/切换失败，S3 同步失败表示回补或回补校验失败；已停止只能从待开始中止。","source_block_refs":["GoInsight/迁移任务列表.md#L104-L117::migration-state"]},
+              {"label":"线上影响信号","text":"迁移期间查询仍走旧集群，新上送数据进入 S3 暂存；切换失败时不能把查询或写入误切到目标集群。","source_block_refs":["GoInsight/迁移任务列表.md#L164-L178::migration-recovery","GoInsight/迁移任务列表.md#L253-L261::migration-failure"]}
+            ],
+            "checks": [
+              {"label":"三段校验","text":"先看日志和失败原因，再检查连接/权限/结构/配额/S3/查询写入，最后做总量、分区和抽样 hash 校验。","source_block_refs":["GoInsight/迁移任务列表.md#L182-L191::migration-recovery","GoInsight/迁移任务列表.md#L197-L223::migration-recovery"]},
+              {"label":"目标集群可用性","text":"集群验证不能只看连接成功，还要检查账号、读写、建表删表权限、目标库、表结构与字段类型兼容、磁盘/配额、S3 路径可读以及基础查询写入是否超时。","source_block_refs":["GoInsight/迁移任务列表.md#L199-L210::cluster-availability"]},
+              {"label":"数据准确性","text":"总量校验不能单独作为成功条件；还要按分区对比条目数，并覆盖最大分区、最新分区和随机分区做关键字段或整行 hash 抽样。","source_block_refs":["GoInsight/迁移任务列表.md#L214-L223::data-accuracy"]}
+            ],
+            "possible_causes": [
+              {"label":"环境与幂等","text":"目标集群不兼容、资源不足、S3 路径不可读、基础读写超时和重复提交都可能导致失败，需结合验证与日志确认。","source_block_refs":["GoInsight/迁移任务列表.md#L197-L210::migration-recovery","GoInsight/迁移任务列表.md#L231-L238::migration-recovery"]},
+              {"label":"任务占用与限流","text":"未结束任务的数据集不能再次创建迁移；批量任务还要限制并发、源集群和目标集群流量，避免迁移影响线上查询。","source_block_refs":["GoInsight/迁移任务列表.md#L162-L178::migration-recovery","GoInsight/迁移任务列表.md#L265-L269::performance-boundary"]}
+            ],
+            "actions": [
+              {"label":"按状态恢复","text":"迁移失败可重试，S3 待同步/失败可重新同步，已停止可重新开始；集群切换失败时不切流、不继续 S3、不自动重试。","source_block_refs":["GoInsight/迁移任务列表.md#L164-L167::migration-recovery","GoInsight/迁移任务列表.md#L171-L178::migration-recovery","GoInsight/迁移任务列表.md#L251-L261::migration-failure"]},
+              {"label":"保留排查现场","text":"切换失败后旧集群继续服务，目标集群迁移数据默认保留；不要自动清理、自动重试或继续 S3 回补，先依据失败时间、原因和日志人工处理。","source_block_refs":["GoInsight/迁移任务列表.md#L253-L261::migration-failure"]},
+              {"label":"禁止高风险操作","text":"未结束迁移期间禁止删除或清空数据集、修改字段和结构配置；重复提交、接口重试和 S3 重复同步必须基于明确阶段保持幂等。","source_block_refs":["GoInsight/迁移任务列表.md#L242-L249::risk-operations","GoInsight/迁移任务列表.md#L233-L238::idempotency"]}
+            ],
+            "escalation_boundary": [
+              {"label":"完成与人工边界","text":"未知中间态进入失败并人工处理；只有全量迁移、数据校验、目标集群验证切换、S3 回补及校验全部通过才算完成。","source_block_refs":["GoInsight/迁移任务列表.md#L231-L238::migration-recovery","GoInsight/迁移任务列表.md#L271-L278::migration-failure","GoInsight/迁移任务列表.md#L253-L261::migration-failure"]},
+              {"label":"切换失败边界","text":"集群验证或切换失败时，查询和写入继续留在旧集群，S3 不继续、目标数据不自动清理，必须记录原因并人工决定下一步。","source_block_refs":["GoInsight/迁移任务列表.md#L253-L261::migration-failure"]}
+            ]
+          }
+        },
+        "diagnosis.ai": {
+          "title": "GoInsight 问数、智能删除和文档代理异常如何定位？",
+          "answer_lede": "字段优先匹配、字段值匹配，再用表描述验证用户意图。",
+          "source_paths": ["GoInsight/16 问数自动识别数据集.md", "GoInsight/智能删除图表.md", "GoInsight/智能查询文档.md"],
+          "source_block_refs": [
+            "GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection",
+            "GoInsight/16 问数自动识别数据集.md#L27-L42::dataset-selection",
+            "GoInsight/智能删除图表.md#L30-L48::smart-delete",
+            "GoInsight/智能删除图表.md#L50-L80::smart-delete",
+            "GoInsight/智能查询文档.md#L23-L31::document-agent"
+          ],
+          "summary_source_block_refs": ["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection"],
+          "slot_ledes": {},
+          "axis": {
+            "product": "GoInsight",
+            "module": "问数、智能删除与文档代理",
+            "object": "数据集、字段、表描述、工作表和知识库链接",
+            "scene": "数据集未识别、工作表未命中和知识库无答案",
+            "boundary": "人工选择、删除确认、权限范围和知识库外升级"
+          },
+          "axis_source_block_refs": {
+            "product": ["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection"],
+            "module": ["GoInsight/智能删除图表.md#L12-L13::smart-delete", "GoInsight/智能查询文档.md#L29-L31::document-agent"],
+            "object": ["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection", "GoInsight/智能删除图表.md#L30-L38::smart-delete"],
+            "scene": ["GoInsight/16 问数自动识别数据集.md#L37-L37::dataset-selection", "GoInsight/智能删除图表.md#L42-L48::smart-delete"],
+            "boundary": ["GoInsight/智能删除图表.md#L52-L75::smart-delete", "GoInsight/智能查询文档.md#L29-L31::document-agent"]
+          },
+          "slot_source_block_refs": {
+            "symptom": ["GoInsight/16 问数自动识别数据集.md#L35-L42::dataset-selection", "GoInsight/智能删除图表.md#L42-L48::smart-delete"],
+            "checks": ["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection", "GoInsight/智能删除图表.md#L30-L48::smart-delete"],
+            "possible_causes": ["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection", "GoInsight/智能查询文档.md#L23-L31::document-agent"],
+            "actions": ["GoInsight/16 问数自动识别数据集.md#L29-L30::dataset-selection", "GoInsight/智能删除图表.md#L52-L75::smart-delete"],
+            "escalation_boundary": ["GoInsight/16 问数自动识别数据集.md#L35-L42::dataset-selection", "GoInsight/智能查询文档.md#L27-L31::document-agent"]
+          },
+          "slot_table_rows": {
+            "symptom": [{"label":"识别失败","text":"未识别数据集时问数回答为空；未识别工作表时要求补充具体名称；文档代理找不到答案时不能假装命中。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L35-L42::dataset-selection","GoInsight/智能删除图表.md#L42-L48::smart-delete","GoInsight/智能查询文档.md#L27-L31::document-agent"]}],
+            "checks": [{"label":"匹配顺序","text":"问数按字段/同义词、字段值、表描述验证；删除按数据集、工作表和当前用户可见的私有组/共享组检查。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection","GoInsight/智能删除图表.md#L30-L48::smart-delete"]}],
+            "possible_causes": [{"label":"匹配不足","text":"用户意图与字段、字段值或表描述不匹配会导致无结果；文档代理只能基于知识库回答。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection","GoInsight/智能查询文档.md#L23-L31::document-agent"]}],
+            "actions": [{"label":"确认后操作","text":"数据集未识别时手动选择并重新回答；工作表列表先预览，确认后删除，取消后列表保留但操作禁用。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L29-L30::dataset-selection","GoInsight/智能删除图表.md#L52-L75::smart-delete"]}],
+            "escalation_boundary": [{"label":"越界处理","text":"识别方案只影响问数；删除必须用户确认；知识库没有答案时返回‘我不知道，请升级我的能力’，不从库外生成结论。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L35-L42::dataset-selection","GoInsight/智能查询文档.md#L27-L31::document-agent"]}]
+          }
+        },
+        "diagnosis.query": {
+          "question_aliases": ["问数为什么没有识别出数据集？", "问数没有数据集时怎么处理？"],
+          "allow_source_not_documented": false,
+          "title": "GoInsight 问数数据集未识别如何定位？",
+          "answer_lede": "按字段、字段值和表描述验证问数数据集；未识别到数据集时，大模型回答内容为空。",
+          "source_paths": ["GoInsight/16 问数自动识别数据集.md"],
+          "source_block_refs": ["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection", "GoInsight/16 问数自动识别数据集.md#L29-L30::dataset-selection", "GoInsight/16 问数自动识别数据集.md#L42-L42::dataset-selection"],
+          "summary_source_block_refs": ["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection", "GoInsight/16 问数自动识别数据集.md#L42-L42::dataset-selection"],
+          "slot_ledes": {},
+          "slot_source_block_refs": {"symptom":["GoInsight/16 问数自动识别数据集.md#L42-L42::dataset-selection"],"checks":["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection"],"possible_causes":["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection"],"actions":["GoInsight/16 问数自动识别数据集.md#L29-L30::dataset-selection"],"escalation_boundary":["GoInsight/16 问数自动识别数据集.md#L42-L42::dataset-selection"]},
+          "axis": {"product":"GoInsight","module":"问数","object":"数据集、字段、字段值与表描述","scene":"数据集未识别和问数无结果","boundary":"识别失败时补充信息或手动选择，不把无命中当成答案"},
+          "axis_source_block_refs": {"product":["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection"],"module":["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection"],"object":["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection"],"scene":["GoInsight/16 问数自动识别数据集.md#L29-L30::dataset-selection"],"boundary":["GoInsight/16 问数自动识别数据集.md#L42-L42::dataset-selection"]},
+          "slot_table_rows": {"symptom":[{"label":"识别失败","text":"未识别数据集时问数回答为空，需要补充具体数据集信息。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L42-L42::dataset-selection"]}],"checks":[{"label":"匹配顺序","text":"按字段/同义词、字段值、表描述依次验证用户意图。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection"]}],"possible_causes":[{"label":"没有命中","text":"用户意图没有匹配到字段、字段值或表描述时不会得到可靠数据集。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection"]}],"actions":[{"label":"补充或选择","text":"识别失败时补充信息，或由用户手动选择数据集后重新回答。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L29-L30::dataset-selection"]}],"escalation_boundary":[{"label":"回答边界","text":"资料没有记录的识别结果不能被猜测成命中。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L42-L42::dataset-selection"]}]}
+        },
+        "diagnosis.delete": {
+          "question_aliases": ["智能删除为什么找不到工作表？", "删除图表失败怎么排查？"],
+          "allow_source_not_documented": false,
+          "title": "GoInsight 智能删除找不到工作表或无法删除如何定位？",
+          "answer_lede": "工作表先指定数据集进行检索；检索到的工作表以列表展示并由用户确认删除。",
+          "source_paths": ["GoInsight/智能删除图表.md"],
+          "source_block_refs": ["GoInsight/智能删除图表.md#L30-L38::smart-delete", "GoInsight/智能删除图表.md#L42-L48::smart-delete", "GoInsight/智能删除图表.md#L52-L75::smart-delete"],
+          "summary_source_block_refs": ["GoInsight/智能删除图表.md#L30-L38::smart-delete", "GoInsight/智能删除图表.md#L52-L75::smart-delete"],
+          "slot_ledes": {},
+          "slot_source_block_refs": {"symptom":["GoInsight/智能删除图表.md#L42-L48::smart-delete"],"checks":["GoInsight/智能删除图表.md#L30-L38::smart-delete"],"possible_causes":["GoInsight/智能删除图表.md#L30-L38::smart-delete"],"actions":["GoInsight/智能删除图表.md#L52-L75::smart-delete"],"escalation_boundary":["GoInsight/智能删除图表.md#L52-L75::smart-delete"]},
+          "axis": {"product":"GoInsight","module":"智能删除图表","object":"数据集、工作表、分组与删除确认","scene":"工作表未命中和删除操作异常","boundary":"用户可见权限、预览确认和取消后的操作状态"},
+          "axis_source_block_refs": {"product":["GoInsight/智能删除图表.md#L30-L38::smart-delete"],"module":["GoInsight/智能删除图表.md#L30-L38::smart-delete"],"object":["GoInsight/智能删除图表.md#L30-L38::smart-delete"],"scene":["GoInsight/智能删除图表.md#L42-L48::smart-delete"],"boundary":["GoInsight/智能删除图表.md#L52-L75::smart-delete"]},
+          "slot_table_rows": {"symptom":[{"label":"未命中","text":"未识别工作表时要求用户补充具体名称，不能直接执行删除。","source_block_refs":["GoInsight/智能删除图表.md#L42-L48::smart-delete"]}],"checks":[{"label":"权限与对象","text":"按数据集、工作表和当前用户可见的私有组/共享组检查可删除对象。","source_block_refs":["GoInsight/智能删除图表.md#L30-L38::smart-delete"]}],"possible_causes":[{"label":"对象或权限不匹配","text":"数据集、工作表或用户可见范围不匹配时，删除对象不会被可靠识别。","source_block_refs":["GoInsight/智能删除图表.md#L30-L38::smart-delete"]}],"actions":[{"label":"预览再确认","text":"先展示数据集、分组和工作表列表，确认后才执行删除；取消后列表保留但操作禁用。","source_block_refs":["GoInsight/智能删除图表.md#L52-L75::smart-delete"]}],"escalation_boundary":[{"label":"人工确认边界","text":"删除必须由用户确认，不能把识别结果直接当成已删除。","source_block_refs":["GoInsight/智能删除图表.md#L52-L75::smart-delete"]}]}
+        },
+        "diagnosis.doc": {
+          "question_aliases": ["/Document 没有答案怎么办？", "文档代理找不到内容怎么升级？"],
+          "allow_source_not_documented": false,
+          "title": "GoInsight 文档代理没有答案如何定位？",
+          "answer_lede": "文档代理基于知识库提供准确、简洁的解答；找不到答案时返回我不知道，请升级我的能力。",
+          "source_paths": ["GoInsight/智能查询文档.md"],
+          "source_block_refs": ["GoInsight/智能查询文档.md#L11-L12::document-agent", "GoInsight/智能查询文档.md#L16-L17::document-agent", "GoInsight/智能查询文档.md#L25-L25::document-agent", "GoInsight/智能查询文档.md#L29-L31::document-agent"],
+          "summary_source_block_refs": ["GoInsight/智能查询文档.md#L25-L25::document-agent", "GoInsight/智能查询文档.md#L29-L31::document-agent"],
+          "slot_ledes": {"checks":"问题通过 /Document 意图进入文档代理；结果按提问语言展示并保留文档中的视频链接。"},
+          "slot_source_block_refs": {"symptom":["GoInsight/智能查询文档.md#L29-L31::document-agent"],"checks":["GoInsight/智能查询文档.md#L11-L12::document-agent","GoInsight/智能查询文档.md#L16-L17::document-agent"],"possible_causes":["GoInsight/智能查询文档.md#L29-L31::document-agent"],"actions":["GoInsight/智能查询文档.md#L29-L31::document-agent"],"escalation_boundary":["GoInsight/智能查询文档.md#L29-L31::document-agent"]},
+          "axis": {"product":"GoInsight","module":"文档代理","object":"知识库、文档链接与回答","scene":"知识库无答案和文档代理异常","boundary":"仅限知识库范围，缺答案时升级"},
+          "axis_source_block_refs": {"product":["GoInsight/智能查询文档.md#L25-L25::document-agent"],"module":["GoInsight/智能查询文档.md#L25-L25::document-agent"],"object":["GoInsight/智能查询文档.md#L25-L25::document-agent"],"scene":["GoInsight/智能查询文档.md#L29-L31::document-agent"],"boundary":["GoInsight/智能查询文档.md#L29-L31::document-agent"]},
+          "slot_table_rows": {"symptom":[{"label":"无答案","text":"知识库没有对应内容时，文档代理不能假装命中。","source_block_refs":["GoInsight/智能查询文档.md#L29-L31::document-agent"]}],"checks":[{"label":"知识库范围","text":"先确认问题是否属于当前知识库和文档链接范围。","source_block_refs":["GoInsight/智能查询文档.md#L29-L31::document-agent"]}],"possible_causes":[{"label":"资料不足","text":"知识库外的问题没有可支持的回答依据。","source_block_refs":["GoInsight/智能查询文档.md#L29-L31::document-agent"]}],"actions":[{"label":"明确升级","text":"没有答案时返回‘我不知道，请升级我的能力’，保留文档链接。","source_block_refs":["GoInsight/智能查询文档.md#L29-L31::document-agent"]}],"escalation_boundary":[{"label":"知识库外","text":"不能从知识库外生成结论，必须升级到补充知识或人工处理。","source_block_refs":["GoInsight/智能查询文档.md#L29-L31::document-agent"]}]}
+        }
+      }
+    },
+    {
+      "case_id": "Q-EXP-01",
+      "role": "研发/产品复盘读者",
+      "question": "版本迭代和复盘有哪些做法、坑和适用边界？",
+      "answer_lede": "GoInsight 智能搭建在专用工作流、复用原有工作流和 Agent 之间权衡开发成本、交互性与后续扩展。",
+      "slot_labels": {
+        "context": "背景",
+        "tradeoffs": "方案取舍",
+        "version": "版本与时间",
+        "lessons": "经验教训",
+        "applicability_boundary": "适用边界"
+      },
+      "slot_ledes": {
+        "context": "这些资料记录 GoInsight 智能搭建的专用工作流、复用原有工作流和 Agent 三种方案，并保留 Sprint 复盘的版本上下文。",
+        "tradeoffs": "专用工作流约 8 天，逻辑明确、可控但扩展大屏与设备诊断要新开发；复用原有工作流约 4 天，能快速复用会话和创建工作表能力但扩展受限；Agent 交互较好但可能出现不可预知错误。问数的数据集识别还可用字段→字段值→表描述的确定性流程，降低 token 和识别错误，但不保留选择数据集的对话内容。",
+        "version": "Sprint 116 复盘时间是 2021-11-05，1.9.0 缺陷较多。",
+        "lessons": "Sprint 116 的教训是及时总结版本缺陷；高开发/测试成本需求先找替代方案，必要时取消。",
+        "applicability_boundary": "工作流/Agent 取舍只适用于记录中的智能搭建方案。"
+      },
+      "slot_table_rows": {
+        "context": [
+          {"label":"经验来源","text":"智能搭建记录了三种实现方案；问数资料记录数据集识别和重新回答；智能删除资料记录数据集、工作表、预览确认和日志；智能查询资料记录知识库回答边界。","source_block_refs":["GoInsight/17  智能搭建.md#L3-L5::feature-impact","GoInsight/16 问数自动识别数据集.md#L5-L10::dataset-selection","GoInsight/智能删除图表.md#L8-L13::smart-delete","GoInsight/智能查询文档.md#L7-L12::document-agent"]}
+        ],
+        "tradeoffs": [
+          {"label":"专用工作流","text":"约 8 天；逻辑明确、可控，便于后续扩展大屏与设备诊断，但思考过程和历史会话需要新开发。","source_block_refs":["GoInsight/17  智能搭建.md#L9-L9::feature-impact","GoInsight/17  智能搭建.md#L13-L13::feature-impact","GoInsight/17  智能搭建.md#L15-L17::feature-impact"]},
+          {"label":"复用原有工作流","text":"约 4 天；可直接调用创建工作表接口并复用已有思考过程和历史会话，但不便于后续扩展大屏与设备诊断。","source_block_refs":["GoInsight/17  智能搭建.md#L20-L20::feature-impact","GoInsight/17  智能搭建.md#L22-L26::feature-impact"]},
+          {"label":"Agent","text":"交互较好，信息不足或出错时可以让用户补充，但可能出现不可预知的错误。","source_block_refs":["GoInsight/17  智能搭建.md#L31-L31::feature-impact","GoInsight/17  智能搭建.md#L33-L33::feature-impact"]},
+          {"label":"确定性数据集识别","text":"字段优先匹配，再按字段值找候选字段/表，最后用表描述验证意图；可减少 token 和模型误识别，但不会保留选择数据集的对话内容。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection","GoInsight/16 问数自动识别数据集.md#L16-L19::dataset-selection"]}
+        ],
+        "version": [
+          {"label":"Sprint 116","text":"复盘时间是 2021-11-05 3:00–4:00，且记录 1.9.0 版本缺陷较多；只能作为历史案例。","source_block_refs":["GoInsight/Sprint 116 Retrospective meeting.md#L3-L3::sprint-lessons","GoInsight/Sprint 116 Retrospective meeting.md#L10-L11::sprint-lessons"]},
+          {"label":"智能功能资料","text":"智能删除图表资料标记 V2026.2，智能查询文档资料标记 V2025.4；这些版本上下文不能和 Sprint 116 混成一条当前结论。","source_block_refs":["GoInsight/智能删除图表.md#L87-L91::smart-delete","GoInsight/智能查询文档.md#L40-L44::document-agent"]}
+        ],
+        "lessons": [
+          {"label":"复盘动作","text":"版本缺陷要及时总结；当新需求的开发成本和测试成本都较高时，应寻找替代方案，必要时取消需求。","source_block_refs":["GoInsight/Sprint 116 Retrospective meeting.md#L8-L8::sprint-lessons","GoInsight/Sprint 116 Retrospective meeting.md#L10-L11::sprint-lessons"]},
+          {"label":"高风险操作","text":"智能删除先展示数据集、分组和工作表列表，默认不选中，跨分页全选后仍需确认；删除完成写入日志，取消后保留列表但不再允许操作。","source_block_refs":["GoInsight/智能删除图表.md#L50-L80::smart-delete"]},
+          {"label":"知识边界","text":"文档代理只能基于知识库回答，不能丢弃链接；找不到答案时要返回‘我不知道，请升级我的能力’。","source_block_refs":["GoInsight/智能查询文档.md#L23-L31::document-agent"]}
+        ],
+        "applicability_boundary": [
+          {"label":"选择规则","text":"如果优先逻辑明确和可控，选专用工作流；如果优先快速复用，选原有工作流；如果优先交互并能接受不可预知错误，才考虑 Agent。该选择规则是对本次方案记录的归纳，不是当前全产品规范。","source_block_refs":["GoInsight/17  智能搭建.md#L9-L9::feature-impact","GoInsight/17  智能搭建.md#L20-L20::feature-impact","GoInsight/17  智能搭建.md#L29-L33::feature-impact"]},
+          {"label":"功能边界","text":"问数识别只影响问数；智能删除要求先识别数据集和工作表并由用户确认；文档代理没有知识库答案时必须升级。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L35-L42::dataset-selection","GoInsight/智能删除图表.md#L28-L48::smart-delete","GoInsight/智能查询文档.md#L27-L31::document-agent"]}
+        ]
+      },
+      "page_type": "experience",
+      "projection_keys": [
+        "experience.iteration",
+        "experience.release",
+        "experience.delete",
+        "experience.doc"
+      ],
+      "axis": {
+        "product": "GoInsight",
+        "module": "版本复盘与智能功能方案",
+        "object": "版本、Sprint、工作流、Agent、数据集、工作表与知识库",
+        "scene": "方案取舍、失败复盘与复用边界",
+        "boundary": "版本时效、人工确认、权限与知识库边界"
+      },
+      "source_paths": [
+        "GoInsight/Sprint 116 Retrospective meeting.md",
+        "GoInsight/17  智能搭建.md",
+        "GoInsight/16 问数自动识别数据集.md",
+        "GoInsight/智能删除图表.md",
+        "GoInsight/智能查询文档.md"
+      ],
+      "source_block_refs": [
+        "GoInsight/Sprint 116 Retrospective meeting.md#L5-L5::sprint-lessons",
+        "GoInsight/Sprint 116 Retrospective meeting.md#L10-L11::sprint-lessons",
+        "GoInsight/Sprint 116 Retrospective meeting.md#L8-L8::sprint-lessons",
+        "GoInsight/17  智能搭建.md#L9-L9::feature-impact",
+        "GoInsight/17  智能搭建.md#L33-L33::feature-impact",
+        "GoInsight/17  智能搭建.md#L26-L26::feature-impact",
+        "GoInsight/17  智能搭建.md#L22-L22::feature-impact",
+        "GoInsight/17  智能搭建.md#L38-L42::feature-impact",
+        "GoInsight/17  智能搭建.md#L13-L13::feature-impact",
+        "GoInsight/17  智能搭建.md#L29-L29::feature-impact",
+        "GoInsight/17  智能搭建.md#L20-L20::feature-impact"
+      ],
+      "baseline_ids": [
+        "cb-exp-pitfalls",
+        "cb-exp-version"
+      ],
+      "applicable_dimensions": [
+        "route",
+        "taxonomy",
+        "business-answer",
+        "page-type",
+        "Reader-Audit"
+      ],
+      "risk_tags": [
+        "experience",
+        "version",
+        "overgeneralization"
+      ],
+      "required_claim_refs": [
+        "context",
+        "tradeoffs",
+        "version",
+        "lessons"
+      ],
+      "required_boundary_refs": [
+        "applicability_boundary"
+      ],
+      "forbidden_claim_refs": [
+        "一次复盘变成普遍规则",
+        "丢失版本上下文"
+      ],
+      "required_atoms": [
+        "背景",
+        "做法或取舍",
+        "版本或时间",
+        "踩坑和限制",
+        "适用边界"
+      ],
+      "forbidden_atoms": [
+        "一次复盘变成普遍规则",
+        "丢失版本上下文"
+      ],
+      "strict_advantage": [
+        "经验页保留版本上下文",
+        "每条经验可回查原始块"
+      ],
+      "slot_source_block_refs": {
+        "context": [
+          "GoInsight/Sprint 116 Retrospective meeting.md#L3-L3::sprint-lessons",
+          "GoInsight/17  智能搭建.md#L9-L9::feature-impact",
+          "GoInsight/17  智能搭建.md#L6-L6::feature-impact",
+          "GoInsight/17  智能搭建.md#L3-L3::feature-impact"
+        ],
+        "tradeoffs": [
+          "GoInsight/17  智能搭建.md#L9-L9::feature-impact",
+          "GoInsight/17  智能搭建.md#L33-L33::feature-impact",
+          "GoInsight/17  智能搭建.md#L26-L26::feature-impact",
+          "GoInsight/17  智能搭建.md#L22-L22::feature-impact",
+          "GoInsight/17  智能搭建.md#L38-L42::feature-impact",
+          "GoInsight/17  智能搭建.md#L13-L13::feature-impact",
+          "GoInsight/17  智能搭建.md#L29-L29::feature-impact",
+          "GoInsight/17  智能搭建.md#L20-L20::feature-impact"
+        ],
+        "version": [
+          "GoInsight/Sprint 116 Retrospective meeting.md#L3-L3::sprint-lessons"
+        ],
+        "lessons": [
+          "GoInsight/Sprint 116 Retrospective meeting.md#L10-L11::sprint-lessons"
+        ],
+        "applicability_boundary": [
+          "GoInsight/17  智能搭建.md#L33-L33::feature-impact",
+          "GoInsight/17  智能搭建.md#L26-L26::feature-impact",
+          "GoInsight/17  智能搭建.md#L22-L22::feature-impact",
+          "GoInsight/17  智能搭建.md#L13-L13::feature-impact",
+          "GoInsight/17  智能搭建.md#L29-L29::feature-impact",
+          "GoInsight/17  智能搭建.md#L20-L20::feature-impact"
+        ]
+      },
+      "axis_source_block_refs": {
+        "product": [
+          "GoInsight/Sprint 116 Retrospective meeting.md#L5-L5::sprint-lessons",
+          "GoInsight/Sprint 116 Retrospective meeting.md#L8-L8::sprint-lessons"
+        ],
+        "module": [
+          "GoInsight/Sprint 116 Retrospective meeting.md#L5-L5::sprint-lessons",
+          "GoInsight/Sprint 116 Retrospective meeting.md#L8-L8::sprint-lessons"
+        ],
+        "object": [
+          "GoInsight/17  智能搭建.md#L9-L9::feature-impact",
+          "GoInsight/17  智能搭建.md#L33-L33::feature-impact",
+          "GoInsight/17  智能搭建.md#L26-L26::feature-impact",
+          "GoInsight/17  智能搭建.md#L6-L6::feature-impact",
+          "GoInsight/17  智能搭建.md#L22-L22::feature-impact",
+          "GoInsight/17  智能搭建.md#L13-L13::feature-impact",
+          "GoInsight/17  智能搭建.md#L29-L29::feature-impact",
+          "GoInsight/17  智能搭建.md#L20-L20::feature-impact",
+          "GoInsight/17  智能搭建.md#L3-L3::feature-impact"
+        ],
+        "scene": [
+          "GoInsight/Sprint 116 Retrospective meeting.md#L5-L5::sprint-lessons",
+          "GoInsight/Sprint 116 Retrospective meeting.md#L8-L8::sprint-lessons",
+          "GoInsight/17  智能搭建.md#L9-L9::feature-impact",
+          "GoInsight/17  智能搭建.md#L33-L33::feature-impact",
+          "GoInsight/17  智能搭建.md#L26-L26::feature-impact",
+          "GoInsight/17  智能搭建.md#L6-L6::feature-impact",
+          "GoInsight/17  智能搭建.md#L22-L22::feature-impact",
+          "GoInsight/17  智能搭建.md#L13-L13::feature-impact",
+          "GoInsight/17  智能搭建.md#L29-L29::feature-impact",
+          "GoInsight/17  智能搭建.md#L20-L20::feature-impact",
+          "GoInsight/17  智能搭建.md#L3-L3::feature-impact"
+        ],
+        "boundary": [
+          "GoInsight/17  智能搭建.md#L9-L9::feature-impact",
+          "GoInsight/17  智能搭建.md#L33-L33::feature-impact",
+          "GoInsight/17  智能搭建.md#L26-L26::feature-impact",
+          "GoInsight/17  智能搭建.md#L6-L6::feature-impact",
+          "GoInsight/17  智能搭建.md#L22-L22::feature-impact",
+          "GoInsight/17  智能搭建.md#L13-L13::feature-impact",
+          "GoInsight/17  智能搭建.md#L29-L29::feature-impact",
+          "GoInsight/17  智能搭建.md#L20-L20::feature-impact",
+          "GoInsight/17  智能搭建.md#L3-L3::feature-impact"
+        ]
+      },
+      "projection_overrides": {
+        "experience.iteration": {
+          "question_aliases": ["智能搭建选哪种方案？", "Agent 方案有什么取舍？"],
+          "title": "GoInsight 智能搭建方案怎么取舍？",
+          "answer_lede": "方案一是专用工作流（8 天），方案二是在原有问数工作流基础上调用创建工作表接口（4 天），方案三是 Agent。",
+          "source_paths": ["GoInsight/Sprint 116 Retrospective meeting.md", "GoInsight/17  智能搭建.md"],
+          "source_block_refs": [
+            "GoInsight/Sprint 116 Retrospective meeting.md#L3-L3::sprint-lessons",
+            "GoInsight/Sprint 116 Retrospective meeting.md#L8-L11::sprint-lessons",
+            "GoInsight/17  智能搭建.md#L9-L9::feature-impact",
+            "GoInsight/17  智能搭建.md#L20-L20::feature-impact",
+            "GoInsight/17  智能搭建.md#L29-L33::feature-impact"
+          ],
+          "summary_source_block_refs": ["GoInsight/17  智能搭建.md#L9-L9::feature-impact", "GoInsight/17  智能搭建.md#L20-L20::feature-impact", "GoInsight/17  智能搭建.md#L29-L33::feature-impact"],
+          "slot_ledes": {},
+          "axis": {
+            "product": "GoInsight",
+            "module": "智能搭建方案与 Sprint 复盘",
+            "object": "专用工作流、原有工作流、Agent 和版本缺陷",
+            "scene": "开发方案取舍与历史版本复盘",
+            "boundary": "开发/测试成本、扩展性和历史时效边界"
+          },
+          "axis_source_block_refs": {
+            "product": ["GoInsight/Sprint 116 Retrospective meeting.md#L3-L3::sprint-lessons"],
+            "module": ["GoInsight/17  智能搭建.md#L9-L9::feature-impact"],
+            "object": ["GoInsight/17  智能搭建.md#L9-L9::feature-impact", "GoInsight/17  智能搭建.md#L20-L20::feature-impact"],
+            "scene": ["GoInsight/17  智能搭建.md#L9-L9::feature-impact", "GoInsight/17  智能搭建.md#L29-L33::feature-impact"],
+            "boundary": ["GoInsight/Sprint 116 Retrospective meeting.md#L8-L11::sprint-lessons", "GoInsight/17  智能搭建.md#L13-L17::feature-impact"]
+          }
+        },
+        "experience.release": {
+          "question_aliases": ["GoInsight 发布验收要检查什么？", "迁移发布怎么回归？"],
+          "title": "GoInsight 版本发布、迁移和回归怎么验收？",
+          "answer_lede": "ClickHouse 升级采用新建新版本集群再迁移数据集；迁移、校验、集群切换和 S3 回补都通过后才算完成。",
+          "source_paths": ["GoInsight/迁移任务列表.md", "GoInsight/新建迁移任务.md", "GoInsight/12. GoInsight DC部署方案.md", "GoInsight/指标详情页.md"],
+          "source_block_refs": [
+            "GoInsight/迁移任务列表.md#L3-L11::migration-state",
+            "GoInsight/迁移任务列表.md#L118-L138::migration-state",
+            "GoInsight/迁移任务列表.md#L199-L223::migration-recovery",
+            "GoInsight/迁移任务列表.md#L253-L278::migration-failure",
+            "GoInsight/12. GoInsight DC部署方案.md#L44-L50::feature-impact",
+            "GoInsight/12. GoInsight DC部署方案.md#L52-L65::feature-impact",
+            "GoInsight/指标详情页.md#L150-L152::sprint-lessons",
+            "GoInsight/迁移任务列表.md#L288-L290::sprint-lessons"
+          ],
+          "summary_source_block_refs": ["GoInsight/迁移任务列表.md#L3-L11::migration-state", "GoInsight/迁移任务列表.md#L118-L138::migration-state"],
+          "slot_ledes": {},
+          "axis": {
+            "product": "GoInsight",
+            "module": "版本部署、数据迁移与发布回归",
+            "object": "版本、部署模式、迁移任务、集群和校验结果",
+            "scene": "版本上线、数据迁移、集群切换与回归验收",
+            "boundary": "数据一致性、配置检查、并发限制和失败保留边界"
+          },
+          "axis_source_block_refs": {
+            "product": ["GoInsight/迁移任务列表.md#L3-L11::migration-state"],
+            "module": ["GoInsight/12. GoInsight DC部署方案.md#L46-L50::feature-impact", "GoInsight/迁移任务列表.md#L19-L23::migration-state"],
+            "object": ["GoInsight/迁移任务列表.md#L118-L138::migration-state", "GoInsight/12. GoInsight DC部署方案.md#L52-L65::feature-impact"],
+            "scene": ["GoInsight/迁移任务列表.md#L118-L138::migration-state", "GoInsight/迁移任务列表.md#L253-L261::migration-failure"],
+            "boundary": ["GoInsight/迁移任务列表.md#L214-L223::migration-recovery", "GoInsight/迁移任务列表.md#L265-L269::migration-failure"]
+          },
+          "slot_source_block_refs": {
+            "context": ["GoInsight/迁移任务列表.md#L3-L11::migration-state", "GoInsight/12. GoInsight DC部署方案.md#L46-L50::feature-impact"],
+            "tradeoffs": ["GoInsight/迁移任务列表.md#L3-L11::migration-state", "GoInsight/12. GoInsight DC部署方案.md#L46-L50::feature-impact"],
+            "version": ["GoInsight/迁移任务列表.md#L288-L290::sprint-lessons", "GoInsight/指标详情页.md#L150-L152::sprint-lessons"],
+            "lessons": ["GoInsight/迁移任务列表.md#L199-L223::migration-recovery", "GoInsight/迁移任务列表.md#L253-L261::migration-failure"],
+            "applicability_boundary": ["GoInsight/迁移任务列表.md#L265-L269::migration-failure", "GoInsight/12. GoInsight DC部署方案.md#L54-L65::feature-impact"]
+          },
+          "slot_table_rows": {
+            "context": [
+              {"label":"升级背景","text":"ClickHouse 升级通过新建新版本集群迁移客户数据集；当前约 200 个客户数据集需要统一跟踪，DC 模式还要区分独立 Platform 部署和受 AWS Platform 管控的 DC 部署。","source_block_refs":["GoInsight/迁移任务列表.md#L3-L11::migration-state","GoInsight/12. GoInsight DC部署方案.md#L46-L50::feature-impact"]},
+              {"label":"发布状态链","text":"发布不是单点切换：任务要经过全量迁移、迁移校验、目标集群验证/切换、S3 回补和回补校验，状态与失败原因都可在任务列表中追踪。","source_block_refs":["GoInsight/迁移任务列表.md#L104-L138::migration-state"]}
+            ],
+            "tradeoffs": [
+              {"label":"上线方式","text":"迁移方案解决批量客户数据的漏迁、重复迁移和失败追踪问题；部署时还要根据是否含 Platform 选择主服务或 DC 注册方式。","source_block_refs":["GoInsight/迁移任务列表.md#L3-L11::migration-state","GoInsight/12. GoInsight DC部署方案.md#L46-L50::feature-impact"]},
+              {"label":"线上连续性","text":"迁移期间查询继续走旧集群，新上送数据进入 S3 暂存；只有目标集群验证并切换成功后才处理 S3，优先保证线上查询连续性。","source_block_refs":["GoInsight/迁移任务列表.md#L164-L178::migration-recovery"]}
+            ],
+            "version": [
+              {"label":"版本上下文","text":"迁移任务记录为 V2026.4，指标详情页修订记录为 V2026.3；版本号只绑定各自文档，不合并成一个统一发布时间。","source_block_refs":["GoInsight/迁移任务列表.md#L288-L290::sprint-lessons","GoInsight/指标详情页.md#L150-L152::sprint-lessons"]},
+              {"label":"部署模式","text":"DC 部署区分独立 Platform 与 AWS Platform 管控模式，服务注册、协议、API secret 和数据 API 地址随模式检查。","source_block_refs":["GoInsight/12. GoInsight DC部署方案.md#L46-L50::feature-impact","GoInsight/12. GoInsight DC部署方案.md#L52-L65::feature-impact"]}
+            ],
+            "lessons": [
+              {"label":"发布验收","text":"不能只看总条目数：还要做总量、分区和覆盖最大/最新/随机分区的抽样 hash 校验；任何校验失败都不能进入下一状态。","source_block_refs":["GoInsight/迁移任务列表.md#L212-L223::data-accuracy"]},
+              {"label":"切换失败","text":"集群切换失败时旧集群继续服务、停止 S3 同步、不自动清理目标数据或重试，并保留现场供人工排查。","source_block_refs":["GoInsight/迁移任务列表.md#L253-L261::migration-failure"]},
+              {"label":"幂等与恢复","text":"失败迁移可重试，S3 失败可重新同步，已停止可重新开始；重复提交和重复同步必须按明确阶段幂等，未知中间态进入失败人工处理。","source_block_refs":["GoInsight/迁移任务列表.md#L233-L238::idempotency","GoInsight/迁移任务列表.md#L273-L278::recovery"]}
+            ],
+            "applicability_boundary": [
+              {"label":"适用限制","text":"批量迁移需限制并发和源/目标集群流量，不能影响线上查询；部署配置还要按实际模式检查服务协议、API secret 和数据 API 地址。","source_block_refs":["GoInsight/迁移任务列表.md#L265-L269::migration-failure","GoInsight/12. GoInsight DC部署方案.md#L54-L65::feature-impact"]},
+              {"label":"高风险操作边界","text":"未结束迁移期间不得删除或清空数据集、修改字段和高级配置；失败或完成状态才允许再次创建任务。","source_block_refs":["GoInsight/迁移任务列表.md#L162-L178::migration-recovery","GoInsight/迁移任务列表.md#L265-L269::risk-operations"]}
+            ]
+          }
+        },
+        "experience.ai": {
+          "title": "GoInsight 智能功能的经验、版本和边界是什么？",
+          "answer_lede": "字段优先匹配、字段值匹配，再用表描述验证用户意图。",
+          "source_paths": ["GoInsight/16 问数自动识别数据集.md", "GoInsight/智能删除图表.md", "GoInsight/智能查询文档.md"],
+          "source_block_refs": [
+            "GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection",
+            "GoInsight/16 问数自动识别数据集.md#L16-L19::dataset-selection",
+            "GoInsight/智能删除图表.md#L30-L48::smart-delete",
+            "GoInsight/智能删除图表.md#L50-L80::smart-delete",
+            "GoInsight/智能查询文档.md#L23-L31::document-agent",
+            "GoInsight/智能删除图表.md#L87-L91::smart-delete",
+            "GoInsight/智能查询文档.md#L40-L44::document-agent"
+          ],
+          "summary_source_block_refs": ["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection"],
+          "slot_ledes": {},
+          "axis": {
+            "product": "GoInsight",
+            "module": "问数、智能删除与文档代理",
+            "object": "数据集、字段、工作表、删除确认和知识库",
+            "scene": "智能功能方案复盘与异常边界",
+            "boundary": "版本时效、人工确认、权限和知识库外升级"
+          },
+          "axis_source_block_refs": {
+            "product": ["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection"],
+            "module": ["GoInsight/智能删除图表.md#L12-L13::smart-delete", "GoInsight/智能查询文档.md#L29-L31::document-agent"],
+            "object": ["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection", "GoInsight/智能删除图表.md#L30-L38::smart-delete"],
+            "scene": ["GoInsight/16 问数自动识别数据集.md#L37-L37::dataset-selection", "GoInsight/智能删除图表.md#L42-L48::smart-delete"],
+            "boundary": ["GoInsight/智能删除图表.md#L52-L75::smart-delete", "GoInsight/智能查询文档.md#L29-L31::document-agent"]
+          },
+          "slot_source_block_refs": {
+            "context": ["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection", "GoInsight/智能删除图表.md#L30-L38::smart-delete", "GoInsight/智能查询文档.md#L23-L31::document-agent"],
+            "tradeoffs": ["GoInsight/16 问数自动识别数据集.md#L16-L17::dataset-selection", "GoInsight/智能删除图表.md#L52-L75::smart-delete"],
+            "version": ["GoInsight/智能删除图表.md#L89-L91::smart-delete", "GoInsight/智能查询文档.md#L42-L44::document-agent"],
+            "lessons": ["GoInsight/智能删除图表.md#L52-L75::smart-delete", "GoInsight/智能查询文档.md#L29-L31::document-agent"],
+            "applicability_boundary": ["GoInsight/16 问数自动识别数据集.md#L35-L42::dataset-selection", "GoInsight/智能删除图表.md#L30-L48::smart-delete", "GoInsight/智能查询文档.md#L29-L31::document-agent"]
+          },
+          "slot_table_rows": {
+            "context": [{"label":"经验对象","text":"问数采用字段、字段值和表描述识别；智能删除先识别数据集和工作表；文档代理基于知识库返回答案。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L8-L10::dataset-selection","GoInsight/智能删除图表.md#L30-L38::smart-delete","GoInsight/智能查询文档.md#L23-L31::document-agent"]}],
+            "tradeoffs": [{"label":"确定性与确认","text":"确定性数据集识别可减少 token 和模型误识别，但不保留选择数据集的对话；删除则通过预览和用户确认降低误删风险。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L16-L17::dataset-selection","GoInsight/智能删除图表.md#L52-L75::smart-delete"]}],
+            "version": [{"label":"版本资料","text":"智能删除图表资料标记 V2026.2，智能查询文档资料标记 V2025.4；版本上下文必须随经验保留。","source_block_refs":["GoInsight/智能删除图表.md#L89-L91::smart-delete","GoInsight/智能查询文档.md#L42-L44::document-agent"]}],
+            "lessons": [{"label":"操作教训","text":"删除前展示完整列表并确认，取消后保留列表但禁用操作；文档代理找不到答案时必须明确升级。","source_block_refs":["GoInsight/智能删除图表.md#L52-L75::smart-delete","GoInsight/智能查询文档.md#L29-L31::document-agent"]}],
+            "applicability_boundary": [{"label":"适用边界","text":"数据集识别方案只影响问数；删除依赖数据集、工作表和用户可见组权限；知识库外的结论不能由文档代理补写。","source_block_refs":["GoInsight/16 问数自动识别数据集.md#L35-L42::dataset-selection","GoInsight/智能删除图表.md#L30-L48::smart-delete","GoInsight/智能查询文档.md#L29-L31::document-agent"]}]
+          }
+        },
+        "experience.delete": {
+          "question_aliases": ["智能删除图表有哪些经验？", "删除图表有什么风险？"],
+          "title": "GoInsight 智能删除图表的经验、版本和边界是什么？",
+          "answer_lede": "先确定数据集，再识别工作表并按用户可见分组预览清单；删除前默认不选中并要求人工确认，确认后写日志，取消后保留清单但禁用操作。资料修订为 V2026.2。",
+          "source_paths": ["GoInsight/智能删除图表.md"],
+          "source_block_refs": ["GoInsight/智能删除图表.md#L30-L38::smart-delete", "GoInsight/智能删除图表.md#L52-L75::smart-delete", "GoInsight/智能删除图表.md#L89-L91::smart-delete"],
+          "summary_source_block_refs": ["GoInsight/智能删除图表.md#L30-L38::smart-delete", "GoInsight/智能删除图表.md#L52-L75::smart-delete", "GoInsight/智能删除图表.md#L89-L91::smart-delete"],
+          "slot_ledes": {
+            "context": "工作表必须指定一个数据集进行检索，提交删除指令后先识别数据集。",
+            "tradeoffs": "先展示完整列表、默认不选中并要求用户确认；取消后保留列表但禁用操作。",
+            "version": "智能删除图表资料修订为 V2026.2（2025-10-21）。",
+            "lessons": "跨分页全选仍需确认，删除完成写入日志；取消后保留列表但不再允许继续操作。",
+            "applicability_boundary": "删除依赖当前用户可见的私有组、共享组和具体工作表。"
+          },
+          "slot_source_block_refs": {"context":["GoInsight/智能删除图表.md#L30-L38::smart-delete"],"tradeoffs":["GoInsight/智能删除图表.md#L52-L75::smart-delete"],"version":["GoInsight/智能删除图表.md#L89-L91::smart-delete"],"lessons":["GoInsight/智能删除图表.md#L52-L75::smart-delete"],"applicability_boundary":["GoInsight/智能删除图表.md#L30-L38::smart-delete"]},
+          "axis": {"product":"GoInsight","module":"智能删除图表","object":"数据集、工作表、可见分组和删除确认","scene":"高风险删除操作复盘","boundary":"V2026.2、权限范围、人工确认和日志"},
+          "axis_source_block_refs": {"product":["GoInsight/智能删除图表.md#L30-L38::smart-delete"],"module":["GoInsight/智能删除图表.md#L30-L38::smart-delete"],"object":["GoInsight/智能删除图表.md#L30-L38::smart-delete"],"scene":["GoInsight/智能删除图表.md#L52-L75::smart-delete"],"boundary":["GoInsight/智能删除图表.md#L89-L91::smart-delete"]},
+          "slot_table_rows": {"context":[{"label":"数据集先行","text":"工作表必须指定数据集进行检索，删除指令提交后先识别数据集。","source_block_refs":["GoInsight/智能删除图表.md#L30-L38::smart-delete"]}],"tradeoffs":[{"label":"识别与确认","text":"数据集识别不到时转手动选择；删除前展示完整列表、默认不选中并要求用户确认，避免自然语言目标直接变成删除动作。","source_block_refs":["GoInsight/智能删除图表.md#L30-L38::smart-delete","GoInsight/智能删除图表.md#L52-L75::smart-delete"]}],"version":[{"label":"资料版本","text":"智能删除图表资料修订为 V2026.2（2025-10-21），结论只绑定这份版本记录。","source_block_refs":["GoInsight/智能删除图表.md#L89-L91::smart-delete"]}],"lessons":[{"label":"预览与结果","text":"多个工作表默认全部返回；列表展示分组、数据集和分页，默认不选中；全选覆盖所有分页，确认后生成新的删除指令和完成结果，删除完成在工作表中写入完整配置日志。","source_block_refs":["GoInsight/智能删除图表.md#L52-L75::smart-delete"]},{"label":"取消动作","text":"取消后放弃编辑，列表仍保留但所有操作不可用，并显示已取消状态。","source_block_refs":["GoInsight/智能删除图表.md#L52-L75::smart-delete"]}],"applicability_boundary":[{"label":"权限与命中边界","text":"检索默认覆盖当前用户的私有组和拥有数据分析权限的共享组；未识别工作表时必须补充具体名称，不能把空检索或识别结果当作已删除。","source_block_refs":["GoInsight/智能删除图表.md#L30-L38::smart-delete"]}]}
+        },
+        "experience.doc": {
+          "question_aliases": ["文档代理怎么处理无答案？", "文档代理的知识边界是什么？"],
+          "title": "GoInsight 文档代理的经验、版本和知识边界是什么？",
+          "answer_lede": "文档代理基于知识库提供准确、简洁的解答；知识库找不到答案时返回我不知道，请升级我的能力。",
+          "source_paths": ["GoInsight/智能查询文档.md"],
+          "source_block_refs": ["GoInsight/智能查询文档.md#L11-L12::document-agent", "GoInsight/智能查询文档.md#L16-L17::document-agent", "GoInsight/智能查询文档.md#L25-L25::document-agent", "GoInsight/智能查询文档.md#L29-L31::document-agent", "GoInsight/智能查询文档.md#L42-L44::document-agent"],
+          "summary_source_block_refs": ["GoInsight/智能查询文档.md#L25-L25::document-agent", "GoInsight/智能查询文档.md#L29-L31::document-agent"],
+          "slot_ledes": {
+            "context": "在 /Document 意图下，文档代理基于知识库查询；结果按提问语言展示并保留文档中的视频链接。",
+            "tradeoffs": "只能基于知识库回答并保留文档链接；找不到答案时返回我不知道，请升级我的能力。",
+            "version": "资料修订为 V2025.4（2025-06-23）。",
+            "lessons": "找不到答案时返回我不知道，请升级我的能力，并保留链接。",
+            "applicability_boundary": "只能基于知识库返回答案，库外问题必须升级。"
+          },
+          "slot_source_block_refs": {"context":["GoInsight/智能查询文档.md#L11-L12::document-agent","GoInsight/智能查询文档.md#L16-L17::document-agent"],"tradeoffs":["GoInsight/智能查询文档.md#L29-L31::document-agent"],"version":["GoInsight/智能查询文档.md#L42-L44::document-agent"],"lessons":["GoInsight/智能查询文档.md#L29-L31::document-agent"],"applicability_boundary":["GoInsight/智能查询文档.md#L29-L31::document-agent"]},
+          "axis": {"product":"GoInsight","module":"文档代理","object":"知识库、文档链接与回答","scene":"知识库问答经验与无答案升级","boundary":"V2025.4、知识库范围和不可臆测边界"},
+          "axis_source_block_refs": {"product":["GoInsight/智能查询文档.md#L25-L25::document-agent"],"module":["GoInsight/智能查询文档.md#L25-L25::document-agent"],"object":["GoInsight/智能查询文档.md#L25-L25::document-agent"],"scene":["GoInsight/智能查询文档.md#L29-L31::document-agent"],"boundary":["GoInsight/智能查询文档.md#L42-L44::document-agent"]},
+          "slot_table_rows": {"context":[{"label":"经验背景","text":"文档代理从知识库和文档链接中组织答案，不把外部知识混入当前回答。","source_block_refs":["GoInsight/智能查询文档.md#L23-L31::document-agent"]}],"tradeoffs":[{"label":"可用与可信","text":"保留文档链接并限制在知识库内，遇到无答案时牺牲即时回答，换取不编造结论。","source_block_refs":["GoInsight/智能查询文档.md#L23-L31::document-agent"]}],"version":[{"label":"资料版本","text":"智能查询文档资料修订为 V2025.4（2025-06-23），不能把历史资料当成当前系统承诺。","source_block_refs":["GoInsight/智能查询文档.md#L40-L44::document-agent"]}],"lessons":[{"label":"无答案处理","text":"找不到答案时返回‘我不知道，请升级我的能力’，不能省略链接或伪造命中。","source_block_refs":["GoInsight/智能查询文档.md#L27-L31::document-agent"]}],"applicability_boundary":[{"label":"适用边界","text":"该经验只覆盖当前知识库和文档链接范围；库外问题必须升级。","source_block_refs":["GoInsight/智能查询文档.md#L27-L31::document-agent"]}]}
+        }
+      }
+    },
+    {
+      "case_id": "Q-BND-01",
+      "role": "商户系统运营/权限管理员",
+      "question": "商户角色、终端状态和规范字段的操作与诊断边界是什么？",
+      "answer_lede": "角色定义权限，Terminal 激活/停用改变支付可用状态，字段规范约束数据格式；三者分别属于权限、设备状态和数据规范，不能混成一个对象。",
+      "slot_labels": {
+        "preconditions": "前置条件与权限",
+        "permissions": "权限边界",
+        "steps": "操作步骤",
+        "result": "状态结果",
+        "checks": "检查方式",
+        "verification": "验证方式",
+        "failure_boundary": "失败与限制",
+        "cannot_judge": "不可判定边界",
+        "symptom": "现象",
+        "possible_causes": "可能原因",
+        "actions": "处理动作"
+      },
+      "projection_overrides": {
+        "operation": {
+          "source_paths": [
+            "merchant system/新建角色_角色管理_ResellerPortal.md",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md"
+          ],
+          "source_block_refs": [
+            "merchant system/新建角色_角色管理_ResellerPortal.md#L10-L13::role-flow",
+            "merchant system/新建角色_角色管理_ResellerPortal.md#L14-L16::role-flow",
+            "merchant system/新建角色_角色管理_ResellerPortal.md#L17-L27::role-flow",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L8-L16::terminal-state",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L6-L6::terminal-state",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L20-L20::terminal-state",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L47-L47::terminal-state",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L40-L46::terminal-state",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L57-L57::terminal-state",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L61-L61::terminal-state",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L49-L56::terminal-state"
+          ],
+          "axis_source_block_refs": {
+            "product": [
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L3-L4::role-flow"
+            ],
+            "module": [
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state"
+            ],
+            "object": [
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L8-L16::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L6-L6::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L20-L20::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state"
+            ],
+            "scene": [
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L10-L13::role-flow",
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L14-L16::role-flow",
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L17-L27::role-flow",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L8-L16::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L6-L6::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L20-L20::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state"
+            ],
+            "boundary": [
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L57-L57::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L61-L61::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L49-L56::terminal-state"
+            ]
+          },
+          "slot_source_block_refs": {
+            "preconditions": [
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L17-L20::role-flow",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L8-L16::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L18-L20::terminal-state"
+            ],
+            "permissions": [
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L17-L27::role-flow",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L8-L16::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L18-L20::terminal-state"
+            ],
+            "steps": [
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L8-L16::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L49-L56::terminal-state"
+            ],
+            "result": [
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L49-L56::terminal-state"
+            ],
+            "checks": [
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L40-L46::terminal-state"
+            ],
+            "verification": [
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L40-L46::terminal-state"
+            ],
+            "failure_boundary": [
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L27-L30::role-flow",
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L44-L44::role-flow",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L8-L16::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L49-L56::terminal-state"
+            ],
+            "cannot_judge": [
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L44-L44::role-flow"
+            ]
+          },
+          "title_suffix": "（操作）",
+          "answer_lede": "角色权限决定谁能执行管理动作；Terminal 激活后可支付，停用后不可支付，直到再次激活。",
+          "slot_ledes": {
+            "preconditions": "执行 Terminal 激活前，操作者必须拥有 Merchant Management > Terminal Manage > Activate Terminal 权限，且对象必须处于 Disabled 状态；停用则针对 Active Terminal。",
+            "permissions": "激活和停用分别需要对应的 Terminal 操作权限；新建用户、编辑用户时，可选择的角色权限不能超过操作者的权限。",
+            "steps": "对 Active Terminal 打开操作菜单选择 Disable，在确认框确认后返回列表并显示成功提示；对 Disabled Terminal 打开操作菜单选择 Activate，在确认框确认后返回列表并显示成功提示。",
+            "result": "Terminal 激活后可以继续支付交易；停用后不能发起支付，直到再次激活。",
+            "checks": "用 Terminal SN 和 Register Number 对照操作前后的状态记录，确认操作对象没有串错。",
+            "verification": "确认状态在 Active 与 Disabled 之间按操作预期变化，并检查支付可用性是否同步变化。",
+            "failure_boundary": "激活和停用都受当前状态与操作者权限限制；按钮不可用或操作失败时，先核对 Terminal 状态和对应权限。"
+          }
+        },
+        "diagnosis": {
+          "axis": {
+            "product": "Merchant System",
+            "module": "角色与终端管理",
+            "object": "字段规范、Terminal 状态与操作日志",
+            "scene": "字段校验与终端异常诊断",
+            "boundary": "规范实现、权限状态与日志可见性"
+          },
+          "source_paths": [
+            "merchant system/新建角色_角色管理_ResellerPortal.md",
+            "merchant system/商户系统规范要求.md",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md"
+          ],
+          "source_block_refs": [
+            "merchant system/新建角色_角色管理_ResellerPortal.md#L46-L46::role-flow",
+            "merchant system/新建角色_角色管理_ResellerPortal.md#L40-L40::role-flow",
+            "merchant system/新建角色_角色管理_ResellerPortal.md#L42-L42::role-flow",
+            "merchant system/商户系统规范要求.md#L8-L11::data-rules",
+            "merchant system/商户系统规范要求.md#L3-L4::data-rules",
+            "merchant system/商户系统规范要求.md#L6-L6::data-rules",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L47-L47::terminal-state",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L57-L57::terminal-state",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L61-L61::terminal-state",
+            "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L49-L56::terminal-state"
+          ],
+          "axis_source_block_refs": {
+            "product": [
+              "merchant system/商户系统规范要求.md#L3-L4::data-rules"
+            ],
+            "module": [
+              "merchant system/商户系统规范要求.md#L3-L4::data-rules"
+            ],
+            "object": [
+              "merchant system/商户系统规范要求.md#L8-L11::data-rules",
+              "merchant system/商户系统规范要求.md#L3-L4::data-rules",
+              "merchant system/商户系统规范要求.md#L6-L6::data-rules"
+            ],
+            "scene": [
+              "merchant system/商户系统规范要求.md#L8-L11::data-rules",
+              "merchant system/商户系统规范要求.md#L3-L4::data-rules",
+              "merchant system/商户系统规范要求.md#L6-L6::data-rules",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state"
+            ],
+            "boundary": [
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L44-L46::role-flow",
+              "merchant system/商户系统规范要求.md#L8-L15::data-rules"
+            ]
+          },
+          "slot_source_block_refs": {
+            "symptom": [
+              "merchant system/商户系统规范要求.md#L3-L4::data-rules",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L49-L56::terminal-state"
+            ],
+            "possible_causes": [
+              "merchant system/商户系统规范要求.md#L8-L11::data-rules",
+              "merchant system/商户系统规范要求.md#L3-L4::data-rules",
+              "merchant system/商户系统规范要求.md#L6-L6::data-rules"
+            ],
+            "actions": [
+              "merchant system/商户系统规范要求.md#L8-L15::data-rules",
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L46-L46::role-flow",
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L40-L40::role-flow",
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L42-L42::role-flow",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L40-L46::terminal-state"
+            ],
+            "checks": [
+              "merchant system/商户系统规范要求.md#L8-L11::data-rules",
+              "merchant system/商户系统规范要求.md#L3-L4::data-rules",
+              "merchant system/商户系统规范要求.md#L6-L6::data-rules",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L40-L46::terminal-state"
+            ],
+            "verification": [
+              "merchant system/商户系统规范要求.md#L8-L11::data-rules",
+              "merchant system/商户系统规范要求.md#L3-L4::data-rules",
+              "merchant system/商户系统规范要求.md#L6-L6::data-rules",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state",
+              "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L40-L46::terminal-state"
+            ],
+            "failure_boundary": [
+              "merchant system/商户系统规范要求.md#L8-L11::data-rules",
+              "merchant system/商户系统规范要求.md#L3-L4::data-rules",
+              "merchant system/商户系统规范要求.md#L6-L6::data-rules",
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L44-L44::role-flow"
+            ],
+            "cannot_judge": [
+              "merchant system/新建角色_角色管理_ResellerPortal.md#L44-L44::role-flow"
+            ]
+          },
+          "title_suffix": "（诊断）",
+          "answer_lede": "字段格式问题和 Terminal 状态问题要分开诊断：前者看规范与校验，后者看状态、权限和支付可用性；角色资料标记日志暂时不做。",
+          "slot_ledes": {
+            "symptom": "可观察现象包括字段不一致、接口调用失败、交易处理异常，或 Terminal 停用后仍被误认为可以支付。",
+            "possible_causes": "优先怀疑模块间对金额、数量、百分比、日期时间等字段格式和校验规则理解不一致，或操作对象的 Terminal 状态与预期不符。金额通常保留并展示两位小数、默认 0.00，整数部分每三位用逗号分隔。",
+            "actions": "按金额两位小数、默认 0.00 和千位逗号等规范检查输入与展示；再按 Terminal SN/Register Number 核对状态；需要追溯操作时只能依据实际存在的日志。",
+            "checks": "先检查数据格式与校验规则，再核对 Terminal 状态、操作前后记录和更新时间，最后确认支付行为是否符合状态。",
+            "verification": "验证字段是否符合规范、Terminal 状态是否正确，并确认 Disabled Terminal 不再发起支付。",
+            "escalation_boundary": "字段规范只定义输入、展示和校验要求，不等于系统已经实现同样的行为；角色资料把日志标为暂时不做，遇到日志问题不能从本页判定。"
+          },
+          "slot_table_rows": {
+            "symptom": [
+              {"label":"字段异常","text":"出现字段不一致、接口调用失败或交易处理异常时，先按商户系统字段规范分支排查。","source_block_refs":["merchant system/商户系统规范要求.md#L3-L4::data-rules"]},
+              {"label":"终端状态异常","text":"Terminal 被停用后仍被认为可以支付，或状态与实际支付行为不一致时，转到终端状态分支。","source_block_refs":["merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L49-L56::terminal-state"]}
+            ],
+            "checks": [
+              {"label":"字段分支","text":"检查金额、数量、百分比、日期时间等字段的输入格式、展示格式和校验要求；金额按两位小数和默认 0.00 规则核对。","source_block_refs":["merchant system/商户系统规范要求.md#L3-L15::data-rules"]},
+              {"label":"终端分支","text":"使用 Terminal SN 和 Register Number 对照操作前后记录、Status 与 Updated Time，再确认支付行为。","source_block_refs":["merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L40-L46::terminal-state","merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L81-L86::terminal-state"]}
+            ],
+            "actions": [
+              {"label":"角色权限","text":"角色是数据权限和操作权限的集合；新建用户或编辑用户时，角色权限不能超过操作者权限。","source_block_refs":["merchant system/新建角色_角色管理_ResellerPortal.md#L3-L4::role-flow","merchant system/新建角色_角色管理_ResellerPortal.md#L17-L20::role-flow"]}
+            ],
+            "escalation_boundary": [
+              {"label":"日志不可判定","text":"角色资料把日志标为暂时不做；没有实际日志证据时，不能从本页推断角色操作历史。字段规范也只定义输入、展示和校验要求，不等于系统已经实现同样的行为。","source_block_refs":["merchant system/新建角色_角色管理_ResellerPortal.md#L44-L46::role-flow","merchant system/商户系统规范要求.md#L3-L4::data-rules"]}
+            ]
+          }
+        }
+      },
+      "page_type": "operation+diagnosis",
+      "projection_keys": [
+        "operation",
+        "diagnosis"
+      ],
+      "axis": {
+        "product": "Merchant System",
+        "module": "角色与终端管理",
+        "object": "reseller role、terminal、规范字段",
+        "scene": "激活停用和权限操作",
+        "boundary": "权限、状态、数据格式和交易边界"
+      },
+      "source_paths": [
+        "merchant system/新建角色_角色管理_ResellerPortal.md",
+        "merchant system/商户系统规范要求.md",
+        "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md"
+      ],
+      "source_block_refs": [
+        "merchant system/新建角色_角色管理_ResellerPortal.md#L10-L13::role-flow",
+        "merchant system/新建角色_角色管理_ResellerPortal.md#L14-L16::role-flow",
+        "merchant system/新建角色_角色管理_ResellerPortal.md#L17-L27::role-flow",
+        "merchant system/商户系统规范要求.md#L3-L15::data-rules",
+        "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L8-L16::terminal-state",
+        "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L6-L6::terminal-state",
+        "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L20-L20::terminal-state",
+        "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state",
+        "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L47-L47::terminal-state",
+        "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L57-L57::terminal-state",
+        "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L61-L61::terminal-state",
+        "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L49-L56::terminal-state"
+      ],
+      "baseline_ids": [
+        "cb-bnd-product",
+        "cb-bnd-role"
+      ],
+      "applicable_dimensions": [
+        "route",
+        "taxonomy",
+        "business-answer",
+        "page-type",
+        "Reader-Audit"
+      ],
+      "risk_tags": [
+        "operation",
+        "diagnosis",
+        "permission",
+        "conflict"
+      ],
+      "required_claim_refs": [
+        "preconditions",
+        "permissions",
+        "result",
+        "checks"
+      ],
+      "required_boundary_refs": [
+        "failure_boundary",
+        "cannot_judge"
+      ],
+      "forbidden_claim_refs": [
+        "角色权限等于全局权限",
+        "Disabled 终端可交易",
+        "规范建议等于已实现行为"
+      ],
+      "required_atoms": [
+        "操作前置条件",
+        "权限",
+        "操作结果",
+        "失败边界",
+        "诊断检查顺序",
+        "不能判断的边界"
+      ],
+      "forbidden_atoms": [
+        "角色权限等于全局权限",
+        "Disabled 终端可交易",
+        "规范建议等于已实现行为"
+      ],
+      "strict_advantage": [
+        "操作和诊断两个独立 projection",
+        "权限和终端状态分轴"
+      ],
+      "slot_source_block_refs": {
+        "preconditions": [
+          "merchant system/新建角色_角色管理_ResellerPortal.md#L10-L16::role-flow",
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L8-L16::terminal-state",
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L20-L20::terminal-state"
+        ],
+        "permissions": [
+          "merchant system/新建角色_角色管理_ResellerPortal.md#L17-L20::role-flow",
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L18-L20::terminal-state"
+        ],
+        "steps": [
+          "merchant system/新建角色_角色管理_ResellerPortal.md#L10-L30::role-flow",
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L8-L16::terminal-state",
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L49-L56::terminal-state"
+        ],
+        "result": [
+          "merchant system/新建角色_角色管理_ResellerPortal.md#L22-L27::role-flow",
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state",
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L49-L56::terminal-state"
+        ],
+        "checks": [
+          "merchant system/商户系统规范要求.md#L8-L15::data-rules",
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L40-L46::terminal-state"
+        ],
+        "verification": [
+          "merchant system/新建角色_角色管理_ResellerPortal.md#L22-L30::role-flow",
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L40-L46::terminal-state"
+        ],
+        "failure_boundary": [
+          "merchant system/新建角色_角色管理_ResellerPortal.md#L27-L30::role-flow",
+          "merchant system/商户系统规范要求.md#L8-L15::data-rules",
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L49-L56::terminal-state"
+        ],
+        "cannot_judge": [
+          "merchant system/新建角色_角色管理_ResellerPortal.md#L44-L46::role-flow"
+        ],
+        "symptom": [
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L49-L56::terminal-state"
+        ],
+        "possible_causes": [
+          "merchant system/商户系统规范要求.md#L3-L15::data-rules"
+        ],
+        "actions": [
+          "merchant system/新建角色_角色管理_ResellerPortal.md#L10-L30::role-flow"
+        ]
+      },
+      "axis_source_block_refs": {
+        "product": [
+          "merchant system/新建角色_角色管理_ResellerPortal.md#L3-L4::role-flow"
+        ],
+        "module": [
+          "merchant system/新建角色_角色管理_ResellerPortal.md#L1-L43::role-flow"
+        ],
+        "object": [
+          "merchant system/商户系统规范要求.md#L1-L14::data-rules"
+        ],
+        "scene": [
+          "merchant system/新建角色_角色管理_ResellerPortal.md#L10-L13::role-flow",
+          "merchant system/新建角色_角色管理_ResellerPortal.md#L14-L16::role-flow",
+          "merchant system/新建角色_角色管理_ResellerPortal.md#L17-L27::role-flow",
+          "merchant system/商户系统规范要求.md#L1-L14::data-rules",
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L8-L16::terminal-state",
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L6-L6::terminal-state",
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L20-L20::terminal-state",
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md#L3-L4::terminal-state"
+        ],
+        "boundary": [
+          "merchant system/商户系统规范要求.md#L1-L14::data-rules"
+        ]
+      }
+    }
+  ]
+}

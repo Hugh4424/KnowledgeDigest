@@ -1,0 +1,506 @@
+{
+  "schema_version": "companybrain-baseline.v2",
+  "baseline_id": "companybrain-task5-evidence-snapshot-v2",
+  "default_root": "/Users/Hugh/Hugh/Knowledge/CompanyBrain",
+  "comparison_policy": "actual_snapshot_observation_only",
+  "projection_policy": {
+    "entry_scope": "every baseline entry declares projection_keys",
+    "shared_entry_rule": "the same observed file/locator may apply to every listed projection only when the entry explicitly lists that projection key",
+    "evaluation_rule": "calculate every listed projection independently; never substitute one projection for another; a case passes only when all its projections pass",
+    "observation_rule": "audit_observation and locator are applied to each listed projection, with the projection key recorded in the evidence ref"
+  },
+  "reader_audit_policy": {
+    "common_surface": "actual_rendered_markdown",
+    "evidence_levels": [
+      "none",
+      "metadata",
+      "source-clue",
+      "archive-reference",
+      "source-locator",
+      "claim-exact"
+    ],
+    "same_surface_required": true,
+    "internal_metadata_credit": false,
+    "claim_exact_absence": "does_not_zero_the_dimension; compare the observed evidence level symmetrically",
+    "cb_missing_only_when": "baseline file is absent, hash mismatches, or applicability is missing"
+  },
+  "entries": [
+    {
+      "baseline_id": "cb-pos-value",
+      "case_ids": [
+        "Q-POS-01"
+      ],
+      "projection_keys": [
+        "Q-POS-01.positioning"
+      ],
+      "relative_path": "Products/EMM/产品定位/产品定位与价值.md",
+      "snapshot_id": "snapshot-a4165fa2a38ed140e09908fb",
+      "content_hash": "6df1b125c7aaa30dddf58c2ce9f8674a9c2b74c56c273fdd23f72f3fdc4b8a61",
+      "locator": {
+        "start_line": 1,
+        "end_line": 51
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "metadata",
+        "reader_markers": [
+          "source_status: compiled"
+        ],
+        "audit_locator": {
+          "start_line": 10,
+          "end_line": 10
+        },
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-pos-overview",
+      "case_ids": [
+        "Q-POS-01"
+      ],
+      "projection_keys": [
+        "Q-POS-01.positioning"
+      ],
+      "relative_path": "Products/EMM/产品定位/产品总览.md",
+      "snapshot_id": "snapshot-f47f978bbdb0b70cd24eeb56",
+      "content_hash": "2a53d2c9afbcff035823a3dd5fddbfce1fb32321761b4d7f753937832cbd2c6c",
+      "locator": {
+        "start_line": 1,
+        "end_line": 12
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "none",
+        "reader_markers": [],
+        "audit_locator": null,
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-pos-relation",
+      "case_ids": [
+        "Q-POS-01"
+      ],
+      "projection_keys": [
+        "Q-POS-01.positioning"
+      ],
+      "relative_path": "Products/EMM/产品定位/产品关系与边界.md",
+      "snapshot_id": "snapshot-4f7024b413c888360aae2a65",
+      "content_hash": "cd76222a31d1ef3c941a5e2611560b0017363c4e864fcf472a9800837beb65de",
+      "locator": {
+        "start_line": 1,
+        "end_line": 57
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "source-clue",
+        "reader_markers": [
+          "来源"
+        ],
+        "audit_locator": {
+          "start_line": 54,
+          "end_line": 57
+        },
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-con-network",
+      "case_ids": [
+        "Q-CON-01"
+      ],
+      "projection_keys": [
+        "Q-CON-01.concept"
+      ],
+      "relative_path": "Products/EMM/模块手册/EMM for Android/策略与配置/Android安全通信网络配置项字典.md",
+      "snapshot_id": "snapshot-0dc2652a8d180af1deb49c3a",
+      "content_hash": "f8a479e36cba2f382c9f6cb440edd938acaf7d1fcfa3909f0e21ea7701ccd1a4",
+      "locator": {
+        "start_line": 1,
+        "end_line": 87
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "source-clue",
+        "reader_markers": [
+          "来源线索"
+        ],
+        "audit_locator": {
+          "start_line": 84,
+          "end_line": 87
+        },
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-op-enroll",
+      "case_ids": [
+        "Q-OPR-01"
+      ],
+      "projection_keys": [
+        "Q-OPR-01.qr.operation",
+        "Q-OPR-01.zero-touch.operation"
+      ],
+      "relative_path": "Products/EMM/模块手册/EMM for Android/设备入网/二维码与Zero Touch入网.md",
+      "snapshot_id": "snapshot-d86f7c769e5307c776483c98",
+      "content_hash": "c6aa7733dc54316844c7589a662aa498b4806cafb00190f709eca7d9ca4e9c3b",
+      "locator": {
+        "start_line": 1,
+        "end_line": 50
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "source-clue",
+        "reader_markers": [
+          "来源线索"
+        ],
+        "audit_locator": {
+          "start_line": 46,
+          "end_line": 50
+        },
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-dia-conflict",
+      "case_ids": [
+        "Q-DIA-01"
+      ],
+      "projection_keys": [
+        "Q-DIA-01.diagnosis.metric",
+        "Q-DIA-01.diagnosis.delete"
+      ],
+      "relative_path": "Products/GoInsight/经验与坑/异常逻辑与图表冲突.md",
+      "snapshot_id": "snapshot-497504b69992366f611757c0",
+      "content_hash": "1b5b250a8d733c4d3d914885001e8543dd5380dd45c1abae764aaaa3f7405035",
+      "locator": {
+        "start_line": 1,
+        "end_line": 92
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "archive-reference",
+        "reader_markers": [
+          "SourceArchive"
+        ],
+        "audit_locator": {
+          "start_line": 92,
+          "end_line": 92
+        },
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-dia-root",
+      "case_ids": [
+        "Q-DIA-01"
+      ],
+      "projection_keys": [
+        "Q-DIA-01.diagnosis.migration"
+      ],
+      "relative_path": "Products/GoInsight/经验与坑/缺陷趋势与根因.md",
+      "snapshot_id": "snapshot-1cbe823d8d1f46b418f73034",
+      "content_hash": "cd430c69164b2377d3312593678ac0af0d291d7bad4f1b13e505c72170a40a41",
+      "locator": {
+        "start_line": 1,
+        "end_line": 43
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "archive-reference",
+        "reader_markers": [
+          "SourceArchive"
+        ],
+        "audit_locator": {
+          "start_line": 43,
+          "end_line": 43
+        },
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-exp-pitfalls",
+      "case_ids": [
+        "Q-EXP-01"
+      ],
+      "projection_keys": [
+        "Q-EXP-01.experience"
+      ],
+      "relative_path": "Products/GoInsight/经验与坑/踩坑总览.md",
+      "snapshot_id": "snapshot-a3ccfb20a26e647d3ab62686",
+      "content_hash": "53d9ac835ef23de2d1614264c072576a8a52110b1c9029110356c25d1b4c3c77",
+      "locator": {
+        "start_line": 1,
+        "end_line": 61
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "none",
+        "reader_markers": [],
+        "audit_locator": null,
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-exp-version",
+      "case_ids": [
+        "Q-EXP-01"
+      ],
+      "projection_keys": [
+        "Q-EXP-01.experience"
+      ],
+      "relative_path": "Products/GoInsight/经验与坑/版本演进总览.md",
+      "snapshot_id": "snapshot-1fb9282fab3f383c9be2e528",
+      "content_hash": "dc0d61c4b7c679e459f9cf26c0bd0b5466d1b74661deb493fefbcae9c1ee7247",
+      "locator": {
+        "start_line": 1,
+        "end_line": 37
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "archive-reference",
+        "reader_markers": [
+          "SourceArchive"
+        ],
+        "audit_locator": {
+          "start_line": 37,
+          "end_line": 37
+        },
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-bnd-product",
+      "case_ids": [
+        "Q-BND-01"
+      ],
+      "projection_keys": [
+        "Q-BND-01.operation",
+        "Q-BND-01.diagnosis"
+      ],
+      "relative_path": "Products/MAXSTORE/产品定位/产品关系与边界.md",
+      "snapshot_id": "snapshot-63b7a349d3230c9a251b1469",
+      "content_hash": "cafc14cc1c6ee02dd7e192d5ff44fccc39fe97d0ca22fe058a9f67db82101cf7",
+      "locator": {
+        "start_line": 1,
+        "end_line": 57
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "source-clue",
+        "reader_markers": [
+          "来源"
+        ],
+        "audit_locator": {
+          "start_line": 54,
+          "end_line": 57
+        },
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-bnd-role",
+      "case_ids": [
+        "Q-BND-01"
+      ],
+      "projection_keys": [
+        "Q-BND-01.operation",
+        "Q-BND-01.diagnosis"
+      ],
+      "relative_path": "Products/MAXSTORE/模块手册/账号组织与权限/角色与用户权限管理.md",
+      "snapshot_id": "snapshot-2b98e4b82234d65451b8db3d",
+      "content_hash": "4cfb5918cff2978c418508ece2900144492683725a4416684469822d85294e63",
+      "locator": {
+        "start_line": 1,
+        "end_line": 77
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "source-locator",
+        "reader_markers": [
+          "原始地址:",
+          "SourceArchive"
+        ],
+        "audit_locator": {
+          "start_line": 74,
+          "end_line": 77
+        },
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-dia-metric-chart",
+      "case_ids": [
+        "Q-DIA-01"
+      ],
+      "projection_keys": [
+        "Q-DIA-01.diagnosis.metric"
+      ],
+      "relative_path": "Products/GoInsight/模块手册/图表与展示/数据计算与解读.md",
+      "snapshot_id": "snapshot-d2ec3f8ab565821c841935d9",
+      "content_hash": "b7e77a0d2a091296f423e68a96b46a2911d93b96259d899669f73630baa5589f",
+      "locator": {
+        "start_line": 1,
+        "end_line": 143
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "source-locator",
+        "reader_markers": [
+          "来源",
+          "SourceArchive"
+        ],
+        "audit_locator": {
+          "start_line": 143,
+          "end_line": 143
+        },
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-dia-metric-insight",
+      "case_ids": [
+        "Q-DIA-01"
+      ],
+      "projection_keys": [
+        "Q-DIA-01.diagnosis.metric"
+      ],
+      "relative_path": "Products/GoInsight/模块手册/智能问数与AI/智能洞察与图表生成.md",
+      "snapshot_id": "snapshot-dc968460fa56b384ba7a9480",
+      "content_hash": "5fdf60d5af15193a63ac141ed9ebdf6e231f7b9e418e02ec20e189e9704009c9",
+      "locator": {
+        "start_line": 1,
+        "end_line": 82
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "source-locator",
+        "reader_markers": [
+          "来源",
+          "SourceArchive"
+        ],
+        "audit_locator": {
+          "start_line": 82,
+          "end_line": 82
+        },
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-dia-migration",
+      "case_ids": [
+        "Q-DIA-01"
+      ],
+      "projection_keys": [
+        "Q-DIA-01.diagnosis.migration"
+      ],
+      "relative_path": "Products/GoInsight/技术实现/ClickHouse多集群与数据迁移.md",
+      "snapshot_id": "snapshot-8c83d705fb3a16ccd0c2c5c0",
+      "content_hash": "833b5c1a7e3eab2e42ac81cc237f3de895574a1a4f19a8c139402757890ee847",
+      "locator": {
+        "start_line": 1,
+        "end_line": 100
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "source-locator",
+        "reader_markers": [
+          "来源",
+          "SourceArchive"
+        ],
+        "audit_locator": {
+          "start_line": 100,
+          "end_line": 100
+        },
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-dia-query",
+      "case_ids": [
+        "Q-DIA-01"
+      ],
+      "projection_keys": [
+        "Q-DIA-01.diagnosis.query"
+      ],
+      "relative_path": "Products/GoInsight/模块手册/智能问数与AI/智能问数与数据查询.md",
+      "snapshot_id": "snapshot-48e5477c2be71f2eba86e7ef",
+      "content_hash": "1c4d9a11e4547c07f0b4b0c817a2736bcf242704607ced719f277deed13d2513",
+      "locator": {
+        "start_line": 1,
+        "end_line": 76
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "source-locator",
+        "reader_markers": [
+          "来源",
+          "SourceArchive"
+        ],
+        "audit_locator": {
+          "start_line": 76,
+          "end_line": 76
+        },
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-dia-delete",
+      "case_ids": [
+        "Q-DIA-01"
+      ],
+      "projection_keys": [
+        "Q-DIA-01.diagnosis.delete"
+      ],
+      "relative_path": "Products/GoInsight/模块手册/工作表/工作表创建与管理.md",
+      "snapshot_id": "snapshot-cb4765287b850ad0fee52ae5",
+      "content_hash": "58468f5810a47cced1ae637aeacab760b3e6faaf28417961113498d7a10d2c89",
+      "locator": {
+        "start_line": 1,
+        "end_line": 81
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "source-locator",
+        "reader_markers": [
+          "来源",
+          "SourceArchive"
+        ],
+        "audit_locator": {
+          "start_line": 81,
+          "end_line": 81
+        },
+        "claim_exact": false
+      }
+    },
+    {
+      "baseline_id": "cb-dia-doc",
+      "case_ids": [
+        "Q-DIA-01"
+      ],
+      "projection_keys": [
+        "Q-DIA-01.diagnosis.doc"
+      ],
+      "relative_path": "Products/GoInsight/模块手册/智能问数与AI/知识库与Dify应用.md",
+      "snapshot_id": "snapshot-46d1055931df9d0739b9bbd6",
+      "content_hash": "4e4218bb093d541a9dedc7ea05cf59d7f5310a211626a5a7e8ab889a4c8afe3d",
+      "locator": {
+        "start_line": 1,
+        "end_line": 86
+      },
+      "applicability": "present",
+      "audit_observation": {
+        "evidence_level": "source-locator",
+        "reader_markers": [
+          "来源",
+          "SourceArchive"
+        ],
+        "audit_locator": {
+          "start_line": 86,
+          "end_line": 86
+        },
+        "claim_exact": false
+      }
+    }
+  ]
+}

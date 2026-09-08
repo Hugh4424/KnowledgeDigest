@@ -1,0 +1,119 @@
+{
+  "schema_version": "task5-source-not-documented-contract.v2",
+  "contract_id": "task5-source-not-documented-reader-v2",
+  "guard_case": "G-SOURCE-ND",
+  "source_path": "GoInsight/17  智能搭建.md",
+  "route_kind": "source-not-documented",
+  "evaluation_mode": "full",
+  "page_type": "diagnosis",
+  "projection_subtype": "source-not-documented-status",
+  "reader_task_path": {
+    "contract_id": "snd-status-v1",
+    "ordinary_diagnosis_contract": "not_applicable",
+    "stages": [
+      {"stage_id": "source_scope", "order": 1, "slot": "source_scope", "evidence": "source_snapshot_and_source_identity"},
+      {"stage_id": "scan_coverage", "order": 2, "slot": "scan_coverage", "evidence": "semantic_zero_match_certificate.coverage"},
+      {"stage_id": "zero_match_result", "order": 3, "slot": "zero_match_result", "evidence": "semantic_zero_match_certificate.per_block_results"},
+      {"stage_id": "interpretation_boundary", "order": 4, "slot": "interpretation_boundary", "evidence": "negative_claim_rule"},
+      {"stage_id": "verification_next_step", "order": 5, "slot": "verification_next_step", "evidence": "controlled_status_text"}
+    ],
+    "ordinary_diagnosis_not_applicable": {
+      "cause": "no_system_cause_evidence_in_snd_scan",
+      "action": "no_system_action_evidence_in_snd_scan",
+      "escalation": "no_system_escalation_evidence_in_snd_scan"
+    }
+  },
+  "public_title": "异常规则记录状态",
+  "route_axes_from": "Q-DIA-01",
+  "reader_eligible": true,
+  "answerability": "not_answerable",
+  "publication_effect": "projection_not_evaluable",
+  "package_release_policy": "allowed_only_when_snd_guard_and_semantic_zero_match_certificate_pass_and_all_other_hard_gates_pass",
+  "generation": "one_replacement_semantic_scan_then_deterministic_template_from_audit",
+  "preconditions": {
+    "rule_set": "SND-RULE-002",
+    "scan_scope": ["all_blocks", "tables", "code", "configuration", "links"],
+    "non_rule_context_markers": ["不会", "没有", "无", "避免", "防止", "不存在", "不可预知", "逻辑明确", "交互较好", "优点", "缺点", "特点"],
+    "classification_rule": "trigger+action => rule; trigger-only with an explicit descriptive_or_negated_context_marker => no_rule; other trigger-only => ambiguous; no trigger => no_rule",
+    "explicit_rule_match": [],
+    "ambiguous_match": [],
+    "scan_complete": true
+  },
+  "semantic_zero_match_certificate": {
+    "schema_version": "semantic_zero_match_certificate.v1",
+    "required_fields": [
+      "analyzer_id",
+      "analyzer_contract_sha256",
+      "source_snapshot_id",
+      "source_hash",
+      "scanned_block_refs",
+      "coverage_digest",
+      "per_block_results",
+      "result_digest"
+    ],
+    "per_block_required_fields": ["block_id", "block_hash", "locator", "classification", "evidence_digest"],
+    "classifications": ["no_rule", "rule", "ambiguous"],
+    "pass_rule": "every source block appears exactly once; all classifications are no_rule; block hashes, locators, source snapshot/hash and coverage digest match; analyzer contract is approved and result digest is recomputed",
+    "negative_claim_rule": "the certificate only states that the approved analyzer found no documented rule in the scanned source; it never states that the system has no exception"
+  },
+  "zero_match_certificate_verifier": {
+    "schema_version": "semantic-zero-match-verifier.v1",
+    "verifier_id": "task5-independent-zero-match-verifier-v1",
+    "producer": "S2 analyzer",
+    "verifier": "independent deterministic verifier",
+    "inputs": ["current_source_snapshot", "semantic_zero_match_certificate"],
+    "verification_algorithm": [
+      "recompute the normalized scan for every current source Block using SND-RULE-002",
+      "verify source snapshot/hash, analyzer contract hash, block list, block hash, locator, coverage digest and result digest",
+      "compare every recomputed Block classification and evidence digest with the certificate exactly once",
+      "emit a verifier receipt with the recomputed certificate digest and comparison digest"
+    ],
+    "required_receipt_fields": ["attempt_id", "verifier_id", "source_snapshot_id", "source_hash", "certificate_ref", "certificate_sha256", "recomputed_result_digest", "comparison_digest", "block_count", "compared_block_count", "status", "failure_code", "current_material_id", "canonical_sha256"],
+    "verification_points": ["SND_reader_promotion", "M401_finalize", "M402_release_predicate"],
+    "mismatch_policy": "any mismatch is UNKNOWN/Audit-only/not_released; it cannot be repaired by reusing the producer certificate",
+    "negative_cases": [
+      {"id": "SND-V-001", "input": "producer certificate has one altered Block classification", "expected": "unknown"},
+      {"id": "SND-V-002", "input": "producer certificate has a stale source hash but a closed result digest", "expected": "unknown"},
+      {"id": "SND-V-003", "input": "producer certificate is reused without an independent verifier receipt", "expected": "blocked"}
+    ]
+  },
+  "receipt_contract": {
+    "schema_version": "semantic-zero-match-verifier-receipt.v1",
+    "attempt_path": "quality/evidence/task5/snd-verifier/attempts/<attempt_id>/verifier-receipt.json",
+    "promotion_path": "quality/evidence/task5/snd-verifier/verifier-receipt.json",
+    "public_projection_path": "bundle/_audit/source-not-documented-verifier.json",
+    "owner": "Task5 independent deterministic verifier",
+    "writer": "Task5 SND verifier",
+    "canonical_bytes": "UTF-8 recursive Unicode-key-sorted JSON, no spaces, arrays preserve order, one trailing LF, canonical_sha256 excludes itself",
+    "status_values": ["passed", "unknown", "blocked"],
+    "required_fields": ["schema_version", "attempt_id", "verifier_id", "source_snapshot_id", "source_hash", "certificate_ref", "certificate_sha256", "recomputed_result_digest", "comparison_digest", "block_count", "compared_block_count", "status", "failure_code", "current_material_id", "canonical_sha256"],
+    "bindings": ["current source snapshot and content hash", "producer certificate ref and actual SHA-256", "recomputed per-Block result digest", "certificate-versus-recomputed comparison digest", "current Task5 material_id", "same attempt identity at SND Reader promotion, M401 finalize and M402 release predicate"],
+    "promotion_rule": "only a passed attempt with exact source/certificate/material bindings may update promotion_path; public_projection_path is a sanitized projection of that promoted receipt; unknown/blocked attempts remain append-only and cannot be consumed as Reader evidence",
+    "consumers": ["SND Reader promotion", "M401 finalize", "M402 release predicate", "task5-directory-manifest.v1", "task5-run-result.v1"],
+    "forbidden": ["raw_source", "prompt", "response", "api_key", "Authorization", "absolute_host_paths", "producer_only_attestation", "quality_verdict"]
+  },
+  "reader_slots": {
+    "source_scope": "在 SND-RULE-002 的扫描范围内，当前资料未记录可验证的异常规则。",
+    "scan_coverage": "按 SND-RULE-002 扫描本资料的全部内容、表格、代码/配置和链接；逐 Block 覆盖已闭合。",
+    "zero_match_result": "在该扫描范围内未找到明确异常规则，也未发现含糊匹配。",
+    "interpretation_boundary": "这是资料记录状态，不是系统行为结论；不能据此证明系统不存在异常。",
+    "verification_next_step": "如需诊断具体异常，请补充独立的触发条件、现象、检查步骤和处理动作来源。"
+  },
+  "audit_required": [
+    "source_snapshot_id",
+    "source_hash",
+    "selected_source_closure_sha256",
+    "scanner_contract_sha256",
+    "semantic_zero_match_certificate",
+    "scanned_block_count",
+    "explicit_rule_match",
+    "ambiguous_match",
+    "audit_locator"
+  ],
+  "quality": {
+    "dimension_verdict": "not_evaluable",
+    "produces_kd_win": false,
+    "reader_text_must_equal_template": true
+  },
+  "forbidden": ["system_has_no_exception", "cross_source_rule", "model_inference", "raw_source_copy"]
+}

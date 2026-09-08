@@ -139,10 +139,10 @@ def test_pub_object_invalid_category_and_unbound_field_refs_do_not_pass() -> Non
 
 def test_provider_contract_identity_is_qwen_only() -> None:
     llm.validate_publication_provider_identity(
-        model="qwen3.6",
+        model="qwen3.8",
         base_url="https://dashscope.in.whatspos.cn/v1",
     )
-    with pytest.raises(ValidationError, match="qwen3.6"):
+    with pytest.raises(ValidationError, match="qwen3.8"):
         llm.validate_publication_provider_identity(model="deepseek-v4-flash", base_url="https://api.deepseek.com/v1")
 
 

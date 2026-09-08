@@ -1,0 +1,53 @@
+{
+  "schema_version": "task5-m401-r-review-receipt.v1",
+  "required": [
+    "task_id",
+    "review_kind",
+    "review_attempt_id",
+    "review_result_ref",
+    "review_report_ref",
+    "review_outcome",
+    "terminal_clean",
+    "finding_dispositions",
+    "m401_packet_ref",
+    "m401_packet_sha256",
+    "snapshot_tree",
+    "material_id",
+    "reviewer",
+    "created_at",
+    "canonical_sha256"
+  ],
+  "const": {
+    "review_kind": "mini_task.implementation",
+    "review_outcome": "available",
+    "terminal_clean": true
+  },
+  "finding_disposition_contract": {
+    "allowed_status": [
+      "fixed",
+      "rejected_invalid",
+      "accepted_risk"
+    ],
+    "forbidden_status": [
+      "needs_human",
+      "unavailable",
+      "partial",
+      "non_terminal"
+    ],
+    "must_cover_every_reported_finding": true
+  },
+  "binding_contract": {
+    "m401_packet_sha256_must_match_ref": true,
+    "snapshot_tree_must_match_review_material": true,
+    "material_id_must_match_review_material": true,
+    "review_result_and_report_must_be_public_managed_refs": true
+  },
+  "canonical_bytes": {
+    "encoding": "utf-8",
+    "sort_keys": true,
+    "separators": [",", ":"],
+    "ensure_ascii": false,
+    "trailing_newline": true,
+    "self_hash_excluded": true
+  }
+}

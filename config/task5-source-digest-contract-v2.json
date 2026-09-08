@@ -1,0 +1,252 @@
+{
+  "schema_version": "task5-source-digest-contract.v2",
+  "contract_id": "task5-source-digest-reader-v2",
+  "purpose": "将每条非空原始来源交给 Qwen 做单来源知识消化，形成可读 Reader 页面；它不是原文复制，也不是质量案例的替代物。",
+  "source_manifest": {
+    "path": "config/task5-source-page-manifest-v2.json",
+    "sha256": "54f54bb2b6d589f403862d4049ee0cfec5973121c4de757e4b327d2f51448973",
+    "expected_count": 89,
+    "one_source_per_request": true
+  },
+  "semantic_output_contract": {
+    "path": "config/task5-provider-semantic-output-v2.json",
+    "sha256": "e5fd5d67793eca583683ef331ac61b0a0f72e9f10257f7e9ead5826d4a82db7e",
+    "schema_version": "task5-semantic-output.v2"
+  },
+  "semantic_frame_contract": {
+    "path": "config/task5-semantic-frame-v1.json",
+    "sha256": "e864fd5f976a5641ffda5db662eceb2ce85687f5fabf250dc7e337b73f264ae6",
+    "schema_version": "task5-semantic-frame.v1",
+    "compiler_derived": true
+  },
+  "provider_route": {
+    "request_kind": "source-digest",
+    "route_kind": "source-digest",
+    "model_must_generate": true,
+    "page_type_must_be_one_of": [
+      "positioning",
+      "concept",
+      "operation",
+      "diagnosis",
+      "experience"
+    ],
+    "reader_eligible_on_success": true,
+    "cross_source_claims": false,
+    "raw_full_source_fallback": false
+  },
+  "route_verifier": {
+    "schema_version": "source-digest-route-verifier.v1",
+    "purpose": "separate provider-free source safety from post-provider semantic route verification; missing raw route labels do not block Qwen",
+    "provider_calls_before_verification": 0,
+    "pre_provider_producer": {
+      "schema_version": "source-scope-producer.v1",
+      "owner": "R2 deterministic compiler; runs after Source→Block→Claim and before any Qwen request",
+      "provider_calls": 0,
+      "inputs": [
+        "current_source_snapshot",
+        "source_block_claim_ledger",
+        "raw_coordinate_map"
+      ],
+      "outputs": [
+        "source_scope_ledger"
+      ],
+      "deterministic_algorithm": [
+        "parse only current raw bytes through the frozen Block/Claim parser; every row stores source_id, relative_path, source_content_hash, block/claim closure digest and raw coordinate map digest",
+        "classify only source safety and scope: present/non-empty, readable UTF-8, manifest identity equal, single-source request boundary, and supported/empty/duplicate status",
+        "do not use filename, directory, paragraph position or model output as proof of question, page type, product, module, object, scene or boundary",
+        "preserve a source with readable Claims even when route metadata is absent; only unreadable, unsafe, empty or duplicate states leave the Qwen Reader route",
+        "canonicalize source-scope rows with UTF-8 recursive key sorting and trailing LF; compute source_scope_ledger_sha256 before provider calls"
+      ],
+      "closed_world": {
+        "raw_claims_only": true,
+        "new_entities_before_qwen_forbidden": true,
+        "directory_only_semantics_forbidden": true,
+        "filename_only_title_is_display_candidate_only": true,
+        "model_output_before_qwen_forbidden": true,
+        "unsafe_source": "audit_only",
+        "missing_route_metadata": "continue_to_qwen"
+      },
+      "failure_codes": [
+        "SOURCE_DIGEST_SOURCE_UNREADABLE",
+        "SOURCE_DIGEST_SOURCE_IDENTITY_DRIFT",
+        "SOURCE_DIGEST_SOURCE_SCOPE_UNSAFE",
+        "SOURCE_DIGEST_SOURCE_EMPTY",
+        "SOURCE_DIGEST_SOURCE_DUPLICATE"
+      ],
+      "receipt_required": [
+        "producer_schema_sha256",
+        "source_snapshot_id",
+        "source_id",
+        "source_content_hash",
+        "block_claim_ledger_sha256",
+        "raw_coordinate_map_sha256",
+        "source_scope_ledger_sha256",
+        "source_scope",
+        "decision",
+        "reason_code"
+      ]
+    },
+    "post_provider_verifier": {
+      "schema_version": "source-digest-route-verifier.v1",
+      "provider_calls_before_verification": 1,
+      "inputs": [
+        "source_scope_ledger",
+        "source_block_claim_ledger",
+        "claim_semantic_frame_ledger",
+        "typed_qwen_output"
+      ],
+      "outputs": ["verified_route_record", "support_sha256", "audit_or_reader_decision"],
+      "rules": [
+        "Qwen may generate question, title, page_type and product/module/object/scene/boundary labels only from the single-source Claim closure",
+        "every generated field must carry Claim/frame/locator support; page_type must be one of the five Reader types",
+        "top-level raw directory may be retained only as structural product route and filename only as display-title candidate",
+        "unsupported, ambiguous, stale or closure-external fields are Audit-only; they are not replaced with raw source text"
+      ]
+    },
+    "inputs": [
+      "current_source_snapshot",
+      "source_page_manifest_entry",
+      "source_block_claim_ledger",
+      "source_scope_ledger",
+      "typed_qwen_output"
+    ],
+    "candidate_fields": [
+      "question",
+      "expected_title",
+      "page_type",
+      "primary_intent",
+      "product",
+      "module",
+      "object",
+      "scene",
+      "boundary"
+    ],
+    "derivation_rules": {
+      "expected_title": "Qwen chooses a readable title from the current single-source Claim closure; filename is only a display candidate",
+      "question": "Qwen chooses the reader question from the current single-source Claim closure; manifest question is prompt context, not proof",
+      "page_type": "Qwen chooses exactly one of positioning/concept/operation/diagnosis/experience and binds it to Claim/frame support",
+      "axis": "Qwen generates product/module/object/scene/boundary labels and binds each field to this source closure; top-level directory is structural product context only",
+      "primary_intent": "Qwen generates one primary reader intent from the source Claims; ambiguity or missing support is Audit-only"
+    },
+    "normalization": "Unicode NFKC, trim outer whitespace, collapse internal ASCII whitespace only; preserve source locator bytes for verification",
+    "support_ref_required_fields": [
+      "field",
+      "value",
+      "support_kind",
+      "source_id",
+      "source_snapshot_id",
+      "block_id",
+      "claim_id",
+      "semantic_frame_field",
+      "source_block_sha256",
+      "claim_sha256",
+      "raw_coordinate_span"
+    ],
+    "identity_checks": [
+      "manifest source_id/path/content hash equals current source snapshot",
+      "every support ref belongs to this single source closure",
+      "recompute selected_source_closure_sha256 from current Block/Claim rows and producer frame rows",
+      "recompute support_sha256 from normalized candidate fields, ordered support refs and closure identity",
+      "typed Qwen fields are present, normalized and supported by this source closure",
+      "primary intent, page type and five axes are replayable from the typed output and Claim/frame locators"
+    ],
+    "failure_status": "pre-provider unsafe source => Audit-only and no Qwen; post-provider unsupported/ambiguous route => Audit-only; never raw fallback",
+    "failure_codes": [
+      "SOURCE_DIGEST_ROUTE_FIELD_UNSUPPORTED",
+      "SOURCE_DIGEST_ROUTE_AMBIGUOUS_INTENT",
+      "SOURCE_DIGEST_ROUTE_RELATION_UNCLOSED",
+      "SOURCE_DIGEST_ROUTE_STALE_LOCATOR",
+      "SOURCE_DIGEST_ROUTE_CLOSURE_DRIFT",
+      "SOURCE_DIGEST_ROUTE_MANIFEST_DRIFT"
+    ],
+    "receipt_required": [
+      "route_verifier_schema_sha256",
+      "source_snapshot_id",
+      "manifest_entry_sha256",
+      "selected_source_closure_sha256",
+      "normalized_fields",
+      "support_refs",
+      "support_sha256",
+      "primary_intent_candidates",
+      "decision",
+      "reason_code"
+    ]
+  },
+  "semantic_closure": {
+    "claim_scope": "only_supported_claims_from_the_single_source",
+    "summary_and_sections_must_have_claim_lineage": true,
+    "unsupported_sentence": "drop_or_fail_to_audit",
+    "empty_or_no_supported_claims": "audit_only",
+    "provider_failure": "audit_only_and_not_released",
+    "selected_source_identity": {
+      "schema": "selected-source-identity.v1",
+      "single_source_hash_field": "source_hash",
+      "closure_hash_field": "selected_source_closure_sha256",
+      "closure_hash_required_for": ["single_source", "multi_source"],
+      "closure_row_fields": [
+        "source_path",
+        "source_id",
+        "content_hash",
+        "selected_block_refs"
+      ],
+      "canonical_json": "utf8_recursive_key_sort_no_spaces_trailing_lf",
+      "source_sort": ["canonical_relative_path", "source_id", "content_hash"],
+      "block_sort": ["raw_start_byte", "raw_end_byte", "block_id"]
+    }
+  },
+  "semantic_frame_contract": {
+    "path": "config/task5-semantic-frame-v1.json",
+    "sha256": "e864fd5f976a5641ffda5db662eceb2ce85687f5fabf250dc7e337b73f264ae6",
+    "required_before_prompt": true,
+    "required_before_reader": true
+  },
+  "page_compression_oracle": {
+    "input_surface": "final_reader_body_summary_axis_and_sections_only",
+    "excluded_surface": [
+      "navigation",
+      "title",
+      "slot_labels",
+      "audit_ref",
+      "internal_metadata"
+    ],
+    "max_reader_body_chars": 4800,
+    "structured_concept_exception": {
+      "when": "source-digest concept page with 30-59 supported Claims",
+      "max_reader_body_chars": 9000,
+      "terms_section_max_chars": 8000,
+      "reason": "preserve a structured named-field dictionary without forcing a lossy rewrite"
+    },
+    "large_dictionary_exception": {
+      "when": "source-digest concept page with at least 60 supported Claims",
+      "max_reader_body_chars": 14000,
+      "terms_section_max_chars": 12000,
+      "reason": "preserve a complete large named configuration dictionary without falling back to raw source or Audit-only"
+    },
+    "max_reader_sentence_count": 24,
+    "claim_coverage_guard": {
+      "min_input_claims": 8,
+      "max_distinct_claim_ratio": 0.75
+    },
+    "one_to_one_rewrite_guard": {
+      "high_similarity": 0.78,
+      "max_sentence_ratio": 0.60,
+      "minimum_claims": 4
+    },
+    "ordered_repetition_guard": {
+      "min_input_claims": 8,
+      "max_source_order_overlap": 0.75,
+      "requires_claim_coverage_guard": true
+    },
+    "negative_cases": [
+      "whole_source_semantic_rewrite",
+      "one_to_one_claim_rewrite",
+      "short_source_below_coverage_denominator"
+    ],
+    "failure_status": "audit_only_not_reader_eligible"
+  },
+  "explicit_audit_route": {
+    "request_kind": "source-direct-audit",
+    "reader_eligible": false,
+    "must_not_be_used_for_normal_89_source_digest": true
+  }
+}

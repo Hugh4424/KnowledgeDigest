@@ -38,7 +38,7 @@
 
 Raw Reader 编译对空内容只写 Audit 失败，不生成“暂无正文”占位页；语义候选还要通过可执行代码的确定性保真检查，失败时回退保真正文并把事实损失写入 Audit，质量代理按实际通过比例扣分。表格、链接、版本历史和普通叙述允许被语义候选重新组织。
 
-**受控语义候选编译**：`scripts/task3_semantic_compile.py` 按固定小批量调用批准的 `qwen3.6`，每批只请求一次，失败不自动重放，逐批输出进度并把失败来源写入 `audit/semantic-manifest.json`。它只生成可供 Raw Reader candidate 消费的语义候选，不直接发布；凭据只能通过 `KD_LLM_API_KEY`、`KD_LLM_BASE_URL`、`KD_LLM_MODEL` 环境变量传入。
+**受控语义候选编译**：`scripts/task3_semantic_compile.py` 按固定小批量调用批准的 `qwen3.8`，每批只请求一次，失败不自动重放，逐批输出进度并把失败来源写入 `audit/semantic-manifest.json`。它只生成可供 Raw Reader candidate 消费的语义候选，不直接发布；默认读取 `~/.config/knowledge-digest/config.json` 的 provider 配置，环境变量仅作兼容回退。
 
 **Audit/Archive Package**：用于审计、恢复和排查的交付包，包含 input manifest、source snapshot、Claim、Evidence、原文归档、失败原因、运行报告和配置/provider hash。它不作为日常阅读入口。
 
@@ -77,3 +77,37 @@ Raw Reader 编译对空内容只写 Audit 失败，不生成“暂无正文”�
 - **主题分页**合计保留该主题的全部 Claim，并继续满足 Evidence 与 Provenance 门禁
 - 每个**托管知识页**属于一个**发布结构**；**读者入口**只链接其可读路径，审计数据继续留在 Audit/Archive Package 的 `_digest` 与 `_queues`，不进入 Reader Package
 - 只有存在真实、非空、可导航的待处理项时才生成 `pending`；离线标题依次取既有托管标题、来源 metadata title/H1、文件名，稳定主题身份仍只由来源决定
+
+**Task5 五类业务页面（Task5-scoped）**：本任务的 Reader 页面类型按读者用途分为 `positioning`（定位）、`concept`（概念）、`operation`（操作）、`diagnosis`（诊断）、`experience`（经验）。这是 Task5 的页面投影合同，不改写 Task2/Task3 的历史三类 page type 记录；具体字段和 section 留给后续正式规格。
+
+**Task5 五维读者质量门**：每个冻结的问题/业务场景 case 都必须分别评价问题/场景路由、产品/模块/对象/场景/边界分类、业务化答案正文、页面类型适配、Reader 可见与 Audit 可回查；五维均须严格高于 CompanyBrain，不能用总分抵消单维失败。
+
+**Task5 盲审评分合同**：五维评价必须按实际 Home → Reader → Audit 走读；页面类型比较五类正文合同，不按标签相同自动判平手；CompanyBrain 有而 89 条原始语料没有的事实不能要求 KnowledgeDigest 编造，也不能用它证明候选胜出。完整规则见 `docs/adr/0011-task5-reader-quality-blind-review-rubric.md`。
+
+**Task5 独立读者门**：`strict_all_kd_win` 只是机器比较结果，不是独立读者结论。正式发布必须额外提供 `task5-independent-review.v1`，绑定同一 `run_id`、`source_snapshot_hash` 与候选 Reader/Audit 表面的 `candidate_surface_sha256`，至少两个独立 reviewer，六个冻结场景的五个维度逐项均为 `KD_WIN`，且每项带 Reader、Audit、CompanyBrain 证据。`agent_assisted_independent` 不得写成 `human_reviewed`；缺失、冲突、TIE 或任何一项非 `KD_WIN` 都保持 `not_released`。review 后必须对同一候选执行 `finalize`，不得为独立审查重新发起一轮模型生成。
+
+**Task5 特殊状态边界**：`empty`、`conflict`、`unsupported`、`ambiguous`、`unknown` 或 lineage 不完整只进入 Audit，并阻断对应 Reader case。唯一例外仍是 `source_not_documented`：只有确定性审计证明冻结来源没有明确异常触发、处理、分支或恢复规则时，才允许同页其他有证据内容进入 Reader；异常专属问题保持 `not_answerable`，不得写成“没有异常”，也不得把映射失败伪装成来源缺失。
+
+**Task5 人工门**：自动验收必须逐问题/场景检查 Reader 和 Audit 的五维结果；人工只确认自动汇总完整、可判定且无阻断失败，不逐页、不逐题、不逐来源链复核，不产生 `human_reviewed` 内容核验。
+
+**Task5 case verdict**：每个 quality case 的五个适用维度分别输出 `KD_WIN`、`TIE`、`CB_WIN`、`UNKNOWN`、`INVALID`、`N/A` 或 `CB_MISSING`；严格证明 KnowledgeDigest 更好时，所有适用维度都必须是 `KD_WIN`。`TIE`、`CB_MISSING` 和任何未知/无效状态都不能算胜出；`N/A` 只表示双方都不适用。完整性 guard case 不宣称胜出，但失败会阻断发布。
+
+**Task5 分层状态**：来源层记录 `expected/snapshotted/present/empty/processing_failed/unsupported/duplicate/conflict`；证据层记录 `extracted/supported/lineage_incomplete`；问题层记录 `answerable/not_answerable/blocked`；发布层记录 `candidate/not_released/released`。同 hash 重复来源只能作为 Audit alias；冲突、空源、处理失败、unsupported、lineage 不完整和未知状态不得进入对应 Reader case。
+
+**Task5 全量执行边界**：垂直切片是发布闸门，不是全量执行闸门。切片失败仍必须在同一任务处理 89 条并保留 candidate/Audit，但正式 Reader/released 必须阻断；切片通过也不替代 89 条全量和五维严格比较。
+
+**Task5 provider-required 修复模式**：真实 Task5 修复入口必须调用批准 endpoint 上的 `qwen3.8` 语义编译和 `jina-embeddings` 路由；运行前校验 live model capability，receipt 记录实际 model。不能把其他模型伪装成 `qwen3.8`。provider 缺失、调用失败、typed JSON 不合法、calibration 不匹配或 route ledger 不完整时，只写 Audit，不生成 `full-source` 或 raw-copy Reader。旧 P4 的无 provider/fidelity-only 运行仅是历史回归事实，不是本修复模式的成功路径。
+
+**Provider config precedence**：Task5 修复命令的 provider 配置优先级是显式 `--provider-config` > `~/.config/knowledge-digest/config.json` > 明确的测试/离线配置；生产 provider-required 模式没有隐式 Jaccard 或 identity fallback。配置支持 `api_key` 直接读取，`api_key_env` 仅作兼容回退；配置值优先，密钥只在进程内使用，不写入 receipt/report。
+
+**Task5 quality evidence-only baseline**：CompanyBrain 对照只能是冻结的只读 snapshot manifest；不能在 baseline 或 case 中预写 `strict_advantage`、verdict、`answer_lede`、`slot_ledes` 或答案正文。五维结果必须从实际 Reader/Audit 和 CompanyBrain snapshot 的可见文件、hash、问题入口和证据逐项重算。
+
+**Task5 quality state split**：`quality_cases_proven`、`source_closure`、`publication_status` 是三个互不替代的状态。前者表示五维 case×dimension 全部严格 `KD_WIN` 且 quality guard 通过；中者表示 89 条 source inventory、空源/重复/冲突、Claim/RenderLedger/Audit 处置闭合；后者只有两者和原子发布门都通过才可 `released`。
+
+**Task5 case contract**：QualityCase 只描述 question/aliases、适用维度、source refs、required/forbidden Claim 或 boundary refs、五类 page contract、比较 rubric 和 guard；生成答案只能从本次 provider 输出读取。静态答案字段存在即配置非法并阻断。
+
+**Task5 real render lineage**：每个 Reader render unit 必须满足 `Reader file hash → render_unit_id → claim_id → source_block_id → source_id/content_hash/locator`；字段存在但链路不匹配仍是 `lineage_incomplete`。原文只留在 Audit source snapshot，不能用 Audit 的全文证明 Reader 已业务化回答。
+
+**Task5 provider budget and output**：preflight 在首个网络请求前计算 LLM、embedding probe、route 和 related route 的最大调用数；超预算直接 `blocked`。真实最终结果必须写入用户指定的 Downloads 新目录，`/tmp` 只允许 staging。run identity 绑定 input snapshot、provider config、prompt/schema 和 calibration identity。
+
+**Task5 五维实际评分 v2.2**：每个问题/场景的 route、taxonomy、business-answer、page-type、Reader-Audit 分别计算 `content_score`、`structure_score` 和 `0-100` `score`；KD 与 CompanyBrain 都从当前真实 Reader/Audit 或 hash 绑定 Markdown 快照重算。只有本维 `kd_score > cb_score` 才是 `KD_WIN`，相等、缺证据和 baseline 无效分别保持 `TIE`、`UNKNOWN`、`CB_MISSING`；不允许读取预写 verdict/score，也不允许用跨维总分抵消单维失败。`

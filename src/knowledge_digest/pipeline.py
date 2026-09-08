@@ -2630,7 +2630,7 @@ def write_semantic_evidence_file(
         provider_config_path=getattr(settings, "provider_config_path", None)
     )
     provider = {
-        "provider": "qwen3.6" if settings.llm_enabled else "none",
+        "provider": "qwen3.8" if settings.llm_enabled else "none",
         "model": provider_env.get("KD_LLM_MODEL") if settings.llm_enabled else None,
         "base_url": provider_env.get("KD_LLM_BASE_URL") if settings.llm_enabled else None,
         "credential": credential_source(getattr(settings, "provider_config_path", None)) if settings.llm_enabled else "none",

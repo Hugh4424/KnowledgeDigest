@@ -1,0 +1,4940 @@
+{
+  "schema_version": "task5-source-page-manifest.v2",
+  "source_set": {
+    "expected_count": 89,
+    "path_set_digest": "7484673e9b5996112916190c57d612a67dcfa3468b870d9fd2c1f51d57cb6a51",
+    "policy": "every canonical Markdown source has exactly one source case"
+  },
+  "source_snapshot": {
+    "authority": "this manifest source_snapshot.entries ledger is the sole frozen source-status authority; entries are keyed by source_path and must be joined to entries[*].source_path",
+    "snapshot_id": "task5-raw-corpus-snapshot-fc6cbe662890394641214698a24fcb852aedbb1c9368c148ab552f870ed83908",
+    "hash_algorithm": "sha256 over raw bytes",
+    "line_count_definition": "UTF-8 decoded text split on LF; byte_count remains the raw byte length",
+    "audit_locator_definition": "audit/sources/{source_id}/source-snapshot",
+    "entry_count": 89,
+    "entries": [
+      {
+        "source_path": "GoInsight/12. GoInsight DC部署方案.md",
+        "source_id": "source-af095c27820bdc017e69b64676c5ef2fbd9d0d85657dbeed504e0b301ed1efe6",
+        "expected_status": "present",
+        "content_hash": "a80a7f39ecb214ef4bcd7ff216314d48cc5bb80ec4141ae4d91baee90bbda51b",
+        "byte_count": 5189,
+        "line_count": 90,
+        "audit_locator": "audit/sources/source-af095c27820bdc017e69b64676c5ef2fbd9d0d85657dbeed504e0b301ed1efe6/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/16 问数自动识别数据集.md",
+        "source_id": "source-13fe4dae148126b5dae474547a22d8b1e24d35363c38822cf699467ddddbb504",
+        "expected_status": "present",
+        "content_hash": "c37d40c8b16b6640ed09813572e69e280ffb404446952e8bde96c74d78c52973",
+        "byte_count": 2064,
+        "line_count": 49,
+        "audit_locator": "audit/sources/source-13fe4dae148126b5dae474547a22d8b1e24d35363c38822cf699467ddddbb504/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/17  智能搭建.md",
+        "source_id": "source-50cf4fc54c71aa20174483714b691c7673843d7b291f4925665fcab3e636d595",
+        "expected_status": "present",
+        "content_hash": "f13a606b8e3905db2b0cf5ae94d8e61f0ae79b0f26cfba02074b61986ec6e96f",
+        "byte_count": 1219,
+        "line_count": 42,
+        "audit_locator": "audit/sources/source-50cf4fc54c71aa20174483714b691c7673843d7b291f4925665fcab3e636d595/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/2021 Annual Leave Plan.md",
+        "source_id": "source-f2cdfa6ae4666c65af7e17c496b4facb0619a1a8ced6d3b0474186d4d62e42bc",
+        "expected_status": "present",
+        "content_hash": "a6acfd18d29e89756e0ec09a2e845887d63258805e70a79205c69b7a416ceba7",
+        "byte_count": 2335,
+        "line_count": 14,
+        "audit_locator": "audit/sources/source-f2cdfa6ae4666c65af7e17c496b4facb0619a1a8ced6d3b0474186d4d62e42bc/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/GoInsight V2.2.0 bug analysis.md",
+        "source_id": "source-773461fb4f85f0386f0f2f4a7a24ac86da823be48bd545161a457e5c25128149",
+        "expected_status": "present",
+        "content_hash": "5c11720af889bccc74877c5be1035ed6e1f43d442cb3630d858cadd886812263",
+        "byte_count": 2339,
+        "line_count": 23,
+        "audit_locator": "audit/sources/source-773461fb4f85f0386f0f2f4a7a24ac86da823be48bd545161a457e5c25128149/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/Sprint 116 Retrospective meeting.md",
+        "source_id": "source-22ee5336217b9af05c83c896e7447a0a259111f3c02ada4d3de2d3b04c7e984a",
+        "expected_status": "present",
+        "content_hash": "676177b722393ce8ce743e0182c8d147e1a4f0ceca824e124476454b8231e527",
+        "byte_count": 1634,
+        "line_count": 11,
+        "audit_locator": "audit/sources/source-22ee5336217b9af05c83c896e7447a0a259111f3c02ada4d3de2d3b04c7e984a/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/位置字段筛选.md",
+        "source_id": "source-defac3ccd9563156a636ae8107b1af4acaf457f924f5434930ff00410be768fb",
+        "expected_status": "present",
+        "content_hash": "32b3c01b03a44727c6a692e9b10e3ee71106abec1f90c45272cbd75c9bce32b1",
+        "byte_count": 5284,
+        "line_count": 73,
+        "audit_locator": "audit/sources/source-defac3ccd9563156a636ae8107b1af4acaf457f924f5434930ff00410be768fb/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/创建设备报告.md",
+        "source_id": "source-bb537ec8dc2b630ac012ac18a6d1ff532290e65d4e4d0cc05bb3172d8cedbc47",
+        "expected_status": "present",
+        "content_hash": "c1ee20845ae9abee8b130a8fe7bd3cfd7264f4a2304686fc9f9bec558e5b222e",
+        "byte_count": 54529,
+        "line_count": 366,
+        "audit_locator": "audit/sources/source-bb537ec8dc2b630ac012ac18a6d1ff532290e65d4e4d0cc05bb3172d8cedbc47/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/图表类型.md",
+        "source_id": "source-38d66db68b98c446b3dc3b8ed93dac526d4bcadc8e79b45b29c088c12b11e03c",
+        "expected_status": "present",
+        "content_hash": "2fb085f12322ed8a45563aabd8172f69ca9722a99af6890f756655f9f9217ad3",
+        "byte_count": 15431,
+        "line_count": 54,
+        "audit_locator": "audit/sources/source-38d66db68b98c446b3dc3b8ed93dac526d4bcadc8e79b45b29c088c12b11e03c/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/市场报告快照.md",
+        "source_id": "source-2b656e4febc784456aba666a5cfe3a0475fdd536dcb4731e77fdfc7ab4f7c8fb",
+        "expected_status": "present",
+        "content_hash": "fd020de7dd9ac3ea800c02723ab06089476f65257858937b713f488ec185c811",
+        "byte_count": 5927,
+        "line_count": 73,
+        "audit_locator": "audit/sources/source-2b656e4febc784456aba666a5cfe3a0475fdd536dcb4731e77fdfc7ab4f7c8fb/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/指标详情页.md",
+        "source_id": "source-c92b397f1a33739656ef44f32cf697480624c13e2294448f5ac58410e9fc1a0c",
+        "expected_status": "present",
+        "content_hash": "1e3758853a89257fcf0b2d99c5d5f08cc95f968b7d70079c85299123a3f6fae7",
+        "byte_count": 10618,
+        "line_count": 152,
+        "audit_locator": "audit/sources/source-c92b397f1a33739656ef44f32cf697480624c13e2294448f5ac58410e9fc1a0c/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/收费应用安装统计.md",
+        "source_id": "source-04217796221f3c3adaa00c7d005ed617819110ceda122e523a23e2c7febab754",
+        "expected_status": "present",
+        "content_hash": "5234687971c2941d8de787cff01187edb9a7227e54ef7eb64608a0011908023b",
+        "byte_count": 4297,
+        "line_count": 55,
+        "audit_locator": "audit/sources/source-04217796221f3c3adaa00c7d005ed617819110ceda122e523a23e2c7febab754/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/数据分析.md",
+        "source_id": "source-8bc30e7c37e8eae49c84ada17e1e7b5684c1e9ee1dd62a3495adc2aaac3446a4",
+        "expected_status": "present",
+        "content_hash": "52abb4c14c9beb1f0752bb6c50a8da9bef225237fc46e76f5f9c471e87c42668",
+        "byte_count": 6753,
+        "line_count": 55,
+        "audit_locator": "audit/sources/source-8bc30e7c37e8eae49c84ada17e1e7b5684c1e9ee1dd62a3495adc2aaac3446a4/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/新建迁移任务.md",
+        "source_id": "source-1016feeb22011105b03b0a9fa46bdada1b82230464c95539359072237c6e8267",
+        "expected_status": "present",
+        "content_hash": "d1e600db386a4002eee43a69fc8e94e32af8fb33ac55399bc4789da0e7f8bb28",
+        "byte_count": 15089,
+        "line_count": 199,
+        "audit_locator": "audit/sources/source-1016feeb22011105b03b0a9fa46bdada1b82230464c95539359072237c6e8267/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/日志管理.md",
+        "source_id": "source-3a798dfaf3a7f42cb0110bdff65612a2fccde4461640db27dcda294c384309d0",
+        "expected_status": "present",
+        "content_hash": "370fc8f996de01d759bfc1b438992a5e5827ae57c6791b25d74aa47e524f0b1c",
+        "byte_count": 2960,
+        "line_count": 65,
+        "audit_locator": "audit/sources/source-3a798dfaf3a7f42cb0110bdff65612a2fccde4461640db27dcda294c384309d0/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/智能删除图表.md",
+        "source_id": "source-f08ae357bc64a4b042293f5f23bba4bed85b50af87e424f5df687633009903a2",
+        "expected_status": "present",
+        "content_hash": "80a176eb1cfb6ef10be82c7c11201ab7d39296db0d6897537ce41e07926add62",
+        "byte_count": 4785,
+        "line_count": 91,
+        "audit_locator": "audit/sources/source-f08ae357bc64a4b042293f5f23bba4bed85b50af87e424f5df687633009903a2/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/智能查询文档.md",
+        "source_id": "source-8f1a3260654215af7fd42aeeadf0897d5c384b79da69964e0fe79ad1eb6fad6e",
+        "expected_status": "present",
+        "content_hash": "23f9e16c27bf3fdd139668a3b5ea7a372f21f53dfd230bc769a77d8055b9a756",
+        "byte_count": 2331,
+        "line_count": 44,
+        "audit_locator": "audit/sources/source-8f1a3260654215af7fd42aeeadf0897d5c384b79da69964e0fe79ad1eb6fad6e/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/添加关联数据.md",
+        "source_id": "source-4f4dcf6858e352395e81a083501410862661b974233fab5237f684dd7a699231",
+        "expected_status": "present",
+        "content_hash": "e669ce76f46b613b308ecdabf60d7ad2f96a5efc57ac4503f29e1fc553dd3ae5",
+        "byte_count": 29715,
+        "line_count": 305,
+        "audit_locator": "audit/sources/source-4f4dcf6858e352395e81a083501410862661b974233fab5237f684dd7a699231/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/添加指标页.md",
+        "source_id": "source-c28465ed366dc25c0766023cfdd54e18216ff796eabd452192ce22fc16530b10",
+        "expected_status": "present",
+        "content_hash": "66544230f10923384ed88723ab0467a86c508295597af05706b576e0241bf0d0",
+        "byte_count": 21474,
+        "line_count": 144,
+        "audit_locator": "audit/sources/source-c28465ed366dc25c0766023cfdd54e18216ff796eabd452192ce22fc16530b10/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/累计计算.md",
+        "source_id": "source-7f8af5b6d575a4668d858761eb673edef1623edbd74f3434eec324cdecb8aabf",
+        "expected_status": "present",
+        "content_hash": "d30d2efca1e75c35a8e1697476e95711e6ea48810c856adc170b925150305328",
+        "byte_count": 6465,
+        "line_count": 91,
+        "audit_locator": "audit/sources/source-7f8af5b6d575a4668d858761eb673edef1623edbd74f3434eec324cdecb8aabf/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/设备位置历史数据集.md",
+        "source_id": "source-7ef00a4bd743ce4dca5b85d303e0b429191f667cbd5f33cca5774d52d8a9d494",
+        "expected_status": "present",
+        "content_hash": "39b5bf52e177319239ebe6afb1df037163b6e567ef2ae2752bc46b3bab739cb6",
+        "byte_count": 3544,
+        "line_count": 45,
+        "audit_locator": "audit/sources/source-7ef00a4bd743ce4dca5b85d303e0b429191f667cbd5f33cca5774d52d8a9d494/source-snapshot"
+      },
+      {
+        "source_path": "GoInsight/迁移任务列表.md",
+        "source_id": "source-9273ce0e80775500ea5c3357c5d2080df25edc378ffcb846a959ec23df75c2a0",
+        "expected_status": "present",
+        "content_hash": "35499e746a06a158ae69b05254094decd71af6ba792a75125ee4f0ac9740871b",
+        "byte_count": 15652,
+        "line_count": 290,
+        "audit_locator": "audit/sources/source-9273ce0e80775500ea5c3357c5d2080df25edc378ffcb846a959ec23df75c2a0/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /AE - AirViewer厂商管理.md",
+        "source_id": "source-4f1641d30f34f47d340ec681b5133ae647aeb128d1b014bc17dd05e55d99fd12",
+        "expected_status": "empty",
+        "content_hash": "8b28dec38f962c2a291b3063c3ea6e5e8a3f36e6f1884f9e88c449432b3be885",
+        "byte_count": 5,
+        "line_count": 2,
+        "audit_locator": "audit/sources/source-4f1641d30f34f47d340ec681b5133ae647aeb128d1b014bc17dd05e55d99fd12/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /AE - GoInsight数据收集.md",
+        "source_id": "source-48a5a04c4ab02f7738244fc75bb4f6d0e00820c09a2befd71742c7d78ad207e9",
+        "expected_status": "present",
+        "content_hash": "8b90893e86e07875cb5d82f3c0b7f774018faaf87a52926b7ab47b9331e39a76",
+        "byte_count": 46577,
+        "line_count": 201,
+        "audit_locator": "audit/sources/source-48a5a04c4ab02f7738244fc75bb4f6d0e00820c09a2befd71742c7d78ad207e9/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /AE - 应用定向发布.md",
+        "source_id": "source-6a208697622fe7d57bd167862bdd30fec01f9a5f8bcea674dc38461a7cc1929c",
+        "expected_status": "present",
+        "content_hash": "b1871b739d9afa5a1765ffa139bacc42cc810355e68724c2aacd5e895935147a",
+        "byte_count": 23411,
+        "line_count": 224,
+        "audit_locator": "audit/sources/source-6a208697622fe7d57bd167862bdd30fec01f9a5f8bcea674dc38461a7cc1929c/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /AE - 应用详情.md",
+        "source_id": "source-1c0b3b1dd60867ad1b63188dfeb6bc9f01297309005e35ceae4a128b5127da7f",
+        "expected_status": "present",
+        "content_hash": "214a12f2c5efc529a6698e41d2465bdca30491c36c527342adea8f88b92b1ca5",
+        "byte_count": 45929,
+        "line_count": 519,
+        "audit_locator": "audit/sources/source-1c0b3b1dd60867ad1b63188dfeb6bc9f01297309005e35ceae4a128b5127da7f/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /AE - 设备详情页远程控制.md",
+        "source_id": "source-1c1a885b6456f2a5bfce60d631ad24c5d6e39c7703671d2720621c651b3ae374",
+        "expected_status": "present",
+        "content_hash": "8ce21dbc0c51898ed650c157b542c243bdc78e310dfd7c714c4610ccd76fb741",
+        "byte_count": 14139,
+        "line_count": 135,
+        "audit_locator": "audit/sources/source-1c1a885b6456f2a5bfce60d631ad24c5d6e39c7703671d2720621c651b3ae374/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /AE-分组管理.md",
+        "source_id": "source-2d875c536a46b8037024287cef3ae22fb3ae69b188f95eca8b4f7cf2a6660a73",
+        "expected_status": "present",
+        "content_hash": "553f5543380401c8e2997acb462db10062f3a242e8e82a5353c1493ba02dba62",
+        "byte_count": 13695,
+        "line_count": 240,
+        "audit_locator": "audit/sources/source-2d875c536a46b8037024287cef3ae22fb3ae69b188f95eca8b4f7cf2a6660a73/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /AE-参数推送.md",
+        "source_id": "source-3c993ea98330ee8bacee678992d4dbe98f558bd0fbf7f8ec5a2fe182cdec20c7",
+        "expected_status": "present",
+        "content_hash": "294d0283bd61b93e35ef31565c9da0630dfe3906f562e2545537bb9454a04b10",
+        "byte_count": 13982,
+        "line_count": 240,
+        "audit_locator": "audit/sources/source-3c993ea98330ee8bacee678992d4dbe98f558bd0fbf7f8ec5a2fe182cdec20c7/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /AE-应用参数配置.md",
+        "source_id": "source-5109f8b8217ba606eef1d69e8564341cdf4811f9c2523726d5708b26ca9e6998",
+        "expected_status": "present",
+        "content_hash": "dfb520f863e41225e111d5647d7c057570f8520200953e44c9a6f36f23f91642",
+        "byte_count": 46177,
+        "line_count": 271,
+        "audit_locator": "audit/sources/source-5109f8b8217ba606eef1d69e8564341cdf4811f9c2523726d5708b26ca9e6998/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /AE-开发者上传应用.md",
+        "source_id": "source-b098a77f54a0a2f50a4df3dc91a02d3fd3f581a584675568352dc90d633a373d",
+        "expected_status": "present",
+        "content_hash": "3b158a0c34e651f00eef921f3290796b6e784d35d27cb98947b03ea536ceb422",
+        "byte_count": 13337,
+        "line_count": 185,
+        "audit_locator": "audit/sources/source-b098a77f54a0a2f50a4df3dc91a02d3fd3f581a584675568352dc90d633a373d/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /AE-通信和网络配置.md",
+        "source_id": "source-652bc68f299b2c65cba7de70a14eec3a85d5b009ed82f77d2239030e5b4c11cb",
+        "expected_status": "present",
+        "content_hash": "c066483e58bfc8c26d2f737fbadd97e83850967b4db1f90377d4dd3d8b47dce0",
+        "byte_count": 60615,
+        "line_count": 389,
+        "audit_locator": "audit/sources/source-652bc68f299b2c65cba7de70a14eec3a85d5b009ed82f77d2239030e5b4c11cb/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /EMM for Android应用数据SDK.md",
+        "source_id": "source-93f95553cd18fbd7a404aa795e602b5dcfa70234285baf6b18a83a173f726797",
+        "expected_status": "present",
+        "content_hash": "337c740d2b02c42bb362ec32815a222020ceb0f0d0955e27f7d4590677925568",
+        "byte_count": 7590,
+        "line_count": 101,
+        "audit_locator": "audit/sources/source-93f95553cd18fbd7a404aa795e602b5dcfa70234285baf6b18a83a173f726797/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /EMM- 企业类型升级及管理.md",
+        "source_id": "source-1a1434e6a01916ecb45aebb48e98f988e4a9aca7fdff0e32266d26d9417c58a2",
+        "expected_status": "present",
+        "content_hash": "eafd4b9599032e7759f9ccefc9c60060feb2dbea1e9d8a8ccbc22f1f758c296e",
+        "byte_count": 14091,
+        "line_count": 142,
+        "audit_locator": "audit/sources/source-1a1434e6a01916ecb45aebb48e98f988e4a9aca7fdff0e32266d26d9417c58a2/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /EMM-AirViewer插件包设置.md",
+        "source_id": "source-814d5b30352c299d6cd3d5c4e9428b04691b9ba48f97550d3c6ef661e8602a8c",
+        "expected_status": "present",
+        "content_hash": "1c36216a783ed34ebacd7f60298101aba034b9fecf6dab8a63a03df2d64664c1",
+        "byte_count": 5765,
+        "line_count": 94,
+        "audit_locator": "audit/sources/source-814d5b30352c299d6cd3d5c4e9428b04691b9ba48f97550d3c6ef661e8602a8c/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /EMM介绍文档.md",
+        "source_id": "source-58b4cb6a1dfb780c3728c4b026bbeac4692ef9226c9f6e9a69eda3ea67113b7d",
+        "expected_status": "present",
+        "content_hash": "227d51f282243d17ca1727f421c2c50933c02c0d2270d47c8eef455706521e8f",
+        "byte_count": 16496,
+        "line_count": 307,
+        "audit_locator": "audit/sources/source-58b4cb6a1dfb780c3728c4b026bbeac4692ef9226c9f6e9a69eda3ea67113b7d/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /EMM售前确认.md",
+        "source_id": "source-79a02035a3b508fb0a0024f15b9a815532eadee70f01c9be2e7749b84c3c3ab3",
+        "expected_status": "present",
+        "content_hash": "8d43aaa9a84fc3cfb644ed74da00e9e134a2c693febb332c08c121fe434b1f8c",
+        "byte_count": 10523,
+        "line_count": 20,
+        "audit_locator": "audit/sources/source-79a02035a3b508fb0a0024f15b9a815532eadee70f01c9be2e7749b84c3c3ab3/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /EMM客户端页面.md",
+        "source_id": "source-8dd03021c09a152add11f1efeaa9529d63772fe0ea5dc76db6a0e077644b4c09",
+        "expected_status": "present",
+        "content_hash": "2529b2cc948b5ee6cb16697af5bd59a680b2f130c0e934ed2ba6926916facd16",
+        "byte_count": 10184,
+        "line_count": 159,
+        "audit_locator": "audit/sources/source-8dd03021c09a152add11f1efeaa9529d63772fe0ea5dc76db6a0e077644b4c09/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /EMM客户端：隐私协议.md",
+        "source_id": "source-649759aa367e7af59fb8637bba2c3d798543e2250d231cdbae3f4e0d4e4efd24",
+        "expected_status": "present",
+        "content_hash": "9e300954b01c354177ded86791a0cda852b81e72fec42c95d0b2c4ea0aa9731b",
+        "byte_count": 2745,
+        "line_count": 39,
+        "audit_locator": "audit/sources/source-649759aa367e7af59fb8637bba2c3d798543e2250d231cdbae3f4e0d4e4efd24/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /EMM服务定价.md",
+        "source_id": "source-6b867fda938df15740fd68360683352a2f763e814dcf71de6726bdb699f0d510",
+        "expected_status": "present",
+        "content_hash": "97cad2d0f934807213aaa319bda2f231f0994f91756d48efce7c54f1bf92b5be",
+        "byte_count": 9871,
+        "line_count": 168,
+        "audit_locator": "audit/sources/source-6b867fda938df15740fd68360683352a2f763e814dcf71de6726bdb699f0d510/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /EMM设备AirViewer服务适配新厂商.md",
+        "source_id": "source-670f2520b4d98c4d6fcc5244d76d6fc8a17545d02765c06b2147e3d28d9c4709",
+        "expected_status": "present",
+        "content_hash": "795c3ddaab3c6243263a02004d4f9392bce05ba01d0c3b19d895c4ca22dd5bae",
+        "byte_count": 4559,
+        "line_count": 57,
+        "audit_locator": "audit/sources/source-670f2520b4d98c4d6fcc5244d76d6fc8a17545d02765c06b2147e3d28d9c4709/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /EMM设备数据收集范围.md",
+        "source_id": "source-d50ade998ce8e9ce8c015b2c26e2c8cee81fd32688784aefe3634ea4018ec6b8",
+        "expected_status": "present",
+        "content_hash": "4e6e4ac10f9bd9a77405ace87c85add41eb3360bba6edf5cc46d9fec95ff0c0e",
+        "byte_count": 34311,
+        "line_count": 429,
+        "audit_locator": "audit/sources/source-d50ade998ce8e9ce8c015b2c26e2c8cee81fd32688784aefe3634ea4018ec6b8/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /Global-开发者服务账号管理.md",
+        "source_id": "source-6dac4e31091875821d8ab8205ad1edc5fb1051ff38a8d33d6653c291dd2da97c",
+        "expected_status": "present",
+        "content_hash": "dacd7335e82cbd82d706736fa25341b688d59bade72813c30bf088e176ebee09",
+        "byte_count": 7716,
+        "line_count": 82,
+        "audit_locator": "audit/sources/source-6dac4e31091875821d8ab8205ad1edc5fb1051ff38a8d33d6653c291dd2da97c/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /[AE] EMM服务订阅及企业注册.md",
+        "source_id": "source-b603b72a60ea9d0c69a437f2c392b09b188272b21276059c841c4e01a8403837",
+        "expected_status": "present",
+        "content_hash": "a88a10cc09dd0b66d2f79b33cf84cc0ccd310e873244c0e2fabaa5a4e0bbb186",
+        "byte_count": 34955,
+        "line_count": 464,
+        "audit_locator": "audit/sources/source-b603b72a60ea9d0c69a437f2c392b09b188272b21276059c841c4e01a8403837/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /[AE] 市场列表及操作.md",
+        "source_id": "source-3c173cf1a7bb7c4ef138db3063a23cc3becca060780fb5be478b9353fc63abee",
+        "expected_status": "present",
+        "content_hash": "3498dc285cb577d1bed9df948ab437b0b7ee387ace3a75548693e8e463ad9e50",
+        "byte_count": 22298,
+        "line_count": 200,
+        "audit_locator": "audit/sources/source-3c173cf1a7bb7c4ef138db3063a23cc3becca060780fb5be478b9353fc63abee/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /[AE] 弹窗输入标识符注册设备.md",
+        "source_id": "source-3cd25b4aa19be05ea5d4a9a6348f6d2d0ede219109555a3b2d9fe0909a434a41",
+        "expected_status": "present",
+        "content_hash": "868eecc7e6077969eb5e256e68becc819d2a3043123ab6b53aa487d4d2bd270d",
+        "byte_count": 20290,
+        "line_count": 259,
+        "audit_locator": "audit/sources/source-3cd25b4aa19be05ea5d4a9a6348f6d2d0ede219109555a3b2d9fe0909a434a41/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /[AE]创建二维码注册设备.md",
+        "source_id": "source-17af6c85fed2612711a2a28b4e312ddc7edb8561f4c67fa1ddd17c15c3625c22",
+        "expected_status": "present",
+        "content_hash": "392eca6a1dbd9f885ec0b157ff694ef284423bb1d5dfb528aaf90b780c93f8f1",
+        "byte_count": 13468,
+        "line_count": 178,
+        "audit_locator": "audit/sources/source-17af6c85fed2612711a2a28b4e312ddc7edb8561f4c67fa1ddd17c15c3625c22/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /全管理相关设备配置项注释更动.md",
+        "source_id": "source-0a7ccc8cc6268e3e956332d04c44d837480e74da5189d600760e43fd4fb2f756",
+        "expected_status": "present",
+        "content_hash": "df2a2dad6a90aebaef34092a548260684ab39f07ec8d88da251480cfd4142ccb",
+        "byte_count": 23265,
+        "line_count": 59,
+        "audit_locator": "audit/sources/source-0a7ccc8cc6268e3e956332d04c44d837480e74da5189d600760e43fd4fb2f756/source-snapshot"
+      },
+      {
+        "source_path": "emm for android /零接触相关流程.md",
+        "source_id": "source-dea27cc8f128fa12ae0e4cc5795ff592dcefa77de7f97cbc2cb96dc7ebe6824e",
+        "expected_status": "present",
+        "content_hash": "6687e16e350067f9d8fce6da8563049dbf1c6e231262e4d0d26afda23a9ad6b4",
+        "byte_count": 16940,
+        "line_count": 135,
+        "audit_locator": "audit/sources/source-dea27cc8f128fa12ae0e4cc5795ff592dcefa77de7f97cbc2cb96dc7ebe6824e/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/Payment Settings_商户配置_商户管理_Merchant Management_Reseller Portal.md",
+        "source_id": "source-eb7f7584aa68a386149a967325af6e9adfa3f609da942108b20bf812732da030",
+        "expected_status": "present",
+        "content_hash": "1584d30a3ab43e0b749553cad8978524dc2daee2579fa8e4cb23aa4d37b7a9f6",
+        "byte_count": 12672,
+        "line_count": 164,
+        "audit_locator": "audit/sources/source-eb7f7584aa68a386149a967325af6e9adfa3f609da942108b20bf812732da030/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/SSO列表_SSO_身份与域名配置_通用设置_Global System.md",
+        "source_id": "source-55592e90d21851aa38f451cab7b290e5ce2cfabddc3a2cace0571fbbbafe9235",
+        "expected_status": "present",
+        "content_hash": "66692435444d5d73b5302314d451ad8d859c4078f18f727efcc1be4d7dc610e1",
+        "byte_count": 5568,
+        "line_count": 91,
+        "audit_locator": "audit/sources/source-55592e90d21851aa38f451cab7b290e5ce2cfabddc3a2cace0571fbbbafe9235/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/Store App应用策略配置效果.md",
+        "source_id": "source-0e98d9c9637aa45985447665496c062bf95b4a6441de4e42b6b8c8a018d4509f",
+        "expected_status": "present",
+        "content_hash": "7b880c9c18111964c8aad9030ac0c304d2d702a1bc647b7b764c624c42bfbe1f",
+        "byte_count": 3665,
+        "line_count": 27,
+        "audit_locator": "audit/sources/source-0e98d9c9637aa45985447665496c062bf95b4a6441de4e42b6b8c8a018d4509f/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/Uptrillion日志管理.md",
+        "source_id": "source-e867d47147daffb7d702d8edb778c6687e19611e49d6bfaca672d8dcd54fa1a9",
+        "expected_status": "present",
+        "content_hash": "fd23ce9447ca3858422038fb8b52f50d8fe913928657995ed3e14e2e31e44c12",
+        "byte_count": 83273,
+        "line_count": 641,
+        "audit_locator": "audit/sources/source-e867d47147daffb7d702d8edb778c6687e19611e49d6bfaca672d8dcd54fa1a9/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS - 代理商和商户迁移.md",
+        "source_id": "source-249e4ed1f3ed65172f4dc5064a77cb6b030894f9b16fa1d4894f45e58da5c8f0",
+        "expected_status": "present",
+        "content_hash": "094f482222ec4d94148b40ec0f4a24dc53c4dd1e40d78135cea7dee8739fa65b",
+        "byte_count": 2155,
+        "line_count": 39,
+        "audit_locator": "audit/sources/source-249e4ed1f3ed65172f4dc5064a77cb6b030894f9b16fa1d4894f45e58da5c8f0/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS - 提示邮件汇总.md",
+        "source_id": "source-0911bfb05c277b29596e60f250f304c8e7f8d63095bbbad8e2ab653e8590a8c0",
+        "expected_status": "present",
+        "content_hash": "31b37b90426af16e5540bb56eb7be0bf24aa0210614b917bc7607467b833a583",
+        "byte_count": 8143,
+        "line_count": 49,
+        "audit_locator": "audit/sources/source-0911bfb05c277b29596e60f250f304c8e7f8d63095bbbad8e2ab653e8590a8c0/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS-子市场用量管理.md",
+        "source_id": "source-d61c604e86fc9900f93ea529e0dd294d31838b421ad6f096faacf621c114f8c7",
+        "expected_status": "present",
+        "content_hash": "3c9ed8800ed4a684f3fa064d2384608fa7e18f2e06537666da94d19ccfc11bb9",
+        "byte_count": 8754,
+        "line_count": 135,
+        "audit_locator": "audit/sources/source-d61c604e86fc9900f93ea529e0dd294d31838b421ad6f096faacf621c114f8c7/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS-市场管理.md",
+        "source_id": "source-30fb4fdde643a9f75c50da5e648a173f7559659e922ca87a445ac823aaddd3aa",
+        "expected_status": "present",
+        "content_hash": "51c84beb8d2f32eb1c2d91294220634990cb80d8531a988975737094ebca1571",
+        "byte_count": 19562,
+        "line_count": 203,
+        "audit_locator": "audit/sources/source-30fb4fdde643a9f75c50da5e648a173f7559659e922ca87a445ac823aaddd3aa/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS-应用添加及移除.md",
+        "source_id": "source-0cd96f18f92630d24b098316df0cfaab190640ecfcc66b0a2462cfa0ffde2fca",
+        "expected_status": "present",
+        "content_hash": "0a1c2dabbe9359dc5500c82f7bb5a431443e9356ed2811e6ab5c89ec91320c7f",
+        "byte_count": 16446,
+        "line_count": 276,
+        "audit_locator": "audit/sources/source-0cd96f18f92630d24b098316df0cfaab190640ecfcc66b0a2462cfa0ffde2fca/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS-开发者上传企业应用.md",
+        "source_id": "source-ee8ea2570d13c8ac4229ac20c375296b9fb4dae3f98566a015860d578b1fea27",
+        "expected_status": "present",
+        "content_hash": "f5c504e2f996721b38a34cbca13072dde5a70dfe57f5072a644f6704fdd6ba27",
+        "byte_count": 3810,
+        "line_count": 100,
+        "audit_locator": "audit/sources/source-ee8ea2570d13c8ac4229ac20c375296b9fb4dae3f98566a015860d578b1fea27/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS-开发者应用列表.md",
+        "source_id": "source-34c233199151f71d58590d7906416bd4b90f1245157b7f1b6db9a16c3a2920ec",
+        "expected_status": "present",
+        "content_hash": "35e1313fd537aca198ba6ad567c21b31432a41c6c2554db7d051b4be3ecb5a0e",
+        "byte_count": 1190,
+        "line_count": 42,
+        "audit_locator": "audit/sources/source-34c233199151f71d58590d7906416bd4b90f1245157b7f1b6db9a16c3a2920ec/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS-开发者应用详情.md",
+        "source_id": "source-dd4846c8f4f80dd84d7cafd02fd96beafe3628691cbab9613a01ac96e4f9de6b",
+        "expected_status": "present",
+        "content_hash": "8a7ffd25b5a68bc22e2ea9c29fd959435032f9e1b9bf23764f0f3cdc8900968e",
+        "byte_count": 979,
+        "line_count": 49,
+        "audit_locator": "audit/sources/source-dd4846c8f4f80dd84d7cafd02fd96beafe3628691cbab9613a01ac96e4f9de6b/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS-日志汇总.md",
+        "source_id": "source-a78bf91c2981af587474534fba41ef6786de66d8aa80bb5de1bd73286622dd38",
+        "expected_status": "present",
+        "content_hash": "3488bf5b35f9928cb5c2163e3533ec7f04cc0b06176dde1674f9005712d402a9",
+        "byte_count": 29115,
+        "line_count": 132,
+        "audit_locator": "audit/sources/source-a78bf91c2981af587474534fba41ef6786de66d8aa80bb5de1bd73286622dd38/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS-策略-安全配置.md",
+        "source_id": "source-cdc9c2708d30587be5564f79ee5028f4adadea2ad9dfb9039a1482d2503a04bb",
+        "expected_status": "present",
+        "content_hash": "9f3b55dfed71c5842d70ae6de1061aca316cb415d3c891860c9a1505867e21c8",
+        "byte_count": 48442,
+        "line_count": 97,
+        "audit_locator": "audit/sources/source-cdc9c2708d30587be5564f79ee5028f4adadea2ad9dfb9039a1482d2503a04bb/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS-策略-系统配置.md",
+        "source_id": "source-1e142f6c8de16bf9f3117fe308598d5183bfc1ee57adac5aa712fb207eda540c",
+        "expected_status": "present",
+        "content_hash": "800142f8b584654b56ca389b72e37918679ec79655f6700fa6a201ce5d40c8ff",
+        "byte_count": 18003,
+        "line_count": 100,
+        "audit_locator": "audit/sources/source-1e142f6c8de16bf9f3117fe308598d5183bfc1ee57adac5aa712fb207eda540c/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS-策略-通用规则.md",
+        "source_id": "source-af46b37646a918f899894b50d7f204fb47ac19fd1bcf61c6ba1c2adcf7836096",
+        "expected_status": "present",
+        "content_hash": "5ecda14b8cb34a26789eb7b571cf96bf0983ffbefd4ce7ff9780b6592f6e6f09",
+        "byte_count": 23575,
+        "line_count": 268,
+        "audit_locator": "audit/sources/source-af46b37646a918f899894b50d7f204fb47ac19fd1bcf61c6ba1c2adcf7836096/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS-终端管理.md",
+        "source_id": "source-9c26da2c649e3ba61643472d132e1dfb8e2337d30a2348da06d50991de93e339",
+        "expected_status": "present",
+        "content_hash": "69b6c8736cfc57020fb4354b65f51a672912a8f100bea57ee65c851752dfeb39",
+        "byte_count": 305,
+        "line_count": 6,
+        "audit_locator": "audit/sources/source-9c26da2c649e3ba61643472d132e1dfb8e2337d30a2348da06d50991de93e339/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS-账单.md",
+        "source_id": "source-0416620f81f3e0d01c327a22bc55ea48f5d2521c03d45d7d6d2d712ec41e2ca1",
+        "expected_status": "present",
+        "content_hash": "e309417bf3dfe94671af705c0b0a5e4d9ca03bb951789b554c6a615ba2a12ecf",
+        "byte_count": 2473,
+        "line_count": 67,
+        "audit_locator": "audit/sources/source-0416620f81f3e0d01c327a22bc55ea48f5d2521c03d45d7d6d2d712ec41e2ca1/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/iOS-资产列表.md",
+        "source_id": "source-32ffa2f03bc32b33e3411e720f7206c07797719fcee292fbddd891efd8deb857",
+        "expected_status": "present",
+        "content_hash": "52598f7ac6d5e763bdd7d344c74ec2b091f200166fb7f4f3552a88bf3e68ff03",
+        "byte_count": 37434,
+        "line_count": 226,
+        "audit_locator": "audit/sources/source-32ffa2f03bc32b33e3411e720f7206c07797719fcee292fbddd891efd8deb857/source-snapshot"
+      },
+      {
+        "source_path": "emm for ios/ipad支持展示的机型图.md",
+        "source_id": "source-4f2f544f1b5e67be00a3e37c14e2cab6457a95ce2fa1ba8a7a14ccc9ba96ca7b",
+        "expected_status": "present",
+        "content_hash": "0ddd69e5eb629d217cab4fd235ae092a1c549c78d26bacd398be8e8c1c63d941",
+        "byte_count": 7289,
+        "line_count": 116,
+        "audit_locator": "audit/sources/source-4f2f544f1b5e67be00a3e37c14e2cab6457a95ce2fa1ba8a7a14ccc9ba96ca7b/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/App Management_Global System.md",
+        "source_id": "source-4014284c5d2cc4fd0c131b5e22016705f3f113f467ca1ca78e6e391dada04c85",
+        "expected_status": "present",
+        "content_hash": "c92d5a6b7193906c242eeaa35f19a54c1f0c281547098aee16744860e1b54325",
+        "byte_count": 23610,
+        "line_count": 390,
+        "audit_locator": "audit/sources/source-4014284c5d2cc4fd0c131b5e22016705f3f113f467ca1ca78e6e391dada04c85/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/Apple设备零接触注册流程.md",
+        "source_id": "source-7b8cad95ddb5c688b2ee2700c8b65cce81a5474b2013680fd9cdd6cd4f7300e2",
+        "expected_status": "present",
+        "content_hash": "fe58f265c88929562c13b80577cf4586ce445c73e8e4996a4b24c787ed05c2f3",
+        "byte_count": 19683,
+        "line_count": 156,
+        "audit_locator": "audit/sources/source-7b8cad95ddb5c688b2ee2700c8b65cce81a5474b2013680fd9cdd6cd4f7300e2/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/Dashboard_MerchantPortal.md",
+        "source_id": "source-56f56e859a8b9fabec4449911846221743978a2537417afe2de1fa9c31dd1ba6",
+        "expected_status": "present",
+        "content_hash": "61f416abeb33660ff339446ca3e54a549636c94b32a593e8890b765d02c1d54e",
+        "byte_count": 12097,
+        "line_count": 242,
+        "audit_locator": "audit/sources/source-56f56e859a8b9fabec4449911846221743978a2537417afe2de1fa9c31dd1ba6/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/Dashboard_ResellerPortal.md",
+        "source_id": "source-37977ae7669ca0a3489d45a4a930610bb0920e09dd750292a328acc09413193f",
+        "expected_status": "present",
+        "content_hash": "61f416abeb33660ff339446ca3e54a549636c94b32a593e8890b765d02c1d54e",
+        "byte_count": 12097,
+        "line_count": 242,
+        "audit_locator": "audit/sources/source-37977ae7669ca0a3489d45a4a930610bb0920e09dd750292a328acc09413193f/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/Email Activity_Audit Log_日志管理_Global System.md",
+        "source_id": "source-84304847c88ff548105fb316f7369d1cde4945766462ec6cb10ed0d55a181a65",
+        "expected_status": "present",
+        "content_hash": "a2752aadb76540d442a70de9d2812a2bd82baf4c7c5d0637fb667afe9f51a169",
+        "byte_count": 7563,
+        "line_count": 97,
+        "audit_locator": "audit/sources/source-84304847c88ff548105fb316f7369d1cde4945766462ec6cb10ed0d55a181a65/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/apple接口调用方式.md",
+        "source_id": "source-2eef3e2bde7f9b9fa05e5c19e6eb5b2a83528ec49c4f2fa7323da074e0e5dfa2",
+        "expected_status": "present",
+        "content_hash": "adecbce4e75a9d615433d505852da3685ae4dae787ed7e2fba630982b274ff1d",
+        "byte_count": 1629,
+        "line_count": 13,
+        "audit_locator": "audit/sources/source-2eef3e2bde7f9b9fa05e5c19e6eb5b2a83528ec49c4f2fa7323da074e0e5dfa2/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/初始化策略验证.md",
+        "source_id": "source-22e6bce458e7f2c7fb0ec17a8f929033d46f31b3f44641344573ea2db8a7a20a",
+        "expected_status": "present",
+        "content_hash": "8761e96c45acffe47c170ace26bd24ec6210bc157549ff133a96b11745aa68ad",
+        "byte_count": 4195,
+        "line_count": 43,
+        "audit_locator": "audit/sources/source-22e6bce458e7f2c7fb0ec17a8f929033d46f31b3f44641344573ea2db8a7a20a/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/商户系统规范要求.md",
+        "source_id": "source-5775e27f1de5b7c68d79d0ab657ba8e7fd4aa602030dfc8fe5daa29771fb5e68",
+        "expected_status": "present",
+        "content_hash": "c80c8ceef82792e3a440b195def8295c16e6be8c1ea32394e2303bb1bf498fc3",
+        "byte_count": 1219,
+        "line_count": 15,
+        "audit_locator": "audit/sources/source-5775e27f1de5b7c68d79d0ab657ba8e7fd4aa602030dfc8fe5daa29771fb5e68/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/小票_商户管理_Merchant Management_Reseller Portal.md",
+        "source_id": "source-c93159d37bfecf810ae242ee8432625d37a52a0172db1c84be644a428bf68975",
+        "expected_status": "present",
+        "content_hash": "ddc2e854a60d6e3694bc5f89bd403445d3f62df55434301b5db3389b389a32ac",
+        "byte_count": 9609,
+        "line_count": 105,
+        "audit_locator": "audit/sources/source-c93159d37bfecf810ae242ee8432625d37a52a0172db1c84be644a428bf68975/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/小票竞品分析.md",
+        "source_id": "source-6db8120e4d991d7a5f44e1c0d8df94c0c2f756120205c5e9ca1b9df199d2e41d",
+        "expected_status": "present",
+        "content_hash": "9cdaa93733041920cb09715af0feb5f62386d5931d1d178d109b79112501aeb0",
+        "byte_count": 28182,
+        "line_count": 362,
+        "audit_locator": "audit/sources/source-6db8120e4d991d7a5f44e1c0d8df94c0c2f756120205c5e9ca1b9df199d2e41d/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/新建SSO_SSO_身份与域名配置_通用设置_Global System.md",
+        "source_id": "source-61d91f55046051cf151de2f72609c315745984b94eccfdfea725256ad4075a14",
+        "expected_status": "present",
+        "content_hash": "652b6182dbcc815def20be1baaeca2094b1ac81428d825ba01ed2d694d771b18",
+        "byte_count": 9807,
+        "line_count": 89,
+        "audit_locator": "audit/sources/source-61d91f55046051cf151de2f72609c315745984b94eccfdfea725256ad4075a14/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/新建角色_角色管理_ResellerPortal.md",
+        "source_id": "source-b7750068975e48f709aa556fd4dd7a277f312ccf6fb67ef3321f421a4ec1237a",
+        "expected_status": "present",
+        "content_hash": "0d87f777c18432634ea0079913c0120e0d1224b1ccf890364d1145afea9719d4",
+        "byte_count": 4022,
+        "line_count": 76,
+        "audit_locator": "audit/sources/source-b7750068975e48f709aa556fd4dd7a277f312ccf6fb67ef3321f421a4ec1237a/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/权限分类_角色管理_MerchantPortal.md",
+        "source_id": "source-4e135268cd601f6561958f2b4d3c5111433115594c7b18b938946997e22ba506",
+        "expected_status": "present",
+        "content_hash": "c9495b8d0268aa7749aa706d0d143d32431bf22d4f87dc3232d8b66a336eae17",
+        "byte_count": 10870,
+        "line_count": 80,
+        "audit_locator": "audit/sources/source-4e135268cd601f6561958f2b4d3c5111433115594c7b18b938946997e22ba506/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md",
+        "source_id": "source-49de506cb95f5ed9ecee1943aa57c8e775c74eee1c401155cbfb46362036ce2e",
+        "expected_status": "present",
+        "content_hash": "83049ba1855ac9085b31a270a29223525ec6787fc5947c9093bc1ec4f1ede039",
+        "byte_count": 5410,
+        "line_count": 92,
+        "audit_locator": "audit/sources/source-49de506cb95f5ed9ecee1943aa57c8e775c74eee1c401155cbfb46362036ce2e/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/系统邮件模板_系统邮件管理_邮件管理_Global System.md",
+        "source_id": "source-c1cb129019bcdfed79390f97911891c0dd54c86b69e5ae9eaeaa7b1067c0168d",
+        "expected_status": "present",
+        "content_hash": "77dde2804544a0cb8ed55000fefedad1dd62a1eccd057404935999b1e24dec7b",
+        "byte_count": 714,
+        "line_count": 11,
+        "audit_locator": "audit/sources/source-c1cb129019bcdfed79390f97911891c0dd54c86b69e5ae9eaeaa7b1067c0168d/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/终端列表_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md",
+        "source_id": "source-f83770a05343657ff2354845a07053753443025ffa4a9821217d7754aeb1f9c5",
+        "expected_status": "present",
+        "content_hash": "70dc077de6e3ebd15e0698f2cc1cc75cadafc15c2071b61d5a2d708c6cb9b08a",
+        "byte_count": 9254,
+        "line_count": 104,
+        "audit_locator": "audit/sources/source-f83770a05343657ff2354845a07053753443025ffa4a9821217d7754aeb1f9c5/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/编辑&删除_Merchant Processor_商户管理_Merchant Management_Reseller Portal.md",
+        "source_id": "source-3a88039f88d9854dbebce5fb249fb553fb912a7ed4f95046408aa52c9a6be185",
+        "expected_status": "present",
+        "content_hash": "837d5a61c36b4cc80c78f4945a7b28b139e9b701f8e0fc4f1e5488e86b2ad962",
+        "byte_count": 12512,
+        "line_count": 134,
+        "audit_locator": "audit/sources/source-3a88039f88d9854dbebce5fb249fb553fb912a7ed4f95046408aa52c9a6be185/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/编辑&删除制造商_制造商管理_机型管理_Global System.md",
+        "source_id": "source-8abe585ffdf7beed7594b27e047d88694995e21bf228a9652dc9e008e71dffff",
+        "expected_status": "present",
+        "content_hash": "09fcee57cac216e29379c468e75f0bae654a46b090995cff52587f3dbd539e50",
+        "byte_count": 5280,
+        "line_count": 111,
+        "audit_locator": "audit/sources/source-8abe585ffdf7beed7594b27e047d88694995e21bf228a9652dc9e008e71dffff/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/编辑&删除终端_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md",
+        "source_id": "source-e33c8a496f81a77ab130b98f6bf6191f619649fc8e1a522894c9b528d59f9e5c",
+        "expected_status": "present",
+        "content_hash": "6752d8786a13875cf9f99747b7dc33ade41e8db0484e76b019861543c2e6f354",
+        "byte_count": 19927,
+        "line_count": 152,
+        "audit_locator": "audit/sources/source-e33c8a496f81a77ab130b98f6bf6191f619649fc8e1a522894c9b528d59f9e5c/source-snapshot"
+      },
+      {
+        "source_path": "merchant system/重置密码&更改邮箱_用户_Merchant Management_Reseller Portal.md",
+        "source_id": "source-7ccb52c8dfe882ef58d22f59f47830e4907897a0f3f5887852e8b4904b9f65c3",
+        "expected_status": "present",
+        "content_hash": "222ccaea14525b456077c955b29bcc6be12117df30efe4ff358dc39db4256226",
+        "byte_count": 11514,
+        "line_count": 167,
+        "audit_locator": "audit/sources/source-7ccb52c8dfe882ef58d22f59f47830e4907897a0f3f5887852e8b4904b9f65c3/source-snapshot"
+      }
+    ]
+  },
+  "projection_policy": {
+    "source_digest": "each non-empty source entry is sent through one source-digest semantic projection from its own source closure; a successful projection enters Reader and Home, while failure or ambiguity remains Audit-only",
+    "source_direct_audit": "explicit source-direct-audit requests compile one source closure for Audit/coverage only and never enter Reader, Home, or released publication",
+    "quality_case": "a source may participate in zero or more quality-case projections; each projection has its own frozen question, page_type, route, lineage and five-dimensional gate",
+    "multi_projection_cases": [
+      "Q-OPR-01",
+      "Q-BND-01"
+    ]
+  },
+  "defaults": {
+    "required_content": [
+      "title",
+      "answer",
+      "scope",
+      "source-backed claims"
+    ],
+    "forbidden_content": [
+      "full-source",
+      "raw source copy",
+      "unsupported inference"
+    ],
+    "route": "source-digest for every non-empty entry; selected_source_paths must equal the one-source closure; source-direct-audit is explicit only; quality-case Reader selected_source_paths must be proven by actual embedding top-k and consumed by Qwen",
+    "lineage": "every Reader answer and axis points to Claim/block/hash/locator",
+    "oracle": "source-digest success requires a typed Reader page and Audit/coverage/RenderLedger; source-direct-audit requires reader_eligible=false and Audit/coverage/RenderLedger; known_empty and any failure remain Audit-only; no raw/full-source fallback"
+  },
+  "entries": [
+    {
+      "case_id": "SRC-af095c27820bdc017e69b64676c5ef2fbd9d0d85657dbeed504e0b301ed1efe6",
+      "source_id": "source-af095c27820bdc017e69b64676c5ef2fbd9d0d85657dbeed504e0b301ed1efe6",
+      "source_path": "GoInsight/12. GoInsight DC部署方案.md",
+      "title": "12. GoInsight DC部署方案",
+      "question": "如何理解和使用《12. GoInsight DC部署方案》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/12. GoInsight DC部署方案.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/12. GoInsight DC部署方案.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-13fe4dae148126b5dae474547a22d8b1e24d35363c38822cf699467ddddbb504",
+      "source_id": "source-13fe4dae148126b5dae474547a22d8b1e24d35363c38822cf699467ddddbb504",
+      "source_path": "GoInsight/16 问数自动识别数据集.md",
+      "title": "16 问数自动识别数据集",
+      "question": "如何理解和使用《16 问数自动识别数据集》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/16 问数自动识别数据集.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/16 问数自动识别数据集.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-50cf4fc54c71aa20174483714b691c7673843d7b291f4925665fcab3e636d595",
+      "source_id": "source-50cf4fc54c71aa20174483714b691c7673843d7b291f4925665fcab3e636d595",
+      "source_path": "GoInsight/17  智能搭建.md",
+      "title": "17  智能搭建",
+      "question": "如何理解和使用《17  智能搭建》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/17  智能搭建.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/17  智能搭建.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-f2cdfa6ae4666c65af7e17c496b4facb0619a1a8ced6d3b0474186d4d62e42bc",
+      "source_id": "source-f2cdfa6ae4666c65af7e17c496b4facb0619a1a8ced6d3b0474186d4d62e42bc",
+      "source_path": "GoInsight/2021 Annual Leave Plan.md",
+      "title": "2021 Annual Leave Plan",
+      "question": "如何理解和使用《2021 Annual Leave Plan》中的业务规则？",
+      "page_type": "experience",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/2021 Annual Leave Plan.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/2021 Annual Leave Plan.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-773461fb4f85f0386f0f2f4a7a24ac86da823be48bd545161a457e5c25128149",
+      "source_id": "source-773461fb4f85f0386f0f2f4a7a24ac86da823be48bd545161a457e5c25128149",
+      "source_path": "GoInsight/GoInsight V2.2.0 bug analysis.md",
+      "title": "GoInsight V2.2.0 bug analysis",
+      "question": "如何理解和使用《GoInsight V2.2.0 bug analysis》中的业务规则？",
+      "page_type": "diagnosis",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/GoInsight V2.2.0 bug analysis.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/GoInsight V2.2.0 bug analysis.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-22ee5336217b9af05c83c896e7447a0a259111f3c02ada4d3de2d3b04c7e984a",
+      "source_id": "source-22ee5336217b9af05c83c896e7447a0a259111f3c02ada4d3de2d3b04c7e984a",
+      "source_path": "GoInsight/Sprint 116 Retrospective meeting.md",
+      "title": "Sprint 116 Retrospective meeting",
+      "question": "如何理解和使用《Sprint 116 Retrospective meeting》中的业务规则？",
+      "page_type": "experience",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/Sprint 116 Retrospective meeting.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/Sprint 116 Retrospective meeting.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-defac3ccd9563156a636ae8107b1af4acaf457f924f5434930ff00410be768fb",
+      "source_id": "source-defac3ccd9563156a636ae8107b1af4acaf457f924f5434930ff00410be768fb",
+      "source_path": "GoInsight/位置字段筛选.md",
+      "title": "位置字段筛选",
+      "question": "如何理解和使用《位置字段筛选》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/位置字段筛选.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/位置字段筛选.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-bb537ec8dc2b630ac012ac18a6d1ff532290e65d4e4d0cc05bb3172d8cedbc47",
+      "source_id": "source-bb537ec8dc2b630ac012ac18a6d1ff532290e65d4e4d0cc05bb3172d8cedbc47",
+      "source_path": "GoInsight/创建设备报告.md",
+      "title": "创建设备报告",
+      "question": "如何理解和使用《创建设备报告》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/创建设备报告.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/创建设备报告.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-38d66db68b98c446b3dc3b8ed93dac526d4bcadc8e79b45b29c088c12b11e03c",
+      "source_id": "source-38d66db68b98c446b3dc3b8ed93dac526d4bcadc8e79b45b29c088c12b11e03c",
+      "source_path": "GoInsight/图表类型.md",
+      "title": "图表类型",
+      "question": "如何理解和使用《图表类型》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/图表类型.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/图表类型.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-2b656e4febc784456aba666a5cfe3a0475fdd536dcb4731e77fdfc7ab4f7c8fb",
+      "source_id": "source-2b656e4febc784456aba666a5cfe3a0475fdd536dcb4731e77fdfc7ab4f7c8fb",
+      "source_path": "GoInsight/市场报告快照.md",
+      "title": "市场报告快照",
+      "question": "如何理解和使用《市场报告快照》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/市场报告快照.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/市场报告快照.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-c92b397f1a33739656ef44f32cf697480624c13e2294448f5ac58410e9fc1a0c",
+      "source_id": "source-c92b397f1a33739656ef44f32cf697480624c13e2294448f5ac58410e9fc1a0c",
+      "source_path": "GoInsight/指标详情页.md",
+      "title": "指标详情页",
+      "question": "如何理解和使用《指标详情页》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/指标详情页.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/指标详情页.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-04217796221f3c3adaa00c7d005ed617819110ceda122e523a23e2c7febab754",
+      "source_id": "source-04217796221f3c3adaa00c7d005ed617819110ceda122e523a23e2c7febab754",
+      "source_path": "GoInsight/收费应用安装统计.md",
+      "title": "收费应用安装统计",
+      "question": "如何理解和使用《收费应用安装统计》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/收费应用安装统计.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/收费应用安装统计.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-8bc30e7c37e8eae49c84ada17e1e7b5684c1e9ee1dd62a3495adc2aaac3446a4",
+      "source_id": "source-8bc30e7c37e8eae49c84ada17e1e7b5684c1e9ee1dd62a3495adc2aaac3446a4",
+      "source_path": "GoInsight/数据分析.md",
+      "title": "数据分析",
+      "question": "如何理解和使用《数据分析》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/数据分析.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/数据分析.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-1016feeb22011105b03b0a9fa46bdada1b82230464c95539359072237c6e8267",
+      "source_id": "source-1016feeb22011105b03b0a9fa46bdada1b82230464c95539359072237c6e8267",
+      "source_path": "GoInsight/新建迁移任务.md",
+      "title": "新建迁移任务",
+      "question": "如何理解和使用《新建迁移任务》中的业务规则？",
+      "page_type": "diagnosis",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/新建迁移任务.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/新建迁移任务.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-3a798dfaf3a7f42cb0110bdff65612a2fccde4461640db27dcda294c384309d0",
+      "source_id": "source-3a798dfaf3a7f42cb0110bdff65612a2fccde4461640db27dcda294c384309d0",
+      "source_path": "GoInsight/日志管理.md",
+      "title": "日志管理",
+      "question": "如何理解和使用《日志管理》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/日志管理.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/日志管理.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-f08ae357bc64a4b042293f5f23bba4bed85b50af87e424f5df687633009903a2",
+      "source_id": "source-f08ae357bc64a4b042293f5f23bba4bed85b50af87e424f5df687633009903a2",
+      "source_path": "GoInsight/智能删除图表.md",
+      "title": "智能删除图表",
+      "question": "如何理解和使用《智能删除图表》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/智能删除图表.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/智能删除图表.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-8f1a3260654215af7fd42aeeadf0897d5c384b79da69964e0fe79ad1eb6fad6e",
+      "source_id": "source-8f1a3260654215af7fd42aeeadf0897d5c384b79da69964e0fe79ad1eb6fad6e",
+      "source_path": "GoInsight/智能查询文档.md",
+      "title": "智能查询文档",
+      "question": "如何理解和使用《智能查询文档》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/智能查询文档.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/智能查询文档.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-4f4dcf6858e352395e81a083501410862661b974233fab5237f684dd7a699231",
+      "source_id": "source-4f4dcf6858e352395e81a083501410862661b974233fab5237f684dd7a699231",
+      "source_path": "GoInsight/添加关联数据.md",
+      "title": "添加关联数据",
+      "question": "如何理解和使用《添加关联数据》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/添加关联数据.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/添加关联数据.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-c28465ed366dc25c0766023cfdd54e18216ff796eabd452192ce22fc16530b10",
+      "source_id": "source-c28465ed366dc25c0766023cfdd54e18216ff796eabd452192ce22fc16530b10",
+      "source_path": "GoInsight/添加指标页.md",
+      "title": "添加指标页",
+      "question": "如何理解和使用《添加指标页》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/添加指标页.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/添加指标页.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-7f8af5b6d575a4668d858761eb673edef1623edbd74f3434eec324cdecb8aabf",
+      "source_id": "source-7f8af5b6d575a4668d858761eb673edef1623edbd74f3434eec324cdecb8aabf",
+      "source_path": "GoInsight/累计计算.md",
+      "title": "累计计算",
+      "question": "如何理解和使用《累计计算》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/累计计算.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/累计计算.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-7ef00a4bd743ce4dca5b85d303e0b429191f667cbd5f33cca5774d52d8a9d494",
+      "source_id": "source-7ef00a4bd743ce4dca5b85d303e0b429191f667cbd5f33cca5774d52d8a9d494",
+      "source_path": "GoInsight/设备位置历史数据集.md",
+      "title": "设备位置历史数据集",
+      "question": "如何理解和使用《设备位置历史数据集》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/设备位置历史数据集.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/设备位置历史数据集.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-9273ce0e80775500ea5c3357c5d2080df25edc378ffcb846a959ec23df75c2a0",
+      "source_id": "source-9273ce0e80775500ea5c3357c5d2080df25edc378ffcb846a959ec23df75c2a0",
+      "source_path": "GoInsight/迁移任务列表.md",
+      "title": "迁移任务列表",
+      "question": "如何理解和使用《迁移任务列表》中的业务规则？",
+      "page_type": "diagnosis",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "GoInsight/迁移任务列表.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "GoInsight/迁移任务列表.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-4f1641d30f34f47d340ec681b5133ae647aeb128d1b014bc17dd05e55d99fd12",
+      "source_id": "source-4f1641d30f34f47d340ec681b5133ae647aeb128d1b014bc17dd05e55d99fd12",
+      "source_path": "emm for android /AE - AirViewer厂商管理.md",
+      "title": "AE - AirViewer厂商管理",
+      "question": "如何理解和使用《AE - AirViewer厂商管理》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /AE - AirViewer厂商管理.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /AE - AirViewer厂商管理.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": false,
+        "reader_eligible": false,
+        "coverage_class": "full_run_audit_only",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-48a5a04c4ab02f7738244fc75bb4f6d0e00820c09a2befd71742c7d78ad207e9",
+      "source_id": "source-48a5a04c4ab02f7738244fc75bb4f6d0e00820c09a2befd71742c7d78ad207e9",
+      "source_path": "emm for android /AE - GoInsight数据收集.md",
+      "title": "AE - GoInsight数据收集",
+      "question": "如何理解和使用《AE - GoInsight数据收集》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /AE - GoInsight数据收集.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /AE - GoInsight数据收集.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-6a208697622fe7d57bd167862bdd30fec01f9a5f8bcea674dc38461a7cc1929c",
+      "source_id": "source-6a208697622fe7d57bd167862bdd30fec01f9a5f8bcea674dc38461a7cc1929c",
+      "source_path": "emm for android /AE - 应用定向发布.md",
+      "title": "AE - 应用定向发布",
+      "question": "如何理解和使用《AE - 应用定向发布》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /AE - 应用定向发布.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /AE - 应用定向发布.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-1c0b3b1dd60867ad1b63188dfeb6bc9f01297309005e35ceae4a128b5127da7f",
+      "source_id": "source-1c0b3b1dd60867ad1b63188dfeb6bc9f01297309005e35ceae4a128b5127da7f",
+      "source_path": "emm for android /AE - 应用详情.md",
+      "title": "AE - 应用详情",
+      "question": "如何理解和使用《AE - 应用详情》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /AE - 应用详情.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /AE - 应用详情.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-1c1a885b6456f2a5bfce60d631ad24c5d6e39c7703671d2720621c651b3ae374",
+      "source_id": "source-1c1a885b6456f2a5bfce60d631ad24c5d6e39c7703671d2720621c651b3ae374",
+      "source_path": "emm for android /AE - 设备详情页远程控制.md",
+      "title": "AE - 设备详情页远程控制",
+      "question": "如何理解和使用《AE - 设备详情页远程控制》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /AE - 设备详情页远程控制.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /AE - 设备详情页远程控制.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-2d875c536a46b8037024287cef3ae22fb3ae69b188f95eca8b4f7cf2a6660a73",
+      "source_id": "source-2d875c536a46b8037024287cef3ae22fb3ae69b188f95eca8b4f7cf2a6660a73",
+      "source_path": "emm for android /AE-分组管理.md",
+      "title": "AE-分组管理",
+      "question": "如何理解和使用《AE-分组管理》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /AE-分组管理.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /AE-分组管理.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-3c993ea98330ee8bacee678992d4dbe98f558bd0fbf7f8ec5a2fe182cdec20c7",
+      "source_id": "source-3c993ea98330ee8bacee678992d4dbe98f558bd0fbf7f8ec5a2fe182cdec20c7",
+      "source_path": "emm for android /AE-参数推送.md",
+      "title": "AE-参数推送",
+      "question": "如何理解和使用《AE-参数推送》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /AE-参数推送.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /AE-参数推送.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-5109f8b8217ba606eef1d69e8564341cdf4811f9c2523726d5708b26ca9e6998",
+      "source_id": "source-5109f8b8217ba606eef1d69e8564341cdf4811f9c2523726d5708b26ca9e6998",
+      "source_path": "emm for android /AE-应用参数配置.md",
+      "title": "AE-应用参数配置",
+      "question": "如何理解和使用《AE-应用参数配置》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /AE-应用参数配置.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /AE-应用参数配置.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-b098a77f54a0a2f50a4df3dc91a02d3fd3f581a584675568352dc90d633a373d",
+      "source_id": "source-b098a77f54a0a2f50a4df3dc91a02d3fd3f581a584675568352dc90d633a373d",
+      "source_path": "emm for android /AE-开发者上传应用.md",
+      "title": "AE-开发者上传应用",
+      "question": "如何理解和使用《AE-开发者上传应用》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /AE-开发者上传应用.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /AE-开发者上传应用.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-652bc68f299b2c65cba7de70a14eec3a85d5b009ed82f77d2239030e5b4c11cb",
+      "source_id": "source-652bc68f299b2c65cba7de70a14eec3a85d5b009ed82f77d2239030e5b4c11cb",
+      "source_path": "emm for android /AE-通信和网络配置.md",
+      "title": "AE-通信和网络配置",
+      "question": "如何理解和使用《AE-通信和网络配置》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /AE-通信和网络配置.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /AE-通信和网络配置.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-93f95553cd18fbd7a404aa795e602b5dcfa70234285baf6b18a83a173f726797",
+      "source_id": "source-93f95553cd18fbd7a404aa795e602b5dcfa70234285baf6b18a83a173f726797",
+      "source_path": "emm for android /EMM for Android应用数据SDK.md",
+      "title": "EMM for Android应用数据SDK",
+      "question": "如何理解和使用《EMM for Android应用数据SDK》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /EMM for Android应用数据SDK.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /EMM for Android应用数据SDK.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-1a1434e6a01916ecb45aebb48e98f988e4a9aca7fdff0e32266d26d9417c58a2",
+      "source_id": "source-1a1434e6a01916ecb45aebb48e98f988e4a9aca7fdff0e32266d26d9417c58a2",
+      "source_path": "emm for android /EMM- 企业类型升级及管理.md",
+      "title": "EMM- 企业类型升级及管理",
+      "question": "如何理解和使用《EMM- 企业类型升级及管理》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /EMM- 企业类型升级及管理.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /EMM- 企业类型升级及管理.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-814d5b30352c299d6cd3d5c4e9428b04691b9ba48f97550d3c6ef661e8602a8c",
+      "source_id": "source-814d5b30352c299d6cd3d5c4e9428b04691b9ba48f97550d3c6ef661e8602a8c",
+      "source_path": "emm for android /EMM-AirViewer插件包设置.md",
+      "title": "EMM-AirViewer插件包设置",
+      "question": "如何理解和使用《EMM-AirViewer插件包设置》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /EMM-AirViewer插件包设置.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /EMM-AirViewer插件包设置.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-58b4cb6a1dfb780c3728c4b026bbeac4692ef9226c9f6e9a69eda3ea67113b7d",
+      "source_id": "source-58b4cb6a1dfb780c3728c4b026bbeac4692ef9226c9f6e9a69eda3ea67113b7d",
+      "source_path": "emm for android /EMM介绍文档.md",
+      "title": "EMM介绍文档",
+      "question": "如何理解和使用《EMM介绍文档》中的业务规则？",
+      "page_type": "positioning",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /EMM介绍文档.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /EMM介绍文档.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-79a02035a3b508fb0a0024f15b9a815532eadee70f01c9be2e7749b84c3c3ab3",
+      "source_id": "source-79a02035a3b508fb0a0024f15b9a815532eadee70f01c9be2e7749b84c3c3ab3",
+      "source_path": "emm for android /EMM售前确认.md",
+      "title": "EMM售前确认",
+      "question": "如何理解和使用《EMM售前确认》中的业务规则？",
+      "page_type": "positioning",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /EMM售前确认.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /EMM售前确认.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-8dd03021c09a152add11f1efeaa9529d63772fe0ea5dc76db6a0e077644b4c09",
+      "source_id": "source-8dd03021c09a152add11f1efeaa9529d63772fe0ea5dc76db6a0e077644b4c09",
+      "source_path": "emm for android /EMM客户端页面.md",
+      "title": "EMM客户端页面",
+      "question": "如何理解和使用《EMM客户端页面》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /EMM客户端页面.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /EMM客户端页面.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-649759aa367e7af59fb8637bba2c3d798543e2250d231cdbae3f4e0d4e4efd24",
+      "source_id": "source-649759aa367e7af59fb8637bba2c3d798543e2250d231cdbae3f4e0d4e4efd24",
+      "source_path": "emm for android /EMM客户端：隐私协议.md",
+      "title": "EMM客户端：隐私协议",
+      "question": "如何理解和使用《EMM客户端：隐私协议》中的业务规则？",
+      "page_type": "positioning",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /EMM客户端：隐私协议.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /EMM客户端：隐私协议.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-6b867fda938df15740fd68360683352a2f763e814dcf71de6726bdb699f0d510",
+      "source_id": "source-6b867fda938df15740fd68360683352a2f763e814dcf71de6726bdb699f0d510",
+      "source_path": "emm for android /EMM服务定价.md",
+      "title": "EMM服务定价",
+      "question": "如何理解和使用《EMM服务定价》中的业务规则？",
+      "page_type": "positioning",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /EMM服务定价.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /EMM服务定价.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-670f2520b4d98c4d6fcc5244d76d6fc8a17545d02765c06b2147e3d28d9c4709",
+      "source_id": "source-670f2520b4d98c4d6fcc5244d76d6fc8a17545d02765c06b2147e3d28d9c4709",
+      "source_path": "emm for android /EMM设备AirViewer服务适配新厂商.md",
+      "title": "EMM设备AirViewer服务适配新厂商",
+      "question": "如何理解和使用《EMM设备AirViewer服务适配新厂商》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /EMM设备AirViewer服务适配新厂商.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /EMM设备AirViewer服务适配新厂商.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-d50ade998ce8e9ce8c015b2c26e2c8cee81fd32688784aefe3634ea4018ec6b8",
+      "source_id": "source-d50ade998ce8e9ce8c015b2c26e2c8cee81fd32688784aefe3634ea4018ec6b8",
+      "source_path": "emm for android /EMM设备数据收集范围.md",
+      "title": "EMM设备数据收集范围",
+      "question": "如何理解和使用《EMM设备数据收集范围》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /EMM设备数据收集范围.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /EMM设备数据收集范围.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-6dac4e31091875821d8ab8205ad1edc5fb1051ff38a8d33d6653c291dd2da97c",
+      "source_id": "source-6dac4e31091875821d8ab8205ad1edc5fb1051ff38a8d33d6653c291dd2da97c",
+      "source_path": "emm for android /Global-开发者服务账号管理.md",
+      "title": "Global-开发者服务账号管理",
+      "question": "如何理解和使用《Global-开发者服务账号管理》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /Global-开发者服务账号管理.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /Global-开发者服务账号管理.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-b603b72a60ea9d0c69a437f2c392b09b188272b21276059c841c4e01a8403837",
+      "source_id": "source-b603b72a60ea9d0c69a437f2c392b09b188272b21276059c841c4e01a8403837",
+      "source_path": "emm for android /[AE] EMM服务订阅及企业注册.md",
+      "title": "[AE] EMM服务订阅及企业注册",
+      "question": "如何理解和使用《[AE] EMM服务订阅及企业注册》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /[AE] EMM服务订阅及企业注册.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /[AE] EMM服务订阅及企业注册.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-3c173cf1a7bb7c4ef138db3063a23cc3becca060780fb5be478b9353fc63abee",
+      "source_id": "source-3c173cf1a7bb7c4ef138db3063a23cc3becca060780fb5be478b9353fc63abee",
+      "source_path": "emm for android /[AE] 市场列表及操作.md",
+      "title": "[AE] 市场列表及操作",
+      "question": "如何理解和使用《[AE] 市场列表及操作》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /[AE] 市场列表及操作.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /[AE] 市场列表及操作.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-3cd25b4aa19be05ea5d4a9a6348f6d2d0ede219109555a3b2d9fe0909a434a41",
+      "source_id": "source-3cd25b4aa19be05ea5d4a9a6348f6d2d0ede219109555a3b2d9fe0909a434a41",
+      "source_path": "emm for android /[AE] 弹窗输入标识符注册设备.md",
+      "title": "[AE] 弹窗输入标识符注册设备",
+      "question": "如何理解和使用《[AE] 弹窗输入标识符注册设备》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /[AE] 弹窗输入标识符注册设备.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /[AE] 弹窗输入标识符注册设备.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-17af6c85fed2612711a2a28b4e312ddc7edb8561f4c67fa1ddd17c15c3625c22",
+      "source_id": "source-17af6c85fed2612711a2a28b4e312ddc7edb8561f4c67fa1ddd17c15c3625c22",
+      "source_path": "emm for android /[AE]创建二维码注册设备.md",
+      "title": "[AE]创建二维码注册设备",
+      "question": "如何理解和使用《[AE]创建二维码注册设备》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /[AE]创建二维码注册设备.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /[AE]创建二维码注册设备.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-0a7ccc8cc6268e3e956332d04c44d837480e74da5189d600760e43fd4fb2f756",
+      "source_id": "source-0a7ccc8cc6268e3e956332d04c44d837480e74da5189d600760e43fd4fb2f756",
+      "source_path": "emm for android /全管理相关设备配置项注释更动.md",
+      "title": "全管理相关设备配置项注释更动",
+      "question": "如何理解和使用《全管理相关设备配置项注释更动》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /全管理相关设备配置项注释更动.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /全管理相关设备配置项注释更动.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-dea27cc8f128fa12ae0e4cc5795ff592dcefa77de7f97cbc2cb96dc7ebe6824e",
+      "source_id": "source-dea27cc8f128fa12ae0e4cc5795ff592dcefa77de7f97cbc2cb96dc7ebe6824e",
+      "source_path": "emm for android /零接触相关流程.md",
+      "title": "零接触相关流程",
+      "question": "如何理解和使用《零接触相关流程》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for android /零接触相关流程.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for android /零接触相关流程.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-eb7f7584aa68a386149a967325af6e9adfa3f609da942108b20bf812732da030",
+      "source_id": "source-eb7f7584aa68a386149a967325af6e9adfa3f609da942108b20bf812732da030",
+      "source_path": "emm for ios/Payment Settings_商户配置_商户管理_Merchant Management_Reseller Portal.md",
+      "title": "Payment Settings_商户配置_商户管理_Merchant Management_Reseller Portal",
+      "question": "如何理解和使用《Payment Settings_商户配置_商户管理_Merchant Management_Reseller Portal》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/Payment Settings_商户配置_商户管理_Merchant Management_Reseller Portal.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/Payment Settings_商户配置_商户管理_Merchant Management_Reseller Portal.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-55592e90d21851aa38f451cab7b290e5ce2cfabddc3a2cace0571fbbbafe9235",
+      "source_id": "source-55592e90d21851aa38f451cab7b290e5ce2cfabddc3a2cace0571fbbbafe9235",
+      "source_path": "emm for ios/SSO列表_SSO_身份与域名配置_通用设置_Global System.md",
+      "title": "SSO列表_SSO_身份与域名配置_通用设置_Global System",
+      "question": "如何理解和使用《SSO列表_SSO_身份与域名配置_通用设置_Global System》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/SSO列表_SSO_身份与域名配置_通用设置_Global System.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/SSO列表_SSO_身份与域名配置_通用设置_Global System.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-0e98d9c9637aa45985447665496c062bf95b4a6441de4e42b6b8c8a018d4509f",
+      "source_id": "source-0e98d9c9637aa45985447665496c062bf95b4a6441de4e42b6b8c8a018d4509f",
+      "source_path": "emm for ios/Store App应用策略配置效果.md",
+      "title": "Store App应用策略配置效果",
+      "question": "如何理解和使用《Store App应用策略配置效果》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/Store App应用策略配置效果.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/Store App应用策略配置效果.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-e867d47147daffb7d702d8edb778c6687e19611e49d6bfaca672d8dcd54fa1a9",
+      "source_id": "source-e867d47147daffb7d702d8edb778c6687e19611e49d6bfaca672d8dcd54fa1a9",
+      "source_path": "emm for ios/Uptrillion日志管理.md",
+      "title": "Uptrillion日志管理",
+      "question": "如何理解和使用《Uptrillion日志管理》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/Uptrillion日志管理.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/Uptrillion日志管理.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-249e4ed1f3ed65172f4dc5064a77cb6b030894f9b16fa1d4894f45e58da5c8f0",
+      "source_id": "source-249e4ed1f3ed65172f4dc5064a77cb6b030894f9b16fa1d4894f45e58da5c8f0",
+      "source_path": "emm for ios/iOS - 代理商和商户迁移.md",
+      "title": "iOS - 代理商和商户迁移",
+      "question": "如何理解和使用《iOS - 代理商和商户迁移》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS - 代理商和商户迁移.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS - 代理商和商户迁移.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-0911bfb05c277b29596e60f250f304c8e7f8d63095bbbad8e2ab653e8590a8c0",
+      "source_id": "source-0911bfb05c277b29596e60f250f304c8e7f8d63095bbbad8e2ab653e8590a8c0",
+      "source_path": "emm for ios/iOS - 提示邮件汇总.md",
+      "title": "iOS - 提示邮件汇总",
+      "question": "如何理解和使用《iOS - 提示邮件汇总》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS - 提示邮件汇总.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS - 提示邮件汇总.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-d61c604e86fc9900f93ea529e0dd294d31838b421ad6f096faacf621c114f8c7",
+      "source_id": "source-d61c604e86fc9900f93ea529e0dd294d31838b421ad6f096faacf621c114f8c7",
+      "source_path": "emm for ios/iOS-子市场用量管理.md",
+      "title": "iOS-子市场用量管理",
+      "question": "如何理解和使用《iOS-子市场用量管理》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS-子市场用量管理.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS-子市场用量管理.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-30fb4fdde643a9f75c50da5e648a173f7559659e922ca87a445ac823aaddd3aa",
+      "source_id": "source-30fb4fdde643a9f75c50da5e648a173f7559659e922ca87a445ac823aaddd3aa",
+      "source_path": "emm for ios/iOS-市场管理.md",
+      "title": "iOS-市场管理",
+      "question": "如何理解和使用《iOS-市场管理》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS-市场管理.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS-市场管理.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-0cd96f18f92630d24b098316df0cfaab190640ecfcc66b0a2462cfa0ffde2fca",
+      "source_id": "source-0cd96f18f92630d24b098316df0cfaab190640ecfcc66b0a2462cfa0ffde2fca",
+      "source_path": "emm for ios/iOS-应用添加及移除.md",
+      "title": "iOS-应用添加及移除",
+      "question": "如何理解和使用《iOS-应用添加及移除》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS-应用添加及移除.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS-应用添加及移除.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-ee8ea2570d13c8ac4229ac20c375296b9fb4dae3f98566a015860d578b1fea27",
+      "source_id": "source-ee8ea2570d13c8ac4229ac20c375296b9fb4dae3f98566a015860d578b1fea27",
+      "source_path": "emm for ios/iOS-开发者上传企业应用.md",
+      "title": "iOS-开发者上传企业应用",
+      "question": "如何理解和使用《iOS-开发者上传企业应用》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS-开发者上传企业应用.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS-开发者上传企业应用.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-34c233199151f71d58590d7906416bd4b90f1245157b7f1b6db9a16c3a2920ec",
+      "source_id": "source-34c233199151f71d58590d7906416bd4b90f1245157b7f1b6db9a16c3a2920ec",
+      "source_path": "emm for ios/iOS-开发者应用列表.md",
+      "title": "iOS-开发者应用列表",
+      "question": "如何理解和使用《iOS-开发者应用列表》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS-开发者应用列表.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS-开发者应用列表.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-dd4846c8f4f80dd84d7cafd02fd96beafe3628691cbab9613a01ac96e4f9de6b",
+      "source_id": "source-dd4846c8f4f80dd84d7cafd02fd96beafe3628691cbab9613a01ac96e4f9de6b",
+      "source_path": "emm for ios/iOS-开发者应用详情.md",
+      "title": "iOS-开发者应用详情",
+      "question": "如何理解和使用《iOS-开发者应用详情》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS-开发者应用详情.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS-开发者应用详情.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-a78bf91c2981af587474534fba41ef6786de66d8aa80bb5de1bd73286622dd38",
+      "source_id": "source-a78bf91c2981af587474534fba41ef6786de66d8aa80bb5de1bd73286622dd38",
+      "source_path": "emm for ios/iOS-日志汇总.md",
+      "title": "iOS-日志汇总",
+      "question": "如何理解和使用《iOS-日志汇总》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS-日志汇总.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS-日志汇总.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-cdc9c2708d30587be5564f79ee5028f4adadea2ad9dfb9039a1482d2503a04bb",
+      "source_id": "source-cdc9c2708d30587be5564f79ee5028f4adadea2ad9dfb9039a1482d2503a04bb",
+      "source_path": "emm for ios/iOS-策略-安全配置.md",
+      "title": "iOS-策略-安全配置",
+      "question": "如何理解和使用《iOS-策略-安全配置》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS-策略-安全配置.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS-策略-安全配置.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-1e142f6c8de16bf9f3117fe308598d5183bfc1ee57adac5aa712fb207eda540c",
+      "source_id": "source-1e142f6c8de16bf9f3117fe308598d5183bfc1ee57adac5aa712fb207eda540c",
+      "source_path": "emm for ios/iOS-策略-系统配置.md",
+      "title": "iOS-策略-系统配置",
+      "question": "如何理解和使用《iOS-策略-系统配置》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS-策略-系统配置.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS-策略-系统配置.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-af46b37646a918f899894b50d7f204fb47ac19fd1bcf61c6ba1c2adcf7836096",
+      "source_id": "source-af46b37646a918f899894b50d7f204fb47ac19fd1bcf61c6ba1c2adcf7836096",
+      "source_path": "emm for ios/iOS-策略-通用规则.md",
+      "title": "iOS-策略-通用规则",
+      "question": "如何理解和使用《iOS-策略-通用规则》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS-策略-通用规则.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS-策略-通用规则.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-9c26da2c649e3ba61643472d132e1dfb8e2337d30a2348da06d50991de93e339",
+      "source_id": "source-9c26da2c649e3ba61643472d132e1dfb8e2337d30a2348da06d50991de93e339",
+      "source_path": "emm for ios/iOS-终端管理.md",
+      "title": "iOS-终端管理",
+      "question": "如何理解和使用《iOS-终端管理》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS-终端管理.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS-终端管理.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-0416620f81f3e0d01c327a22bc55ea48f5d2521c03d45d7d6d2d712ec41e2ca1",
+      "source_id": "source-0416620f81f3e0d01c327a22bc55ea48f5d2521c03d45d7d6d2d712ec41e2ca1",
+      "source_path": "emm for ios/iOS-账单.md",
+      "title": "iOS-账单",
+      "question": "如何理解和使用《iOS-账单》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS-账单.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS-账单.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-32ffa2f03bc32b33e3411e720f7206c07797719fcee292fbddd891efd8deb857",
+      "source_id": "source-32ffa2f03bc32b33e3411e720f7206c07797719fcee292fbddd891efd8deb857",
+      "source_path": "emm for ios/iOS-资产列表.md",
+      "title": "iOS-资产列表",
+      "question": "如何理解和使用《iOS-资产列表》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/iOS-资产列表.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/iOS-资产列表.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-4f2f544f1b5e67be00a3e37c14e2cab6457a95ce2fa1ba8a7a14ccc9ba96ca7b",
+      "source_id": "source-4f2f544f1b5e67be00a3e37c14e2cab6457a95ce2fa1ba8a7a14ccc9ba96ca7b",
+      "source_path": "emm for ios/ipad支持展示的机型图.md",
+      "title": "ipad支持展示的机型图",
+      "question": "如何理解和使用《ipad支持展示的机型图》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "emm for ios/ipad支持展示的机型图.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "emm for ios/ipad支持展示的机型图.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-4014284c5d2cc4fd0c131b5e22016705f3f113f467ca1ca78e6e391dada04c85",
+      "source_id": "source-4014284c5d2cc4fd0c131b5e22016705f3f113f467ca1ca78e6e391dada04c85",
+      "source_path": "merchant system/App Management_Global System.md",
+      "title": "App Management_Global System",
+      "question": "如何理解和使用《App Management_Global System》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/App Management_Global System.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/App Management_Global System.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-7b8cad95ddb5c688b2ee2700c8b65cce81a5474b2013680fd9cdd6cd4f7300e2",
+      "source_id": "source-7b8cad95ddb5c688b2ee2700c8b65cce81a5474b2013680fd9cdd6cd4f7300e2",
+      "source_path": "merchant system/Apple设备零接触注册流程.md",
+      "title": "Apple设备零接触注册流程",
+      "question": "如何理解和使用《Apple设备零接触注册流程》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/Apple设备零接触注册流程.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/Apple设备零接触注册流程.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-56f56e859a8b9fabec4449911846221743978a2537417afe2de1fa9c31dd1ba6",
+      "source_id": "source-56f56e859a8b9fabec4449911846221743978a2537417afe2de1fa9c31dd1ba6",
+      "source_path": "merchant system/Dashboard_MerchantPortal.md",
+      "title": "Dashboard_MerchantPortal",
+      "question": "如何理解和使用《Dashboard_MerchantPortal》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/Dashboard_MerchantPortal.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/Dashboard_MerchantPortal.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-37977ae7669ca0a3489d45a4a930610bb0920e09dd750292a328acc09413193f",
+      "source_id": "source-37977ae7669ca0a3489d45a4a930610bb0920e09dd750292a328acc09413193f",
+      "source_path": "merchant system/Dashboard_ResellerPortal.md",
+      "title": "Dashboard_ResellerPortal",
+      "question": "如何理解和使用《Dashboard_ResellerPortal》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/Dashboard_ResellerPortal.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/Dashboard_ResellerPortal.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-84304847c88ff548105fb316f7369d1cde4945766462ec6cb10ed0d55a181a65",
+      "source_id": "source-84304847c88ff548105fb316f7369d1cde4945766462ec6cb10ed0d55a181a65",
+      "source_path": "merchant system/Email Activity_Audit Log_日志管理_Global System.md",
+      "title": "Email Activity_Audit Log_日志管理_Global System",
+      "question": "如何理解和使用《Email Activity_Audit Log_日志管理_Global System》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/Email Activity_Audit Log_日志管理_Global System.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/Email Activity_Audit Log_日志管理_Global System.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-2eef3e2bde7f9b9fa05e5c19e6eb5b2a83528ec49c4f2fa7323da074e0e5dfa2",
+      "source_id": "source-2eef3e2bde7f9b9fa05e5c19e6eb5b2a83528ec49c4f2fa7323da074e0e5dfa2",
+      "source_path": "merchant system/apple接口调用方式.md",
+      "title": "apple接口调用方式",
+      "question": "如何理解和使用《apple接口调用方式》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/apple接口调用方式.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/apple接口调用方式.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-22e6bce458e7f2c7fb0ec17a8f929033d46f31b3f44641344573ea2db8a7a20a",
+      "source_id": "source-22e6bce458e7f2c7fb0ec17a8f929033d46f31b3f44641344573ea2db8a7a20a",
+      "source_path": "merchant system/初始化策略验证.md",
+      "title": "初始化策略验证",
+      "question": "如何理解和使用《初始化策略验证》中的业务规则？",
+      "page_type": "diagnosis",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/初始化策略验证.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/初始化策略验证.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-5775e27f1de5b7c68d79d0ab657ba8e7fd4aa602030dfc8fe5daa29771fb5e68",
+      "source_id": "source-5775e27f1de5b7c68d79d0ab657ba8e7fd4aa602030dfc8fe5daa29771fb5e68",
+      "source_path": "merchant system/商户系统规范要求.md",
+      "title": "商户系统规范要求",
+      "question": "如何理解和使用《商户系统规范要求》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/商户系统规范要求.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/商户系统规范要求.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-c93159d37bfecf810ae242ee8432625d37a52a0172db1c84be644a428bf68975",
+      "source_id": "source-c93159d37bfecf810ae242ee8432625d37a52a0172db1c84be644a428bf68975",
+      "source_path": "merchant system/小票_商户管理_Merchant Management_Reseller Portal.md",
+      "title": "小票_商户管理_Merchant Management_Reseller Portal",
+      "question": "如何理解和使用《小票_商户管理_Merchant Management_Reseller Portal》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/小票_商户管理_Merchant Management_Reseller Portal.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/小票_商户管理_Merchant Management_Reseller Portal.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-6db8120e4d991d7a5f44e1c0d8df94c0c2f756120205c5e9ca1b9df199d2e41d",
+      "source_id": "source-6db8120e4d991d7a5f44e1c0d8df94c0c2f756120205c5e9ca1b9df199d2e41d",
+      "source_path": "merchant system/小票竞品分析.md",
+      "title": "小票竞品分析",
+      "question": "如何理解和使用《小票竞品分析》中的业务规则？",
+      "page_type": "experience",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/小票竞品分析.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/小票竞品分析.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-61d91f55046051cf151de2f72609c315745984b94eccfdfea725256ad4075a14",
+      "source_id": "source-61d91f55046051cf151de2f72609c315745984b94eccfdfea725256ad4075a14",
+      "source_path": "merchant system/新建SSO_SSO_身份与域名配置_通用设置_Global System.md",
+      "title": "新建SSO_SSO_身份与域名配置_通用设置_Global System",
+      "question": "如何理解和使用《新建SSO_SSO_身份与域名配置_通用设置_Global System》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/新建SSO_SSO_身份与域名配置_通用设置_Global System.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/新建SSO_SSO_身份与域名配置_通用设置_Global System.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-b7750068975e48f709aa556fd4dd7a277f312ccf6fb67ef3321f421a4ec1237a",
+      "source_id": "source-b7750068975e48f709aa556fd4dd7a277f312ccf6fb67ef3321f421a4ec1237a",
+      "source_path": "merchant system/新建角色_角色管理_ResellerPortal.md",
+      "title": "新建角色_角色管理_ResellerPortal",
+      "question": "如何理解和使用《新建角色_角色管理_ResellerPortal》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/新建角色_角色管理_ResellerPortal.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/新建角色_角色管理_ResellerPortal.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-4e135268cd601f6561958f2b4d3c5111433115594c7b18b938946997e22ba506",
+      "source_id": "source-4e135268cd601f6561958f2b4d3c5111433115594c7b18b938946997e22ba506",
+      "source_path": "merchant system/权限分类_角色管理_MerchantPortal.md",
+      "title": "权限分类_角色管理_MerchantPortal",
+      "question": "如何理解和使用《权限分类_角色管理_MerchantPortal》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/权限分类_角色管理_MerchantPortal.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/权限分类_角色管理_MerchantPortal.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-49de506cb95f5ed9ecee1943aa57c8e775c74eee1c401155cbfb46362036ce2e",
+      "source_id": "source-49de506cb95f5ed9ecee1943aa57c8e775c74eee1c401155cbfb46362036ce2e",
+      "source_path": "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md",
+      "title": "激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal",
+      "question": "如何理解和使用《激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/激活&停用终端_Terminal_设备管理_Merchant Management_Reseller Portal.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-c1cb129019bcdfed79390f97911891c0dd54c86b69e5ae9eaeaa7b1067c0168d",
+      "source_id": "source-c1cb129019bcdfed79390f97911891c0dd54c86b69e5ae9eaeaa7b1067c0168d",
+      "source_path": "merchant system/系统邮件模板_系统邮件管理_邮件管理_Global System.md",
+      "title": "系统邮件模板_系统邮件管理_邮件管理_Global System",
+      "question": "如何理解和使用《系统邮件模板_系统邮件管理_邮件管理_Global System》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/系统邮件模板_系统邮件管理_邮件管理_Global System.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/系统邮件模板_系统邮件管理_邮件管理_Global System.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-f83770a05343657ff2354845a07053753443025ffa4a9821217d7754aeb1f9c5",
+      "source_id": "source-f83770a05343657ff2354845a07053753443025ffa4a9821217d7754aeb1f9c5",
+      "source_path": "merchant system/终端列表_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md",
+      "title": "终端列表_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal",
+      "question": "如何理解和使用《终端列表_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/终端列表_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/终端列表_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-3a88039f88d9854dbebce5fb249fb553fb912a7ed4f95046408aa52c9a6be185",
+      "source_id": "source-3a88039f88d9854dbebce5fb249fb553fb912a7ed4f95046408aa52c9a6be185",
+      "source_path": "merchant system/编辑&删除_Merchant Processor_商户管理_Merchant Management_Reseller Portal.md",
+      "title": "编辑&删除_Merchant Processor_商户管理_Merchant Management_Reseller Portal",
+      "question": "如何理解和使用《编辑&删除_Merchant Processor_商户管理_Merchant Management_Reseller Portal》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/编辑&删除_Merchant Processor_商户管理_Merchant Management_Reseller Portal.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/编辑&删除_Merchant Processor_商户管理_Merchant Management_Reseller Portal.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-8abe585ffdf7beed7594b27e047d88694995e21bf228a9652dc9e008e71dffff",
+      "source_id": "source-8abe585ffdf7beed7594b27e047d88694995e21bf228a9652dc9e008e71dffff",
+      "source_path": "merchant system/编辑&删除制造商_制造商管理_机型管理_Global System.md",
+      "title": "编辑&删除制造商_制造商管理_机型管理_Global System",
+      "question": "如何理解和使用《编辑&删除制造商_制造商管理_机型管理_Global System》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/编辑&删除制造商_制造商管理_机型管理_Global System.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/编辑&删除制造商_制造商管理_机型管理_Global System.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-e33c8a496f81a77ab130b98f6bf6191f619649fc8e1a522894c9b528d59f9e5c",
+      "source_id": "source-e33c8a496f81a77ab130b98f6bf6191f619649fc8e1a522894c9b528d59f9e5c",
+      "source_path": "merchant system/编辑&删除终端_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md",
+      "title": "编辑&删除终端_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal",
+      "question": "如何理解和使用《编辑&删除终端_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal》中的业务规则？",
+      "page_type": "operation",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/编辑&删除终端_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/编辑&删除终端_Terminal_设备管理_商户管理_Merchant Management_Reseller Portal.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    },
+    {
+      "case_id": "SRC-7ccb52c8dfe882ef58d22f59f47830e4907897a0f3f5887852e8b4904b9f65c3",
+      "source_id": "source-7ccb52c8dfe882ef58d22f59f47830e4907897a0f3f5887852e8b4904b9f65c3",
+      "source_path": "merchant system/重置密码&更改邮箱_用户_Merchant Management_Reseller Portal.md",
+      "title": "重置密码&更改邮箱_用户_Merchant Management_Reseller Portal",
+      "question": "如何理解和使用《重置密码&更改邮箱_用户_Merchant Management_Reseller Portal》中的业务规则？",
+      "page_type": "concept",
+      "required_content": [
+        "title",
+        "answer",
+        "scope",
+        "source-backed claims"
+      ],
+      "forbidden_content": [
+        "full-source",
+        "raw source copy",
+        "unsupported inference"
+      ],
+      "route": {
+        "allowed_source_paths": [
+          "merchant system/重置密码&更改邮箱_用户_Merchant Management_Reseller Portal.md"
+        ],
+        "selected_source_paths_must_equal": [
+          "merchant system/重置密码&更改邮箱_用户_Merchant Management_Reseller Portal.md"
+        ],
+        "route_kind": "source-digest"
+      },
+      "lineage": {
+        "required": true,
+        "fields": [
+          "claim_id",
+          "source_id",
+          "block_id",
+          "content_hash",
+          "locator"
+        ]
+      },
+      "oracle": {
+        "reader_page_required": true,
+        "reader_eligible": true,
+        "coverage_class": "full_run_source_digest",
+        "audit_page_required": true,
+        "render_ledger_required": true,
+        "all_page_slots_non_empty": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": "companybrain-observation.v2",
+  "dimensions": ["DIM-01.route", "DIM-02.taxonomy", "DIM-03.business-answer", "DIM-04.page-type", "DIM-05.reader-audit"],
+  "gap_types": ["missing_stage", "wrong_relation", "unreachable", "untyped_contract", "missing_taxonomy_axis", "unsupported_answer_claim", "wrong_page_type", "missing_provenance", "untraceable_claim"],
+  "dimension_gap_contracts": {"DIM-01.route": {"gap_types": ["unreachable", "wrong_relation"], "observation_fields": ["route_replay_path", "relation_observations"]}, "DIM-02.taxonomy": {"gap_types": ["missing_taxonomy_axis", "wrong_relation"], "required_axes": ["product", "module", "object", "scene", "boundary"], "observation_fields": ["taxonomy_observations", "visible_atom_observations", "relation_observations"]}, "DIM-03.business-answer": {"gap_types": ["missing_stage", "unsupported_answer_claim", "wrong_relation"], "observation_fields": ["stage_observations", "visible_atom_observations", "relation_observations"]}, "DIM-04.page-type": {"gap_types": ["untyped_contract", "wrong_page_type"], "observation_fields": ["observed_page_type", "stage_observations"]}, "DIM-05.reader-audit": {"gap_types": ["missing_provenance", "untraceable_claim"], "observation_fields": ["evidence_level", "provenance_observations"]}},
+  "gap_atom_mapping": {
+    "schema_version": "task5-gap-atom-map.v1",
+    "authority_ref": "config/task5-quality-result-v3.json#gap_atom_mapping",
+    "atom_id_rule": "<projection_key>::<dimension_id>::<frozen_required_atom>",
+    "required_per_observation": ["gap_type", "gap_locator", "atom_ids", "cb_status", "evidence_field", "mapping_digest"],
+    "atom_ids_rule": "atom_ids are copied from the named observation_field and must be exact frozen required atom ids for the same projection and dimension; no prose-derived ids",
+    "cb_status": "absent",
+    "mapping_digest_rule": "SHA-256 of canonical mapping object excluding mapping_digest",
+    "missing_or_mismatched": "UNKNOWN"
+  },
+  "required": ["projection_key", "dimension_id", "snapshot_ref", "snapshot_tree_digest", "target_file_hashes", "route_replay_path", "stage_observations", "relation_observations", "visible_atom_observations", "atom_observations", "gap_atom_refs", "observed_page_type", "taxonomy_observations", "provenance_observations", "evidence_level", "gap_type", "gap_locator", "observation_digest", "kd_ref"],
+  "atom_observation_contract": {
+    "required_fields": ["atom_id", "applicable", "status", "evidence_refs", "observation_digest"],
+    "status": ["present", "absent", "unknown", "forbidden"],
+    "binding_rule": "one item per frozen required atom for this projection and dimension; applicable is copied from the rubric; gap_atom_refs names only applicable absent atoms explaining the observed gap"
+  },
+  "binding_rule": "one immutable observation per applicable projection_key x dimension_id; gap_type and gap_locator must be observed for that same dimension; kd_ref must point to the matching KnowledgeDigest Reader page/unit and may not point only to Audit",
+  "reuse_rule": "an observation or gap locator cannot be referenced by more than one dimension",
+  "missing_or_mismatch": "UNKNOWN",
+  "verdict_forbidden": true
+}
