@@ -111,3 +111,17 @@ Raw Reader 编译对空内容只写 Audit 失败，不生成“暂无正文”�
 **Task5 provider budget and output**：preflight 在首个网络请求前计算 LLM、embedding probe、route 和 related route 的最大调用数；超预算直接 `blocked`。真实最终结果必须写入用户指定的 Downloads 新目录，`/tmp` 只允许 staging。run identity 绑定 input snapshot、provider config、prompt/schema 和 calibration identity。
 
 **Task5 五维实际评分 v2.2**：每个问题/场景的 route、taxonomy、business-answer、page-type、Reader-Audit 分别计算 `content_score`、`structure_score` 和 `0-100` `score`；KD 与 CompanyBrain 都从当前真实 Reader/Audit 或 hash 绑定 Markdown 快照重算。只有本维 `kd_score > cb_score` 才是 `KD_WIN`，相等、缺证据和 baseline 无效分别保持 `TIE`、`UNKNOWN`、`CB_MISSING`；不允许读取预写 verdict/score，也不允许用跨维总分抵消单维失败。`
+
+## 本轮新增术语（task6-effect-gap-and-architecture-reset · make-decision 确认）
+
+**语义知识层**：用户已有的正式知识层，物理位置是 `/Users/Hugh/Hugh/Knowledge/CompanyBrain`，由三部分组成——带 frontmatter 契约的 Markdown 页面、执行该契约的元数据脚本（`tools/apply_formal_knowledge_metadata.py`），以及在其上建立索引的 `gbrain` 检索层。KnowledgeDigest 的产物是这一层的页面，不是独立的 bundle 格式。
+_Avoid_: 把 KnowledgeDigest 的 `bundle/` 目录本身称为"知识库"或"语义层"。
+
+**唯一生产者（同一主题）**：同一主题页（同一路径）只能由一个生成器负责。KnowledgeDigest 在覆盖某主题前，该主题由旧 `tools/synthesize_*` 脚本产出；接管必须先做只读对比证明不劣化，并在自动化规则中登记，否则自动化恢复时可能改名或删除 KnowledgeDigest 的页面。
+_Avoid_: "谁后跑谁覆盖"、两个脚本并行写同一路径。
+
+**真实查询集验收**：用固定的一组真实产品问题分别考察新产物与冻结的 CompanyBrain 快照，逐题判定能否定位答案并回到出处；对照侧本来没有对应内容时记为"对照未覆盖"，不计为我方优势。它是唯一被接受的"知识可用"证据，机器自评（投影、五维原子、证书、verifier）不再作为证据。
+_Avoid_: 把 `released`、`KD_WIN`、证书或覆盖率绿灯当作可用性结论。
+
+**证据零容忍**：产物中每一条结论必须能回到原文具体位置；回不到就不写成结论，改为显式标注"原文未明确"并保留占位。不设百分比门槛，也不接受只有页面级出处。
+_Avoid_: 用覆盖率百分比或"来源：某文件"的页面级标注替代逐条出处。
