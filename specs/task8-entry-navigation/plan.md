@@ -69,7 +69,7 @@ compile_batch_navigation(batch_dir)
   ├─ build_home               # Home.md（状态行+入口+建议+边界段）
   ├─ self_check               # 覆盖判定三件套 + 描述四判据 + N=10 路径抽查
   ├─ commit_or_block          # 全绿：暂存→落盘 + manifest navigation 节 + run-metrics 补记
-  │                           # 任一红：清暂存 + manifest navigation.status=blocked
+  │                           # 任一红：清暂存 + manifest navigation_status=blocked
   └─ return NavigationResult  # 机读结果（status/计数/reasons），供 K1 汇总与测试断言
 ```
 
