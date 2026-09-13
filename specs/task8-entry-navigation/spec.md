@@ -390,7 +390,7 @@ K3 发布通道读取 manifest `navigation` 节：仅 `generated_ok` 批次允�
 
 ## 阶段执行记录（build-spec）
 
-### spec-clarify 执行记录
+### spec-clarify 执行记录（step 3）
 
 trigger = false。本阶段负责的 OPEN-K2-1/2/3 与 DEF-K2-5 逐项核对均可由已批准决策与已核实事实唯一推导：
 导航术语（decision-log D-003/005）、自检指标（AC-K2-1/2/3 判据已冻结）、manifest 对齐（K1 FR-AUD-004 全文可循）；
@@ -399,14 +399,19 @@ trigger = false。本阶段负责的 OPEN-K2-1/2/3 与 DEF-K2-5 逐项核对均�
 失败边界=SCN-003/004/005/006；权限=第 10 节默认必须成立；集成外部效果=K3 交接（SCN-008）；非目标=第 10 节；
 延期=第 12 节；验收=第 11 节。无 unknown 维度。
 
-### conditional-spec-research 执行记录
+### spec-specify（step 4）
+
+本草稿第 1–13 节即本步骤产物：按 decision-log 展开 FR/SCN/PFACT/AC，不改任何已冻结方向；
+新增内容仅限"如何验证"层（fixture/oracle/字段契约），均标注来源（决策/DEF/review finding）。
+
+### conditional-spec-research 执行记录（step 2）
 
 已执行一轮子代理只读取证（成功）：K1 manifest 冻结字段与页面条目子字段缺口（PFACT-K2-002）、
 16 字段清单（PFACT-K2-003）、manifest 落盘顺序与 K2 挂接点（第 5 节）、旧 navigation.py 盘点（PFACT-K2-007，
 OPEN-K2-2 关闭）、CONTEXT.md 术语区格式（登记用）、测试布局（PFACT-K2-006）。
 正式 research receipt 无 build-spec 公共发布通道（同 K1），按合同记未供给，事实已固化进 PFACT。
 
-### simplicity-guard 四阶梯执行记录
+### simplicity-guard 四阶梯执行记录（step 5）
 
 - 分批/中断续跑/原子发布/向量库：P0 不成立（K1 D-013 / NG-004 / NG-007）。
 - 旧 navigation.py：P1——结构不同且属旧行为，不复用不修改（PFACT-K2-007）。
@@ -415,7 +420,7 @@ OPEN-K2-2 关闭）、CONTEXT.md 术语区格式（登记用）、测试布局�
 - 查询建议：P3——用户 R2-Q3 显式选择，补最小 oracle（FR-GEN-002）；非发散新增。
 - 结论：无范围膨胀；每处新增给出依据与删除条件。
 
-### plan-ceo-review 执行记录
+### plan-ceo-review 执行记录（step 6）
 
 - 问题与证据分离：问题=87/99 无入口、95/99 同质（PRD 基线）；证据=母任务 F-001 实测。
 - 最窄范围：K2 一张卡（D-001）；既有杠杆=K1 冻结契约（manifest/frontmatter/缓存）。
@@ -424,12 +429,16 @@ OPEN-K2-2 关闭）、CONTEXT.md 术语区格式（登记用）、测试布局�
 - 可否定前提：PFACT-K2-001/002/005（批次布局、manifest 契约、缓存机制）；若 K1 冻结契约被推翻回 make-decision。
 - 时机/影响半径/最小缺口：影响半径=批次产物新增四项；最小缺口=单新模块+检查器（本文件第 5/6 节）。
 
-### UI 条件路径记录
+### UI 条件路径记录（steps 7–9，non_ui 全部 N/A）
 
 UI applicability = non_ui（继承 decision-log，三来源一致）。ui-project-init / design-source-readiness /
 conditional-plan-design-review 均 N/A：CLI + Markdown 产物，无浏览器界面/路由/交互组件；不产生 UI contract facts。
 
-### review-frozen-spec 执行记录（step 11–12）
+### freeze-spec（step 10）
+
+本草稿标 frozen（头部状态行）；冻结内容 = 第 1–13 节全部条款。
+
+### review-frozen-spec 执行记录（step 11）
 
 wh-review build-spec surface 真实调用一轮：公共结果 `available`（outcome=partial：kimi/antigravity
 PUBLIC_RESULT_INVALID 身份降级，按合同不写成"没有问题"；有效 reviewer=codex/luna，11 条 finding，
@@ -454,3 +463,66 @@ PUBLIC_RESULT_INVALID 身份降级，按合同不写成"没有问题"；有效 r
 ### 阶段末遗漏披露
 
 （发布步骤输出时回填。）
+
+### main-agent-disposes-findings（step 12）
+
+11 条 finding 全部处置（处置表见 review-frozen-spec 小节）：3 fixed-as-blocking 修复（F-1 命名统一、
+F-2 权威源+路径对账、F-4 gate 模式）、8 fixed（F-3/5/6/7/8/9/10/11）；零静默丢弃、零 rejected_invalid、
+零 needs_human。处置已回写本文件（头部 frozen 状态 + 各处条款），本轮提交为发布前最后修订。
+
+### stage-end-spec-analyze（step 13）
+
+外部 spec-analyze 宿主不可用（同 stage_outcome 根因），主会话按"原始需求+决策 vs 完整 spec"做全量对账：
+
+**R-001…R-017 对账**：
+
+| 需求 | spec 落点 | 状态 |
+| --- | --- | --- |
+| R-001/R-002/R-003（流程约束） | 阶段执行记录 steps 1–15 逐步执行 | covered |
+| R-004（六类边界） | SCN-K2-001…008 + 第 5/7/10/12 节 | covered |
+| R-005（上下文控制） | 取证走子代理（step 2），主会话只收结论 | covered |
+| R-006（大白话） | Talk/grill 在 decision-log；本材料为冻结条款 | covered |
+| R-007（范围=K2 卡） | 第 2 节范围内/外 | covered |
+| R-008（结果） | FR-NAV-001/003/004、FR-GEN-001 | covered |
+| R-009（3 条 FR/AC） | 第 11 节 AC-K2-1/2/3 | covered |
+| R-010（scope 表述） | 第 2 节 + PFACT-K2-002 页面类型映射声明（review D-M1） | covered |
+| R-011（流程状态转换） | SCN-K2-001…008 + FR-CHK-004 + FR-AUD-001 | covered |
+| R-012（基线 87/99、95/99） | 第 1 节 + FR-CHK-002 判据③正对 | covered |
+| R-013（local risk 压制） | FR-CHK-002 四判据 | covered |
+| R-014（依赖=K1 页面清单） | PFACT-K2-002 + FR 9. 兼容预留 | covered |
+| R-015（S1 同构） | FR-NAV-005 | covered |
+| R-016（S3 状态词表） | 状态覆盖清单 + SCN-K2-002/003/006 | covered |
+| R-017（OPEN/DEF 归属） | 第 12 节未决项表 | covered |
+
+**D-001…D-012 对账**：D-001→第 2/10 节；D-002→FR-NAV-001；D-003→FR-NAV-003/004；D-004→FR-NAV-002；
+D-005→FR-GEN-001/FR-CHK-002；D-006→FR-GEN-004；D-007→FR-NAV-003；D-008→FR-CHK-004；D-009→FR-GEN-003/FR-AUD-002；
+D-010→FR-NAV-005；D-011→第 12 节 DEF-K2-3；D-012→PFACT-K2-001。12/12 covered。
+
+**OI-01…OI-12 对账**：OI-01→FR-NAV-001；OI-02→FR-NAV-001/SCN-001；OI-03→FR-NAV-005/第 6 节；OI-04→FR-NAV-002；
+OI-05→状态覆盖清单；OI-06→SCN-K2-002/003/006；OI-07→FR-CHK-001/2/3；OI-08→FR-GEN-001/FR-CHK-002；
+OI-09→第 10 节默认必须成立；OI-10→第 10 节；OI-11→第 12 节；OI-12→FR-AUD-001/SCN-K2-008。12/12 covered。
+
+**AC-K2-1…7 对账**：逐条在第 11 节有可执行定义 + oracle；AC-K2-3/AC-K2-4 含诚实 incomplete 子项（gate 拦截）。
+**六类边界对账**：流程=SCN 全链；页面范围=PFACT-K2-001 六项白名单+第 6 节；数据状态=状态覆盖清单；
+成功/失败=SCN-K2-004/005/006 + FR-CHK-004；非目标=第 10 节；延期=第 12 节。无 empty 维度。
+
+**结论**：无"做完仍不能交付"的缺口；两项 gate（DEF-K2-2/4）已以 STOP 条件形式前置拦截。
+
+### publish-spec-result（step 14）
+
+大白话交接（向用户/下游）：
+- 这份 spec 做了什么：把 K2 导航从"想法"变成能开工的图纸——三层导航文件长什么样、描述怎么生成怎么查重、
+  自检怎么跑、失败怎么办、K3 怎么读状态放行，全部写死成机器可验的条款。
+- 关键流程：K1 产物写出 → 暂存区生成 → 模型写描述（缓存）→ 两道门+路径抽查 → 全绿落盘 + manifest
+  增写 navigation 节；任一红 = 不落盘 + blocked 状态。
+- 边界：只写批次目录内六个白名单路径；K1 状态一个字段都不动；CompanyBrain/gbrain 零触碰。
+- 调研/澄清事实：K1 manifest 页面条目子字段未冻结 → 用"条目权威+路径对账+冻结 page_path 字段"解耦；
+  旧 navigation.py 结构不同不复用。
+- 审查结果：codex/luna 11 条 finding 全修（含 3 blocking）；kimi/antigravity 身份降级按事实记录，不写成通过。
+- 风险：K1 未研发完（RISK-K2-5，fixture 先行）；题目清单与 generated_by 是 gate。
+- 下一阶段：build-plan（步骤链 13 步，plan.md + tasks.md）。
+
+### stage-reflection（step 15）
+
+外部 reflect 宿主不可用：无 authenticated stage outcome 原件（step 13 的 stage_outcome 即 unavailable），
+按合同记 `unavailable`（缺判断输入，不复盘、不伪造）；原 stage 状态保留，不阻断交接。
