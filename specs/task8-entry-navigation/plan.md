@@ -338,7 +338,14 @@ plan/tasks 仅由 build-code 按卡执行更新执行事实字段，不再改设
 
 ### publish-plan-result（step 12）
 
-（大白话交接与 confirmation 见会话发布动作 + `quality/confirmations/`。）
+大白话交接：这份 plan/tasks 把 spec 变成 40 张可执行卡（20 对 RED/GREEN）——每卡带真实引用 hash、
+gate 命令、预期 exit、oracle、证据路径和 STOP 条件；单模块四职责块，K1 未落地也能用 fixture 离线全链验收。
+- 实现路径：P1 对账 → P2 机械生成 → P3 模型产物 → P4 自检端到端。
+- 风险：K1 未研发完（fixture 先行 + P4 生产接线卡）；题目清单是 build-code 唯一 gate。
+- 审查：build-plan review 18 findings 全处置（含 gate 削弱与生产接线两个 blocking 的纠正）。
+- 基线实跑：16 failed/892 passed/3 skipped（与 K1 冻结逐数一致）。
+- **用户确认（2026-09-13）**：「确认双阶段发布」——approval 已绑定 confirmation
+  `quality/confirmations/4dd7177059e051ef….json`。
 
 ### stage-reflection（step 13）
 
