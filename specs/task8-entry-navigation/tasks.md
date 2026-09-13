@@ -1,229 +1,1893 @@
 # 任务清单：task8 入口与导航（K2）
 
-> 输入权威 = decision-log.md（approved）+ spec.md（frozen）+ plan.md（本文件姊妹篇）。
-> RED/GREEN 纪律：每对同一 gate_cmd 与 oracle identity；RED 预期失败先行提交，GREEN 修到 exit 0。
-> 权威执行命令 = `uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k <gate>`
-> （gate 为各卡 gate_cmd 的 -k 选择子；全量回归 = `uv run --frozen pytest -q`）。
-> **build-code 开工 gate（spec 第 12 节 F-4 处置，STOP 条件）**：**build-code 的第一个任务卡（T001）
-> 开工前，DEF-K2-2（十条查询路径题目经用户确认）必须关闭**。DEF-K2-4 已由 build-plan DEC-K2-004
-> 冻结关闭（四项参数），gate 只剩 DEF-K2-2 一项。review 指出本文件曾将 gate 降级为"仅真实批次任务"——
-> 已纠正：fixture 离线开发也属于 build-code 实现工作，同样受 gate 前置。
+- **Input**：`specs/task8-entry-navigation/decision-log.md`（approved）、`specs/task8-entry-navigation/spec.md`（frozen）、`specs/task8-entry-navigation/plan.md`（本文件姊妹篇）
+- **Template version**：`plan-task.v4`
+- **build-code 开工 gate（spec §12 F-4）**：**T001（本文件第一张卡）开工前 DEF-K2-2（十条查询路径题目经用户确认）必须关闭**；DEF-K2-4 已由 plan DEC-K2-004 冻结关闭（模块名/generated_by/拒绝词表/N=30+推断规则）。
+- **RED/GREEN 纪律**：每对同一 gate_cmd 与 oracle identity；RED expected_exit 非零先行提交，GREEN 修到 exit 0。
+- **权威执行命令**：`uv run --frozen pytest -q` 包住 gate_cmd；执行事实（status/changed files/commands/evidence）逐卡回填下方执行状态填写区——该区是唯一完成权威。
 
 ## 材料导航
 
-| Phase | 内容 | 任务 |
+| 章节 / 材料锚点 | 职责与摘要 | M/S/B/P 读取时机 |
 | --- | --- | --- |
-| P1 | 输入对账与 fixture | T001–T004 |
-| P2 | 机械生成（无模型） | T005–T008 |
-| P3 | 模型产物（缓存/描述/建议） | T009–T012 |
-| P4 | 自检、状态增写、端到端 | T013–T021 |
+| `decision-log.md#已选方向` | 已确认方向/范围/非目标 | S：判类与 review 时读 |
+| `spec.md#5. 功能需求` | FR 精确契约 | M：写卡与实现时读 |
+| `spec.md#11. 验收标准` | AC oracle 定义 | M：写 oracle 时读；B：回归时读 |
+| `plan.md#Solution Design` | 职责块与接口 | M：实现对应块时读 |
+| `plan.md#File Boundary` | NEW/MODIFY/DO NOT TOUCH | S：build-code 首卡前读 |
+| `tasks.md#Phase P1…P4` | 40 卡执行设计与执行事实区 | M：逐卡执行时读写 |
+| `CONTEXT.md#本轮新增术语（task8）` | 四术语 _Avoid_ 红线 | S：review 时读 |
+
+## test-routing 判类（test-routing-advisor 输出合同）
+
+```json
+{
+  "routing_tier": "feature",
+  "routing_rationale": "Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/基础设施/并发/数据库变更。changed_files=semantic_navigation.py 单模块 + 测试 + fixtures；phase_count=4 同功能域不升级。",
+  "result": "pass",
+  "ts": "2026-09-13T00:00:00Z"
+}
+```
 
 ## Phase P1 — 输入对账与 fixture
 
 ### Goal
 
-manifest 输入校验（fail-closed）与页面集双向路径对账可用；fixture 构造器把 K1 冻结 schema 固化为代码。
+manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 冻结 schema 固化为代码。
 
 ### Files
 
-- `tests/fixtures/task8_nav/__init__.py`（`make_batch(root, pages, blocked=[]) -> Path`：写 manifest/
-  products 页面（16 字段 frontmatter）/README/_audit 骨架）
-- `tests/fixtures/task8_nav/manifest_sample.json`（冻结样例）
-- `src/knowledge_digest/semantic_navigation.py`（本 Phase 落：load_and_validate + reconcile_pages）
+- **NEW**：`src/knowledge_digest/semantic_navigation.py`（对账职责块） + `tests/fixtures/task8_nav/`（fixture 构造器与样例）
+- **MODIFY**：N/A — 本卡零 MODIFY（spec/plan/tasks 材料冻结）
+- **DO NOT TOUCH**：K1 规划文件（semantic_*.py 尚不存在）；旧 `navigation.py`；既有 49 测试文件；CONTEXT.md/docs//CompanyBrain/gbrain/真实语料目录
 
 ### Tasks
 
-- T001【RED→GREEN】`test_reconcile_happy` — 正常批次（3 页面/2 product/2 section）对账通过，
-  页面集精确等于 manifest 条目集；gate：`-k reconcile_happy`
-- T002【RED→GREEN】`test_reconcile_manifest_missing_field` — manifest 缺 `run_status`/`阻塞项`/
-  `来源台账` 任一 → blocked，reason 含精确字段名（SCN-K2-003 fail-closed）；gate：`-k reconcile_missing_field`
-- T003【RED→GREEN】`test_reconcile_bidirectional` — 条目有文件无 / 文件有条目无 / slug=`Index` 冲突
-  三态各自 blocked 且 reason 精确（`nav-page-manifest-mismatch`）；gate：`-k reconcile_bidirectional`
-- T004【GREEN-only】`test_fixture_determinism` — fixture 构造器两次构造同输入 → 全字节一致
-  （frontmatter created/updated 固定值）；gate：`-k fixture_determinism`
+#### T001R — RED：对账 happy 路径
 
-### Verify
+- **ID**：T001R
+- **Phase**：Phase P1
+- **goal**：使 `test_reconcile_happy` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：R-008/R-014·D-004·OI-04·PFACT-K2-002
+- **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：P1 对账层
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-NAV-002
+- **AC**：AC-K2-1
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：页面集精确等于 manifest 条目集（双向路径对账通过）
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T001G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "对账"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T001R — 页面集精确等于 manifest 条目集（双向路径对账通过）`
+- **evidence_path**：`quality/evidence/build-code/T001R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：页面集精确等于 manifest 条目集（双向路径对账通过）（同 gate_cmd/oracle）
+- **fixtures_services**：make_batch() 迷你批次（K1 schema manifest + 16 字段页面）
+- **coverage limits**：不测 K1 真实写出；K1 schema 漂移由负例与 P4 wiring 卡兜住
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
-`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "reconcile or fixture"` 全绿；
-RED 快照留 git 历史。
+##### 执行状态填写区（唯一完成权威）
 
-### Knowledge
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-1
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T001G — GREEN：对账 happy 路径
 
-manifest 样例严格按 K1 FR-AUD-004 + 本卡 FR-AUD-001（navigation 节由 K2 增写、不在输入 fixture 中）。
-K1 页面条目冻结字段 = `page_path`（DEF-K2-5）。
+- **ID**：T001G
+- **Phase**：Phase P1
+- **goal**：实现使 T001R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：R-008/R-014·D-004·OI-04·PFACT-K2-002
+- **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：P1 对账层
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-NAV-002
+- **AC**：AC-K2-1
+- **动作**：实现 load_and_validate + reconcile_pages；fixture 3 页面/2 product/2 section
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T001R 同 gate_cmd exit 0
+- **Knowledge**：实现 load_and_validate + reconcile_pages；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T001R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "对账"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T001R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T001G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T001R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：make_batch() 迷你批次（K1 schema manifest + 16 字段页面）
+- **coverage limits**：不测 K1 真实写出；K1 schema 漂移由负例与 P4 wiring 卡兜住
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
-### STOP
+##### 执行状态填写区（唯一完成权威）
 
-发现需修改 K1 冻结 schema 才能继续 → 停止并回 make-decision；fixture 中出现真实语料路径 → 停止。
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-1
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T002R — RED：manifest 缺字段 fail-closed
 
-### Done
+- **ID**：T002R
+- **Phase**：Phase P1
+- **goal**：使 `test_reconcile_manifest_missing_field` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：R-016·OI-05·SCN-K2-003
+- **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：P1 对账层
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-NAV-002/FR §9
+- **AC**：AC-K2-5
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：缺 run_status/阻塞项/来源台账任一 → blocked，reason 含精确字段名
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T002G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "manifest"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T002R — 缺 run_status/阻塞项/来源台账任一 → blocked，reason 含精确字段名`
+- **evidence_path**：`quality/evidence/build-code/T002R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：缺 run_status/阻塞项/来源台账任一 → blocked，reason 含精确字段名（同 gate_cmd/oracle）
+- **fixtures_services**：字段删除版 manifest fixture ×3
+- **coverage limits**：只测三个已冻结字段；K1 未来新增字段不在本卡
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
-对账层四行为有测试钉住；NavigationResult 骨架类型存在。
+##### 执行状态填写区（唯一完成权威）
 
-### Risks and rollback
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-5
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T002G — GREEN：manifest 缺字段 fail-closed
 
-删本 Phase 新增函数与测试即回滚；fixture 与 K1 真实 schema 不符的风险 = RISK-K2-5，P4 Knowledge 记录对照计划。
+- **ID**：T002G
+- **Phase**：Phase P1
+- **goal**：实现使 T002R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：R-016·OI-05·SCN-K2-003
+- **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：P1 对账层
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-NAV-002/FR §9
+- **AC**：AC-K2-5
+- **动作**：实现启动字段校验（K1 冻结字段缺失 → blocked 不写产物）
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T002R 同 gate_cmd exit 0
+- **Knowledge**：实现启动字段校验（K1 冻结字段缺失 → blocked 不写产物）；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T002R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "manifest"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T002R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T002G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T002R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：字段删除版 manifest fixture ×3
+- **coverage limits**：只测三个已冻结字段；K1 未来新增字段不在本卡
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-5
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T003R — RED：双向对账三态
+
+- **ID**：T003R
+- **Phase**：Phase P1
+- **goal**：使 `test_reconcile_bidirectional` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-004·PFACT-K2-002·review F-2
+- **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：P1 对账层
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-NAV-002
+- **AC**：AC-K2-1/AC-K2-5
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：条目有文件无/文件有条目无/slug=Index 冲突三态各自 blocked + reason 精确
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T003G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "双向对账三态"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T003R — 条目有文件无/文件有条目无/slug=Index 冲突三态各自 blocked + reason 精确`
+- **evidence_path**：`quality/evidence/build-code/T003R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：条目有文件无/文件有条目无/slug=Index 冲突三态各自 blocked + reason 精确（同 gate_cmd/oracle）
+- **fixtures_services**：撕裂目录 fixture ×3（手工增删文件/条目）
+- **coverage limits**：Index 冲突依赖 K1 slug 排除对齐（DEF-K2-5），本卡只验 K2 检出
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-1/AC-K2-5
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T003G — GREEN：双向对账三态
+
+- **ID**：T003G
+- **Phase**：Phase P1
+- **goal**：实现使 T003R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-004·PFACT-K2-002·review F-2
+- **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：P1 对账层
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-NAV-002
+- **AC**：AC-K2-1/AC-K2-5
+- **动作**：实现对账双向遍历 + Index 保留名规则
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T003R 同 gate_cmd exit 0
+- **Knowledge**：实现对账双向遍历 + Index 保留名规则；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T003R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "双向对账三态"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T003R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T003G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T003R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：撕裂目录 fixture ×3（手工增删文件/条目）
+- **coverage limits**：Index 冲突依赖 K1 slug 排除对齐（DEF-K2-5），本卡只验 K2 检出
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-1/AC-K2-5
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
 ## Phase P2 — 机械生成（无模型）
 
 ### Goal
 
-三层导航的机械层确定性生成：Index/模块 Index（挂载+frontmatter+模块名推断）与 Home 机械段。
+三件套机械层确定性生成（Index/模块 Index/Home 机械段 + frontmatter + 模块名推断），零模型调用。
 
 ### Files
 
-- `src/knowledge_digest/semantic_navigation.py`（build_index + build_module_indexes + build_home 机械段）
+- **NEW**：`src/knowledge_digest/semantic_navigation.py`（生成职责块） + `tests/fixtures/task8_nav/`（fixture 构造器与样例）
+- **MODIFY**：N/A — 本卡零 MODIFY（spec/plan/tasks 材料冻结）
+- **DO NOT TOUCH**：K1 规划文件（semantic_*.py 尚不存在）；旧 `navigation.py`；既有 49 测试文件；CONTEXT.md/docs//CompanyBrain/gbrain/真实语料目录
 
 ### Tasks
 
-- T005【RED→GREEN】`test_build_mount_tree` — Index.md 按 product 分节、节内按 section 升序列模块总览链接；
-  模块 Index 条目含每页 wikilink+占位描述槽（描述在 P3 注入）；gate：`-k build_mount_tree`
-- T006【RED→GREEN】`test_build_frontmatter_contract` — 三件套 frontmatter 16 字段精确断言：
-  tier 分层（Home/Index=1、模块=2）、title（Home="批次入口"/Index="知识索引"/模块=推断值）、
-  `source: batch`、`created/updated`=页面值最早/最晚、`tags:[company,navigation]`、
-  `generated_by: knowledge_digest_semantic_navigation.py`；gate：`-k build_frontmatter`
-- T007【RED→GREEN】`test_module_title_inference` — 词频最高/并列字典序最小/单页模块三态；
-  同输入两次推断结果一致（确定性）；gate：`-k module_title`
-- T008【RED→GREEN】`test_home_mechanical_sections` — Home.md 批次状态行（`nav: success_pages=N
-  blocked_sources=M`）+ 快速入口（Index 链接+product 锚）+ 使用边界段（临时对照产物声明）齐备；
-  查询建议槽存在但 P3 前为空标记；无时间戳/批次名；gate：`-k home_mechanical`
+#### T004R — RED：挂载树生成
 
-### Verify
+- **ID**：T004R
+- **Phase**：Phase P2
+- **goal**：使 `test_build_mount_tree` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-003/D-004·OI-02
+- **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-NAV-002/004
+- **AC**：AC-K2-4
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：Index 按 product 分节、节内 section 升序；模块 Index 条目含 wikilink+描述槽
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T004G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "挂载树生成"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T004R — Index 按 product 分节、节内 section 升序；模块 Index 条目含 wikilink+描述槽`
+- **evidence_path**：`quality/evidence/build-code/T004R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：Index 按 product 分节、节内 section 升序；模块 Index 条目含 wikilink+描述槽（同 gate_cmd/oracle）
+- **fixtures_services**：T001 happy fixture 复用
+- **coverage limits**：不验模型产物（P3）；排序只 section slug 升序
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
-同目录 `-k "build or module_title or home_mechanical"` 全绿；字节级快照（snapshot 文件随测试入库）。
+##### 执行状态填写区（唯一完成权威）
 
-### Knowledge
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-4
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T004G — GREEN：挂载树生成
 
-确定性模板 = f-string 固定布局；任何"看起来聪明"的排序都禁用（只 section slug 升序）。模块名切分
-正则 `[^0-9A-Za-z\u4e00-\u9fff]+`（保留中文字符为词）。
+- **ID**：T004G
+- **Phase**：Phase P2
+- **goal**：实现使 T004R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-003/D-004·OI-02
+- **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-NAV-002/004
+- **AC**：AC-K2-4
+- **动作**：实现 build_index + build_module_indexes（确定性模板）
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T004R 同 gate_cmd exit 0
+- **Knowledge**：实现 build_index + build_module_indexes（确定性模板）；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T004R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "挂载树生成"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T004R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T004G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T004R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：T001 happy fixture 复用
+- **coverage limits**：不验模型产物（P3）；排序只 section slug 升序
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
-### STOP
+##### 执行状态填写区（唯一完成权威）
 
-需要新增第 17 个 frontmatter 字段 → 停止（spec FR-NAV-005 硬边界）；需要对页面文件写任何内容 → 停止。
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-4
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T005R — RED：frontmatter 16 字段契约
 
-### Done
+- **ID**：T005R
+- **Phase**：Phase P2
+- **goal**：使 `test_build_frontmatter_contract` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-NAV-005"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：S1·D-010·review F-3
+- **输入**：spec §5（FR-NAV-005）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-NAV-005
+- **AC**：AC-K2-4
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：16 字段逐项（tier 分层/title/source=batch/created/updated/tags/generated_by）
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T005G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "frontmatter"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T005R — 16 字段逐项（tier 分层/title/source=batch/created/updated/tags/generated_by）`
+- **evidence_path**：`quality/evidence/build-code/T005R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：16 字段逐项（tier 分层/title/source=batch/created/updated/tags/generated_by）（同 gate_cmd/oracle）
+- **fixtures_services**：字段断言辅助函数
+- **coverage limits**：generated_by 值由 DEC-K2-004 冻结，本卡验常量存在性
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
-无模型时三件套可生成且字节确定（T008 的 GREEN 即 SCN-K2-001 机械半段）。
+##### 执行状态填写区（唯一完成权威）
 
-### Risks and rollback
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-4
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T005G — GREEN：frontmatter 16 字段契约
 
-删生成函数即回滚；快照格式变更=测试变更，不动产物契约。
+- **ID**：T005G
+- **Phase**：Phase P2
+- **goal**：实现使 T005R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-NAV-005"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：S1·D-010·review F-3
+- **输入**：spec §5（FR-NAV-005）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-NAV-005
+- **AC**：AC-K2-4
+- **动作**：实现三件套 frontmatter 构造（零新增字段）
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T005R 同 gate_cmd exit 0
+- **Knowledge**：实现三件套 frontmatter 构造（零新增字段）；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T005R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "frontmatter"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T005R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T005G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T005R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：字段断言辅助函数
+- **coverage limits**：generated_by 值由 DEC-K2-004 冻结，本卡验常量存在性
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-4
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T006R — RED：模块中文名推断
+
+- **ID**：T006R
+- **Phase**：Phase P2
+- **goal**：使 `test_module_title_inference` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-GEN-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：R2-Q7·D-006·DEC-K2-004
+- **输入**：spec §5（FR-GEN-004）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-GEN-004
+- **AC**：AC-K2-4
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：词频最高/并列字典序最小/单页三态；同输入两次推断一致
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T006G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "模块中文名推断"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T006R — 词频最高/并列字典序最小/单页三态；同输入两次推断一致`
+- **evidence_path**：`quality/evidence/build-code/T006R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：词频最高/并列字典序最小/单页三态；同输入两次推断一致（同 gate_cmd/oracle）
+- **fixtures_services**：三态 title 集合 fixture
+- **coverage limits**：推断质量（像不像人话）不入 oracle——机器只验确定性
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-4
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T006G — GREEN：模块中文名推断
+
+- **ID**：T006G
+- **Phase**：Phase P2
+- **goal**：实现使 T006R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-GEN-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：R2-Q7·D-006·DEC-K2-004
+- **输入**：spec §5（FR-GEN-004）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-GEN-004
+- **AC**：AC-K2-4
+- **动作**：实现确定性推断（切分→词频→字典序 tie-break）
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T006R 同 gate_cmd exit 0
+- **Knowledge**：实现确定性推断（切分→词频→字典序 tie-break）；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T006R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "模块中文名推断"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T006R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T006G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T006R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：三态 title 集合 fixture
+- **coverage limits**：推断质量（像不像人话）不入 oracle——机器只验确定性
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-4
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T007R — RED：Home 机械段
+
+- **ID**：T007R
+- **Phase**：Phase P2
+- **goal**：使 `test_home_mechanical_sections` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-NAV-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-007·OI-06
+- **输入**：spec §5（FR-NAV-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-NAV-003
+- **AC**：AC-K2-4/AC-K2-5
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：状态行 nav: success_pages=N blocked_sources=M + 快速入口 + 使用边界段；无时间戳/批次名；建议槽空标记
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T007G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "home"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T007R — 状态行 nav: success_pages=N blocked_sources=M + 快速入口 + 使用边界段；无时间戳/批次名；建议槽空标记`
+- **evidence_path**：`quality/evidence/build-code/T007R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：状态行 nav: success_pages=N blocked_sources=M + 快速入口 + 使用边界段；无时间戳/批次名；建议槽空标记（同 gate_cmd/oracle）
+- **fixtures_services**：T001 fixture + blocked=[2] 变体
+- **coverage limits**：建议文本 P3 注入，本卡只验槽位
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-4/AC-K2-5
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T007G — GREEN：Home 机械段
+
+- **ID**：T007G
+- **Phase**：Phase P2
+- **goal**：实现使 T007R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-NAV-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-007·OI-06
+- **输入**：spec §5（FR-NAV-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-NAV-003
+- **AC**：AC-K2-4/AC-K2-5
+- **动作**：实现 build_home 机械段（确定性模板）
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T007R 同 gate_cmd exit 0
+- **Knowledge**：实现 build_home 机械段（确定性模板）；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T007R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "home"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T007R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T007G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T007R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：T001 fixture + blocked=[2] 变体
+- **coverage limits**：建议文本 P3 注入，本卡只验槽位
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-4/AC-K2-5
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
 ## Phase P3 — 模型产物（缓存/描述/建议）
 
 ### Goal
 
-描述句与查询建议的生成管线：缓存协议对接、拒绝词表、非空校验、预算记账。
+缓存协议对接、描述/建议生成、拒绝词表与非空校验、预算记账；离线全链可验。
 
 ### Files
 
-- `src/knowledge_digest/semantic_navigation.py`（generate_model_outputs：键构造/调用/过滤/校验）
+- **NEW**：`src/knowledge_digest/semantic_navigation.py`（model 职责块） + `tests/fixtures/task8_nav/`（fixture 构造器与样例）
+- **MODIFY**：N/A — 本卡零 MODIFY（spec/plan/tasks 材料冻结）
+- **DO NOT TOUCH**：K1 规划文件（semantic_*.py 尚不存在）；旧 `navigation.py`；既有 49 测试文件；CONTEXT.md/docs//CompanyBrain/gbrain/真实语料目录
 
 ### Tasks
 
-- T009【RED→GREEN】`test_cache_key_contract` — 键构成 = spec FR-GEN-003 五要素（任务标识/输入内容指纹/
-  模型标识/提示模板版本/主题映射版本）逐项断言；改页面一字节 → 键变（负例）；批次目录名/运行时刻不进键；
-  gate：`-k cache_key`
-- T010【RED→GREEN】`test_cache_hit_no_call` — DictCache 预置命中 → gateway 零调用、输出=缓存值；
-  miss → 调用一次并写回；第二次运行同输入零调用（AC-K2-6 的调用面）；gate：`-k cache_hit`
-- T011【RED→GREEN】`test_model_output_validation` — FakeGateway 三态：正常 / 空串 / 拒绝词
-  （"最佳"）——空与拒绝词 → blocked（reason=`model-output-missing`/`model-output-rejected`）；
-  无重试（一次即决）；gate：`-k model_output`
-- T012【RED→GREEN】`test_suggestion_count_and_metrics` — 建议 ≥3 且非空（上限不加——spec review F-5 已删）；run-metrics 补记
-  K2 调用数（计划=页面数+1，实际含拒绝后不再重试 ≤ 计划）；gate：`-k suggestion_metrics`
+#### T008R — RED：缓存键契约
 
-### Verify
+- **ID**：T008R
+- **Phase**：Phase P3
+- **goal**：使 `test_cache_key_contract` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-009·PFACT-K2-005·review F-6
+- **输入**：spec §5（FR-GEN-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-GEN-003
+- **AC**：AC-K2-6
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：五要素（任务标识/输入内容指纹/模型标识/提示模板版本/主题映射版本）逐项；改页面一字节→键变
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T008G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "缓存键契约"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T008R — 五要素（任务标识/输入内容指纹/模型标识/提示模板版本/主题映射版本）逐项；改页面一字节→键变`
+- **evidence_path**：`quality/evidence/build-code/T008R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：五要素（任务标识/输入内容指纹/模型标识/提示模板版本/主题映射版本）逐项；改页面一字节→键变（同 gate_cmd/oracle）
+- **fixtures_services**：字节级 fixture + 键导出钩子
+- **coverage limits**：负例只验描述键；建议键同构推理不重复测
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
-同目录 `-k "cache or model_output or suggestion"` 全绿；FakeGateway 三态脚本在 fixture 模块内。
+##### 执行状态填写区（唯一完成权威）
 
-### Knowledge
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-6
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T008G — GREEN：缓存键契约
 
-真实 gateway 解析 `~/.config/knowledge-digest/config.json`（与 K1 同约定）；测试零网络。拒绝词表=
-模块常量（DEC-K2-004），变更=代码变更。提示模板版本 = 本模块内常量 `PROMPT_VERSION`（变更即失效全量缓存）。
+- **ID**：T008G
+- **Phase**：Phase P3
+- **goal**：实现使 T008R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-009·PFACT-K2-005·review F-6
+- **输入**：spec §5（FR-GEN-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-GEN-003
+- **AC**：AC-K2-6
+- **动作**：实现键构造（与 K1 同构）+ 键导出可测钩子
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T008R 同 gate_cmd exit 0
+- **Knowledge**：实现键构造（与 K1 同构）+ 键导出可测钩子；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T008R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "缓存键契约"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T008R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T008G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T008R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：字节级 fixture + 键导出钩子
+- **coverage limits**：负例只验描述键；建议键同构推理不重复测
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
-### STOP
+##### 执行状态填写区（唯一完成权威）
 
-需要发真实网络请求才能 GREEN → 停止（改 FakeGateway）；需要改 K1 缓存文件 → 停止（K1 未落地，
-只按 Protocol 对接）。
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-6
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T009R — RED：缓存命中零调用
 
-### Done
+- **ID**：T009R
+- **Phase**：Phase P3
+- **goal**：使 `test_cache_hit_no_call` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-009·OI-08
+- **输入**：spec §5（FR-GEN-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-GEN-003
+- **AC**：AC-K2-6
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：预置命中 → gateway 零调用且输出=缓存值；miss → 调用一次并写回
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T009G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "缓存命中零调用"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T009R — 预置命中 → gateway 零调用且输出=缓存值；miss → 调用一次并写回`
+- **evidence_path**：`quality/evidence/build-code/T009R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：预置命中 → gateway 零调用且输出=缓存值；miss → 调用一次并写回（同 gate_cmd/oracle）
+- **fixtures_services**：DictCache + FakeGateway 调用计数
+- **coverage limits**：真实 K1 缓存适配归 DEC-K2-002 后续，本卡验协议
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
-模型产物在离线环境全链路可验；四判据的输入前置（非空/词表）在此层完成，P4 只验跨页面判据。
+##### 执行状态填写区（唯一完成权威）
 
-### Risks and rollback
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-6
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T009G — GREEN：缓存命中零调用
 
-删 generate_model_outputs 即回滚；缓存键构成变更 = spec 变更，须回 make-decision 修订 FR-GEN-003。
+- **ID**：T009G
+- **Phase**：Phase P3
+- **goal**：实现使 T009R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-009·OI-08
+- **输入**：spec §5（FR-GEN-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-GEN-003
+- **AC**：AC-K2-6
+- **动作**：实现缓存读写路径（CacheProtocol 对接）
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T009R 同 gate_cmd exit 0
+- **Knowledge**：实现缓存读写路径（CacheProtocol 对接）；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T009R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "缓存命中零调用"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T009R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T009G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T009R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：DictCache + FakeGateway 调用计数
+- **coverage limits**：真实 K1 缓存适配归 DEC-K2-002 后续，本卡验协议
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-6
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T010R — RED：模型输出校验（空/拒绝词）
+
+- **ID**：T010R
+- **Phase**：Phase P3
+- **goal**：使 `test_model_output_validation` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-GEN-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-005·review R2-B3/F-5
+- **输入**：spec §5（FR-GEN-001）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-GEN-001/002
+- **AC**：AC-K2-2/AC-K2-5
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：空串/拒绝词（最佳）→ blocked 且 reason 精确；无重试（一次即决）
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T010G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "模型输出校验（空/拒绝词）"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T010R — 空串/拒绝词（最佳）→ blocked 且 reason 精确；无重试（一次即决）`
+- **evidence_path**：`quality/evidence/build-code/T010R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：空串/拒绝词（最佳）→ blocked 且 reason 精确；无重试（一次即决）（同 gate_cmd/oracle）
+- **fixtures_services**：FakeGateway 三态脚本
+- **coverage limits**：真实模型不调用；重试被 spec review F-11 显式删除
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-2/AC-K2-5
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T010G — GREEN：模型输出校验（空/拒绝词）
+
+- **ID**：T010G
+- **Phase**：Phase P3
+- **goal**：实现使 T010R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-GEN-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-005·review R2-B3/F-5
+- **输入**：spec §5（FR-GEN-001）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-GEN-001/002
+- **AC**：AC-K2-2/AC-K2-5
+- **动作**：实现非空校验 + REJECTION_WORDS 过滤（DEC-K2-004 常量）
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T010R 同 gate_cmd exit 0
+- **Knowledge**：实现非空校验 + REJECTION_WORDS 过滤（DEC-K2-004 常量）；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T010R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "模型输出校验（空/拒绝词）"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T010R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T010G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T010R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：FakeGateway 三态脚本
+- **coverage limits**：真实模型不调用；重试被 spec review F-11 显式删除
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-2/AC-K2-5
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T011R — RED：建议数与预算记账
+
+- **ID**：T011R
+- **Phase**：Phase P3
+- **goal**：使 `test_suggestion_count_and_metrics` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-GEN-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-007·K1 FR-AUD-005
+- **输入**：spec §5（FR-GEN-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-GEN-002/FR-AUD-002
+- **AC**：AC-K2-4/AC-K2-6
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：建议 ≥3 非空（无上限）；run-metrics K2 调用数记账（计划=页面数+1）
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T011G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "建议数与预算记账"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T011R — 建议 ≥3 非空（无上限）；run-metrics K2 调用数记账（计划=页面数+1）`
+- **evidence_path**：`quality/evidence/build-code/T011R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：建议 ≥3 非空（无上限）；run-metrics K2 调用数记账（计划=页面数+1）（同 gate_cmd/oracle）
+- **fixtures_services**：FakeGateway + metrics 读取断言
+- **coverage limits**：预算上界 1.5× 为 K1 继承约束，本卡验记账真实性
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-4/AC-K2-6
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T011G — GREEN：建议数与预算记账
+
+- **ID**：T011G
+- **Phase**：Phase P3
+- **goal**：实现使 T011R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-GEN-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-007·K1 FR-AUD-005
+- **输入**：spec §5（FR-GEN-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-GEN-002/FR-AUD-002
+- **AC**：AC-K2-4/AC-K2-6
+- **动作**：实现建议批量生成 + metrics 补记
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T011R 同 gate_cmd exit 0
+- **Knowledge**：实现建议批量生成 + metrics 补记；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T011R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "建议数与预算记账"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T011R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T011G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T011R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：FakeGateway + metrics 读取断言
+- **coverage limits**：预算上界 1.5× 为 K1 继承约束，本卡验记账真实性
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-4/AC-K2-6
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
 ## Phase P4 — 自检、状态增写、端到端
 
 ### Goal
 
-覆盖判定三件套 + 描述四判据 + N=10 路径抽查 + 暂存清理 + manifest 增写 + 端到端七 AC 闭环。
+覆盖判定三件套 + 四判据 + 路径抽查 + blocked 矩阵 + commit fail-closed + 生产接线；七 AC 闭环。
 
 ### Files
 
-- `src/knowledge_digest/semantic_navigation.py`（self_check + commit_or_block）
-- `tests/fixtures/task8_nav/query_fixture_sample.json`（题目清单样例 10 题，格式
-  `[{id, query, target_slug}]`；真实清单经用户确认替换，DEF-K2-2）
+- **NEW**：`src/knowledge_digest/semantic_navigation.py`（自检+commit 职责块） + `tests/fixtures/task8_nav/`（fixture 构造器与样例）
+- **MODIFY**：N/A — 本卡零 MODIFY（spec/plan/tasks 材料冻结）
+- **DO NOT TOUCH**：K1 规划文件（semantic_*.py 尚不存在）；旧 `navigation.py`；既有 49 测试文件；CONTEXT.md/docs//CompanyBrain/gbrain/真实语料目录
 
 ### Tasks
 
-- T013【RED→GREEN】`test_check_coverage_three` — 三件套：①漏挂一页（孤儿）②死链（模块 Index 手工塞
-  坏链接，fixture 直接写暂存文件模拟）③导航指向 manifest 外页面；各reason 精确；gate：`-k check_coverage`
-- T014【RED→GREEN】`test_check_description_criteria` — 四判据逐条：重复=0（两篇同描述）/骨架≥3/
-  问句模板≥3/空描述（FakeGateway 返回空已 P3 blocked——本条验"暂存区残留空槽被检出"路径）；
-  gate：`-k check_description`
-- T015【RED→GREEN】`test_path_sample_and_gate` — 题目清单 10 题：目标可达且 ≤3 跳；
-  一题超 3 跳构造 → blocked；清单缺失（fixture=None）→ AC-K2-3 记 incomplete 不失败（gate 语义）；
-  gate：`-k path_sample`
-- T016【RED→GREEN】`test_e2e_manifest_and_cleanup` — 端到端：happy → ①三文件落盘 ②run-metrics 补记 ③manifest navigation 节
-  最后写出（commit 顺序断言：导航先于 manifest——review B-13 fail-closed，manifest 缺/不一致即被 K3 拦截）
-  {generated_ok, success_pages, blocked_sources:0, blocked_reasons:[]} + 暂存区清空；
-  任一自检红 → 导航零落盘 + navigation_status=blocked + reasons + manifest 未触及字段语义相等
-  （解析后比对冻结字段值——review B-6：JSON 重序列化不保字节级，字节稳定归 K1 真实批次集成检查点）+ 暂存区清空；SCN-K2-006 零页面 → blocked+`zero-page-batch`；SCN-K2-003 interrupted（manifest 损坏）
-  → 不写 manifest、显式报告；gate：`-k e2e`
+#### T012R — RED：覆盖判定三件套
 
-### Verify
+- **ID**：T012R
+- **Phase**：Phase P4
+- **goal**：使 `test_check_coverage_three` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-CHK-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-008·OI-07·review R2-B1
+- **输入**：spec §5（FR-CHK-001）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-CHK-001
+- **AC**：AC-K2-1
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：漏挂（孤儿）/死链/指向 manifest 外页面三态检出，reason 精确；不用数量等式
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T012G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "覆盖判定三件套"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T012R — 漏挂（孤儿）/死链/指向 manifest 外页面三态检出，reason 精确；不用数量等式`
+- **evidence_path**：`quality/evidence/build-code/T012R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：漏挂（孤儿）/死链/指向 manifest 外页面三态检出，reason 精确；不用数量等式（同 gate_cmd/oracle）
+- **fixtures_services**：破坏版暂存 fixture ×3（写暂存区模拟）
+- **coverage limits**：遍历只认 wikilink；裸 URL/相对链接按 CB 同构约定不出现于导航
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
-`-k "check or path or e2e or rerun or audit or partial or blocked"` 全绿 → 全量 `uv run --frozen pytest -q`：
-新增文件全绿 + 16 个基线失败节点 ID 集合不变（K1 AC-10 口径借用）。
+##### 执行状态填写区（唯一完成权威）
 
-### Knowledge
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-1
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T012G — GREEN：覆盖判定三件套
 
-真实批次人工冒烟（K1 落地后）：跑一次 `/Users/Hugh/Downloads/KD测试` 真实批次，对照 fixture 行为，
-结果记录在案（RISK-K2-5 关闭动作）。
+- **ID**：T012G
+- **Phase**：Phase P4
+- **goal**：实现使 T012R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-CHK-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-008·OI-07·review R2-B1
+- **输入**：spec §5（FR-CHK-001）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-CHK-001
+- **AC**：AC-K2-1
+- **动作**：实现 wikilink 解析 + BFS 遍历 + 覆盖判定（⊆/存在/⊆）
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T012R 同 gate_cmd exit 0
+- **Knowledge**：实现 wikilink 解析 + BFS 遍历 + 覆盖判定（⊆/存在/⊆）；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T012R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "覆盖判定三件套"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T012R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T012G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T012R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：破坏版暂存 fixture ×3（写暂存区模拟）
+- **coverage limits**：遍历只认 wikilink；裸 URL/相对链接按 CB 同构约定不出现于导航
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
-### STOP
+##### 执行状态填写区（唯一完成权威）
 
-自检需要人工翻页判定 → 停止；blocked 情形 manifest 无法写出 → 停止（interrupted 除外，其契约=不写）。
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-1
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T013R — RED：描述四判据
 
-### Done
+- **ID**：T013R
+- **Phase**：Phase P4
+- **goal**：使 `test_check_description_criteria` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-CHK-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：Talk R3 冻结·review R2-B2/B3
+- **输入**：spec §5（FR-CHK-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-CHK-002
+- **AC**：AC-K2-2
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：重复=0/骨架≥3/问句模板≥3/空描述 四判据逐条检出
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T013G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "描述四判据"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T013R — 重复=0/骨架≥3/问句模板≥3/空描述 四判据逐条检出`
+- **evidence_path**：`quality/evidence/build-code/T013R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：重复=0/骨架≥3/问句模板≥3/空描述 四判据逐条检出（同 gate_cmd/oracle）
+- **fixtures_services**：违例描述集 fixture ×4
+- **coverage limits**：判据算法（切分/归一化）按 spec AC-K2-2 冻结口径实现
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
-七 AC 全部有机器 oracle 且端到端可验；NavigationResult 返回面闭合。
+##### 执行状态填写区（唯一完成权威）
 
-### Risks and rollback
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-2
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T013G — GREEN：描述四判据
 
-删 self_check/commit_or_block 即回滚；清单样例 ≠ 用户确认清单时，P4 仅 T015 记 incomplete（gate 生效）。
+- **ID**：T013G
+- **Phase**：Phase P4
+- **goal**：实现使 T013R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-CHK-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：Talk R3 冻结·review R2-B2/B3
+- **输入**：spec §5（FR-CHK-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-CHK-002
+- **AC**：AC-K2-2
+- **动作**：实现规范化/骨架/问句模板/空判据四函数
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T013R 同 gate_cmd exit 0
+- **Knowledge**：实现规范化/骨架/问句模板/空判据四函数；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T013R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "描述四判据"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T013R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T013G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T013R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：违例描述集 fixture ×4
+- **coverage limits**：判据算法（切分/归一化）按 spec AC-K2-2 冻结口径实现
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
 
-### Tasks（P4 续）
+##### 执行状态填写区（唯一完成权威）
 
-- T017【RED→GREEN】`test_e2e_rerun_bytes` — 同输入双跑：三导航文件字节完全一致（AC-K2-6；FakeGateway
-  脚本化相同输出 + DictCache 保证第二次零调用）；gate：`-k rerun`
-- T018【RED→GREEN】`test_e2e_write_audit` — 写路径审计（AC-K2-7）：测试桩记录运行期全部写操作 →
-  批次目录外零写入；批次目录内仅白名单六项（PFACT-K2-001）；暂存区在终态必被清空；gate：`-k audit`
-- T019【RED→GREEN】`test_e2e_partial_success` — SCN-K2-002：fixture blocked=[2 个来源] → Home 状态行
-  `blocked_sources=2`、navigation 节三数对账（success_pages==页面集、blocked_sources==K1 阻塞清单长度、
-  Home 行==manifest）；gate：`-k partial`
-- T020【RED→GREEN】`test_e2e_blocked_matrix` — blocked 态契约参数化（review B-12）：模型不可用/
-  空输出/拒绝词/K1 run_status=blocked/对账违例/frontmatter 缺字段/零页面 七种情形，逐一断言
-  navigation_status=blocked、reasons 精确、导航零落盘、暂存清空、未触及 manifest 字段语义相等；
-  gate：`-k blocked`
-- T021【RED→GREEN】`test_production_wiring` — 生产接线（review B-2）：按 DEC-K2-003 从用户 config
-  构造真实 ModelGateway（构造期零网络请求）、按 DEC-K2-002 构造 CacheProtocol 适配点、K1 集成调用面
-  签名断言（cache/gateway/query_fixture 三依赖显式注入、无默认 Null/None）；gate：`-k wiring`
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-2
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T014R — RED：N=10 路径抽查
 
+- **ID**：T014R
+- **Phase**：Phase P4
+- **goal**：使 `test_path_sample_and_gate` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-CHK-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：Q7·Talk R3 N=10·DEF-K2-2
+- **输入**：spec §5（FR-CHK-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-CHK-003
+- **AC**：AC-K2-3
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：10 题 BFS 边数≤3；一题 3+跳构造 → blocked；fixture=None → incomplete 不失败
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T014G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "n=10"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T014R — 10 题 BFS 边数≤3；一题 3+跳构造 → blocked；fixture=None → incomplete 不失败`
+- **evidence_path**：`quality/evidence/build-code/T014R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：10 题 BFS 边数≤3；一题 3+跳构造 → blocked；fixture=None → incomplete 不失败（同 gate_cmd/oracle）
+- **fixtures_services**：query_fixture_sample.json（10 题样例）
+- **coverage limits**：真实清单用户确认前 AC-K2-3 记 incomplete（gate）
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-3
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T014G — GREEN：N=10 路径抽查
+
+- **ID**：T014G
+- **Phase**：Phase P4
+- **goal**：实现使 T014R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-CHK-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：Q7·Talk R3 N=10·DEF-K2-2
+- **输入**：spec §5（FR-CHK-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-CHK-003
+- **AC**：AC-K2-3
+- **动作**：实现题目清单加载 + BFS 测跳 + gate 语义
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T014R 同 gate_cmd exit 0
+- **Knowledge**：实现题目清单加载 + BFS 测跳 + gate 语义；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T014R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "n=10"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T014R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T014G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T014R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：query_fixture_sample.json（10 题样例）
+- **coverage limits**：真实清单用户确认前 AC-K2-3 记 incomplete（gate）
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-3
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T015R — RED：e2e manifest+cleanup+commit 顺序
+
+- **ID**：T015R
+- **Phase**：Phase P4
+- **goal**：使 `test_e2e_manifest_and_cleanup` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-CHK-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-008·OI-12·review B-13
+- **输入**：spec §5（FR-CHK-004）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-CHK-004/FR-AUD-001
+- **AC**：AC-K2-5
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：happy → ①三文件落盘②metrics③manifest navigation 最后写出；blocked → 零落盘+reasons+暂存清空+未触及字段
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T015G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "e2e"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T015R — happy → ①三文件落盘②metrics③manifest navigation 最后写出；blocked → 零落盘+reasons+暂存清空+未触及字段语义相等`
+- **evidence_path**：`quality/evidence/build-code/T015R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：happy → ①三文件落盘②metrics③manifest navigation 最后写出；blocked → 零落盘+reasons+暂存清空+未触及字段（同 gate_cmd/oracle）
+- **fixtures_services**：全 fixture 套件 + manifest 解析断言
+- **coverage limits**：manifest 字节稳定归 K1 真实集成检查点（review B-6）
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-5
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T015G — GREEN：e2e manifest+cleanup+commit 顺序
+
+- **ID**：T015G
+- **Phase**：Phase P4
+- **goal**：实现使 T015R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-CHK-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-008·OI-12·review B-13
+- **输入**：spec §5（FR-CHK-004）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-CHK-004/FR-AUD-001
+- **AC**：AC-K2-5
+- **动作**：实现 commit_or_block（顺序 fail-closed + 暂存清理 + manifest 二次落盘）
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T015R 同 gate_cmd exit 0
+- **Knowledge**：实现 commit_or_block（顺序 fail-closed + 暂存清理 + manifest 二次落盘）；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T015R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "e2e"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T015R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T015G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T015R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：全 fixture 套件 + manifest 解析断言
+- **coverage limits**：manifest 字节稳定归 K1 真实集成检查点（review B-6）
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-5
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T016R — RED：同输入双跑字节一致
+
+- **ID**：T016R
+- **Phase**：Phase P4
+- **goal**：使 `test_e2e_rerun_bytes` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-009·review R2
+- **输入**：spec §5（FR-GEN-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-GEN-003/FR §8
+- **AC**：AC-K2-6
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：同 fixture 连跑两次 → 三导航文件字节完全一致；第二次零模型调用
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T016G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "同输入双跑字节一致"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T016R — 同 fixture 连跑两次 → 三导航文件字节完全一致；第二次零模型调用`
+- **evidence_path**：`quality/evidence/build-code/T016R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：同 fixture 连跑两次 → 三导航文件字节完全一致；第二次零模型调用（同 gate_cmd/oracle）
+- **fixtures_services**：双跑 harness（tmp 批次 ×2）
+- **coverage limits**：manifest 运行级字段不参与比对（spec SCN-K2-007）
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-6
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T016G — GREEN：同输入双跑字节一致
+
+- **ID**：T016G
+- **Phase**：Phase P4
+- **goal**：实现使 T016R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-009·review R2
+- **输入**：spec §5（FR-GEN-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-GEN-003/FR §8
+- **AC**：AC-K2-6
+- **动作**：端到端复跑（缓存全命中路径）
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T016R 同 gate_cmd exit 0
+- **Knowledge**：端到端复跑（缓存全命中路径）；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T016R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "同输入双跑字节一致"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T016R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T016G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T016R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：双跑 harness（tmp 批次 ×2）
+- **coverage limits**：manifest 运行级字段不参与比对（spec SCN-K2-007）
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-6
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T017R — RED：写路径审计
+
+- **ID**：T017R
+- **Phase**：Phase P4
+- **goal**：使 `test_e2e_write_audit` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "PFACT-K2-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-012·review B（白名单六项）
+- **输入**：spec §5（PFACT-K2-001）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：PFACT-K2-001
+- **AC**：AC-K2-7
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：批次目录外零写入；批次内仅白名单六项；暂存区终态清空
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T017G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "写路径审计"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T017R — 批次目录外零写入；批次内仅白名单六项；暂存区终态清空`
+- **evidence_path**：`quality/evidence/build-code/T017R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：批次目录外零写入；批次内仅白名单六项；暂存区终态清空（同 gate_cmd/oracle）
+- **fixtures_services**：写审计桩 fixture
+- **coverage limits**：审计桩只在测试注入，生产路径零开销
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-7
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T017G — GREEN：写路径审计
+
+- **ID**：T017G
+- **Phase**：Phase P4
+- **goal**：实现使 T017R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "PFACT-K2-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：D-012·review B（白名单六项）
+- **输入**：spec §5（PFACT-K2-001）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：PFACT-K2-001
+- **AC**：AC-K2-7
+- **动作**：实现写操作记录桩（测试注入审计器）
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T017R 同 gate_cmd exit 0
+- **Knowledge**：实现写操作记录桩（测试注入审计器）；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T017R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "写路径审计"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T017R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T017G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T017R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：写审计桩 fixture
+- **coverage limits**：审计桩只在测试注入，生产路径零开销
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-7
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T018R — RED：部分成功对账
+
+- **ID**：T018R
+- **Phase**：Phase P4
+- **goal**：使 `test_e2e_partial_success` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-NAV-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：Q6·SCN-K2-002·review B-5
+- **输入**：spec §5（FR-NAV-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-NAV-003/FR-AUD-001
+- **AC**：AC-K2-5
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：blocked=[2] → Home 行 blocked_sources=2；navigation 三数对账全等
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T018G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "部分成功对账"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T018R — blocked=[2] → Home 行 blocked_sources=2；navigation 三数对账全等`
+- **evidence_path**：`quality/evidence/build-code/T018R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：blocked=[2] → Home 行 blocked_sources=2；navigation 三数对账全等（同 gate_cmd/oracle）
+- **fixtures_services**：T007 fixture 变体（blocked 非空）
+- **coverage limits**：K1 阻塞清单形态以 manifest blocked 数组为准
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-5
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T018G — GREEN：部分成功对账
+
+- **ID**：T018G
+- **Phase**：Phase P4
+- **goal**：实现使 T018R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-NAV-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：Q6·SCN-K2-002·review B-5
+- **输入**：spec §5（FR-NAV-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-NAV-003/FR-AUD-001
+- **AC**：AC-K2-5
+- **动作**：blocked 参数贯通 Home 状态行与 manifest 计数
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T018R 同 gate_cmd exit 0
+- **Knowledge**：blocked 参数贯通 Home 状态行与 manifest 计数；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T018R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "部分成功对账"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T018R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T018G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T018R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：T007 fixture 变体（blocked 非空）
+- **coverage limits**：K1 阻塞清单形态以 manifest blocked 数组为准
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-5
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T019R — RED：blocked 矩阵七情形
+
+- **ID**：T019R
+- **Phase**：Phase P4
+- **goal**：使 `test_e2e_blocked_matrix` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-CHK-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：SCN-K2-003…006·review B-12
+- **输入**：spec §5（FR-CHK-004）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-CHK-004
+- **AC**：AC-K2-5
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：模型不可用/空输出/拒绝词/K1 blocked/对账违例/frontmatter 缺字段/零页面七情形 → status+reasons+零落盘+暂存清空+语
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T019G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "blocked"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T019R — 模型不可用/空输出/拒绝词/K1 blocked/对账违例/frontmatter 缺字段/零页面七情形 → status+reasons+零落盘+暂存清空+语义相等`
+- **evidence_path**：`quality/evidence/build-code/T019R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：模型不可用/空输出/拒绝词/K1 blocked/对账违例/frontmatter 缺字段/零页面七情形 → status+reasons+零落盘+暂存清空+语（同 gate_cmd/oracle）
+- **fixtures_services**：七情形 fixture 矩阵
+- **coverage limits**：interrupted（manifest 损坏）另行断言：不写 manifest 显式报告（spec SCN-K2-003）
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-5
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T019G — GREEN：blocked 矩阵七情形
+
+- **ID**：T019G
+- **Phase**：Phase P4
+- **goal**：实现使 T019R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "FR-CHK-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：SCN-K2-003…006·review B-12
+- **输入**：spec §5（FR-CHK-004）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：FR-CHK-004
+- **AC**：AC-K2-5
+- **动作**：参数化端到端（七情形驱动同一断言组）
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T019R 同 gate_cmd exit 0
+- **Knowledge**：参数化端到端（七情形驱动同一断言组）；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T019R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "blocked"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T019R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T019G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T019R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：七情形 fixture 矩阵
+- **coverage limits**：interrupted（manifest 损坏）另行断言：不写 manifest 显式报告（spec SCN-K2-003）
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-5
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T020R — RED：生产接线
+
+- **ID**：T020R
+- **Phase**：Phase P4
+- **goal**：使 `test_production_wiring` 因目标断言失败（当前无实现）
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "DEC-K2-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：review B-2·B-1
+- **输入**：spec §5（DEC-K2-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：DEC-K2-002/003
+- **AC**：AC-K2-4(gate)
+- **动作**：只写失败测试与必要 fixture 辅助，不改生产代码
+- **精确文件**：`tests/acceptance/test_task8_entry_navigation.py`
+- **boundary**：files: `tests/acceptance/test_task8_entry_navigation.py`; symbols/regions: 仅测试文件
+- **输出**：RED 证据：真实 config 构造 ModelGateway（零网络）+ CacheProtocol 适配点 + K1 挂接签名（三依赖显式注入无默认）
+- **Knowledge**：fixture 结构参考 plan Code Anchors；K1 schema 常量在 tests/fixtures/task8_nav/
+- **verification_role**：RED
+- **paired_task**：T020G
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "生产接线"`
+- **expected_exit**：非零（断言失败）
+- **oracle**：`ORACLE-T020R — 真实 config 构造 ModelGateway（零网络）+ CacheProtocol 适配点 + K1 挂接签名（三依赖显式注入无默认）`
+- **evidence_path**：`quality/evidence/build-code/T020R/`
+- **STOP**：环境失败、命令损坏、断言写错（改测试而非实现）或需要新设计时停止
+- **recovery**：负责人=build-code 执行者；最小恢复=修正测试/环境后重跑 gate
+- **task risk**：错误 RED（断言本身写错）导致 GREEN 误实现
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：RED 证据：真实 config 构造 ModelGateway（零网络）+ CacheProtocol 适配点 + K1 挂接签名（三依赖显式注入无默认）（同 gate_cmd/oracle）
+- **fixtures_services**：假 config 文件 fixture
+- **coverage limits**：DEF-K2-2 未关闭前本卡为 build-code 最后一张卡（gate）
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-4(gate)
+- **review_fact**：N/A — RED 与其 paired GREEN 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
+#### T020G — GREEN：生产接线
+
+- **ID**：T020G
+- **Phase**：Phase P4
+- **goal**：实现使 T020R 的断言通过并保留其负例语义
+- **design_state**：ready
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "665c5cd4d9464d80cf11e8308441fdef4c22151705b4d230c6e0a6f353109f33", "id": "DEC-K2-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "25d541c0db5c3f63880f77aa77cec188f65e0551535d007b95d074baf3470225", "id": "DEC-K2-001..004"}]`
+- **source_refs / decision_refs**：review B-2·B-1
+- **输入**：spec §5（DEC-K2-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
+- **依赖**：同 Phase 前序卡；详见 Phase 块
+- **并行**：否 — 单模块顺序 RED→GREEN
+- **FR**：DEC-K2-002/003
+- **AC**：AC-K2-4(gate)
+- **动作**：实现 config 只读解析 + 入口签名冻结
+- **精确文件**：`src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`
+- **boundary**：files: `src/knowledge_digest/semantic_navigation.py（本 Phase 职责块）`; symbols/regions: 仅本 Phase 声明的 symbol/region；不得触碰其他职责块
+- **输出**：GREEN：T020R 同 gate_cmd exit 0
+- **Knowledge**：实现 config 只读解析 + 入口签名冻结；接口签名以 plan Solution Design 为准
+- **verification_role**：GREEN
+- **paired_task**：T020R
+- **gate_cmd**：`uv run --frozen pytest -q tests/acceptance/test_task8_entry_navigation.py -k "生产接线"`
+- **expected_exit**：0
+- **oracle**：`ORACLE-T020R 全绿（同 oracle identity）`
+- **evidence_path**：`quality/evidence/build-code/T020G/`
+- **STOP**：实现需要越出 File Boundary / 需要改 spec/plan/tasks 设计时停止（回 stage）
+- **recovery**：负责人=build-code 执行者；最小恢复=git 回退本卡实现
+- **task risk**：实现引入非确定性（时间戳/随机序/运行级字段入产物）
+- **test tier / test method**：feature — Python 模块级单功能域行为变化（批次导航编译器），需目标单测+邻接集成测试（fixture 批次端到端）；无跨端/…
+- **scenarios / commands / expected exit / oracle**：GREEN：T020R 同 gate_cmd exit 0（同 gate_cmd/oracle）
+- **fixtures_services**：假 config 文件 fixture
+- **coverage limits**：DEF-K2-2 未关闭前本卡为 build-code 最后一张卡（gate）
+- **acceptance_role**：implementation
+- **ui_scope**：non_ui
+
+##### 执行状态填写区（唯一完成权威）
+
+- [ ] **任务完成**
+- **status**：pending
+- **actual_changes**：N/A — not started
+- **executed_commands**：N/A — not started
+- **evidence_refs**：N/A — not started
+- **covered_ac**：AC-K2-4(gate)
+- **review_fact**：N/A — 与 paired RED 合并审
+- **completed_at**：N/A — not completed
+- **执行事实**：N/A — not started
 ## 跨 Phase 事实
 
-- test tier（test-routing 预判，step 7）：全部 `feature`（Python 模块级行为，无 UI/网络/DB/部署）。
-- 当前状态：P1–P4 均已规划未执行（build-code 阶段按 RED→GREEN 逐卡执行；开工前置 = DEF-K2-2 gate）。
-- 执行事实字段（build-code 填）：attempt/gate stdout/exit/receipt。
+- 基线守卫（已实跑 2026-09-13）：`uv run --frozen pytest -q` = 16 failed, 892 passed, 3 skipped
+  （与 K1 冻结基线逐数一致；task2a 单文件 15 failed + 其余 1）。P4 GREEN 后全量跑断言该集合不变。
+- 最终验收卡 = T020G（gate：DEF-K2-2 关闭后执行真实清单路径抽查）。
+- 执行事实回填纪律：每卡完成后在"执行状态填写区"逐字段更新；review_fact 引用 wh-review build-code 面。

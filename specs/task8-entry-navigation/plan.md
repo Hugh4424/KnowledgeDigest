@@ -7,13 +7,14 @@
 
 ## 材料导航
 
-| 想查什么 | 去哪 |
-| --- | --- |
-| 30 秒了解 | `## Quick Read` |
-| 复用什么/不动什么 | `## Code Anchors` + `## File Boundary` |
-| 怎么实现 | `## Solution Design` + `## Technical Decisions` |
-| 怎么测 | `## Test Strategy` |
-| 任务卡 | `tasks.md`（Phase P1–P4） |
+| 章节 / 材料锚点 | 职责与摘要 | M/S/B/P 读取时机 |
+| --- | --- | --- |
+| `## Quick Read` | 30 秒了解 | M：开工前必读 |
+| `## Code Anchors` + `## File Boundary` | 复用什么/不动什么 | S：build-code 首卡前读 |
+| `## Solution Design` + `## Technical Decisions` | 怎么实现 | M：实现对应职责块时读 |
+| `## Test Strategy` | 怎么测（blueprint） | M：写卡时读；B：回归时读 |
+| `## Phase P1…P4`（本文件） | Phase 工程边界概要（细节在 tasks.md） | M：按 Phase 推进时读 |
+| `tasks.md`（Phase P1–P4，40 卡） | 可执行 RED/GREEN 卡与执行事实区 | M：逐卡执行时读 |
 
 ## Quick Read
 
@@ -221,6 +222,27 @@ P1 → P2 → P3 → P4 严格串行（同模块内职责块依数据流：对�
 - 可重复：缓存键不含运行级字段；双跑字节一致有 oracle ✓
 - 同构：16 字段零新增；ADR 0013 授权不消费 ✓
 - 无投机能力：无调度/向量库/服务化；单模块给出行数拆分条件 ✓
+
+## Phase P1 — 输入对账与 fixture
+
+Goal：manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 冻结 schema 固化为代码。
+工程边界：仅 `semantic_navigation.py` 的对账职责块 + fixtures 包；测试先行（T001–T006）。
+依赖：无（首 Phase）。细节与 RED/GREEN 卡见 tasks.md。
+
+## Phase P2 — 机械生成（无模型）
+
+Goal：三件套机械层确定性生成（Index/模块 Index/Home 机械段 + frontmatter 契约 + 模块名推断）。
+工程边界：仅生成职责块；零模型调用；快照断言。依赖：P1 页面集。细节见 tasks.md。
+
+## Phase P3 — 模型产物（缓存/描述/建议）
+
+Goal：缓存协议对接、描述/建议生成、拒绝词表与非空校验、预算记账。
+工程边界：仅 model 职责块；FakeGateway/DictCache 离线全链。依赖：P2 生成槽位。细节见 tasks.md。
+
+## Phase P4 — 自检、状态增写、端到端
+
+Goal：覆盖判定三件套 + 四判据 + 路径抽查 + blocked 矩阵 + commit fail-closed 顺序 + 生产接线。
+工程边界：自检职责块 + commit_or_block；全 AC 闭环。依赖：P1–P3。细节见 tasks.md。
 
 ## 阶段执行记录（build-plan）
 

@@ -7,14 +7,14 @@
 
 ## 材料导航
 
-| 想查什么 | 去哪 |
-| --- | --- |
-| 30 秒了解本规格 | `## 速读卡` |
-| 决策↔需求↔验收的对应 | `## 来源与决策映射` |
-| 运行时行为分支 | `## 3. 用户场景与状态覆盖` |
-| 每条功能需求的精确契约 | `## 5. 功能需求` |
-| 验收怎么执行 | `## 11. 验收标准` |
-| 不做的事与红线 | `## 10. 明确不做与默认必须成立` |
+| 章节 / 材料锚点 | 职责与摘要 | M/S/B/P 读取时机 |
+| --- | --- | --- |
+| `## 速读卡` | 30 秒了解本规格 | M：开工前必读 |
+| `## 来源与决策映射` | 决策↔需求↔验收的对应 | S：build-plan 投影时读 |
+| `## 3. 用户场景与状态覆盖` | 运行时行为分支（SCN-K2-001…008） | M：写测试场景时读 |
+| `## 5. 功能需求` | 每条功能需求的精确契约 | M：实现对应职责块时读 |
+| `## 11. 验收标准` | 验收怎么执行（oracle 定义） | M：写 oracle 时读；B：CI 回归时读 |
+| `## 10. 明确不做与默认必须成立` | 不做的事与红线 | M：越界判断时读；S：review 时读 |
 
 ## 速读卡（30 秒）
 
@@ -370,9 +370,10 @@ K3 发布通道读取 manifest `navigation` 节：仅 `generated_ok` 批次允�
 | OPEN-K2-1 | K2 导航术语登记 CONTEXT.md | build-spec（本阶段） | 本文件发布后执行登记 |
 | OPEN-K2-2 | 旧 navigation.py 复用盘点 | build-plan | 盘点事实已产出（PFACT-K2-007：不复用）；正式关闭动作归 build-plan |
 | OPEN-K2-3 | 自检指标精确形态 | build-spec（本阶段） | 已冻结（FR-CHK-001/002/003 + AC 表） |
-| DEF-K2-2 | 十条路径题目清单 | build-spec 收集 → 用户确认 | 开放；**gate：build-code 开工前必须关闭**（确认前 AC-K2-3 incomplete，review F-4） |
-| DEF-K2-4 | generated_by 命名/拒绝词表/模块名规则细节/N 值 | build-plan | 开放；**gate：build-code 开工前必须关闭**（确认前 AC-K2-4 子项 incomplete） |
-| DEF-K2-5 | K1 manifest 对齐（条目提供 `page_path` 字段） | K1 侧 build-spec/plan 对齐 + K2 build-plan 联调核验 | 部分处置（本卡消费契约已冻结）；K1 侧对齐跟踪 |
+| DEF-K2-2 | 十条路径题目清单 | owner=用户确认（build-plan 期间收集表） | 触发=build-code 开工前 | handoff=用户 → tasks T014/T020 fixture | 关闭=用户确认冻结清单文件 |
+| DEF-K2-4 | generated_by/拒绝词表/N=30/推断规则 | owner=build-plan（DEC-K2-004 已冻结关闭） | 触发=已完成 | handoff=plan → tasks 各卡 Knowledge | 关闭=DEC-K2-004 落 plan |
+| DEF-K2-5 | K1 manifest 条目提供 `page_path` | owner=K1 侧 build-spec/plan | 触发=K1 冻结 manifest schema 时 | handoff=K1 → K2 P1 fixture 对账层 + K1 集成检查点 | 关闭=真实批次联调核验通过 |
+| DEF-K2-3 | CB 入口合并/取代 | owner=K3 | 触发=发布通道写语义层时 | handoff=本卡 navigation 节 → K3 门禁 | 关闭=K3 发布决策记录 |
 
 ### 交接给 build-plan 的边界
 
