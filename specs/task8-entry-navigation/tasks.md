@@ -2,7 +2,7 @@
 
 - **Input**：`specs/task8-entry-navigation/decision-log.md`（approved）、`specs/task8-entry-navigation/spec.md`（frozen）、`specs/task8-entry-navigation/plan.md`（本文件姊妹篇）
 - **Template version**：`plan-task.v4`
-- **build-code 开工 gate（spec §12 F-4）**：**T001（本文件第一张卡）开工前 DEF-K2-2（十条查询路径题目经用户确认）必须关闭**；DEF-K2-4 已由 plan DEC-K2-004 冻结关闭（模块名/generated_by/拒绝词表/N=30+推断规则）。
+- **build-code 开工 gate（spec §12 F-4）**：~~T001 开工前 DEF-K2-2 必须关闭~~ **已于 2026-09-13 满足**——十条题目经用户确认冻结（`tests/fixtures/task8_nav/query_fixture_sample.json`）；DEF-K2-4 由 plan DEC-K2-004 关闭。build-code 可开工。
 - **RED/GREEN 纪律**：每对同一 gate_cmd 与 oracle identity；RED expected_exit 非零先行提交，GREEN 修到 exit 0。
 - **权威执行命令**：`uv run --frozen pytest -q` 包住 gate_cmd；执行事实（status/changed files/commands/evidence）逐卡回填下方执行状态填写区——该区是唯一完成权威。
 

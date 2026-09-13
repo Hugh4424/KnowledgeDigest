@@ -370,8 +370,8 @@ K3 发布通道读取 manifest `navigation` 节：仅 `generated_ok` 批次允�
 | OPEN-K2-1 | K2 导航术语登记 CONTEXT.md | build-spec（本阶段） | 本文件发布后执行登记 |
 | OPEN-K2-2 | 旧 navigation.py 复用盘点 | build-plan | 盘点事实已产出（PFACT-K2-007：不复用）；正式关闭动作归 build-plan |
 | OPEN-K2-3 | 自检指标精确形态 | build-spec（本阶段） | 已冻结（FR-CHK-001/002/003 + AC 表） |
-| DEF-K2-2 | 十条路径题目清单 | owner=用户确认（build-plan 期间收集表） | 触发=build-code 开工前 | handoff=用户 → tasks T014/T020 fixture | 关闭=用户确认冻结清单文件 |
-| DEF-K2-4 | generated_by/拒绝词表/N=30/推断规则 | owner=build-plan（DEC-K2-004 已冻结关闭） | 触发=已完成 | handoff=plan → tasks 各卡 Knowledge | 关闭=DEC-K2-004 落 plan |
+| DEF-K2-2 | 十条路径题目清单 | owner=用户确认 | 触发=build-code 开工前 | handoff=用户 → `tests/fixtures/task8_nav/query_fixture_sample.json`（frozen 2026-09-13） | **已关闭**：用户确认冻结，AC-K2-3 可执行 |
+| DEF-K2-4 | generated_by/拒绝词表/N=30/推断规则 | owner=build-plan（DEC-K2-004 已冻结关闭） | 触发=已完成 | handoff=plan → tasks 各卡 Knowledge | 已关闭：DEC-K2-004 落 plan |
 | DEF-K2-5 | K1 manifest 条目提供 `page_path` | owner=K1 侧 build-spec/plan | 触发=K1 冻结 manifest schema 时 | handoff=K1 → K2 P1 fixture 对账层 + K1 集成检查点 | 关闭=真实批次联调核验通过 |
 | DEF-K2-3 | CB 入口合并/取代 | owner=K3 | 触发=发布通道写语义层时 | handoff=本卡 navigation 节 → K3 门禁 | 关闭=K3 发布决策记录 |
 
@@ -379,8 +379,8 @@ K3 发布通道读取 manifest `navigation` 节：仅 `generated_ok` 批次允�
 
 - 不得重新决定产品方向；不得降低四判据/覆盖判定/navigation 机读契约的任何门槛。
 - 需冻结的实现参数（DEF-K2-4）：模块文件名、generated_by 值、拒绝词表、正文行数 N、模块名推断规则。
-- **build-code 开工 gate（review F-4）**：DEF-K2-2（十条题目用户确认）与 DEF-K2-4 关闭前，允许 build-plan
-  完成，但 build-code 的第一个任务卡必须以"两 DEF 已关闭"为前置；tasks.md 须把 gate 写成显式 STOP 条件。
+- **build-code 开工 gate（review F-4）**：DEF-K2-2（2026-09-13 用户确认冻结）与 DEF-K2-4（DEC-K2-004）
+  均已关闭——**gate 已满足，build-code 可开工**。
 - 需补的验证 fixture：K1 manifest 冻结 schema 样例（按 FR-AUD-004 + FR-AUD-001 构造）。
 
 ## 13. 业务影响与回归范围
