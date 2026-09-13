@@ -125,3 +125,17 @@ _Avoid_: 把 `released`、`KD_WIN`、证书或覆盖率绿灯当作可用性结�
 
 **证据零容忍**：产物中每一条结论必须能回到原文具体位置；回不到就不写成结论，改为显式标注"原文未明确"并保留占位。不设百分比门槛，也不接受只有页面级出处。
 _Avoid_: 用覆盖率百分比或"来源：某文件"的页面级标注替代逐条出处。
+
+## 本轮新增术语（task8-entry-navigation · build-spec 冻结）
+
+**批次导航（K2）**：KnowledgeDigest 一次运行批次目录内的三层入口结构——`Home.md`（批次入口：状态行+快速入口+查询建议）→ `Index.md`（全局知识索引，按 product 分节列模块总览）→ `products/<product>/<section>/Index.md`（模块总览：全页面+每页一条描述句）。定位=批次目录内的临时对照导航；与 CompanyBrain 既有入口并行自营，合并/取代归 K3。
+_Avoid_: 把批次导航称为语义层的正式入口；把 CompanyBrain 的 Home/索引改写为本卡职责。
+
+**入口描述句**：模块总览页中每个页面条目下的一句介绍（中文 ≤60 字，"这页帮你解决什么"），模型生成、走缓存，验收过四判据（规范化相等=0/句式骨架≥3/疑问模板≥3/空即失败）。
+_Avoid_: 用页面 title 复述充当描述（基线 95/99 同质即标题式描述造成）；放行空描述或留空标注。
+
+**navigation 节**：K1 `page-manifest.json` 增写的机读状态块 `{status: generated_ok|blocked, success_pages, blocked_sources, blocked_reasons}`，K2 自检通过后二次落盘写出；K3 发布门禁读此字段，blocked/缺字段一律拦截。
+_Avoid_: 仅凭 run_status=complete 放行无导航批次；由 K2 改写 K1 的 run_status（K1 状态冻结，隔离字段承载）。
+
+**结构门**：K2 两道门（零孤儿覆盖判定/描述四判据）+ N=10 路径抽查的统称——只证明"找得到、分得清"的导航结构正确性，不构成"知识可用"证据。
+_Avoid_: 把结构门通过当作 ADR 0014 真实查询集验收的替代。
