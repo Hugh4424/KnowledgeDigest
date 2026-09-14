@@ -126,6 +126,25 @@ _Avoid_: 把 `released`、`KD_WIN`、证书或覆盖率绿灯当作可用性结�
 **证据零容忍**：产物中每一条结论必须能回到原文具体位置；回不到就不写成结论，改为显式标注"原文未明确"并保留占位。不设百分比门槛，也不接受只有页面级出处。
 _Avoid_: 用覆盖率百分比或"来源：某文件"的页面级标注替代逐条出处。
 
+## 本轮新增术语（task7-semantic-layer-compiler · build-spec 冻结）
+
+**批次目录**：K1 一次运行的交付单元，位于 `/Users/Hugh/Downloads/KD测试/<YYYY-MM-DD>-<当天自增序号>/`，内部固定为 `README.md` + `products/<产品>/<模块>/<页面>.md` + `_audit/{reference-blocks.jsonl, sources.jsonl, page-manifest.json, run-metrics.json, suspected-synonyms.md}`。定位是**临时对照产物**，不是语义层、不是知识库；正式上库由 K3 发布通道负责。
+_Avoid_: 把批次目录称为"语义层"或"知识库"；把缺失/中断的批次当作可发布。
+
+**参考块**：参考型内容（整张表/整个参数列表/整段报错文案等）的整块单元，逐字保真、结构同原文；每块带 `block_id`、内容 sha256、行区间与唯一输出锚点，全集登记在 `_audit/reference-blocks.jsonl` 并经独立第二方法交叉验证。块内图片/附件 URL 原样保留并标注为外部资源链接。
+_Avoid_: 把表格按行拆块、改写块内字节、静默丢弃坏行。
+
+**双轨出处**：逐条出处的读者面与机器面分工——页面面向读者显示「原始文件名 + 文件内标题」，不显示行号；机器在 `_audit/sources.jsonl` 逐 claim 存「文件 + 内容指纹 + 行区间 + char 区间」。页头 `source` 字段是读者导航（标注语料根目录），不构成证据零容忍的满足物；满足物是旁路文件的逐 claim 凭据。
+_Avoid_: 在页面显示行号；用页头 `source` 充当逐条证据；新增页头溯源字段名。
+
+**待验证事实全集**：一次编译中进入验证管道的全部 claim（叙述 claim + 导读 claim）的集合，即 `_audit/sources.jsonl` 本次运行的全部记录；事实分母 = 其中有原文依据的 claim 数。claim 级状态 `资料未明确`（运行内值「原文未明确」）= 在原文中找不到依据的 claim，须附检索证据、不写成结论、不进事实分母。
+_Avoid_: 把 `资料未明确` 写成结论或计入分母；用模型复核替代程序化推导。
+
+**显式主题映射**：人编辑、机器读取的主题归组机械输入（仓库内固定配置文件），`别名 → 规范主题` 的合并表；缺失或为空 = 纯标题名归组。模型对主题的判断只进 `_audit/suspected-synonyms.md` 作建议，永不改变页面成员；人工采纳的唯一路径是编辑该映射后整体重跑。
+_Avoid_: 让模型在运行时决定页面成员；自动合并疑似同义主题。
+
+**KD 溯源生成器名**：K1 产物页 `generated_by: knowledge_digest_semantic_compiler.py`、`page_model: derived`。既有元数据脚本 `page_model_for()` 的推导规则已覆盖该名字（非 `clean_`/`sync_` 前缀 → `derived`），无需修改脚本。
+
 ## 本轮新增术语（task8-entry-navigation · build-spec 冻结）
 
 **批次导航（K2）**：KnowledgeDigest 一次运行批次目录内的三层入口结构——`Home.md`（批次入口：状态行+快速入口+查询建议）→ `Index.md`（全局知识索引，按 product 分节列模块总览）→ `products/<product>/<section>/Index.md`（模块总览：全页面+每页一条描述句）。定位=批次目录内的临时对照导航；与 CompanyBrain 既有入口并行自营，合并/取代归 K3。
@@ -139,3 +158,4 @@ _Avoid_: 仅凭 run_status=complete 放行无导航批次；由 K2 改写 K1 的
 
 **结构门**：K2 两道门（零孤儿覆盖判定/描述四判据）+ N=10 路径抽查的统称——只证明"找得到、分得清"的导航结构正确性，不构成"知识可用"证据。
 _Avoid_: 把结构门通过当作 ADR 0014 真实查询集验收的替代。
+

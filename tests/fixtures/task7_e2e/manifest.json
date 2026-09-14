@@ -1,0 +1,39 @@
+{
+  "schema_version": "task7-source-manifest.v1",
+  "input_manifest_id": "task7-e2e-fixture-v1",
+  "expected_count": 5,
+  "entries": [
+    {
+      "source_uri": "Payments/payments-login.md",
+      "source_id": "task7-login",
+      "content_hash": "bedeca8a26624a82d04351b35a3effd07910fdd64473a06e2a664657a628a483",
+      "byte_count": 245
+    },
+    {
+      "source_uri": "Payments/payments-session.md",
+      "source_id": "task7-session",
+      "content_hash": "be52300634fcb82214870c06cb671e268f30da41dfe558076aff6ef8378f482b",
+      "byte_count": 174
+    },
+    {
+      "source_uri": "Billing/billing-login-copy.md",
+      "source_id": "task7-login-copy",
+      "content_hash": "bedeca8a26624a82d04351b35a3effd07910fdd64473a06e2a664657a628a483",
+      "byte_count": 245
+    },
+    {
+      "source_uri": "Payments/payments-audit-notes.md",
+      "source_id": "task7-audit-notes",
+      "content_hash": "5a87f08fc1fee578f4fb7c40925b839f0771963067e9af69c50421930cbbe231",
+      "byte_count": 140,
+      "expected_status": "audit_only"
+    },
+    {
+      "source_uri": "Payments/payments-empty.md",
+      "source_id": "task7-empty",
+      "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byte_count": 0,
+      "expected_status": "empty"
+    }
+  ]
+}
