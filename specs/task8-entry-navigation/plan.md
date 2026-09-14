@@ -338,7 +338,7 @@ plan/tasks 仅由 build-code 按卡执行更新执行事实字段，不再改设
 外部 strict report-only analyzer 无宿主（stage_outcome 根因同前），主会话对当前五输入 packet
 （decision-log / spec / plan / tasks / AC 表）做最终一致性核对：
 
-- 命名一致性：navigation_status 全链一致（spec/plan/tasks 逐文件 grep 零残留 navigation.status）。
+- 命名一致性：navigation_status 全链一致（spec/plan/tasks 逐文件 grep 零残留 navigation\.status（旧命名））。
 - gate 一致性：spec §12 F-4（两 DEF gate）→ DEF-K2-4 关闭证据 = plan DEC-K2-004 → tasks 头部
   gate = DEF-K2-2 单一项 + T001 前置。三层一致。
 - 追溯闭合：13 FR 簇 → P1–P4 → 21 任务卡 → 7 AC；review 新增的 T017–T021 已入追溯
