@@ -49,7 +49,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P1
 - **goal**：使 `test_reconcile_happy` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：R-008/R-014·D-004·OI-04·PFACT-K2-002
 - **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：P1 对账层
@@ -94,7 +94,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P1
 - **goal**：实现使 T001R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：R-008/R-014·D-004·OI-04·PFACT-K2-002
 - **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：P1 对账层
@@ -139,7 +139,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P1
 - **goal**：使 `test_reconcile_manifest_missing_field` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：R-016·OI-05·SCN-K2-003
 - **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：P1 对账层
@@ -184,7 +184,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P1
 - **goal**：实现使 T002R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：R-016·OI-05·SCN-K2-003
 - **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：P1 对账层
@@ -229,7 +229,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P1
 - **goal**：使 `test_reconcile_bidirectional` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-004·PFACT-K2-002·review F-2
 - **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：P1 对账层
@@ -274,7 +274,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P1
 - **goal**：实现使 T003R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-004·PFACT-K2-002·review F-2
 - **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：P1 对账层
@@ -333,7 +333,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P2
 - **goal**：使 `test_build_mount_tree` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-003/D-004·OI-02
 - **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -378,7 +378,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P2
 - **goal**：实现使 T004R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-003/D-004·OI-02
 - **输入**：spec §5（FR-NAV-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -423,7 +423,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P2
 - **goal**：使 `test_build_frontmatter_contract` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-005"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-005"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：S1·D-010·review F-3
 - **输入**：spec §5（FR-NAV-005）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -468,7 +468,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P2
 - **goal**：实现使 T005R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-005"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-005"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：S1·D-010·review F-3
 - **输入**：spec §5（FR-NAV-005）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -513,7 +513,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P2
 - **goal**：使 `test_module_title_inference` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：R2-Q7·D-006·DEC-K2-004
 - **输入**：spec §5（FR-GEN-004）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -558,7 +558,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P2
 - **goal**：实现使 T006R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：R2-Q7·D-006·DEC-K2-004
 - **输入**：spec §5（FR-GEN-004）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -603,7 +603,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P2
 - **goal**：使 `test_home_mechanical_sections` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-007·OI-06
 - **输入**：spec §5（FR-NAV-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -648,7 +648,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P2
 - **goal**：实现使 T007R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-007·OI-06
 - **输入**：spec §5（FR-NAV-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -707,7 +707,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P3
 - **goal**：使 `test_cache_key_contract` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-009·PFACT-K2-005·review F-6
 - **输入**：spec §5（FR-GEN-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -752,7 +752,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P3
 - **goal**：实现使 T008R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-009·PFACT-K2-005·review F-6
 - **输入**：spec §5（FR-GEN-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -797,7 +797,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P3
 - **goal**：使 `test_cache_hit_no_call` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-009·OI-08
 - **输入**：spec §5（FR-GEN-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -842,7 +842,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P3
 - **goal**：实现使 T009R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-009·OI-08
 - **输入**：spec §5（FR-GEN-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -887,7 +887,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P3
 - **goal**：使 `test_model_output_validation` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-005·review R2-B3/F-5
 - **输入**：spec §5（FR-GEN-001）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -932,7 +932,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P3
 - **goal**：实现使 T010R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-005·review R2-B3/F-5
 - **输入**：spec §5（FR-GEN-001）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -977,7 +977,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P3
 - **goal**：使 `test_suggestion_count_and_metrics` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-007·K1 FR-AUD-005
 - **输入**：spec §5（FR-GEN-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1022,7 +1022,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P3
 - **goal**：实现使 T011R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-007·K1 FR-AUD-005
 - **输入**：spec §5（FR-GEN-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1081,7 +1081,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：使 `test_check_coverage_three` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-008·OI-07·review R2-B1
 - **输入**：spec §5（FR-CHK-001）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1126,7 +1126,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：实现使 T012R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-008·OI-07·review R2-B1
 - **输入**：spec §5（FR-CHK-001）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1171,7 +1171,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：使 `test_check_description_criteria` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：Talk R3 冻结·review R2-B2/B3
 - **输入**：spec §5（FR-CHK-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1216,7 +1216,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：实现使 T013R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：Talk R3 冻结·review R2-B2/B3
 - **输入**：spec §5（FR-CHK-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1261,7 +1261,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：使 `test_path_sample_and_gate` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：Q7·Talk R3 N=10·DEF-K2-2
 - **输入**：spec §5（FR-CHK-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1306,7 +1306,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：实现使 T014R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：Q7·Talk R3 N=10·DEF-K2-2
 - **输入**：spec §5（FR-CHK-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1351,7 +1351,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：使 `test_e2e_manifest_and_cleanup` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-008·OI-12·review B-13
 - **输入**：spec §5（FR-CHK-004）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1396,7 +1396,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：实现使 T015R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-008·OI-12·review B-13
 - **输入**：spec §5（FR-CHK-004）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1441,7 +1441,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：使 `test_e2e_rerun_bytes` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-009·review R2
 - **输入**：spec §5（FR-GEN-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1486,7 +1486,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：实现使 T016R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-GEN-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-009·review R2
 - **输入**：spec §5（FR-GEN-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1531,7 +1531,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：使 `test_e2e_write_audit` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "PFACT-K2-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "PFACT-K2-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-012·review B（白名单六项）
 - **输入**：spec §5（PFACT-K2-001）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1576,7 +1576,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：实现使 T017R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "PFACT-K2-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "PFACT-K2-001"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：D-012·review B（白名单六项）
 - **输入**：spec §5（PFACT-K2-001）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1621,7 +1621,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：使 `test_e2e_partial_success` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：Q6·SCN-K2-002·review B-5
 - **输入**：spec §5（FR-NAV-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1666,7 +1666,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：实现使 T018R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-003"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：Q6·SCN-K2-002·review B-5
 - **输入**：spec §5（FR-NAV-003）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1711,7 +1711,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：使 `test_e2e_blocked_matrix` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：SCN-K2-003…006·review B-12
 - **输入**：spec §5（FR-CHK-004）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1756,7 +1756,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：实现使 T019R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-CHK-004"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：SCN-K2-003…006·review B-12
 - **输入**：spec §5（FR-CHK-004）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1801,7 +1801,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：使 `test_production_wiring` 因目标断言失败（当前无实现）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "DEC-K2-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "DEC-K2-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：review B-2·B-1
 - **输入**：spec §5（DEC-K2-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1846,7 +1846,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：实现使 T020R 的断言通过并保留其负例语义
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "DEC-K2-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001..004"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "DEC-K2-002"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001..004"}]`
 - **source_refs / decision_refs**：review B-2·B-1
 - **输入**：spec §5（DEC-K2-002）+ plan Solution Design 对应职责块 + 上游 Phase 产物
 - **依赖**：同 Phase 前序卡；详见 Phase 块
@@ -1891,7 +1891,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：使 test_cli_invokes_navigation_after_compile 失败（当前 semantic_cli.main compile 后无 navigation 调用）
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-001/OI-12"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-001/OI-12"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001"}]`
 - **source_refs / decision_refs**：R-011·D-002·OI-12·PFACT-K2-001；plan DEC-K2-001（挂接点 semantic_cli.main）
 - **输入**：spec §5 FR-NAV-001 + plan DEC-K2-001 + T020G 完成的库入口
 - **依赖**：T020G（库入口冻结后）
@@ -1937,7 +1937,7 @@ manifest 输入校验 fail-closed + 双向路径对账可用；fixture 把 K1 �
 - **Phase**：Phase P4
 - **goal**：实现挂接使 T022R 通过：compile_batch 成功后调用 compile_batch_navigation
 - **design_state**：ready
-- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-001/OI-12"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "915f4a68cc4956509a2336f99656d200189bed2c74be4a963f7a5ddc131f8a58", "id": "DEC-K2-001"}]`
+- **versioned_refs**：`[{"artifact_kind": "spec", "ref": "specs/task8-entry-navigation/spec.md", "hash": "1eee4f77c28bd3193f2ec79a7c02005dc983720ba12ef37e6ea651a6749eb3ec", "id": "FR-NAV-001/OI-12"}, {"artifact_kind": "plan", "ref": "specs/task8-entry-navigation/plan.md", "hash": "f302839b28ddf41d257a9fa6be4a3820ce2aba6fd93a5c4604b68c3efcfd5577", "id": "DEC-K2-001"}]`
 - **source_refs / decision_refs**：R-011·D-002·OI-12·PFACT-K2-001；plan DEC-K2-001（挂接点 semantic_cli.main）
 - **输入**：spec §5 FR-NAV-001 + plan DEC-K2-001 + T020G 完成的库入口
 - **依赖**：T020G（库入口冻结后）
