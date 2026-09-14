@@ -144,24 +144,30 @@ K3 发布通道读取 manifest `navigation` 节：仅 `generated_ok` 批次允�
   ① `Home.md` ② `Index.md` ③ `products/**/Index.md` ④ `_audit/nav-staging/`（暂存，运行开始时整体重建、
   blocked 时整体删除）⑤ manifest `navigation` 节（二次落盘）⑥ `run-metrics.json` 的 K2 成本字段
   （FR-AUD-002）——其余路径零写入。
-- **PFACT-K2-002**：K1 manifest 已冻结字段（FR-AUD-004）：`publish_status`/`run_status`/`attempt_id`/来源快照身份/
-  阻塞项全集/页面条目/来源→页面反查表/来源台账；**页面条目的子字段名未冻结**（K1 spec 仅描述"含主题键、
-  来源列表、claim/块计数"）。本卡的处置（build-spec review F-2 修复）：**量化域权威 = manifest 页面条目**；
-  本卡冻结 K2 消费的条目字段名 `page_path`（批次内相对路径，如 `products/<product>/<section>/<slug>.md`），
-  登记 DEF-K2-5 = K1 manifest 条目必须提供该字段（K1 侧对齐义务）。K2 用**双向路径对账**（非计数对账——
-  计数相等不能证同一性）：每个条目的 `page_path` 在 products/ 存在且 frontmatter 可读；每个 products/
-  页面（排除保留文件名）都有对应条目。任一向违例 → blocked（`nav-page-manifest-mismatch`）。
-  保留文件名：`Index.md` 为导航保留——若发现 slug 为 `Index` 的 K1 页面 → blocked 显式报告
-  （请求 K1 slug 排除，RISK-K2-3 跟踪）。
+- **PFACT-K2-002**：K1 manifest **已随 K1 合并实现**（`schema_version: task7-page-manifest.v1`，
+  semantic_audit.py `_manifest` 生成）：顶层 = `publish_status`/`run_status`/`attempt_id`/`source_snapshot`/
+  `blockers[]`/`pages[]`/`source_to_pages{}`/`source_ledger[]`。**pages[] 条目真实字段 = `topic_key`、
+  `page_path`（批次内相对路径）、`page_paths[]`、`source_paths[]`、`block_count`、`claim_count`、
+  `block_ids[]`、`claim_ids[]`——无 title/product/section（在页面 frontmatter，见 PFACT-K2-003）**。
+  ⇒ DEF-K2-5 关闭（K1 已提供 `page_path`）。量化域权威 = manifest 页面条目；K2 用**双向路径对账**：
+  每个条目的 `page_path` 在 products/ 存在且 frontmatter 可读；每个 products/ 页面（排除保留文件名）
+  都有对应条目。任一向违例 → blocked（`nav-page-manifest-mismatch`）。保留文件名：`Index.md` 为导航
+  保留——若发现 slug 为 `Index` 的 K1 页面 → blocked 显式报告（请求 K1 slug 排除，RISK-K2-3 跟踪）。
 - **PFACT-K2-003**：页面 frontmatter 16 字段冻结（K1 FR-PUB-001），K2 消费其中 4 个：`title`（中文）、
   `product`（目录 slug）、`section`（模块目录 slug）、`generated_by`（本卡不校验其值，仅引用字段表）；
   导航页自身的 frontmatter 全集见 FR-NAV-005。
 - **PFACT-K2-004**：CompanyBrain 入口参照（只读）：Home.md（tier 1，快速入口+查询建议）、分类索引
   （导语+分组入口）、产品/文档总览三层链；本卡三层结构与之同构体验但不复制其内容、不改其文件。
-- **PFACT-K2-005**：模型缓存机制（K1 FR-CMP 系列冻结）：任务级固定位置，键 = 来源内容指纹+模型标识+
-  提示模板版本+主题映射版本；命中不重调、缺则调用并写回。K2 复用该机制，键构成扩项见 FR-GEN-003。
-- **PFACT-K2-006**：`tests/acceptance/` 现有 49 个测试文件、`tests/conftest.py` 不存在（基线 c5fb2b5 取证）；
-  本卡新增验收测试挂入同目录同风格。
+- **PFACT-K2-005**：K1 缓存已随实现落地（semantic_cache.py `ModelCache`）：`cache/model-cache/entries.jsonl`
+  append-only，条目字段 `{cache_key, model_id, prompt_version, topic_map_version, result, created_from_fingerprint}`；
+  唯一接口为**主题级** `get_or_call(*, model_id, prompt_version, topic_map_version, topic_key, members, provider)`
+  ——与 K2 的描述句/建议对象（页面级/批次级）不同构。K2 处置（plan DEC-K2-002 已对齐）：**同格式、
+  独立键空间**——沿用 entries.jsonl 存储格式与缓存目录，键前缀 `task8-desc:`/`task8-suggest:` 隔离，
+  不调用 K1 的 get_or_call；键构成仍按 FR-GEN-003 冻结。
+- **PFACT-K2-006**：`tests/acceptance/` 现有 56 个测试文件（K1 合并后，含 7 个 test_task7_*）、
+  `tests/conftest.py` 不存在；测试收集 1000（2026-09-14 取证）。失败基线 **20 failed/976 passed/4 skipped**
+  （清单冻结 `tests/fixtures/task8_nav/baseline_failures_20.txt`：旧 15 + K1 入口切换预期破坏 5——
+  task5×2/task0/task1/task2a-existing_cli；属 K1 遗留清理，非 K2 回归面）。本卡新增测试零新增失败。
 - **PFACT-K2-007**：旧 `src/knowledge_digest/navigation.py`（344 行）渲染旧分类轴导航记录交 writeback，
   属旧 digest 行为（K1 已降级为对照脚本）；其结构（分类轴/旧 KB）与本卡 product/section 三层不同，
   **不复用**（盘点事实成立；按 decision-log OPEN-K2-2 归 build-plan 正式关闭，review F-9 修正状态归属）。
@@ -273,10 +279,11 @@ K3 发布通道读取 manifest `navigation` 节：仅 `generated_ok` 批次允�
 
 ### 审计衔接（AUD）
 
-- **FR-AUD-001 manifest navigation 节**：自检通过后二次落盘 manifest，增写
+- **FR-AUD-001 manifest navigation 节**：自检通过后二次落盘 manifest，**保留顶层
+  `schema_version: task7-page-manifest.v1` 与其余全部节不动**，仅增写
   `navigation: {navigation_status, success_pages, blocked_sources, blocked_reasons: [...]}`；
   blocked 情形同样增写（status=blocked）。字段名/类型/公式本卡冻结（detail R2-B6）：
-  `success_pages` == products 页面集大小；`blocked_sources` == K1 阻塞项清单长度；两数与 Home.md 状态行一致。
+  `success_pages` == products 页面集大小；`blocked_sources` == K1 `blockers[]` 长度；两数与 Home.md 状态行一致。
   - 依据：OI-12；detail R2-B6/R2-B7
   - 场景：全场景
   - 验收：AC-K2-5
@@ -372,7 +379,7 @@ K3 发布通道读取 manifest `navigation` 节：仅 `generated_ok` 批次允�
 | OPEN-K2-3 | 自检指标精确形态 | build-spec（本阶段） | 已冻结（FR-CHK-001/002/003 + AC 表） |
 | DEF-K2-2 | 十条路径题目清单 | owner=用户确认 | 触发=build-code 开工前 | handoff=用户 → `tests/fixtures/task8_nav/query_fixture_sample.json`（frozen 2026-09-13） | **已关闭**：用户确认冻结，AC-K2-3 可执行 |
 | DEF-K2-4 | generated_by/拒绝词表/N=30/推断规则 | owner=build-plan（DEC-K2-004 已冻结关闭） | 触发=已完成 | handoff=plan → tasks 各卡 Knowledge | 已关闭：DEC-K2-004 落 plan |
-| DEF-K2-5 | K1 manifest 条目提供 `page_path` | owner=K1 侧 build-spec/plan | 触发=K1 冻结 manifest schema 时 | handoff=K1 → K2 P1 fixture 对账层 + K1 集成检查点 | 关闭=真实批次联调核验通过 |
+| DEF-K2-5 | K1 manifest 条目提供 `page_path` | owner=K1 实现 | 触发=已随 K1 合并落地 | handoff=K1 `pages[].page_path` → K2 P1 对账层 | **已关闭**：K1 实现含 `page_path`（真实批次联调核验仍为 P4 冒烟项） |
 | DEF-K2-3 | CB 入口合并/取代 | owner=K3 | 触发=发布通道写语义层时 | handoff=本卡 navigation 节 → K3 门禁 | 关闭=K3 发布决策记录 |
 
 ### 交接给 build-plan 的边界
@@ -470,6 +477,15 @@ PUBLIC_RESULT_INVALID 身份降级，按合同不写成"没有问题"；有效 r
 11 条 finding 全部处置（处置表见 review-frozen-spec 小节）：3 fixed-as-blocking 修复（F-1 命名统一、
 F-2 权威源+路径对账、F-4 gate 模式）、8 fixed（F-3/5/6/7/8/9/10/11）；零静默丢弃、零 rejected_invalid、
 零 needs_human。处置已回写本文件（头部 frozen 状态 + 各处条款），本轮提交为发布前最后修订。
+
+### K1 实现合并对齐修订（2026-09-14，merge main 后）
+
+K1（task7）实现合并主干（merge commit 361114e）。本规格按"上游已实现事实"做对齐修订（未冻结假设的
+落地核对，不改方向）：① PFACT-K2-002 更新为真实 manifest schema（pages[] 含 `page_path`，DEF-K2-5 关闭）；
+② 来源级状态词表补 K1 实现第五态 `blocked`；③ FR-AUD-001 明确二次落盘保留 `schema_version` 与其余节；
+④ PFACT-K2-005 缓存载体改为"同格式独立键空间"（K1 get_or_call 为主题级接口，与 K2 对象不同构）；
+⑤ PFACT-K2-006 基线更新为 20 failed（K1 入口切换预期破坏 5 个，清单已冻结）。
+R-016 词表口径以 K1 实现（五态：ready/known_empty/duplicate_alias/audit_only/blocked）为准。
 
 ### stage-end-spec-analyze（step 13）
 

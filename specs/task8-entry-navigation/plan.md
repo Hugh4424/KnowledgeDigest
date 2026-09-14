@@ -31,8 +31,10 @@
 ### Global Constraints
 
 - Python 3.11+ / uv 管理 / src-layout；测试 `uv run --frozen pytest -q`（49 文件现状，无 conftest）。
-- 基线 `c5fb2b5`：16 个既有失败（test_task2a_reader_bundle.py，K1 AC-10 口径：节点 ID 与原因逐一不变）；
-  本卡新增测试不得新增失败。
+- 基线（merge main @361114e 后实跑 2026-09-14）：**1000 收集 / 20 failed / 976 passed / 4 skipped**；
+  20 失败清单冻结于 `tests/fixtures/task8_nav/baseline_failures_20.txt`（旧 15 task2a + K1 入口切换
+  预期破坏 5：task5×2、task0、task1、task2a-existing_cli——K1 遗留清理，非本卡回归面）；
+  本卡新增测试**零新增失败**，基线 20 节点集合不变。
 - 模型通道只走项目配置约定的 Qwen（qwen3.8）与缓存契约（spec FR-GEN-003）；离线回归不得发任何网络请求。
 - 批次父目录 `/Users/Hugh/Downloads/KD测试` 冻结；本卡测试一律用 `tmp_path` fixture 构造迷你批次，不碰真实目录。
 - 写权白名单（spec PFACT-K2-001 六项）= 本计划唯一允许写入路径集。
@@ -43,7 +45,7 @@
 
 | 能力 | 处置 | 锚点 |
 | --- | --- | --- |
-| 模型缓存 | **Reuse（契约）** | K1 `semantic_cache.py` 将冻结的接口形态（spec PFACT-K2-005：任务级固定位置、键=内容指纹+模型标识+提示模板版本+主题映射版本）。K1 未研发 ⇒ 按契约定义 Protocol 对接 + fixture 假实现；K1 落地后换真实现仅需改一处构造（DEC-003） |
+| 模型缓存 | **Reuse（同格式独立键空间）** | K1 `semantic_cache.py ModelCache`（@261）：`cache/model-cache/entries.jsonl` append-only；K2 不复用 get_or_call（主题级，不同构），沿用其存储格式/目录/键风格（composite_cache_key @178），键前缀隔离（DEC-K2-002） |
 | frontmatter 读写 | **Reuse** | PyYAML（项目已在用，K1 FR-PUB-001 同依赖）；不引入新依赖 |
 | wikilink 解析 | **New（纯函数）** | 无既有实现服务批次内 wikilink 图遍历 |
 | 批次导航生成/自检 | **New** | 旧 `navigation.py`（344 行）服务旧分类轴，结构不同，不复用（spec PFACT-K2-007；OPEN-K2-2 盘点事实） |
@@ -51,9 +53,12 @@
 
 ### 关键既有事实（build-plan 取证，step 2）
 
-- K1 文件边界（K1 plan.md）：新链路七模块 `semantic_*.py` 全为 NEW；`simple_cli.py` 由 K1 MODIFY。
-  K2 的唯一集成面 = `semantic_compiler.py` 完成产物写出后调用本卡入口（K1 侧任务）。
-- K1 缓存键构成（spec FR-GEN-003 已冻结）：K2 侧实现同构键。
+- K1 真实链路（已核实）：`simple_cli.main → semantic_cli.main（@55）→ compile_batch（@1459）→
+  BatchResult（@326：output_dir/outcome/attempt_id/provider_calls/cache_hits）`；`_write_audit` 最后落盘
+  manifest（semantic_audit.py @986）。compile 后无钩子 ⇒ K2 挂接在 semantic_cli.main（DEC-K2-001）。
+- K1 真实 manifest（schema task7-page-manifest.v1）：`pages[].page_path` 存在（DEF-K2-5 关闭）；
+  顶层含 `blockers[]`/`source_ledger[]`（条目含 source_status 五态）。
+- K1 缓存（semantic_cache.py）：ModelCache @261 / get_or_call @294 / composite_cache_key @178。
 - 旧 `navigation.py` 函数面：`build_publication_navigation`/`_expanded_navigation`/`_topic_rows`/
   `build_topic_part_navigation`/`_validate_existing_navigation`——全部围绕旧 KB 分类轴，无一批次导航可复用单元。
 
@@ -106,11 +111,13 @@ compile_batch_navigation(batch_dir)
 
 ### MODIFY
 
-- 无。
+- `src/knowledge_digest/semantic_cli.py` — 一处挂接：compile_batch 成功后、打印 output 前调用
+  `compile_batch_navigation(batch.output_dir, ...)` 并将 NavigationResult 并入输出 JSON（DEC-K2-001）。
 
 ### DO NOT TOUCH
 
-- K1 全部规划文件（`semantic_*.py` 尚不存在；K2 侧零集成代码——挂接归 K1 build-code）。
+- K1 其余实现文件（semantic_compiler/cache/audit/split/group/claims/page.py——只 import 其公开函数，
+  不修改；唯一例外 = semantic_cli.py 挂接点）。
 - `src/knowledge_digest/navigation.py`（旧分类轴，K4 再评估）。
 - `CONTEXT.md`/`docs/adr/`（术语登记 build-spec 已完成；不改 ADR）。
 - CompanyBrain/gbrain/停摆流水线/真实语料目录。
@@ -120,22 +127,27 @@ compile_batch_navigation(batch_dir)
 
 ### DEC-K2-001 — 单模块 + 契约挂接：K2 不集成 K1，K1 集成 K2
 
-- **Problem**：K1 未研发（无 `semantic_compiler.py` 可挂），但 K2 必须与 K1 同批产出（decision-log D-002/Q1）。
-- **Options**：A K2 新建自己的 CLI 入口（违反 Q1 已决方向）；B K2 写 K1 的集成代码（文件不存在，无法编译验证）；
-  C **契约挂接**：K2 只暴露库入口 + 文档化挂接点，K1 build-code 在 compiler 落盘后调用（K1 侧一行集成）。
-- **Selected**：C。K2 全部验收用 fixture 批次端到端（七 AC 均可离线验）；K1 集成后真实联调登记为 K1 侧任务 +
-  本计划 P4 Knowledge。
-- **Consequence/risk**：RISK-K2-5（fixture≠真实 K1 产物）；缓解 = manifest/page frontmatter 均按 K1 冻结 schema
-  构造 fixture，且 P1 的对账层会 fail-closed 拒绝 schema 漂移。
-- **Fallback**：若 K1 最终接口与本契约不符，改 `compile_batch_navigation` 的输入适配层（单点）。
+- **Problem**：K2 必须与 K1 同批产出（decision-log D-002/Q1）；K1 已实现并合并（2026-09-14 merge main）。
+- **Selected（修订：K1 落地后从"C 契约挂接"细化为"K2 侧窄挂接"）**：K1 真实链路 = `simple_cli.main →
+  semantic_cli.main → compile_batch`（semantic_compiler.py @1459），compile 完成后**无任何后续钩子**
+  （已核实全库无 navigation 调用）。挂接点 = `semantic_cli.main` 的 compile_batch 调用之后、打印 output
+  之前（约 semantic_cli.py @110 区域）调用 `compile_batch_navigation(batch_result.output_dir, ...)`——
+  **本卡 MODIFY semantic_cli.py 一处调用**（File Boundary 已列）；K2 的入口签名按 DEC-K2-001 接口节冻结。
+- **Consequence/risk**：RISK-K2-5 降级——fixture 与真实实现的差异面已从"全 schema"缩到"挂接一行 +
+  BatchResult 字段消费"；P4 T022 挂接卡验证真实 `digest --manifest` 端到端（mock provider）。
+- **Fallback**：若 K1 BatchResult 字段变化，改 T022 挂接卡的字段读取（单点）。
 
 ### DEC-K2-002 — 缓存按 Protocol 对接，键构造同构 K1
 
-- **Problem**：K1 缓存未实现，但描述必须可缓存（AC-K2-6）。
-- **Selected**：`CacheProtocol` 鸭子类型；默认 `NullCache`（测试用假实现 `DictCache`）；键 = spec FR-GEN-003
-  冻结构成（任务标识+输入内容指纹（页面字节 sha256）+模型标识+提示模板版本+主题映射版本）。
-- **Consequence**：K1 落地后写薄适配（~10 行）；无 K1 时测试确定性全绿。
-- **删除条件**：若 K1 缓存接口与本 Protocol 不兼容且适配层 >50 行，重开 DEC（plan-eng-review 检查点）。
+- **Problem**：描述必须可缓存（AC-K2-6）；K1 缓存已落地为主题级 `ModelCache.get_or_call`
+  （semantic_cache.py @294：topic_key+members 形态），与 K2 对象（页面描述/批次建议）**不同构**。
+- **Selected（修订：按 K1 真实实现）**：**同格式、独立键空间**——K2 缓存沿用 entries.jsonl append-only
+  格式与 `cache/model-cache/` 目录（懒创建，KNOWLEDGEDIGEST_TASK7_CACHE_ROOT 可覆盖），键前缀
+  `task8-desc:` / `task8-suggest:` 隔离；不调用 K1 get_or_call。对外仍暴露 `CacheProtocol`
+  （get/set 形态，测试注入 DictCache/NullCache），持久层为 JSONL 追加（单写者=本运行）。
+- **键构成**：spec FR-GEN-003 冻结（任务标识+输入内容指纹+模型标识+提示模板版本+主题映射版本）——
+  与 K1 的 composite_cache_key 同风格（canonical JSON → sha256）。
+- **删除条件**：若未来 K1 提供通用键值缓存接口，收敛到 K1 实现（重开 DEC）。
 
 ### DEC-K2-003 — 模型通道经既有 provider 配置；测试全离线
 
