@@ -14,6 +14,21 @@ KnowledgeDigest 是一个人工触发的本地知识消化与发布工具：读�
 uv run --frozen digest NEW_DIR KB_DIR --config config/knowledge-digest.json
 ```
 
+Task7 语义编译入口：
+
+```bash
+uv run --frozen digest NEW_DIR --manifest config/task4-source-coverage-89-input.v1.json
+```
+
+它按冻结清单对账后，在 `/Users/Hugh/Downloads/KD测试/<YYYY-MM-DD>-<n>/`
+生成待发布语义批次；缓存固定在仓库 `cache/model-cache/`，对账或 provider
+失败会留下可机读的 `blocked`/`not_released` 状态。历史 reader 行为不再由
+`digest` 分流，需显式使用：
+
+```bash
+python scripts/legacy_digest_reference.py NEW_DIR KB_DIR --config CONFIG
+```
+
 严格离线运行（不调用 LLM，也不探测 embedding）：
 
 ```bash
