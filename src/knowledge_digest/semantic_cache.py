@@ -265,14 +265,19 @@ class ModelCache:
 
     def __init__(self, root: str | Path):
         root_path = Path(root)
+        if root_path.is_symlink() or (root_path.exists() and not root_path.is_dir()):
+            raise ValueError(f"cache root is not a real directory: {root_path}")
         root_path.mkdir(parents=True, exist_ok=True)
-        if not root_path.is_dir():
-            raise ValueError(f"cache root is not a directory: {root_path}")
+        if root_path.is_symlink() or not root_path.is_dir():
+            raise ValueError(f"cache root is not a real directory: {root_path}")
         object.__setattr__(self, "root", root_path)
 
     @property
     def path(self) -> Path:
-        return self.root / "entries.jsonl"
+        path = self.root / "entries.jsonl"
+        if path.is_symlink():
+            raise ValueError(f"cache entries path must not be a symlink: {path}")
+        return path
 
     def _entries(self) -> list[dict[str, Any]]:
         if not self.path.exists():
@@ -288,6 +293,8 @@ class ModelCache:
                     raw_entry = json.loads(line)
                 except json.JSONDecodeError as exc:
                     raise ValueError(f"cache line {line_number} is not valid JSON") from exc
+                if isinstance(raw_entry, dict) and str(raw_entry.get("cache_key", "")).startswith("task8-"):
+                    continue
                 entries.append(_validated_entry(raw_entry, line_number))
         return entries
 

@@ -383,7 +383,10 @@ def _slug_with_fallback(model: Mapping[str, Any], model_title: str | None, membe
         fallback = _filename_slug(member.source_path)
         if fallback:
             return fallback
-    raise ValueError("slug_fallback_exhausted: no ASCII model or source filename segment")
+    # A topic may legitimately contain only non-ASCII source names and an
+    # unavailable/empty model slug. Keep the batch deterministic and safe
+    # rather than making every otherwise readable page block at materialization.
+    return "topic-" + hashlib.sha256((model_title or "\n".join(member.source_path for member in members)).encode("utf-8", "surrogateescape")).hexdigest()[:12]
 
 
 def _claim_items(value: object) -> tuple[object, ...]:
