@@ -70,8 +70,7 @@ def test_m401_public_gate_does_not_require_reader_positionals(tmp_path: Path):
     result = subprocess.run(
         [
             sys.executable,
-            "-m",
-            "knowledge_digest.simple_cli",
+            "scripts/legacy_digest_reference.py",
             "--gate",
             "M401",
             "--fixture-bundle",
@@ -103,13 +102,14 @@ def test_registered_digest_entrypoint_is_the_thin_reader_cli():
     )
     assert result.returncode == 0
     assert "new_dir" in result.stdout
-    assert "--no-llm" in result.stdout
-    assert "--slice-config" in result.stdout
-    assert "--provider-config" in result.stdout
-    assert "--gate" in result.stdout
-    assert "--m401-packet" in result.stdout
-    assert "--m401-r-receipt" in result.stdout
-    assert "--workflowhub-successor" in result.stdout
+    assert "--manifest" in result.stdout
+    assert "--no-llm" not in result.stdout
+    assert "--slice-config" not in result.stdout
+    assert "--provider-config" not in result.stdout
+    assert "--gate" not in result.stdout
+    assert "--m401-packet" not in result.stdout
+    assert "--m401-r-receipt" not in result.stdout
+    assert "--workflowhub-successor" not in result.stdout
 
     import_graph = subprocess.run(
         [

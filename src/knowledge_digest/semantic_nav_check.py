@@ -27,6 +27,7 @@ from .semantic_compiler import configured_provider_from_env
 # Labels may contain bracketed product markers such as ``[AE]``. Parse the
 # target separately and allow the label to contain ordinary brackets.
 WIKILINK_RE = re.compile(r"\[\[([^\]|#\n]+)(?:#[^\]|#\n]+)?(?:\|[^\n]*?)?\]\]")
+NAVIGATION_PROMPT_VERSION = "task8-navigation-v3"
 
 
 def _provider_usage_tokens(value: object) -> int | None:
@@ -352,8 +353,9 @@ class NavigationDependencies:
 class ConfiguredNavigationGateway:
     provider: Any
     model_id: str
-    prompt_version: str = "task8-navigation-v1"
+    prompt_version: str = NAVIGATION_PROMPT_VERSION
     topic_map_version: str = "task8-topic-map-v1"
+    last_provider_tokens: int | None = field(default=None, init=False, repr=False, compare=False)
 
     def _complete_configured(self, prompt: str) -> Mapping[str, Any]:
         if len(prompt) > self.provider.max_input_chars:
@@ -404,8 +406,10 @@ class ConfiguredNavigationGateway:
         complete = self._complete_configured if configured else getattr(self.provider, "complete", None)
         if not callable(complete):
             raise NavigationInputError("model-output-invalid", "configured provider is not callable")
+        object.__setattr__(self, "last_provider_tokens", None)
         result = complete(prompt)
         if isinstance(result, str):
+            object.__setattr__(self, "last_provider_tokens", None)
             return result
         if not isinstance(result, Mapping):
             raise NavigationInputError("model-output-invalid", "configured provider output is not an object")
@@ -414,6 +418,7 @@ class ConfiguredNavigationGateway:
         token_value = result.get("provider_tokens")
         if not isinstance(token_value, int) or isinstance(token_value, bool) or token_value < 0:
             raise NavigationInputError("provider-usage-unavailable", "configured navigation output has no valid token count")
+        object.__setattr__(self, "last_provider_tokens", token_value)
         for key in ("description", "text", "content"):
             value = result.get(key)
             if isinstance(value, str):
@@ -435,7 +440,7 @@ class UnavailableNavigationGateway:
 
     reason: str = "provider-config-missing"
     model_id: str = "unconfigured-navigation-model"
-    prompt_version: str = "task8-navigation-v1"
+    prompt_version: str = NAVIGATION_PROMPT_VERSION
     topic_map_version: str = "task8-topic-map-v1"
 
     def complete(self, prompt: str) -> str:
@@ -1121,7 +1126,7 @@ def _page_body_excerpt(text: str) -> str:
 
 def _gateway_identity(gateway: Any) -> tuple[str, str, str]:
     model_id = getattr(gateway, "model_id", "injected-model")
-    prompt_version = getattr(gateway, "prompt_version", "task8-navigation-v1")
+    prompt_version = getattr(gateway, "prompt_version", NAVIGATION_PROMPT_VERSION)
     topic_map_version = getattr(gateway, "topic_map_version", "task8-topic-map-v1")
     values = (model_id, prompt_version, topic_map_version)
     if any(not isinstance(value, str) or not value for value in values):
@@ -1153,14 +1158,20 @@ def _resolve_with_stats(
             return validator(cached)
         return cached
     stats["provider_calls"] += 1
-    return resolve_cached_output(
-        cache=cache,
-        gateway=gateway,
-        cache_key=cache_key,
-        prompt=prompt,
-        created_from_fingerprint=created_from_fingerprint,
-        validator=validator,
-    )
+    try:
+        return resolve_cached_output(
+            cache=cache,
+            gateway=gateway,
+            cache_key=cache_key,
+            prompt=prompt,
+            created_from_fingerprint=created_from_fingerprint,
+            validator=validator,
+        )
+    finally:
+        token_value = getattr(gateway, "last_provider_tokens", None)
+        if isinstance(token_value, int) and not isinstance(token_value, bool) and token_value >= 0:
+            stats["provider_tokens"] = stats.get("provider_tokens", 0) + token_value
+            stats["provider_token_observations"] = stats.get("provider_token_observations", 0) + 1
 
 
 def _generate_model_outputs(
@@ -1169,9 +1180,12 @@ def _generate_model_outputs(
     index: NavigationDocument,
     cache: Any,
     gateway: Any,
+    stats: dict[str, int] | None = None,
 ) -> tuple[dict[str, str], tuple[str, ...], dict[str, int]]:
     model_id, prompt_version, topic_map_version = _gateway_identity(gateway)
-    stats = {"provider_calls": 0, "cache_hits": 0}
+    stats = stats if stats is not None else {"provider_calls": 0, "cache_hits": 0}
+    stats.setdefault("provider_tokens", 0)
+    stats.setdefault("provider_token_observations", 0)
     descriptions: dict[str, str] = {}
     for page in pages:
         page_material = page.text.encode("utf-8")
@@ -1184,6 +1198,7 @@ def _generate_model_outputs(
         )
         prompt = (
             "task8 description\n"
+            "请严格使用中文输出一条不超过60字的陈述句，只说明这页帮助读者解决什么问题；不要输出英文、问句或营销词。\n"
             f"title={page.title}\nproduct={page.product}\nsection={page.section}\n"
             f"body:\n{_page_body_excerpt(page.text)}"
         )

@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import shutil
 import tempfile
+import time
 from typing import Any, Mapping, Sequence
 
 # This module is the stable façade; deterministic support moved here when the
@@ -103,6 +104,9 @@ def _write_navigation_metrics(
     page_count: int,
     provider_calls: int,
     cache_hits: int,
+    provider_tokens: int = 0,
+    provider_token_observations: int = 0,
+    elapsed_ms: int = 0,
 ) -> None:
     metrics_path = _safe_batch_path(batch, "_audit/run-metrics.json", field="metrics-path")
     metrics = _read_json_object(metrics_path)
@@ -113,7 +117,23 @@ def _write_navigation_metrics(
             cache_hits=cache_hits,
         )
     )
+    task8_metrics["elapsed_ms"] = max(0, int(elapsed_ms))
     task8_metrics["actual_provider_calls"] = provider_calls
+    task8_metrics["provider_tokens"] = max(0, int(provider_tokens))
+    task8_metrics["actual_provider_tokens"] = max(0, int(provider_tokens))
+    task8_metrics["provider_token_observations"] = max(0, int(provider_token_observations))
+    # This is a new per-run projection. Never inherit diagnostic reasons from
+    # an earlier blocked attempt when the current run has positive metrics.
+    reasons: dict[str, str] = {}
+    task8_metrics["reasons"] = reasons
+    if task8_metrics["elapsed_ms"] == 0:
+        reasons["elapsed_ms"] = "no_provider_call_yet"
+    if provider_calls == 0:
+        reasons["provider_calls"] = "cache_hit" if cache_hits else "no_provider_call_yet"
+    if provider_tokens == 0:
+        reasons["provider_tokens"] = "cache_hit" if provider_calls == 0 and cache_hits else (
+            "no_provider_call_yet" if provider_calls == 0 else "provider_usage_unavailable"
+        )
     metrics["task8_navigation"] = task8_metrics
     _atomic_write(
         metrics_path,
@@ -191,6 +211,9 @@ def _blocked_result(
     page_count: int,
     provider_calls: int,
     cache_hits: int,
+    provider_tokens: int = 0,
+    provider_token_observations: int = 0,
+    elapsed_ms: int = 0,
     write_manifest: bool,
 ) -> NavigationResult:
     _remove_staging(batch)
@@ -202,6 +225,9 @@ def _blocked_result(
                 page_count=page_count,
                 provider_calls=provider_calls,
                 cache_hits=cache_hits,
+                provider_tokens=provider_tokens,
+                provider_token_observations=provider_token_observations,
+                elapsed_ms=elapsed_ms,
             )
         except (OSError, TypeError, ValueError, NavigationInputError):
             try:
@@ -318,6 +344,8 @@ def compile_batch_navigation(
             write_manifest=True,
         )
 
+    stats = {"provider_calls": 0, "cache_hits": 0, "provider_tokens": 0, "provider_token_observations": 0}
+    navigation_started = time.monotonic()
     try:
         tree = build_mount_tree(pages)
         index = build_index(tree)
@@ -326,11 +354,12 @@ def compile_batch_navigation(
             success_pages=sum(len(page.page_paths) for page in pages),
             blocked_sources=len(blockers),
         )
-        descriptions, suggestions, stats = _generate_model_outputs(
+        descriptions, suggestions, _ = _generate_model_outputs(
             pages=pages,
             index=index,
             cache=cache,
             gateway=gateway,
+            stats=stats,
         )
         modules = _module_documents(tree, descriptions)
         home = _home_document(mechanical_home, suggestions)
@@ -377,13 +406,15 @@ def compile_batch_navigation(
                 page_count=len(pages),
                 provider_calls=stats["provider_calls"],
                 cache_hits=stats["cache_hits"],
+                provider_tokens=stats["provider_tokens"],
+                provider_token_observations=stats["provider_token_observations"],
+                elapsed_ms=int((time.monotonic() - navigation_started) * 1000),
                 write_manifest=True,
             )
     except (NavigationInputError, TypeError, ValueError, OSError, RuntimeError, KeyError, IndexError) as error:
         reason = error.reason if isinstance(error, NavigationInputError) else "navigation-input-invalid" if isinstance(error, (KeyError, IndexError)) else "model-gateway-failed"
         if isinstance(error, NavigationInputError) and error.reason == "model-output-invalid":
             reason = f"model-output-invalid:{error}"
-        stats = locals().get("stats", {"provider_calls": 0, "cache_hits": 0})
         return _blocked_result(
             batch,
             reasons=(reason,),
@@ -391,6 +422,9 @@ def compile_batch_navigation(
             page_count=len(locals().get("pages", ())),
             provider_calls=stats.get("provider_calls", 0),
             cache_hits=stats.get("cache_hits", 0),
+            provider_tokens=stats.get("provider_tokens", 0),
+            provider_token_observations=stats.get("provider_token_observations", 0),
+            elapsed_ms=int((time.monotonic() - navigation_started) * 1000),
             write_manifest=True,
         )
 
@@ -418,6 +452,9 @@ def compile_batch_navigation(
             page_count=len(pages),
             provider_calls=stats["provider_calls"],
             cache_hits=stats["cache_hits"],
+            provider_tokens=stats["provider_tokens"],
+            provider_token_observations=stats["provider_token_observations"],
+            elapsed_ms=int((time.monotonic() - navigation_started) * 1000),
         )
         _write_manifest_navigation(
             batch,
@@ -441,6 +478,9 @@ def compile_batch_navigation(
             page_count=len(pages),
             provider_calls=stats["provider_calls"],
             cache_hits=stats["cache_hits"],
+            provider_tokens=stats["provider_tokens"],
+            provider_token_observations=stats["provider_token_observations"],
+            elapsed_ms=int((time.monotonic() - navigation_started) * 1000),
             write_manifest=False,
         )
     return NavigationResult(
