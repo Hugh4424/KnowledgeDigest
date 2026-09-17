@@ -1,0 +1,5 @@
+{
+  "command": "python scripts/task10_metrics.py --baseline eee55492517bc86e3aad4838fe215bb23d84e8a4 --tree worktree >/tmp/task10-final-metrics.json && uv run --frozen pytest tests/acceptance/test_task5_publication_contract.py tests/acceptance/test_task7_pages.py tests/acceptance/test_task7_claims.py tests/acceptance/test_task7_e2e.py tests/acceptance/test_task7_audit.py tests/acceptance/test_task7_split.py tests/acceptance/test_task8_entry_navigation.py tests/acceptance/test_task9_accept.py tests/acceptance/test_task9_publish.py",
+  "receipt_ref": "quality/tests/build-code-final-aggregate.json",
+  "timeout_ms": 120000
+}

@@ -20,8 +20,9 @@ from pathlib import Path, PurePosixPath
 import re
 import sys
 import time
-from typing import Any, TextIO
+from typing import Any, Callable, TextIO
 import unicodedata
+import urllib.error
 import urllib.request
 
 from .llm import (
@@ -32,8 +33,13 @@ from .llm import (
     _request_payload as _llm_request_payload,
 )
 from .provider_config import configured_provider_config_path, load_provider_config
-from .semantic_audit import AuditResult, write_audit
-from .semantic_cache import CacheIntegrityError, ModelCache
+from .semantic_audit import AuditResult, build_audit, write_audit
+from .semantic_cache import (
+    CacheIntegrityError,
+    ModelCache,
+    composite_cache_key,
+    page_input_fingerprint,
+)
 from .semantic_claims import Claim, extract_claims
 from .semantic_group import GroupingResult, TopicGroup, group_topics, load_topic_map
 from .semantic_page import PagePart, RenderedPage, gbrain_slug, render_pages
@@ -97,6 +103,10 @@ class ProviderUnavailable(RuntimeError):
 
 class InjectedWriteFailure(RuntimeError):
     """Controlled failure seam used by the interruption acceptance fixture."""
+
+
+class CheckpointError(RuntimeError):
+    """A same-batch checkpoint is stale, corrupt, or internally inconsistent."""
 
 
 @dataclass(frozen=True)
@@ -166,6 +176,79 @@ class ConfiguredSemanticProvider:
             raise ProviderUnavailable("provider intro must be text or a sentence array")
         usage = envelope.get("usage", {})
         tokens = _usage_tokens(usage)
+        if tokens is None:
+            raise ProviderUnavailable(
+                "provider response did not include usage tokens",
+                reason="provider_usage_unavailable",
+            )
+        normalized["provider_tokens"] = tokens
+        return normalized
+
+    def complete_reader(self, prompt: str) -> Mapping[str, Any]:
+        """Return the full JSON object used by the K3 Reader projection.
+
+        K1 intentionally exposes only title/slug/intro.  Reader projection is
+        a separate contract and needs typed sections plus evidence references;
+        keeping this method separate prevents the raw K1 result schema from
+        silently widening.
+        """
+
+        if len(prompt) > self.max_input_chars:
+            raise ProviderUnavailable(
+                f"reader provider prompt exceeds configured limit ({len(prompt)} > {self.max_input_chars})"
+            )
+        if self.api_format not in SUPPORTED_FORMATS:
+            raise ProviderUnavailable(f"unsupported provider format: {self.api_format}")
+        if not self.base_url or not self.model or not self.api_key:
+            raise ProviderUnavailable("provider configuration is incomplete")
+        request_body = _llm_request_payload(
+            self.api_format,
+            self.model,
+            prompt,
+            max_tokens=self.max_tokens,
+            json_mode=True,
+        )
+        headers = {"content-type": "application/json"}
+        if self.api_format == OPENAI_FORMAT:
+            headers["authorization"] = f"Bearer {self.api_key}"
+        else:
+            headers["x-api-key"] = self.api_key
+            headers["anthropic-version"] = "2023-06-01"
+        request = urllib.request.Request(
+            _llm_endpoint(self.base_url, self.api_format),
+            data=json.dumps(request_body, ensure_ascii=False).encode("utf-8"),
+            headers=headers,
+            method="POST",
+        )
+        try:
+            # The Reader projection is called from the public ``digest``
+            # console entry. On macOS, spawning the existing isolated
+            # transport from that console wrapper can block during child
+            # bootstrap before a socket is opened. K1 keeps its existing
+            # isolated transport; Reader uses urllib's bounded socket timeout
+            # so this route cannot hang before the request begins.
+            with urllib.request.urlopen(request, timeout=min(self.timeout, 90)) as response:
+                status = getattr(response, "status", None) or response.getcode()
+                if not 200 <= int(status) < 300:
+                    raise ProviderUnavailable(f"Reader provider returned HTTP {status}")
+                raw = response.read().decode("utf-8")
+            envelope = json.loads(raw)
+            if self.api_format == OPENAI_FORMAT:
+                content = envelope["choices"][0]["message"]["content"]
+            else:
+                content = envelope["content"][0]["text"]
+            result = json.loads(str(content))
+        except ProviderUnavailable:
+            raise
+        except (KeyError, IndexError, TypeError, UnicodeDecodeError, json.JSONDecodeError, OSError, ValueError, urllib.error.URLError) as error:
+            raise ProviderUnavailable(f"provider returned invalid Reader JSON ({type(error).__name__})") from error
+        if not isinstance(result, Mapping):
+            raise ProviderUnavailable("Reader provider result must be a JSON object")
+        nested = result.get("result")
+        if isinstance(nested, Mapping) and "title" not in result:
+            result = nested
+        normalized = dict(result)
+        tokens = _usage_tokens(envelope.get("usage", {}))
         if tokens is None:
             raise ProviderUnavailable(
                 "provider response did not include usage tokens",
@@ -911,6 +994,9 @@ def _model_results(
     model_id: str,
     prompt_version: str,
     topic_map_version: str,
+    checkpoint_completed: Iterable[str] = (),
+    checkpoint_fingerprints: Mapping[str, Mapping[str, str]] | None = None,
+    on_topic_complete: Callable[[str, Any, int], None] | None = None,
 ) -> tuple[dict[str, Mapping[str, Any]], list[dict[str, Any]], int, int, int, dict[str, str]]:
     results: dict[str, Mapping[str, Any]] = {}
     blockers: list[dict[str, Any]] = []
@@ -918,6 +1004,8 @@ def _model_results(
     cache_hits = 0
     provider_tokens = 0
     unavailable_reasons: dict[str, str] = {}
+    completed = set(checkpoint_completed)
+    fingerprints = checkpoint_fingerprints or {}
     for group in groups:
         prompt = _provider_prompt(group, prompt_version=prompt_version, topic_map_version=topic_map_version)
         if provider is None:
@@ -946,7 +1034,15 @@ def _model_results(
                 topic_key=group.key,
                 members=_group_page_members(group),
                 provider=provider_call,
+                allow_provider=group.key not in completed,
             )
+            if group.key in completed:
+                expected = fingerprints.get(group.key)
+                if not isinstance(expected, Mapping) or expected.get("cache_key") != cached.cache_key or expected.get("page_input_fingerprint") != cached.created_from_fingerprint:
+                    raise CacheIntegrityError(
+                        "checkpoint cache fingerprint does not match the frozen topic input",
+                        provider_called=False,
+                    )
             validated_cached = _validated_semantic_result(cached.result)
         except CacheIntegrityError as error:
             provider_result = error.provider_result
@@ -996,6 +1092,8 @@ def _model_results(
         if cached.called:
             provider_calls += 1
             provider_tokens += cached_tokens
+        if on_topic_complete is not None:
+            on_topic_complete(group.key, cached, provider_calls)
     return results, blockers, provider_calls, cache_hits, provider_tokens, unavailable_reasons
 
 
@@ -1362,6 +1460,155 @@ def _attempt_id(batch: Path) -> str:
     return "attempt-" + hashlib.sha256(str(batch).encode("utf-8")).hexdigest()[:24]
 
 
+CHECKPOINT_SCHEMA_VERSION = "knowledge-digest-checkpoint.v1"
+CHECKPOINT_RELATIVE_PATH = "_audit/checkpoint.v1.json"
+CHECKPOINT_STATES = frozenset({"pending", "running", "complete", "blocked", "interrupted"})
+
+
+def _json_hash(value: object) -> str:
+    return _sha256_bytes(_stable_json(value).encode("utf-8"))
+
+
+def _topic_plan_hash(groups: Iterable[TopicGroup]) -> str:
+    plan = [
+        {
+            "key": group.key,
+            "product": group.product,
+            "title": group.title,
+            "members": [
+                {
+                    "source_path": member.source_path,
+                    "content_hash": member.content_hash,
+                    "block_id": member.block_id,
+                    "line_start": member.line_start,
+                    "line_end": member.line_end,
+                }
+                for member in group.members
+            ],
+        }
+        for group in groups
+    ]
+    return _json_hash(plan)
+
+
+def _checkpoint_identity(
+    *,
+    batch: Path,
+    reconciliation: ReconciliationResult,
+    topic_map_hash: str,
+    topic_plan_hash: str,
+    model_id: str,
+    prompt_version: str,
+) -> dict[str, Any]:
+    manifest_hash = reconciliation.manifest_hash
+    if not manifest_hash and reconciliation.manifest_path.is_file():
+        manifest_hash = _sha256_bytes(reconciliation.manifest_path.read_bytes())
+    return {
+        "schema_version": CHECKPOINT_SCHEMA_VERSION,
+        "batch_id": batch.name,
+        "input_manifest_id": reconciliation.manifest_id,
+        "manifest_hash": manifest_hash,
+        "source_snapshot_hash": _json_hash(reconciliation.source_snapshot),
+        "topic_map_hash": topic_map_hash,
+        "topic_plan_hash": topic_plan_hash,
+        "model_id": model_id,
+        "prompt_version": prompt_version,
+    }
+
+
+def _fsync_directory(directory: Path) -> None:
+    descriptor = os.open(directory, os.O_RDONLY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _write_checkpoint(path: Path, value: Mapping[str, Any]) -> None:
+    """Atomically replace the checkpoint without exposing a partial JSON file."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    payload = f"{json.dumps(dict(value), ensure_ascii=False, sort_keys=True, indent=2)}\n"
+    try:
+        with temporary.open("w", encoding="utf-8", newline="") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        _fsync_directory(path.parent)
+    finally:
+        try:
+            temporary.unlink()
+        except FileNotFoundError:
+            pass
+
+
+def _read_checkpoint(path: Path) -> dict[str, Any]:
+    if path.is_symlink() or not path.is_file():
+        raise CheckpointError("checkpoint is missing or is not a regular file")
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise CheckpointError(f"checkpoint is not valid JSON: {type(error).__name__}") from error
+    if not isinstance(value, dict):
+        raise CheckpointError("checkpoint root must be an object")
+    if value.get("schema_version") != CHECKPOINT_SCHEMA_VERSION:
+        raise CheckpointError("checkpoint schema version is unsupported")
+    if value.get("state") not in CHECKPOINT_STATES:
+        raise CheckpointError("checkpoint state is invalid")
+    completed = value.get("completed_topics")
+    fingerprints = value.get("cache_fingerprints")
+    if not isinstance(completed, list) or any(not isinstance(item, str) or not item for item in completed):
+        raise CheckpointError("checkpoint completed_topics is invalid")
+    if len(set(completed)) != len(completed):
+        raise CheckpointError("checkpoint completed_topics contains duplicates")
+    if not isinstance(fingerprints, dict) or any(
+        not isinstance(key, str)
+        or not isinstance(item, dict)
+        or not isinstance(item.get("cache_key"), str)
+        or not isinstance(item.get("page_input_fingerprint"), str)
+        for key, item in fingerprints.items()
+    ):
+        raise CheckpointError("checkpoint cache_fingerprints is invalid")
+    if set(completed) != set(fingerprints):
+        raise CheckpointError("checkpoint completed topics and cache fingerprints disagree")
+    return value
+
+
+def _validate_checkpoint_identity(checkpoint: Mapping[str, Any], expected: Mapping[str, Any]) -> None:
+    for key, value in expected.items():
+        if checkpoint.get(key) != value:
+            raise CheckpointError(f"checkpoint identity mismatch: {key}")
+
+
+def _checkpoint_with_state(
+    identity: Mapping[str, Any],
+    *,
+    state: str,
+    completed_topics: Iterable[str] = (),
+    cache_fingerprints: Mapping[str, Mapping[str, str]] | None = None,
+    provider_calls: int = 0,
+    reason: str | None = None,
+) -> dict[str, Any]:
+    if state not in CHECKPOINT_STATES:
+        raise ValueError(f"unsupported checkpoint state: {state}")
+    value: dict[str, Any] = {
+        **dict(identity),
+        "state": state,
+        "completed_topics": sorted(set(completed_topics)),
+        "cache_fingerprints": {
+            key: dict(cache_fingerprints[key])
+            for key in sorted(cache_fingerprints or {})
+        },
+        "provider_calls": provider_calls,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    if reason:
+        value["reason"] = reason
+    return value
+
+
 def _zero_reason(
     *,
     provider_errors: bool,
@@ -1456,6 +1703,60 @@ def _write_audit(
     )
 
 
+def _build_audit(
+    *,
+    reconciliation: ReconciliationResult,
+    all_blocks: Iterable[Block],
+    all_claims: Iterable[Claim],
+    pages: Iterable[Mapping[str, Any]],
+    anchors: Mapping[str, Mapping[str, Any]],
+    suggestions: Iterable[Mapping[str, Any]],
+    blockers: Iterable[Mapping[str, Any]],
+    metrics: Mapping[str, Any],
+    attempt_id: str,
+    run_status: str,
+    audit_only_sources: Iterable[str],
+) -> AuditResult:
+    """Build failure facts without writing the standard batch artifacts."""
+
+    return build_audit(
+        blocks=[block.as_dict() for block in all_blocks],
+        claims=[claim.as_dict() for claim in all_claims],
+        pages=list(pages),
+        source_records=[source.source_record() for source in reconciliation.sources],
+        block_anchors=dict(anchors),
+        source_snapshot=reconciliation.source_snapshot,
+        attempt_id=attempt_id,
+        audit_only_sources=tuple(audit_only_sources),
+        model_suggestions=tuple(suggestions),
+        metrics=dict(metrics),
+        blockers=tuple(blockers),
+        run_status=run_status,
+        publish_status="not_released",
+    )
+
+
+def _write_resume_preflight_failure(
+    batch: Path,
+    *,
+    attempt_id: str,
+    failure: Mapping[str, Any],
+    blockers: Iterable[Mapping[str, Any]],
+) -> str:
+    """Record resume-preflight failure beside, never over, an existing batch."""
+
+    payload = {
+        "schema_version": "knowledge-digest-resume-preflight-failure.v1",
+        "batch_id": batch.name,
+        "attempt_id": attempt_id,
+        "failure": dict(failure),
+        "blockers": [dict(item) for item in blockers],
+    }
+    relative = f"_audit/resume-preflight-failure-{_json_hash(payload)}.json"
+    _write_text(batch / relative, f"{json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2)}\n")
+    return relative
+
+
 def compile_batch(
     new_dir: str | Path,
     *,
@@ -1468,17 +1769,87 @@ def compile_batch(
     prompt_version: str = DEFAULT_PROMPT_VERSION,
     today: str | date | None = None,
     write_failure_after: int | None = None,
+    resume_batch: str | Path | None = None,
     stdout: TextIO | None = None,
 ) -> BatchResult:
-    """Compile one frozen source set into a new, not-yet-released batch."""
+    """Compile one frozen source set into a new batch or resume one batch.
+
+    ``resume_batch`` is an internal same-batch continuation seam.  It is
+    deliberately not exposed as a new CLI mode: the checkpoint binds the
+    frozen source/topic/model identity before any provider work is allowed.
+    """
 
     started = time.monotonic()
     reconciliation = reconcile_manifest(new_dir, manifest_path)
-    batch = allocate_batch_dir(output_parent, today=today)
+    if resume_batch is None:
+        batch = allocate_batch_dir(output_parent, today=today)
+    else:
+        candidate_batch = Path(resume_batch)
+        if candidate_batch.is_symlink() or not candidate_batch.is_dir():
+            raise CheckpointError("resume batch must be an existing real directory")
+        try:
+            output_root = Path(output_parent).resolve()
+            batch = candidate_batch.resolve(strict=True)
+        except OSError as error:
+            raise CheckpointError("resume batch path cannot be resolved") from error
+        if batch == output_root or not batch.is_relative_to(output_root):
+            raise CheckpointError("resume batch must be inside the requested output parent")
     attempt_id = _attempt_id(batch)
     out = stdout or sys.stdout
     if not reconciliation.ok:
         blockers = tuple(dict(item) for item in reconciliation.differences)
+        if resume_batch is not None:
+            failure = {
+                "reason": "reconciliation_failed",
+                "error_type": "ManifestReconciliationError",
+                "cause": "resume manifest reconciliation failed before checkpoint validation",
+                "impact": "existing resume batch artifacts were preserved and no provider work was started",
+            }
+            failure_ref = _write_resume_preflight_failure(
+                batch,
+                attempt_id=attempt_id,
+                failure=failure,
+                blockers=blockers,
+            )
+            failure_blockers = [*blockers, {**failure, "record_ref": failure_ref}]
+            audit = _build_audit(
+                reconciliation=reconciliation,
+                all_blocks=(),
+                all_claims=(),
+                pages=(),
+                anchors={},
+                suggestions=(),
+                blockers=failure_blockers,
+                metrics={
+                    "elapsed_ms": max(0, int((time.monotonic() - started) * 1000)),
+                    "provider_calls": 0,
+                    "provider_tokens": 0,
+                    "cache_hits": 0,
+                    "planned_provider_calls": 0,
+                    "actual_provider_calls": 0,
+                    "reasons": {
+                        "elapsed_ms": "reconciliation_failed",
+                        "provider_calls": "no_provider_call_yet",
+                        "provider_tokens": "no_provider_call_yet",
+                        "cache_hits": "no_provider_call_yet",
+                        "planned_provider_calls": "no_provider_call_yet",
+                        "actual_provider_calls": "no_provider_call_yet",
+                    },
+                },
+                attempt_id=attempt_id,
+                run_status="blocked",
+                audit_only_sources=(),
+            )
+            return BatchResult(
+                batch,
+                "blocked",
+                BatchPlan(len(reconciliation.entries), 0, 0, 0).as_dict(),
+                (),
+                audit,
+                attempt_id,
+                0,
+                0,
+            )
         _write_text(
             batch / "README.md",
             _readme(
@@ -1537,6 +1908,11 @@ def compile_batch(
     groups: tuple[TopicGroup, ...] = ()
     source_mtimes: dict[str, float] = {}
     topic_map_version = "unavailable"
+    checkpoint_path = batch / CHECKPOINT_RELATIVE_PATH
+    checkpoint_identity: dict[str, Any] | None = None
+    checkpoint_state: dict[str, Any] | None = None
+    checkpoint_completed: tuple[str, ...] = ()
+    checkpoint_fingerprints: dict[str, Mapping[str, str]] = {}
     planned_plan = BatchPlan(
         source_count=len(sources),
         topic_count=0,
@@ -1569,18 +1945,110 @@ def compile_batch(
             planned_provider_calls=len(groups),
         )
         cache = ModelCache(cache_root)
-    except Exception as error:
+        checkpoint_identity = _checkpoint_identity(
+            batch=batch,
+            reconciliation=reconciliation,
+            topic_map_hash=topic_map_version,
+            topic_plan_hash=_topic_plan_hash(groups),
+            model_id=model_id,
+            prompt_version=prompt_version,
+        )
+        if resume_batch is None:
+            checkpoint_state = _checkpoint_with_state(checkpoint_identity, state="pending")
+        else:
+            loaded_checkpoint = _read_checkpoint(checkpoint_path)
+            _validate_checkpoint_identity(loaded_checkpoint, checkpoint_identity)
+            checkpoint_completed = tuple(loaded_checkpoint["completed_topics"])
+            checkpoint_fingerprints = {
+                key: dict(value)
+                for key, value in loaded_checkpoint["cache_fingerprints"].items()
+            }
+            group_keys = {group.key for group in groups}
+            if not set(checkpoint_completed).issubset(group_keys):
+                raise CheckpointError("checkpoint contains a topic outside the frozen topic plan")
+            for group in groups:
+                if group.key not in checkpoint_completed:
+                    continue
+                cached = cache.get_or_call(
+                    model_id=model_id,
+                    prompt_version=prompt_version,
+                    topic_map_version=topic_map_version,
+                    topic_key=group.key,
+                    members=_group_page_members(group),
+                    provider=provider,
+                    allow_provider=False,
+                )
+                expected = checkpoint_fingerprints.get(group.key)
+                if (
+                    not isinstance(expected, Mapping)
+                    or expected.get("cache_key") != cached.cache_key
+                    or expected.get("page_input_fingerprint") != cached.created_from_fingerprint
+                ):
+                    raise CacheIntegrityError(
+                        "checkpoint cache fingerprint does not match the frozen topic input",
+                        provider_called=False,
+                    )
+            checkpoint_state = _checkpoint_with_state(
+                checkpoint_identity,
+                state="running",
+                completed_topics=checkpoint_completed,
+                cache_fingerprints=checkpoint_fingerprints,
+                provider_calls=0,
+            )
+        checkpoint_state["state"] = "running"
+        _write_checkpoint(checkpoint_path, checkpoint_state)
+    except (Exception, KeyboardInterrupt) as error:
+        cancelled = isinstance(error, KeyboardInterrupt)
         failure = {
-            "reason": "preflight_failed",
+            "reason": "cancelled" if cancelled else "preflight_failed",
             "error_type": type(error).__name__,
             "cause": str(error),
-            "impact": "semantic batch setup failed before model work and is not publishable",
+            "impact": "semantic batch setup was cancelled before model work and is not publishable" if cancelled else "semantic batch setup failed before model work and is not publishable",
         }
+        if resume_batch is not None:
+            failure_ref = _write_resume_preflight_failure(
+                batch,
+                attempt_id=attempt_id,
+                failure=failure,
+                blockers=all_blockers,
+            )
+            failure_blockers = [*all_blockers, {**failure, "record_ref": failure_ref}]
+            audit = _build_audit(
+                reconciliation=reconciliation,
+                all_blocks=all_blocks,
+                all_claims=(),
+                pages=(),
+                anchors={},
+                suggestions=grouping.suggestions if grouping is not None else (),
+                blockers=failure_blockers,
+                metrics=_metrics(
+                    elapsed_ms=max(0, int((time.monotonic() - started) * 1000)),
+                    provider_calls=0,
+                    provider_tokens=0,
+                    cache_hits=0,
+                    planned=planned_plan.planned_provider_calls,
+                    planned_topic_count=planned_plan.topic_count,
+                    provider_errors=False,
+                ),
+                attempt_id=attempt_id,
+                run_status="interrupted" if cancelled else "blocked",
+                audit_only_sources=grouping.audit_only_sources if grouping is not None else (),
+            )
+            return BatchResult(
+                batch,
+                "interrupted" if cancelled else "blocked",
+                planned_plan.as_dict(),
+                (),
+                audit,
+                attempt_id,
+                0,
+                0,
+            )
         failure_blockers = [*all_blockers, failure]
         _write_text(
             batch / "README.md",
             _readme(
-                status="blocked",
+                status="interrupted" if cancelled else "blocked",
                 source_count=planned_plan.source_count,
                 topic_count=planned_plan.topic_count,
                 page_count=0,
@@ -1606,12 +2074,23 @@ def compile_batch(
                 provider_errors=False,
             ),
             attempt_id=attempt_id,
-            run_status="blocked",
+            run_status="interrupted" if cancelled else "blocked",
             audit_only_sources=grouping.audit_only_sources if grouping is not None else (),
         )
+        if checkpoint_identity is not None:
+            _write_checkpoint(
+                checkpoint_path,
+                _checkpoint_with_state(
+                    checkpoint_identity,
+                    state="interrupted" if cancelled else "blocked",
+                    completed_topics=checkpoint_completed,
+                    cache_fingerprints=checkpoint_fingerprints,
+                    reason=str(failure.get("reason")),
+                ),
+            )
         return BatchResult(
             batch,
-            "blocked",
+            "interrupted" if cancelled else "blocked",
             planned_plan.as_dict(),
             (),
             audit,
@@ -1634,6 +2113,28 @@ def compile_batch(
     cache_hits = 0
     provider_tokens = 0
     unavailable_reasons: dict[str, str] = {}
+    completed_topics = set(checkpoint_completed)
+    completed_fingerprints: dict[str, Mapping[str, str]] = dict(checkpoint_fingerprints)
+
+    def record_completed_topic(topic_key: str, cached: Any, current_provider_calls: int) -> None:
+        nonlocal provider_calls
+        provider_calls = current_provider_calls
+        completed_topics.add(topic_key)
+        completed_fingerprints[topic_key] = {
+            "cache_key": str(cached.cache_key),
+            "page_input_fingerprint": str(cached.created_from_fingerprint),
+        }
+        if checkpoint_identity is not None:
+            _write_checkpoint(
+                checkpoint_path,
+                _checkpoint_with_state(
+                    checkpoint_identity,
+                    state="running",
+                    completed_topics=completed_topics,
+                    cache_fingerprints=completed_fingerprints,
+                    provider_calls=current_provider_calls,
+                ),
+            )
     materialization_stage = "model"
     try:
         model_results, model_blockers, provider_calls, cache_hits, provider_tokens, unavailable_reasons = _model_results(
@@ -1643,6 +2144,9 @@ def compile_batch(
             model_id=model_id,
             prompt_version=prompt_version,
             topic_map_version=topic_map_version,
+            checkpoint_completed=completed_topics,
+            checkpoint_fingerprints=completed_fingerprints,
+            on_topic_complete=record_completed_topic,
         )
         all_blockers.extend(dict(item) for item in model_blockers)
         materialization_stage = "render"
@@ -1694,18 +2198,19 @@ def compile_batch(
         materialization_stage = "audit"
         audit_pages, anchors = _page_audit_rows(groups, rendered, final_claims_by_topic)
         all_claims = tuple(claim for topic in sorted(final_claims_by_topic) for claim in final_claims_by_topic[topic])
-    except Exception as error:
+    except (Exception, KeyboardInterrupt) as error:
+        cancelled = isinstance(error, KeyboardInterrupt)
         failure = {
-            "reason": "render_failed" if materialization_stage in {"render", "audit"} else "compile_failed",
+            "reason": "cancelled" if cancelled else ("render_failed" if materialization_stage in {"render", "audit"} else "compile_failed"),
             "error_type": type(error).__name__,
             "cause": str(error),
-            "impact": "semantic batch could not be materialized and is not publishable",
+            "impact": "semantic batch was cancelled before materialization completed and is not publishable" if cancelled else "semantic batch could not be materialized and is not publishable",
         }
         failure_blockers = [*all_blockers, failure]
         _write_text(
             batch / "README.md",
             _readme(
-                status="blocked",
+                status="interrupted" if cancelled else "blocked",
                 source_count=planned_plan.source_count,
                 topic_count=planned_plan.topic_count,
                 page_count=0,
@@ -1734,10 +2239,22 @@ def compile_batch(
                 ),
             ),
             attempt_id=attempt_id,
-            run_status="blocked",
+            run_status="interrupted" if cancelled else "blocked",
             audit_only_sources=grouping.audit_only_sources,
         )
-        return BatchResult(batch, "blocked", planned_plan.as_dict(), (), audit, attempt_id, provider_calls, cache_hits)
+        if checkpoint_identity is not None:
+            _write_checkpoint(
+                checkpoint_path,
+                _checkpoint_with_state(
+                    checkpoint_identity,
+                    state="interrupted" if cancelled else "blocked",
+                    completed_topics=completed_topics,
+                    cache_fingerprints=completed_fingerprints,
+                    provider_calls=provider_calls,
+                    reason=str(failure.get("reason")),
+                ),
+            )
+        return BatchResult(batch, "interrupted" if cancelled else "blocked", planned_plan.as_dict(), (), audit, attempt_id, provider_calls, cache_hits)
 
     plan = BatchPlan(
         source_count=planned_plan.source_count,
@@ -1745,10 +2262,7 @@ def compile_batch(
         page_count=len(rendered),
         planned_provider_calls=planned_plan.planned_provider_calls,
     )
-    fatal_blockers = [
-        item for item in all_blockers
-        if item.get("reason") != "model_unavailable_no_cache"
-    ]
+    fatal_blockers = list(all_blockers)
     written_parts = 0
     complete_pages: list[RenderedPage] = []
     try:
@@ -1807,6 +2321,19 @@ def compile_batch(
             audit_only_sources=grouping.audit_only_sources,
         )
         final_run_status = str(audit.manifest["run_status"])
+        checkpoint_final_state = "complete" if final_run_status != "blocked" and len(completed_topics) == len(groups) else "blocked"
+        if checkpoint_identity is not None:
+            _write_checkpoint(
+                checkpoint_path,
+                _checkpoint_with_state(
+                    checkpoint_identity,
+                    state=checkpoint_final_state,
+                    completed_topics=completed_topics,
+                    cache_fingerprints=completed_fingerprints,
+                    provider_calls=provider_calls,
+                    reason=("provider_or_materialization_blocker" if checkpoint_final_state == "blocked" else None),
+                ),
+            )
         _write_text(
             batch / "README.md",
             _readme(
@@ -1819,9 +2346,9 @@ def compile_batch(
         )
         outcome = "blocked" if final_run_status == "blocked" else "not_released"
         return BatchResult(batch, outcome, plan.as_dict(), rendered, audit, attempt_id, provider_calls, cache_hits)
-    except Exception as error:
+    except (Exception, KeyboardInterrupt) as error:
         interruption = {
-            "reason": "write_interrupted" if isinstance(error, InjectedWriteFailure) else "write_failed",
+            "reason": "write_interrupted" if isinstance(error, (InjectedWriteFailure, KeyboardInterrupt)) else "write_failed",
             "error_type": type(error).__name__,
             "cause": str(error),
             "impact": "batch contains a partial products tree and is not publishable",
@@ -1879,7 +2406,19 @@ def compile_batch(
                 run_status="interrupted",
                 audit_only_sources=grouping.audit_only_sources,
             )
-        except Exception as recovery_error:
+            if checkpoint_identity is not None:
+                _write_checkpoint(
+                    checkpoint_path,
+                    _checkpoint_with_state(
+                        checkpoint_identity,
+                        state="interrupted",
+                        completed_topics=completed_topics,
+                        cache_fingerprints=completed_fingerprints,
+                        provider_calls=provider_calls,
+                        reason=str(interruption.get("reason")),
+                    ),
+                )
+        except (Exception, KeyboardInterrupt) as recovery_error:
             raise error from recovery_error
         return BatchResult(batch, "interrupted", plan.as_dict(), tuple(complete_pages), audit, attempt_id, provider_calls, cache_hits)
 

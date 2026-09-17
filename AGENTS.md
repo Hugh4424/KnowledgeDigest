@@ -22,12 +22,8 @@ uv run --frozen digest NEW_DIR --manifest config/task4-source-coverage-89-input.
 
 它按冻结清单对账后，在 `/Users/Hugh/Downloads/KD测试/<YYYY-MM-DD>-<n>/`
 生成待发布语义批次；缓存固定在仓库 `cache/model-cache/`，对账或 provider
-失败会留下可机读的 `blocked`/`not_released` 状态。历史 reader 行为不再由
-`digest` 分流，需显式使用：
-
-```bash
-python scripts/legacy_digest_reference.py NEW_DIR KB_DIR --config CONFIG
-```
+失败会留下可机读的 `blocked`/`not_released` 状态。历史 reader 分支已在 K4
+退役；`digest` 不再接受旧 reader/质量参数，也不再提供旧脚本入口。
 
 Task8 K2 在同一批次内接在 K1 `semantic_cli` 编译之后：完整且有页面的 K1
 批次会生成 `Home.md`、`Index.md` 和 `products/<product>/<section>/Index.md`，

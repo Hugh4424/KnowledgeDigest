@@ -7,6 +7,7 @@ import io
 import json
 import os
 from pathlib import Path
+import stat
 import subprocess
 import sys
 from typing import Any
@@ -18,12 +19,14 @@ try:
     from knowledge_digest.semantic_compiler import (
         BASELINE_REGRESSION_CAUSES,
         BASELINE_REGRESSION_NODES,
+        CheckpointError,
         configured_provider_from_env,
         compile_batch,
     )
 except (ImportError, ModuleNotFoundError):
     BASELINE_REGRESSION_CAUSES = None
     BASELINE_REGRESSION_NODES = None
+    CheckpointError = None
     configured_provider_from_env = None
     compile_batch = None
 
@@ -219,7 +222,7 @@ def _stable_batch_files(batch: Path) -> dict[str, bytes]:
     return result
 
 
-def test_task7_e2e_success_writes_reader_pages_and_exact_five_audit_files(tmp_path: Path) -> None:
+def test_task7_e2e_success_writes_reader_pages_and_checkpoint_audit_files(tmp_path: Path) -> None:
     provider = FakeProvider()
     result = _run(tmp_path, provider=provider)
     batch = Path(result.output_dir)
@@ -234,6 +237,7 @@ def test_task7_e2e_success_writes_reader_pages_and_exact_five_audit_files(tmp_pa
         "page-manifest.json",
         "run-metrics.json",
         "suspected-synonyms.md",
+        "checkpoint.v1.json",
     }
     manifest = _read_json(batch / "_audit" / "page-manifest.json")
     assert manifest["publish_status"] == "not_released"
@@ -377,8 +381,9 @@ def test_task7_e2e_provider_matrix_cache_hit_miss_and_unavailable_is_explicit(tm
     assert hit_metrics["cache_hits"] == len(_read_json(Path(hit.output_dir) / "_audit" / "page-manifest.json")["pages"])
 
     unavailable = _run(tmp_path / "unavailable", provider=FakeProvider(available=False))
+    assert unavailable.outcome == "blocked"
     unavailable_manifest = _read_json(Path(unavailable.output_dir) / "_audit" / "page-manifest.json")
-    assert unavailable_manifest["run_status"] == "complete"
+    assert unavailable_manifest["run_status"] == "blocked"
     assert any(row.get("reason") == "model_unavailable_no_cache" for row in unavailable_manifest["blockers"])
     unavailable_metrics = _read_json(Path(unavailable.output_dir) / "_audit" / "run-metrics.json")
     assert unavailable_metrics["provider_calls"] == len(unavailable_manifest["pages"])
@@ -447,6 +452,223 @@ def test_task7_e2e_same_input_has_stable_products_and_audit_projection(tmp_path:
     first = _run(tmp_path / "one", provider=FakeProvider(), cache_root=cache_root)
     second = _run(tmp_path / "two", provider=FakeProvider(), cache_root=cache_root)
     assert _stable_batch_files(Path(first.output_dir)) == _stable_batch_files(Path(second.output_dir))
+
+
+def test_task7_e2e_checkpoint_resume_reuses_same_batch_without_provider_calls(tmp_path: Path) -> None:
+    first_provider = FakeProvider()
+    first = _run(tmp_path, provider=first_provider)
+    batch = Path(first.output_dir)
+    checkpoint = _read_json(batch / "_audit" / "checkpoint.v1.json")
+
+    assert checkpoint["schema_version"] == "knowledge-digest-checkpoint.v1"
+    assert checkpoint["state"] == "complete"
+    assert checkpoint["completed_topics"]
+    assert checkpoint["cache_fingerprints"]
+
+    resumed_provider = FakeProvider()
+    resumed = compile_batch(
+        FIXTURE_ROOT,
+        manifest_path=tmp_path / "manifest.json",
+        output_parent=tmp_path / "batches",
+        cache_root=tmp_path / "cache" / "model-cache",
+        topic_map_path=PROJECT_ROOT / "config" / "task7-topic-map.json",
+        provider=resumed_provider,
+        today="2026-09-14",
+        resume_batch=batch,
+    )
+
+    assert Path(resumed.output_dir) == batch
+    assert resumed.outcome == "not_released"
+    assert resumed.provider_calls == 0
+    assert resumed_provider.calls == 0
+    resumed_checkpoint = _read_json(batch / "_audit" / "checkpoint.v1.json")
+    assert resumed_checkpoint["completed_topics"] == checkpoint["completed_topics"]
+    assert resumed_checkpoint["topic_plan_hash"] == checkpoint["topic_plan_hash"]
+
+
+def test_task7_e2e_checkpoint_replace_fsyncs_parent_directory(tmp_path: Path, monkeypatch) -> None:
+    import knowledge_digest.semantic_compiler as semantic_compiler
+
+    original_fsync = semantic_compiler.os.fsync
+    fsync_kinds: list[bool] = []
+
+    def record_fsync(descriptor: int) -> None:
+        fsync_kinds.append(stat.S_ISDIR(semantic_compiler.os.fstat(descriptor).st_mode))
+        original_fsync(descriptor)
+
+    monkeypatch.setattr(semantic_compiler.os, "fsync", record_fsync)
+    checkpoint = tmp_path / "batch" / "_audit" / "checkpoint.v1.json"
+    semantic_compiler._write_checkpoint(checkpoint, {"state": "pending"})
+
+    assert checkpoint.is_file()
+    assert True in fsync_kinds
+
+
+def test_task7_e2e_checkpoint_resume_identity_mismatch_blocks_without_provider_calls(tmp_path: Path) -> None:
+    first = _run(tmp_path, provider=FakeProvider())
+    resumed_provider = FakeProvider()
+    batch = Path(first.output_dir)
+    before_files = {
+        path.relative_to(batch).as_posix(): path.read_bytes()
+        for path in batch.rglob("*")
+        if path.is_file()
+    }
+
+    resumed = compile_batch(
+        FIXTURE_ROOT,
+        manifest_path=tmp_path / "manifest.json",
+        output_parent=tmp_path / "batches",
+        cache_root=tmp_path / "cache" / "model-cache",
+        topic_map_path=PROJECT_ROOT / "config" / "task7-topic-map.json",
+        provider=resumed_provider,
+        model_id="changed-model",
+        today="2026-09-14",
+        resume_batch=Path(first.output_dir),
+    )
+
+    assert resumed.outcome == "blocked"
+    assert resumed_provider.calls == 0
+    after_files = {
+        path.relative_to(batch).as_posix(): path.read_bytes()
+        for path in batch.rglob("*")
+        if path.is_file()
+        and "resume-preflight-failure-" not in path.name
+    }
+    assert after_files == before_files
+    assert list((batch / "_audit").glob("resume-preflight-failure-*.json"))
+
+
+def test_task7_e2e_checkpoint_resume_corrupt_checkpoint_blocks_without_provider_calls(tmp_path: Path) -> None:
+    first = _run(tmp_path, provider=FakeProvider())
+    checkpoint_path = Path(first.output_dir) / "_audit" / "checkpoint.v1.json"
+    checkpoint_path.write_text("not-json\n", encoding="utf-8")
+    resumed_provider = FakeProvider()
+    batch = Path(first.output_dir)
+    before_files = {
+        path.relative_to(batch).as_posix(): path.read_bytes()
+        for path in batch.rglob("*")
+        if path.is_file()
+    }
+
+    resumed = compile_batch(
+        FIXTURE_ROOT,
+        manifest_path=tmp_path / "manifest.json",
+        output_parent=tmp_path / "batches",
+        cache_root=tmp_path / "cache" / "model-cache",
+        topic_map_path=PROJECT_ROOT / "config" / "task7-topic-map.json",
+        provider=resumed_provider,
+        today="2026-09-14",
+        resume_batch=Path(first.output_dir),
+    )
+
+    assert resumed.outcome == "blocked"
+    assert resumed_provider.calls == 0
+    after_files = {
+        path.relative_to(batch).as_posix(): path.read_bytes()
+        for path in batch.rglob("*")
+        if path.is_file()
+        and "resume-preflight-failure-" not in path.name
+    }
+    assert after_files == before_files
+    assert checkpoint_path.read_text(encoding="utf-8") == "not-json\n"
+    assert list((batch / "_audit").glob("resume-preflight-failure-*.json"))
+
+
+def test_task7_e2e_checkpoint_resume_missing_cache_preserves_existing_batch(tmp_path: Path) -> None:
+    cache_root = tmp_path / "cache" / "model-cache"
+    first = _run(tmp_path, provider=FakeProvider(), cache_root=cache_root)
+    batch = Path(first.output_dir)
+    before_files = {
+        path.relative_to(batch).as_posix(): path.read_bytes()
+        for path in batch.rglob("*")
+        if path.is_file()
+    }
+    (cache_root / "entries.jsonl").unlink()
+
+    resumed = compile_batch(
+        FIXTURE_ROOT,
+        manifest_path=tmp_path / "manifest.json",
+        output_parent=tmp_path / "batches",
+        cache_root=cache_root,
+        topic_map_path=PROJECT_ROOT / "config" / "task7-topic-map.json",
+        provider=FakeProvider(),
+        today="2026-09-14",
+        resume_batch=batch,
+    )
+
+    assert resumed.outcome == "blocked"
+    after_files = {
+        path.relative_to(batch).as_posix(): path.read_bytes()
+        for path in batch.rglob("*")
+        if path.is_file()
+        and "resume-preflight-failure-" not in path.name
+    }
+    assert after_files == before_files
+    assert list((batch / "_audit").glob("resume-preflight-failure-*.json"))
+
+
+def test_task7_e2e_checkpoint_resume_reconciliation_failure_preserves_existing_batch(tmp_path: Path) -> None:
+    first = _run(tmp_path, provider=FakeProvider())
+    batch = Path(first.output_dir)
+    before_files = {
+        path.relative_to(batch).as_posix(): path.read_bytes()
+        for path in batch.rglob("*")
+        if path.is_file()
+    }
+    _write_manifest(tmp_path / "manifest.json", mutate="hash")
+
+    resumed = compile_batch(
+        FIXTURE_ROOT,
+        manifest_path=tmp_path / "manifest.json",
+        output_parent=tmp_path / "batches",
+        cache_root=tmp_path / "cache" / "model-cache",
+        topic_map_path=PROJECT_ROOT / "config" / "task7-topic-map.json",
+        provider=FakeProvider(),
+        today="2026-09-14",
+        resume_batch=batch,
+    )
+
+    assert resumed.outcome == "blocked"
+    after_files = {
+        path.relative_to(batch).as_posix(): path.read_bytes()
+        for path in batch.rglob("*")
+        if path.is_file()
+        and "resume-preflight-failure-" not in path.name
+    }
+    assert after_files == before_files
+    assert list((batch / "_audit").glob("resume-preflight-failure-*.json"))
+
+
+def test_task7_e2e_checkpoint_resume_rejects_batch_outside_requested_output_parent(tmp_path: Path) -> None:
+    first = _run(tmp_path, provider=FakeProvider())
+    resumed_provider = FakeProvider()
+
+    assert CheckpointError is not None, "semantic_compiler.CheckpointError is not implemented"
+    with pytest.raises(CheckpointError, match="output parent"):
+        compile_batch(
+            FIXTURE_ROOT,
+            manifest_path=tmp_path / "manifest.json",
+            output_parent=tmp_path / "different-batches",
+            cache_root=tmp_path / "cache" / "model-cache",
+            topic_map_path=PROJECT_ROOT / "config" / "task7-topic-map.json",
+            provider=resumed_provider,
+            today="2026-09-14",
+            resume_batch=Path(first.output_dir),
+        )
+
+    assert resumed_provider.calls == 0
+
+
+def test_task7_e2e_active_duplicate_source_reuses_canonical_page_and_audit_alias(tmp_path: Path) -> None:
+    result = _run(tmp_path, provider=FakeProvider())
+    manifest = _read_json(Path(result.output_dir) / "_audit" / "page-manifest.json")
+    canonical = next(row for row in manifest["source_ledger"] if row["source_path"] == "Payments/payments-login.md")
+    alias = next(row for row in manifest["source_ledger"] if row["source_path"] == "Billing/billing-login-copy.md")
+
+    assert canonical["source_status"] == "ready"
+    assert alias["source_status"] == "duplicate_alias"
+    assert alias["pages"] == canonical["pages"]
+    assert len(manifest["pages"]) == 2
 
 
 def test_task7_e2e_claim_paths_follow_the_concrete_multipart_page(tmp_path: Path) -> None:
@@ -657,6 +879,36 @@ def test_task7_e2e_write_interruption_is_not_a_completed_batch(tmp_path: Path) -
     assert manifest["run_status"] != "complete"
 
 
+def test_task7_e2e_keyboard_interrupt_persists_interrupted_state(tmp_path: Path) -> None:
+    class KeyboardInterruptProvider:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def complete(self) -> dict[str, object]:
+            self.calls += 1
+            if self.calls > 1:
+                raise KeyboardInterrupt()
+            return {
+                "title": "First topic",
+                "slug": "first-topic",
+                "intro": "Login supports token authentication.",
+                "provider_tokens": 12,
+            }
+
+    provider = KeyboardInterruptProvider()
+    result = _run(tmp_path, provider=provider)
+    batch = Path(result.output_dir)
+
+    assert result.outcome == "interrupted"
+    assert provider.calls == 2
+    manifest = _read_json(batch / "_audit" / "page-manifest.json")
+    assert manifest["run_status"] == "interrupted"
+    assert any(row.get("reason") == "cancelled" for row in manifest["blockers"])
+    checkpoint = _read_json(batch / "_audit" / "checkpoint.v1.json")
+    assert checkpoint["state"] == "interrupted"
+    assert checkpoint["provider_calls"] == 1
+
+
 def test_task7_e2e_provider_plan_is_visible_before_first_provider_call(tmp_path: Path) -> None:
     output = io.StringIO()
     observations: list[str] = []
@@ -842,7 +1094,7 @@ def test_task7_e2e_default_digest_dispatches_semantic_cli_and_rejects_legacy_fla
         check=False,
     )
     assert legacy.returncode == 2
-    assert "legacy_digest_reference.py" in (legacy.stdout + legacy.stderr)
+    assert "历史参数已退役" in (legacy.stdout + legacy.stderr)
 
     semantic_legacy = subprocess.run(
         [sys.executable, "-m", "knowledge_digest.semantic_cli", str(ITEMS_ROOT.parent), "--no-llm"],
@@ -853,7 +1105,7 @@ def test_task7_e2e_default_digest_dispatches_semantic_cli_and_rejects_legacy_fla
         env=cli_env,
     )
     assert semantic_legacy.returncode == 2
-    assert "legacy_digest_reference.py" in (semantic_legacy.stdout + semantic_legacy.stderr)
+    assert "历史参数已退役" in (semantic_legacy.stdout + semantic_legacy.stderr)
 
 
 def test_task7_e2e_semantic_cli_stdout_is_one_machine_readable_json_document(tmp_path: Path) -> None:
@@ -885,7 +1137,7 @@ def test_task7_e2e_semantic_cli_stdout_is_one_machine_readable_json_document(tmp
     assert "Task7 semantic plan:" in result.stderr
 
 
-def test_task7_e2e_legacy_reference_script_is_independently_invocable() -> None:
+def test_task7_e2e_legacy_reference_script_is_not_a_successful_entry() -> None:
     result = subprocess.run(
         [sys.executable, "scripts/legacy_digest_reference.py", "--help"],
         cwd=PROJECT_ROOT,
@@ -893,8 +1145,7 @@ def test_task7_e2e_legacy_reference_script_is_independently_invocable() -> None:
         capture_output=True,
         check=False,
     )
-    assert result.returncode == 0
-    assert "new_dir" in result.stdout
+    assert result.returncode != 0
 
 
 @pytest.mark.skipif(

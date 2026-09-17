@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import stat
 
 import pytest
 
@@ -191,6 +192,52 @@ def test_task7_cache_miss_calls_once_writes_jsonl_and_hit_skips_provider(tmp_pat
     assert "token" not in cache.path.read_text(encoding="utf-8").lower()
 
 
+def test_task7_cache_recovers_an_incomplete_tail_before_reading(tmp_path) -> None:
+    cache_type, _, _ = _require_api()
+    calls: list[str] = []
+    cache = cache_type(tmp_path / "cache" / "model-cache")
+    kwargs = {
+        "model_id": "qwen3.8",
+        "prompt_version": "semantic-v1",
+        "topic_map_version": "map-v1",
+        "topic_key": "payments:login",
+        "members": _members(),
+    }
+
+    cache.get_or_call(provider=lambda: calls.append("first") or {"title": "Login"}, **kwargs)
+    with cache.path.open("a", encoding="utf-8") as stream:
+        stream.write('{"partial":')
+
+    hit = cache.get_or_call(provider=lambda: calls.append("unexpected") or {"title": "wrong"}, **kwargs)
+
+    assert hit.hit is True
+    assert calls == ["first"]
+    assert len(cache.path.read_text(encoding="utf-8").splitlines()) == 1
+
+
+def test_task7_cache_preserves_a_complete_tail_without_newline(tmp_path) -> None:
+    cache_type, _, _ = _require_api()
+    calls: list[str] = []
+    cache = cache_type(tmp_path / "cache" / "model-cache")
+    kwargs = {
+        "model_id": "qwen3.8",
+        "prompt_version": "semantic-v1",
+        "topic_map_version": "map-v1",
+        "topic_key": "payments:login",
+        "members": _members(),
+    }
+
+    cache.get_or_call(provider=lambda: calls.append("first") or {"title": "Login"}, **kwargs)
+    cache.path.write_bytes(cache.path.read_bytes().removesuffix(b"\n"))
+
+    hit = cache.get_or_call(provider=lambda: calls.append("unexpected") or {"title": "wrong"}, **kwargs)
+
+    assert hit.hit is True
+    assert calls == ["first"]
+    assert cache.path.read_bytes().endswith(b"\n")
+    assert len(cache.path.read_text(encoding="utf-8").splitlines()) == 1
+
+
 def test_task7_cache_member_change_including_non_primary_source_forces_new_call(tmp_path) -> None:
     cache_type, _, _ = _require_api()
     calls: list[str] = []
@@ -264,6 +311,104 @@ def test_task7_cache_corruption_is_a_structured_integrity_failure(tmp_path) -> N
 
     assert raised.value.provider_called is False
     assert calls == []
+
+
+def test_task7_cache_retired_task8_entry_is_not_silently_ignored(tmp_path) -> None:
+    cache_type, _, _ = _require_api()
+    assert CacheIntegrityError is not None
+    cache = cache_type(tmp_path / "model-cache")
+    cache.path.write_text(
+        json.dumps({"cache_key": "task8-retired-key"}) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(CacheIntegrityError, match="cache read or validation failed"):
+        cache.get_or_call(
+            model_id="qwen3.8",
+            prompt_version="semantic-v1",
+            topic_map_version="map-v1",
+            topic_key="payments:login",
+            members=_members(),
+            provider=lambda: {"title": "Login"},
+        )
+
+
+def test_task7_cache_skips_valid_task8_sibling_records_in_shared_jsonl(tmp_path) -> None:
+    cache_type, _, _ = _require_api()
+    cache = cache_type(tmp_path / "model-cache")
+    cache.path.write_text(
+        json.dumps(
+            {
+                "cache_key": "task8-desc:valid-sibling",
+                "model_id": "qwen3.8",
+                "prompt_version": "task8-navigation-v3",
+                "topic_map_version": "task8-topic-map-v1",
+                "result": "这页帮助你完成登录配置。",
+                "created_from_fingerprint": "a" * 64,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    calls: list[str] = []
+
+    result = cache.get_or_call(
+        model_id="qwen3.8",
+        prompt_version="semantic-v1",
+        topic_map_version="map-v1",
+        topic_key="payments:login",
+        members=_members(),
+        provider=lambda: calls.append("called") or {"title": "Login"},
+    )
+
+    assert result.called is True
+    assert calls == ["called"]
+
+
+def test_task7_cache_lock_path_cannot_follow_symlink(tmp_path) -> None:
+    cache_type, _, _ = _require_api()
+    cache = cache_type(tmp_path / "model-cache")
+    outside = tmp_path / "outside.lock"
+    outside.write_bytes(b"unchanged")
+    cache_lock = cache.root / "entries.jsonl.lock"
+    cache_lock.symlink_to(outside)
+
+    with pytest.raises(ValueError, match="lock"):
+        cache.get_or_call(
+            model_id="qwen3.8",
+            prompt_version="semantic-v1",
+            topic_map_version="map-v1",
+            topic_key="payments:login",
+            members=_members(),
+            provider=lambda: {"title": "Login"},
+        )
+
+    assert outside.read_bytes() == b"unchanged"
+
+
+def test_task7_cache_append_fsyncs_cache_directory(tmp_path, monkeypatch) -> None:
+    cache_type, _, _ = _require_api()
+    import knowledge_digest.semantic_cache as semantic_cache
+
+    original_fsync = semantic_cache.os.fsync
+    fsync_kinds: list[bool] = []
+
+    def record_fsync(descriptor: int) -> None:
+        fsync_kinds.append(stat.S_ISDIR(semantic_cache.os.fstat(descriptor).st_mode))
+        original_fsync(descriptor)
+
+    monkeypatch.setattr(semantic_cache.os, "fsync", record_fsync)
+    cache = cache_type(tmp_path / "model-cache")
+    cache.get_or_call(
+        model_id="qwen3.8",
+        prompt_version="semantic-v1",
+        topic_map_version="map-v1",
+        topic_key="payments:login",
+        members=_members(),
+        provider=lambda: {"title": "Login"},
+    )
+
+    assert True in fsync_kinds
 
 
 def test_task7_cache_write_failure_records_that_provider_was_called(tmp_path, monkeypatch) -> None:

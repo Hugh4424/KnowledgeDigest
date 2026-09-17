@@ -1,0 +1,5 @@
+{
+  "command": "uv run --frozen pytest tests/acceptance/test_task7_audit.py -k b1_retirement_guard && uv run --frozen pytest tests/acceptance/test_task7_pages.py tests/acceptance/test_task7_claims.py tests/acceptance/test_task7_e2e.py tests/acceptance/test_task7_audit.py tests/acceptance/test_task7_split.py",
+  "receipt_ref": "quality/tests/build-code-p3-retained-regression.json",
+  "timeout_ms": 120000
+}

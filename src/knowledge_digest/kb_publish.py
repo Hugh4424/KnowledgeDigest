@@ -561,6 +561,28 @@ def load_batch_manifest(batch_dir: Path) -> dict[str, object]:
     }
 
 
+def _select_reader_candidate(batch_dir: Path) -> Path:
+    """Use the K3 Reader candidate when ``digest --reader`` created one.
+
+    Raw K1/K2 batches remain publishable for their existing compatibility
+    tests, but a batch carrying a Reader projection must never silently fall
+    back to the raw evidence surface.  A blocked Reader candidate is returned
+    too, so publication fails closed instead of publishing the wrong layer.
+    """
+
+    batch = Path(batch_dir)
+    candidate = batch / "_reader-candidate"
+    manifest = candidate / "_audit" / "page-manifest.json"
+    if manifest.is_file() and not manifest.is_symlink():
+        try:
+            value = json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError):
+            return candidate
+        if isinstance(value, dict) and isinstance(value.get("reader_surface"), dict):
+            return candidate
+    return batch
+
+
 class _PublishBlocked(RuntimeError):
     def __init__(self, reasons: Sequence[str]) -> None:
         self.reasons = tuple(reasons)
@@ -878,7 +900,7 @@ def publish(
 ) -> dict[str, object]:
     """Publish one valid batch through a lock, staging tree and fixed pointer."""
     target = Path(kb_dir)
-    batch = Path(batch_dir)
+    batch = _select_reader_candidate(Path(batch_dir))
     run_id, run_id_error = _prepare_run_id(run_id, stage="publish")
     copy_file = copy_file or _DEFAULT_COPY_FILE
     replace_file = replace_file or os.replace
