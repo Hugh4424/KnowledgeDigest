@@ -116,7 +116,7 @@ src/knowledge_digest/
   pipeline.py      # 串联 S1–S6 和单写者边界
   cli.py           # digest 命令入口
 tests/acceptance/  # 可运行的行为与回归测试
-config/            # 默认配置；用户密钥从 ~/.config/knowledge-digest/config.json 直接读取，环境变量仅兼容回退
+config/            # 当前运行/验收配置；历史 Task4/Task5/Task10 配置归档在 config/archive/
 docs/              # 设计、决策、历史报告
 scripts/task2_publication_comparison.py # 只读生成 Task1/Task2/CompanyBrain 对比报告
 ```

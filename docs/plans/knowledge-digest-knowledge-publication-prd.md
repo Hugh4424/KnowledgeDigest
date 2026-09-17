@@ -338,7 +338,7 @@ Task 3-Closeout 还要对全仓库做一次“保留、归档、删除、待确�
 - 将已完成任务的 spec/plan/tasks/decision log、旧任务状态和已结束报告归入对应 `specs/archive/` 或 `docs/reports/archive/`，保留索引和来源 hash；
 - 将 21 份本次研究和盲审材料在任务完成后归入带日期的研究归档目录，PRD 保留主结论和证据索引；
 - 对 `.DS_Store`、`__pycache__`、`.pytest_cache`、`.venv`、`.opencode/node_modules`、`.agent_context`、`.omc`、`.multica`、`.worker-mode` 等生成物逐项确认是否有活跃任务或 Git 跟踪后再清理；补齐 `.gitignore` 中的缓存/本地环境规则；不得用宽泛递归删除；
-- 根目录只保留当前用户入口和项目状态索引；`BLOCKED.md`、`PROGRESS.md` 等旧任务状态必须迁移、重命名为历史报告，或明确标注当前有效性。
+- 根目录只保留当前用户入口和项目状态索引；`docs/reports/project-blockers.md`、`specs/archive/task10-slimming-without-capability-loss/execution/PROGRESS.md` 等旧任务状态必须迁移、重命名为历史报告，或明确标注当前有效性。
 
 清理后的仓库必须能通过“文档链接、配置引用、脚本引用、测试引用、Git 跟踪状态和目录 allowlist”检查；任何仍被引用的文件不得被删除，任何被归档的文件必须有新路径映射。
 
@@ -822,7 +822,7 @@ OKF v0.2 解决的是“读者/Agent 在打开正文前，能看到来源、生�
 #### 调研结论
 
 - 根目录没有面向使用者的 README；AGENTS 中的输出结构、状态和命令必须随实现更新；CONTEXT 中存在旧的 `pending`/“不提供人工复核流程”等表述，需要区分历史约束与新发布验收。
-- `BLOCKED.md`、`PROGRESS.md`、`.omc/`、`.multica/`、`.worker-mode/`、`.agent_context/` 等可能是历史任务或工具状态，不能凭文件名直接删除。
+- `docs/reports/project-blockers.md`、`specs/archive/task10-slimming-without-capability-loss/execution/PROGRESS.md`、`.omc/`、`.multica/`、`.worker-mode/`、`.agent_context/` 等可能是历史任务或工具状态，不能凭文件名直接删除。
 - `evidence/phase4` 和配置存在真实引用；`docs/adr`、原始设计和验收 fixture 是长期证据，不属于垃圾。
 - 本次 21 份研究/盲审材料应保留可追溯性，但不应永久和活跃计划混在同一层级。
 

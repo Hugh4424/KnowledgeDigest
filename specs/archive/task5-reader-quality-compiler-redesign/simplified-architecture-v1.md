@@ -427,7 +427,7 @@ Qwen 返回版本化 JSON，必填 `page_key/question/page_type/five_axes/summar
 
 状态判定顺序固定为：先判 `known_empty`；再按完整原始字节哈希判 `duplicate_alias`；再判扩展名/编码是否 `unsupported`；provider 或 typed contract 失败为 `provider_failed`；其余为 `ready`。重复内容的首个稳定路径为 canonical，后续路径为 alias；alias 不发 Qwen 请求，但必须有自己的 source row、raw hash、`duplicate_of`、Audit 记录和 canonical Reader link。空源必须写 `failure.code=known_empty_source`；provider 失败必须写 `provider_failed`；不支持格式必须写 `unsupported_format`。
 
-89 条预期集合不是代码里的隐含数字：运行前从冻结 `config/task5-source-page-manifest-v2.json` 读取 `relative_path/raw_hash/expected_status`，必须逐项等于输入快照；缺失、增加、哈希漂移或状态漂移立即 `blocked`，不得生成半套 Reader。发布后 `RunManifest.sources` 必须恰好 89 行；每个非空 canonical source 至少有一次 Qwen source compile 尝试，alias 按上面规则豁免；任何 source 无终态都是失败。单个 route/provider 失败不抹掉候选：该 route 写 `status=failed`、非空 `failure`，整包只能 `not_released`。
+89 条预期集合不是代码里的隐含数字：运行前从冻结 `config/archive/task5/task5-source-page-manifest-v2.json` 读取 `relative_path/raw_hash/expected_status`，必须逐项等于输入快照；缺失、增加、哈希漂移或状态漂移立即 `blocked`，不得生成半套 Reader。发布后 `RunManifest.sources` 必须恰好 89 行；每个非空 canonical source 至少有一次 Qwen source compile 尝试，alias 按上面规则豁免；任何 source 无终态都是失败。单个 route/provider 失败不抹掉候选：该 route 写 `status=failed`、非空 `failure`，整包只能 `not_released`。
 
 ### 17.4 Jina 的真实消费
 

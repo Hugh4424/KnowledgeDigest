@@ -6,7 +6,7 @@
 
 ## 允许改动
 
-- 新增 `config/task4-reader-quality.v1.json`
+- 新增 `config/archive/task4/task4-reader-quality.v1.json`
 - 新增 `src/knowledge_digest/task4_reader_quality.py`
 - 新增 `tests/acceptance/test_task4_full_compiler.py`
 - 修改 `src/knowledge_digest/page_layout.py` 的 Task4 通用渲染 seam

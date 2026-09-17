@@ -26,7 +26,7 @@
 ### Phase Card — Phase 1
 
 - **goal**：在现有 S1–S6 seam 上完成三类固定 page type、受控 section、结构片段回查和后续正文编译门；先从 T001 的 typed-section RED 开始。
-- **allowed files**：`src/knowledge_digest/draft.py`、`src/knowledge_digest/llm.py`、`src/knowledge_digest/publication.py`、`src/knowledge_digest/faithfulness.py`、`src/knowledge_digest/page_layout.py`、`src/knowledge_digest/navigation.py`、`src/knowledge_digest/pipeline.py`、`tests/acceptance/test_task2b_body_compiler.py`、`tests/fixtures/task2b_publication_body/cases.json`；运行时证据只写 `apply/evidence/`。
+- **allowed files**：`src/knowledge_digest/draft.py`、`src/knowledge_digest/llm.py`、`src/knowledge_digest/publication.py`、`src/knowledge_digest/faithfulness.py`、`src/knowledge_digest/page_layout.py`、`src/knowledge_digest/navigation.py`、`src/knowledge_digest/pipeline.py`、`tests/acceptance/test_task2b_body_compiler.py`、`tests/fixtures/task2b_publication_body/cases.json`；运行时证据只写 `docs/archive/apply/evidence/`。
 - **covered ACs**：AC-01–AC-13；既有 T001–T014 事实不重置，SR 新增 T015/T016 覆盖 AC-13 及受影响的 AC-02/AC-07/AC-09/AC-11。
 - **non-goals**：不改 CLI、配置、Task 2-A Reader Bundle/Frontmatter、TopicIndex、写回单写者、PRD；不做人工读者门、全量 89 篇正式发布、数据库、第二套导航或 UI。四份当前材料只按本 SR 做一次受影响范围更新。
 - **compatibility boundary**：继续复用 `draft`、`llm`、`faithfulness`、`page_layout`、`navigation`、`pipeline` 现有入口；不破坏旧字段和 Task 2-A 稳定主题/导航/回查合同。
@@ -72,7 +72,7 @@
 - **gate_cmd**：`bash -lc 'uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k typed_sections'`
 - **expected_exit**：1
 - **oracle**：ORACLE-T2B-TYPED-SECTIONS — 目标断言报告固定三类 page type、必需 section、结构片段可回查字段和 provider 越界失败。
-- **evidence_path**：`apply/evidence/T001.typed-sections.red.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T001.typed-sections.red.txt`
 - **STOP**：如果 RED 因依赖安装、import、fixture 路径或命令错误失败，停止并修复测试设置；不得把 setup error 当目标失败。
 - **recovery**：删除本卡新增测试/fixture bytes，保留当前生产代码。
 - **task risk**：测试只检查 section 名称而没有证明 provider 越界被拒绝。
@@ -86,7 +86,7 @@
 - **证据**：ref=`quality/evidence/task2b-build-code-handoff.json`
 - **执行事实**：T001 typed-section RED 已真实执行，3 个目标断言失败且不是 setup error。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k typed_sections`；exit `1`，3 个目标断言失败，失败点是当前缺少 `normalize_structure` seam，不是 setup error。
-- **evidence_refs**：`apply/evidence/T001.typed-sections.red.txt`
+- **evidence_refs**：`docs/archive/apply/evidence/T001.typed-sections.red.txt`
 - **covered_ac**：AC-01、AC-02（RED 目标断言已建立；GREEN 待 T002）
 - **review_fact**：N/A — Phase 1 review pending
 - **completed_at**：2026-08-10
@@ -113,7 +113,7 @@
 - **gate_cmd**：`bash -lc 'uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k typed_sections'`
 - **expected_exit**：0
 - **oracle**：ORACLE-T2B-TYPED-SECTIONS — 同一断言全部通过，TopicIndex 映射优先于标题猜测且缺映射/冲突进入 Audit，结构关系和 source locator/content type 可回查，未知 page type/section/来源字段、必需证据缺失、截断/不可解析 provider 输出、无依据事实和空结果负例仍失败并保持 fail-closed。
-- **evidence_path**：`apply/evidence/T002.typed-sections.green.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T002.typed-sections.green.txt`
 - **STOP**：先回读并确认 `draft.py`、`llm.py`、`publication.py` 的计划 seam 和调用关系；若符号/签名不一致，或实现需要新增 page type、改变必需 section、预先选择未冻结 provider 或放宽 provider 来源边界，停止并回到当前材料，不自行补接口。
 - **recovery**：只回滚本卡在 `draft.py`、`llm.py`、`publication.py` 和对应测试/fixture 的改动。
 - **task risk**：把结构整理误写成 provider 自由补事实。
@@ -127,7 +127,7 @@
 - **证据**：ref=`quality/evidence/task2b-build-code-handoff.json`
 - **执行事实**：T002 typed-section GREEN 已真实执行，3 个 focused tests 通过。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k typed_sections`；exit `0`，3 passed，10 deselected。
-- **evidence_refs**：`apply/evidence/T002.typed-sections.green.txt`
+- **evidence_refs**：`docs/archive/apply/evidence/T002.typed-sections.green.txt`
 - **covered_ac**：AC-01、AC-02（结构关系、TopicIndex 映射、固定 section 和 provider contract）
 - **review_fact**：N/A — Phase 1 review pending
 - **completed_at**：2026-08-10
@@ -154,7 +154,7 @@
 - **gate_cmd**：`bash -lc 'uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k provenance_gate'`
 - **expected_exit**：1
 - **oracle**：ORACLE-T2B-PROVENANCE-GATE — 目标断言报告无来源事实、关键 token 变化、重复或 Evidence 冒充正文被阻断；截断/不可解析 provider 输出和空结果进入 `degraded`，完整 Claim/Evidence 仍留在 Audit/Archive，并能回查每项重复检测的 `denominator`、`detector_version`、`seed`。
-- **evidence_path**：`apply/evidence/T003.provenance-gate.red.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T003.provenance-gate.red.txt`
 - **STOP**：如果测试只能检查字符串存在、不能定位具体 Claim/失败样本，停止并补 oracle；不得以 provider 返回 200 代替门。
 - **recovery**：删除本卡新增测试/fixture bytes。
 - **task risk**：把带 attribution 的短引、公共模板、代码、表格或双语合法例外误判为失败。
@@ -168,7 +168,7 @@
 - **证据**：ref=`quality/evidence/task2b-build-code-handoff.json`
 - **执行事实**：T003 provenance-gate RED 已真实执行，4 个目标断言失败且不是 setup error。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k provenance_gate`；exit `1`，4 个目标断言失败，15 个测试被筛除。
-- **evidence_refs**：`apply/evidence/T003.provenance-gate.red.txt`
+- **evidence_refs**：`docs/archive/apply/evidence/T003.provenance-gate.red.txt`
 - **covered_ac**：AC-03、AC-04、AC-12（RED 目标断言已建立；GREEN 待 T004）
 - **review_fact**：N/A — Phase 1 review pending
 - **completed_at**：2026-08-10
@@ -195,7 +195,7 @@
 - **gate_cmd**：`bash -lc 'uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k provenance_gate'`
 - **expected_exit**：0
 - **oracle**：ORACLE-T2B-PROVENANCE-GATE — 同一正例通过、golden-negative 稳定失败；数字、标识符、版本、命令、端口、配置、表格、图片的事实门可回查；截断/不可解析 provider 输出和空结果进入 `degraded`，失败页状态、完整证据和恢复依据可回查。
-- **evidence_path**：`apply/evidence/T004.provenance-gate.green.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T004.provenance-gate.green.txt`
 - **STOP**：如果实现需要引入人工评分、全局复制率或修改 Reader Bundle schema，停止并回到当前材料。
 - **recovery**：只回滚本卡在 `faithfulness.py`、`publication.py`、`llm.py`、`draft.py` 和对应测试/fixture 的改动。
 - **task risk**：正文 gate 通过但完整 Evidence/archive 链断裂。
@@ -209,7 +209,7 @@
 - **证据**：ref=`quality/evidence/task2b-build-code-handoff.json`
 - **执行事实**：T004 provenance-gate GREEN 已真实执行，4 个 focused tests 通过。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k provenance_gate`；exit `0`，4 passed，15 deselected。
-- **evidence_refs**：`apply/evidence/T004.provenance-gate.green.txt`
+- **evidence_refs**：`docs/archive/apply/evidence/T004.provenance-gate.green.txt`
 - **covered_ac**：AC-03、AC-04、AC-12（当前 gate 的正文/Evidence 分离、归因/token/重复 oracle；版本完整矩阵待后续卡）
 - **review_fact**：N/A — Phase 1 review pending
 - **completed_at**：2026-08-10
@@ -236,7 +236,7 @@
 - **gate_cmd**：`bash -lc 'uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k impact_closure'`
 - **expected_exit**：1
 - **oracle**：ORACLE-T2B-IMPACT-CLOSURE — 目标断言报告受影响 section 仍复用旧内容或不确定影响未扩大整页。
-- **evidence_path**：`apply/evidence/T005.impact-closure.red.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T005.impact-closure.red.txt`
 - **STOP**：如果测试无法比较 section dependency/attribution/version 或旧页 bytes，停止并补 fixture/oracle。
 - **recovery**：删除本卡新增测试/fixture bytes。
 - **task risk**：只测“调用了 provider”，没有证明旧说法真的失效。
@@ -250,7 +250,7 @@
 - **证据**：ref=`quality/evidence/task2b-build-code-handoff.json`
 - **执行事实**：T005 impact-closure RED 已真实执行，3 个目标断言失败且不是 setup error。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k impact_closure`；exit `1`，3 个目标断言失败，19 个测试被筛除。
-- **evidence_refs**：`apply/evidence/T005.impact-closure.red.txt`
+- **evidence_refs**：`docs/archive/apply/evidence/T005.impact-closure.red.txt`
 - **covered_ac**：AC-05、AC-06、AC-07（RED 目标断言已建立；GREEN 待 T006）
 - **review_fact**：N/A — Phase 1 review pending
 - **completed_at**：2026-08-10
@@ -277,7 +277,7 @@
 - **gate_cmd**：`bash -lc 'uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k impact_closure'`
 - **expected_exit**：0
 - **oracle**：ORACLE-T2B-IMPACT-CLOSURE — unaffected page bytes/hash 不变，affected section 不残留旧 signal，uncertain failure 不覆盖旧 Reader。
-- **evidence_path**：`apply/evidence/T006.impact-closure.green.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T006.impact-closure.green.txt`
 - **STOP**：如果需要删除旧页、创建第二写回链或把 uncertain 降级为局部复用，停止并回到当前材料。
 - **recovery**：只回滚本卡在 `draft.py`、`page_layout.py`、`pipeline.py` 和对应测试/fixture 的改动。
 - **task risk**：影响集合漏掉跨 section/跨 page 的版本或父子关系依赖。
@@ -291,7 +291,7 @@
 - **证据**：ref=`quality/evidence/task2b-build-code-handoff.json`
 - **执行事实**：T006 impact-closure GREEN 已真实执行，3 个 focused tests 通过。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k impact_closure`；exit `0`，3 passed，24 deselected。
-- **evidence_refs**：`apply/evidence/T006.impact-closure.green.txt`
+- **evidence_refs**：`docs/archive/apply/evidence/T006.impact-closure.green.txt`
 - **covered_ac**：AC-05、AC-06、AC-07（明确变更只重编受影响 section；不确定影响扩大为整页；候选失败不覆盖旧页）
 - **review_fact**：N/A — Phase 1 review pending
 - **completed_at**：2026-08-10
@@ -318,7 +318,7 @@
 - **gate_cmd**：`bash -lc 'uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_split'`
 - **expected_exit**：1
 - **oracle**：ORACLE-T2B-SEMANTIC-SPLIT — 目标断言报告任意切碎、超限、缺 overview/prev-next、任一 part 无入口或 Claim 重复/丢失。
-- **evidence_path**：`apply/evidence/T007.semantic-split.red.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T007.semantic-split.red.txt`
 - **STOP**：如果只能通过提高行数上限、丢 Claim 或把 part-1 当第二入口来过测试，停止。
 - **recovery**：删除本卡新增测试/fixture bytes。
 - **task risk**：只验证行数，不验证语义边界和导航入口。
@@ -332,7 +332,7 @@
 - **证据**：ref=`quality/evidence/task2b-build-code-handoff.json`
 - **执行事实**：T007 semantic-split RED 已真实执行，目标分页断言失败且另一个边界断言通过。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_split`；exit `1`，1 个目标断言失败、1 个断言通过，22 个测试被筛除。
-- **evidence_refs**：`apply/evidence/T007.semantic-split.red.txt`
+- **evidence_refs**：`docs/archive/apply/evidence/T007.semantic-split.red.txt`
 - **covered_ac**：AC-04、AC-08（RED 目标断言已建立；GREEN 待 T008）
 - **review_fact**：N/A — Phase 1 review pending
 - **completed_at**：2026-08-10
@@ -359,7 +359,7 @@
 - **gate_cmd**：`bash -lc 'uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_split'`
 - **expected_exit**：0
 - **oracle**：ORACLE-T2B-SEMANTIC-SPLIT — 正例满足语义边界/120/300 行/导航/Claim exactly-once，超限和重复负例仍失败。
-- **evidence_path**：`apply/evidence/T008.semantic-split.green.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T008.semantic-split.green.txt`
 - **STOP**：如果改动需要第二套 Home/index/navigation 或删除历史 part，停止并回到当前材料。
 - **recovery**：只回滚本卡在 `page_layout.py`、`navigation.py`、`faithfulness.py` 和对应测试/fixture 的改动。
 - **task risk**：语义拆分后 provenance locator 或现有 source-index 链接失配。
@@ -373,7 +373,7 @@
 - **证据**：ref=`quality/evidence/task2b-build-code-handoff.json`
 - **执行事实**：T008 semantic-split GREEN 已真实执行，2 个 focused tests 通过。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_split`；exit `0`，2 passed，25 deselected。
-- **evidence_refs**：`apply/evidence/T008.semantic-split.green.txt`
+- **evidence_refs**：`docs/archive/apply/evidence/T008.semantic-split.green.txt`
 - **covered_ac**：AC-04、AC-08（120/300 行边界、稳定 part 路径、每个 part 可达、Claim 只归属一个 part）
 - **review_fact**：N/A — Phase 1 review pending
 - **completed_at**：2026-08-10
@@ -400,7 +400,7 @@
 - **gate_cmd**：`bash -lc 'uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_exit'`
 - **expected_exit**：1
 - **oracle**：ORACLE-T2B-SEMANTIC-EXIT-GATE — 目标断言报告缺 manifest/运行字段、缺 answerability/first-hit/证据回查/section completeness/修订记录、缺 AC 绑定、覆盖不足或 fallback 被误报通过；离线 `semantic_evidence_file` 必填字段断言必须失败。
-- **evidence_path**：`apply/evidence/T009.semantic-exit.red.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T009.semantic-exit.red.txt`
 - **STOP**：如果测试要求临时改题、降低 `>=6` 或把离线/Jaccard-only 当语义通过，停止。
 - **recovery**：删除本卡新增测试/fixture bytes。
 - **task risk**：fixture 通过但没有绑定真实 sample manifest 的 hash/范围。
@@ -414,7 +414,7 @@
 - **证据**：ref=`quality/evidence/task2b-build-code-handoff.json`
 - **执行事实**：T009 semantic-exit RED 已真实执行，3 个目标断言失败且不是 setup error。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_exit`；exit `1`，3 个目标断言失败，24 个测试被筛除。
-- **evidence_refs**：`apply/evidence/T009.semantic-exit.red.txt`
+- **evidence_refs**：`docs/archive/apply/evidence/T009.semantic-exit.red.txt`
 - **covered_ac**：AC-09、AC-10、AC-11、AC-12（RED 目标断言已建立；GREEN 待 T010）
 - **review_fact**：N/A — Phase 1 review pending
 - **completed_at**：2026-08-10
@@ -441,7 +441,7 @@
 - **gate_cmd**：`bash -lc 'uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_exit'`
 - **expected_exit**：0
 - **oracle**：ORACLE-T2B-SEMANTIC-EXIT-GATE — 正例满足离线机器底线且所有语义字段和 AC 绑定可回查，缺任一 fixture 证据或违反 revision budget 的负例为 `not_released` 并保留原因；不代表 T013 的真实 provider 运行完成。
-- **evidence_path**：`apply/evidence/T010.semantic-exit.green.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T010.semantic-exit.green.txt`
 - **STOP**：如果实现把 `not_released` 降成 `published`、把 provider 失败吞掉或发明完整题集门，停止并回到当前材料。
 - **recovery**：只回滚本卡在 `publication.py`、`pipeline.py` 和对应测试/fixture 的改动。
 - **task risk**：机器聚合统计正确但运行身份没有绑定具体 sample/provider evidence。
@@ -455,7 +455,7 @@
 - **证据**：ref=`quality/evidence/task2b-build-code-handoff.json`
 - **执行事实**：T010 semantic-exit GREEN 已真实执行，3 个 focused tests 通过；真实语义运行仍由 T013 诚实记录为 incomplete。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_exit`；exit `0`，3 passed，24 deselected。
-- **evidence_refs**：`apply/evidence/T010.semantic-exit.green.txt`
+- **evidence_refs**：`docs/archive/apply/evidence/T010.semantic-exit.green.txt`
 - **covered_ac**：AC-09、AC-10、AC-11、AC-12、AC-13（validator 与 file identity seam；真实 provider/sample 事实待 T013）
 - **review_fact**：N/A — Phase 1 review pending
 - **completed_at**：2026-08-10
@@ -482,7 +482,7 @@
 - **gate_cmd**：`bash -lc 'uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k pipeline_compat'`
 - **expected_exit**：1
 - **oracle**：ORACLE-T2B-PIPELINE-COMPAT — 截断/不可解析 provider 输出或空结果导致的 `degraded` 不出现在导航；未映射/冲突 identity、缺失冻结输入或 fingerprint mismatch 也只进 Audit/Archive；旧页不被覆盖，完整失败证据可回查，Task 2-A contract 不断裂。
-- **evidence_path**：`apply/evidence/T011.pipeline-compat.red.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T011.pipeline-compat.red.txt`
 - **STOP**：先回读并确认 `pipeline.py`、`navigation.py`、`page_layout.py` 的计划 seam；若符号/调用关系不一致，或兼容测试要求修改 Task 2-A schema、重建第二套导航、改变旧页删除规则或预先选择未冻结 provider，停止。
 - **recovery**：删除本卡新增测试 bytes。
 - **task risk**：只测函数返回，不测正式写回前后的 Reader/Audit 分流。
@@ -496,7 +496,7 @@
 - **证据**：ref=`quality/evidence/task2b-build-code-handoff.json`
 - **执行事实**：T011 pipeline-compat RED 已真实执行，5 个目标断言失败且不是 setup error。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k pipeline_compat`；exit `1`，5 个目标断言失败，27 个测试被筛除。
-- **evidence_refs**：`apply/evidence/T011.pipeline-compat.red.txt`
+- **evidence_refs**：`docs/archive/apply/evidence/T011.pipeline-compat.red.txt`
 - **covered_ac**：AC-01、AC-03、AC-07、AC-08（RED 目标断言已建立；GREEN 待 T012）
 - **review_fact**：N/A — Phase 1 review pending
 - **completed_at**：2026-08-10
@@ -523,7 +523,7 @@
 - **gate_cmd**：`bash -lc 'uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k pipeline_compat'`
 - **expected_exit**：0
 - **oracle**：ORACLE-T2B-PIPELINE-COMPAT — 通过页进入唯一导航，截断/不可解析 provider 输出或空结果产生的 degraded、未映射/冲突 identity、缺失冻结输入或 fingerprint mismatch 留在 Audit，旧正式页不被失败覆盖，Task 2-A contract 继续通过。
-- **evidence_path**：`apply/evidence/T012.pipeline-compat.green.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T012.pipeline-compat.green.txt`
 - **STOP**：如果接线需要改变 CLI/config、删除旧 history 或把 Task 2-B 机器出口写成正式 released，停止。
 - **recovery**：只回滚本卡在 `pipeline.py`、`navigation.py`、`page_layout.py`、`draft.py` 和对应测试的改动。
 - **task risk**：离线回归通过但真实 provider failure 的 page status 没有保留。
@@ -537,7 +537,7 @@
 - **证据**：ref=`quality/evidence/task2b-build-code-handoff.json`
 - **执行事实**：T012 pipeline-compat GREEN 已真实执行，6 个 focused tests 通过；真实语义出口仍受 T013 前置事实限制。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k pipeline_compat`；exit `0`，6 passed，28 deselected。兼容回归另有 task2_publication 18 passed、phase25_llm 72 passed、Task 2-A 48 passed、batch recovery 13 passed。
-- **evidence_refs**：`apply/evidence/T012.pipeline-compat.green.txt`
+- **evidence_refs**：`docs/archive/apply/evidence/T012.pipeline-compat.green.txt`
 - **covered_ac**：AC-01、AC-03、AC-07、AC-08（typed handoff、失败不进 Reader、旧页保护、稳定入口；真实语义出口待 T013）
 - **review_fact**：N/A — Phase 1 review pending
 - **completed_at**：2026-08-10
@@ -555,7 +555,7 @@
 - **FR**：FR-SEM-001、FR-SEM-002、FR-SEM-003
 - **AC**：AC-01、AC-03、AC-05、AC-07、AC-09、AC-10、AC-11、AC-12、AC-13
 - **动作**：T013 开始先回读当前 `cli.py`/config 的命令面（`digest --help`、`--config`、`--llm-format` 及其响应格式含义）和 runner 环境变量映射，把回读结果写入 preflight evidence；若实际命令面或变量映射与本卡冻结 gate_cmd 不一致，停止并记 `incomplete`，先修订当前 `plan.md`/`tasks.md`、重新发布并重新审查，不能在执行时就地改写 gate_cmd。随后绑定已有 sample manifest、`sample_count`、`sampling_seed`、Task 0 17+3 题集、当前 provider/model/base URL、credential、detector、budget、threshold 和 `section-dependency-record.v1`；在隔离 sample input/KB 上使用正常 `digest` CLI，不由本卡选择 provider。把真实结果写入 task evidence，至少记录 `answerability_source`、确定性 answerability subset id/hash、逐题 answerability/`first_hit`、`evidence_backtrace.claim_id`/`fragment_locator`、逐 section `section_completeness`、来源缺口 section audit/status、failure reason、实际 provider/model/detector/budget/threshold、`contract_revision`、`sample_count`、`sampling_seed` 和 `ac_bindings`：AC-01 绑定 page type/section/structure，AC-03 绑定正文/Evidence/Claim 回查，AC-05 绑定 impact closure，AC-07 绑定页级状态/导航投影/旧页保护，AC-09 绑定 sample manifest/coverage，AC-10 绑定运行身份/可复核字段，AC-11 绑定机器底线判定，AC-12/AC-13 绑定 revision ledger 和来源缺口 section。对 evidence 文件做必填字段和全部 AC 绑定机器断言；若任一前置事实缺失，记录 `incomplete/not_released`，不伪造通过。
-- **evidence_binding**：`apply/evidence/T013.semantic-run.json` 在运行前解析为绝对路径且必须不存在；先导出 `KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE` 再启动同一次 `digest`，由 `digest`/`pipeline` 写入该新文件。文件必须含本次 `run_id`、sample/KB/input 指纹和 `output_path`；pytest validator 只读取这个路径并核对身份，路径不存在、是旧文件或身份不匹配就失败。
+- **evidence_binding**：`docs/archive/apply/evidence/T013.semantic-run.json` 在运行前解析为绝对路径且必须不存在；先导出 `KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE` 再启动同一次 `digest`，由 `digest`/`pipeline` 写入该新文件。文件必须含本次 `run_id`、sample/KB/input 指纹和 `output_path`；pytest validator 只读取这个路径并核对身份，路径不存在、是旧文件或身份不匹配就失败。
 - **manifest_binding**：preflight 只接受 `quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json`；必须记录路径、存在性和 content hash，并把同一 hash 写入 T013 manifest/evidence。路径或 hash 无法回读时记 `incomplete/not_released`，不得用新 fixture 或自行挑选的样本替代。
 - **精确文件**：`tests/acceptance/test_task2b_body_compiler.py`
 - **boundary**：files: `tests/acceptance/test_task2b_body_compiler.py`; symbols/regions: semantic_exit assertion and evidence capture guidance only；运行输入/KB 为隔离外部目录，不写进源码边界。
@@ -563,10 +563,10 @@
 - **Knowledge**：命令使用普通 `digest`，不建立第二 runner；provider/model/base URL/threshold/budget 的具体值必须来自 T013 开始前的事实回读，不由本卡猜测。
 - **verification_role**：N/A — non-behavior real semantic evidence capture
 - **paired_task**：N/A — non-behavior real semantic evidence capture
-- **gate_cmd**：`bash -lc 'expected_evidence="$(pwd -P)/apply/evidence/T013.semantic-run.json"; export KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE="${KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE:?KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE is required}"; test "$KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE" = "$expected_evidence"; test ! -e "$expected_evidence"; uv run --frozen digest --help >/dev/null; uv run --frozen digest "${KNOWLEDGEDIGEST_TASK2B_SAMPLE_INPUT:?KNOWLEDGEDIGEST_TASK2B_SAMPLE_INPUT is required}" "${KNOWLEDGEDIGEST_TASK2B_SAMPLE_KB:?KNOWLEDGEDIGEST_TASK2B_SAMPLE_KB is required}" --config "${KNOWLEDGEDIGEST_TASK2B_SEMANTIC_CONFIG:?KNOWLEDGEDIGEST_TASK2B_SEMANTIC_CONFIG is required}" --llm-format="${KNOWLEDGEDIGEST_TASK2B_LLM_FORMAT:?KNOWLEDGEDIGEST_TASK2B_LLM_FORMAT is required}"; test -s "$expected_evidence"; uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_evidence_file'`
+- **gate_cmd**：`bash -lc 'expected_evidence="$(pwd -P)/docs/archive/apply/evidence/T013.semantic-run.json"; export KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE="${KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE:?KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE is required}"; test "$KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE" = "$expected_evidence"; test ! -e "$expected_evidence"; uv run --frozen digest --help >/dev/null; uv run --frozen digest "${KNOWLEDGEDIGEST_TASK2B_SAMPLE_INPUT:?KNOWLEDGEDIGEST_TASK2B_SAMPLE_INPUT is required}" "${KNOWLEDGEDIGEST_TASK2B_SAMPLE_KB:?KNOWLEDGEDIGEST_TASK2B_SAMPLE_KB is required}" --config "${KNOWLEDGEDIGEST_TASK2B_SEMANTIC_CONFIG:?KNOWLEDGEDIGEST_TASK2B_SEMANTIC_CONFIG is required}" --llm-format="${KNOWLEDGEDIGEST_TASK2B_LLM_FORMAT:?KNOWLEDGEDIGEST_TASK2B_LLM_FORMAT is required}"; test -s "$expected_evidence"; uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_evidence_file'`
 - **expected_exit**：0
 - **oracle**：ORACLE-T2B-SEMANTIC-RUN — 证据含冻结运行身份、`sample_count`/`sampling_seed`、17+3 派生 answerability、逐题 first hit、Claim/fragment 回查、section completeness、来源缺口 section audit/status、修订记录、AC-01/03/05/07/09/10/11/12/13 全部绑定和覆盖/失败项，并证明 `run_id`、sample/KB/input 指纹及 `output_path` 来自本次 digest；环境变量、命令面、证据路径、运行身份或任一字段/绑定缺失都使 gate 非零；达到底线才记录 machine-passing，未达到底线但证据完整时 gate 仍以 exit 0 记录 `not_released`，不把它改写成通过。
-- **evidence_path**：`apply/evidence/T013.semantic-run.json`
+- **evidence_path**：`docs/archive/apply/evidence/T013.semantic-run.json`
 - **STOP**：命令面回读不支持冻结 gate_cmd、环境变量（包括 `KNOWLEDGEDIGEST_TASK2B_LLM_FORMAT`、`KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE`）、当前工作目录不是任务 worktree 根、`apply/evidence` 路径约定、权威样本清单 `quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json` 或其 content hash、隔离目录、manifest、`sample_count`/`sampling_seed`、provider/model/detector/budget/threshold、Task 0 派生 answerability 或 section dependency v1 任一缺失，或 CLI/semantic evidence machine assertion 非目标失败时停止；只记 incomplete，不换 provider、不降阈值。诚实的完整 `not_released` 是 gate exit 0 的目标结果，不是失败。
 - **recovery**：删除隔离 sample KB 和本次临时运行输出，保留不可用 provider/manifest 的事实证据，不动正式 KB。
 - **task risk**：真实运行结束但样本覆盖或 provider identity 没有绑定到 evidence。
@@ -577,7 +577,7 @@
 - **status**：`incomplete`
 - **actual_changes**：完成真实 T013 运行接线；使用冻结 sample manifest 指定的隔离输入/KB、embedding 配置和用户提供的 qwen3.6 provider 运行普通 `digest`。为避免主线程 HTTPS 无限等待，真实 provider 请求统一走可终止子进程；同时修正 TopicIndex 的 v2 路径 ID 不覆盖 digest 稳定 `topic-*` 身份，并保证离线模式不误套 typed provider contract。运行完成并写出绑定证据，但 provider 返回截断/不可解析 JSON，机器语义门明确失败，保持 `not_released`。同任务修复补齐了 mapped page 的 typed-body prompt、publication-only 与 typed body 的边界，以及语义证据 writer 对声明 sample input/KB 的绑定。
 - **executed_commands**：`uv run --frozen digest --help`；单源真实 provider/embedding smoke；冻结 20-example / 30-source 隔离运行（run_id=`run-dc0d99596e70414099a31d54cf6b26fb`，28 rounds，30 source notes）；`uv run --frozen python -c '...validate_semantic_evidence_file...'` 返回 `valid=false`、`machine_exit_passed=false`；`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_evidence_file` 为 1 passed、38 deselected。
-- **evidence_refs**：`apply/evidence/T013.preflight.txt`、`apply/evidence/T013.semantic-run.json`
+- **evidence_refs**：`docs/archive/apply/evidence/T013.preflight.txt`、`docs/archive/apply/evidence/T013.semantic-run.json`
 - **covered_ac**：AC-09、AC-10、AC-12 的运行身份、样本/失败项、provider identity 和 revision ledger 已写入证据；AC-01/03/05/07 的实现绑定由前置卡覆盖，但真实运行因 provider 输出无效未达到 machine-passing。
 - **review_fact**：本次 build-code integration review 已执行；当前审查发现的语义出口缺口和任务锚点证据限制已在 T014 处置，未把 incomplete 说成通过。
 - **completed_at**：2026-08-11
@@ -601,10 +601,10 @@
 - **Knowledge**：正式验收仍需当前 WorkflowHub review/human confirmation；绿色测试不替代 review、真实 provider 完成或人工读者门。
 - **verification_role**：N/A — non-behavior final aggregate verification
 - **paired_task**：N/A — non-behavior final aggregate verification
-- **gate_cmd**：`bash -lc 'export KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE="$(pwd -P)/apply/evidence/T013.semantic-run.json"; test -s "$KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE"; uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_evidence_file; uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py tests/acceptance/test_task2_publication.py tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_corpus_regression.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task2a_reader_frontmatter.py tests/acceptance/test_task2a_okf_smoke.py -q'`
+- **gate_cmd**：`bash -lc 'export KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE="$(pwd -P)/docs/archive/apply/evidence/T013.semantic-run.json"; test -s "$KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE"; uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_evidence_file; uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py tests/acceptance/test_task2_publication.py tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_corpus_regression.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task2a_reader_frontmatter.py tests/acceptance/test_task2a_okf_smoke.py -q'`
 - **expected_exit**：0
 - **oracle**：ORACLE-T2B-FINAL-REGRESSION — 先对 T013 同一路径、同一运行身份执行 `semantic_evidence_file` machine assertion，再执行 focused tests 和既有兼容回归；两者都退出 0，且 revision ledger、section dependency v1、来源缺口 section audit、AC-01/03/05/07/09/10/11/12/13 evidence bindings 和语义出口字段完整；结果单独标注 provider、sample、人工门和 formal release 限制。
-- **evidence_path**：`apply/evidence/T014.final-regression.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T014.final-regression.txt`
 - **STOP**：如果聚合命令失败且无法归因到本计划变更、发现越界文件、或有人要求用旧 receipt/历史绿测替代当前证据，停止并保留真实失败。
 - **recovery**：不做自动修复；回到对应失败 Task，必要时按 plan 的最小回滚命令验证。
 - **task risk**：把完整测试绿灯误读为 Task 2-B 语义出口或 WorkflowHub stage 完成。
@@ -615,7 +615,7 @@
 - **status**：`incomplete`
 - **actual_changes**：执行独立聚合回归并回读 T013 同一次 digest 的绑定证据；补齐版本冲突/非法版本/无版本产品概览/显式 release label 的正文门测试与 fail-closed 实现；兼容回归与全仓回归均通过，但 T013 evidence validator 明确返回 invalid，未把绿测冒充语义通过。
 - **executed_commands**：T013 evidence-file focused test exit `0`，1 passed、40 deselected；Task 2-B/Task 2/Task 2-A aggregate exit `0`，123 passed、2 skipped；full repository `uv run --frozen pytest -q` exit `0`，484 passed、3 skipped；版本门 focused test 5 passed；T013 direct validator diagnostic 返回 `valid=false`、`machine_exit_passed=false`；qwen3.6 typed-body live smoke 返回三组必需 section，未把它当成正式样本语义出口；当前快照异源 integration review 返回 1 个 major incomplete 语义建议和 1 个 minor packet 锚点建议，未把 AC-09/10/11 的缺失证据说成通过；随后修复 qwen bridge 所需的 `chat_template_kwargs.enable_thinking=false`，新增 payload 回归断言，v5 全仓回归仍为 484 passed、3 skipped；使用 20 个冻结 example/30 个真实来源重跑时，provider transport 仍未在诊断窗口内完成，未将该诊断写成语义通过；正式 verify-code 已执行，当前 stage=`in_progress`、quality=`incomplete`，已绑定 v5 当前逐 AC evidence、测试和一次异源 review 事实，未取得 human confirmation，也未把语义出口延期说成完成。
-- **evidence_refs**：`apply/evidence/T013.semantic-run.json`、`apply/evidence/T013.typed-body-live-smoke.txt`、`apply/evidence/T014.final-regression.txt`、`apply/evidence/T014.test-routing.json`、`quality/evidence/implementation/current-final-v3.json`、`quality/tests/build-code-full-regression-final-v3.json`、`quality/evidence/T014-build-code-review-current-v3.json`
+- **evidence_refs**：`docs/archive/apply/evidence/T013.semantic-run.json`、`docs/archive/apply/evidence/T013.typed-body-live-smoke.txt`、`docs/archive/apply/evidence/T014.final-regression.txt`、`docs/archive/apply/evidence/T014.test-routing.json`、`quality/evidence/implementation/current-final-v3.json`、`quality/tests/build-code-full-regression-final-v3.json`、`quality/evidence/T014-build-code-review-current-v3.json`
 - **covered_ac**：AC-01–AC-08、Task 2-A 兼容回归已通过；AC-09/AC-10/AC-11/AC-12 的字段和失败事实已记录，但 machine-passing、answerability 和完整 backtrace 仍 incomplete。
 - **review_fact**：当前快照 integration review 已执行，result=`quality/reviews/results/build-code-default-165fa246b52ca465b084cdb0df34e2274e4cc2b7-b5bf0380-baf0-491d-8408-b200c6d29f42.json`；fixture 重标记问题、版本门测试缺口已修复；AC-09/10/11 的真实样本/语义出口缺口保持 `unknown/incomplete`、delivery=`not_released`，任务完成锚点的 packet 内摘录限制按审查事实保留。
 - **completed_at**：2026-08-11
@@ -696,7 +696,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 
 - 发现并修复一个正文编译缺陷：typed PageDraft 原先沿用 legacy body-refinement 的 source/claim 小批次拆分，但每个批次仍要求完整 page-wide required sections，导致批次缺少 section 证据时 provider 必然返回不完整映射，整页被降级。现在 typed body 一页只发一个包含完整可信 Claim 集合的 provider context；请求过大或失败仍走原有 fail-closed/degraded 路径，不改变 section/page type 合同。新增 `test_typed_generation_keeps_complete_page_claims_in_one_provider_context`，并更新多批次回归为完整 typed page contract 回归。
 - 修复后 focused 回归：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py tests/acceptance/test_task2_publication.py -q`，exit `0`，`80 passed`；全仓回归：`uv run --frozen pytest -q`，exit `0`，`498 passed, 3 skipped`；`git diff --check`，exit `0`。
-- 使用同一冻结 sample manifest、同一隔离输入/KB 和用户提供的 allowlisted provider identity 重跑 T013：run_id=`run-538bed276afb43e9b509bda2a835ea55`，provider calls=`14`/planned `14`，Task0 budget=`within_budget`，run_status=`completed`，delivery=`not_released`；证据=`apply/evidence/T013.semantic-run-v13.json`，sha256=`8f282b9a8759c0f5193d84bd82d6d93e641410060cb53275abf268a040014647`。
+- 使用同一冻结 sample manifest、同一隔离输入/KB 和用户提供的 allowlisted provider identity 重跑 T013：run_id=`run-538bed276afb43e9b509bda2a835ea55`，provider calls=`14`/planned `14`，Task0 budget=`within_budget`，run_status=`completed`，delivery=`not_released`；证据=`docs/archive/apply/evidence/T013.semantic-run-v13.json`，sha256=`8f282b9a8759c0f5193d84bd82d6d93e641410060cb53275abf268a040014647`。
 - 真实重跑仍为 `concepts=0`、`evidence_backtrace=0`、`answerable=0`，validator/machine exit 未通过。13 页 TopicIndex degraded 被正确跳过；剩余 6 页全部是 `module_or_capability`，没有 `product_overview` 或 `procedure_or_rule` 覆盖；provider 对部分大页返回截断/不可解析 JSON，对其他页返回缺少可信 section claim mapping 或 token/faithfulness/重复门失败。T013 因此仍为 `incomplete/not_released`，AC-09/AC-10/AC-11 继续 `unknown`，不能声称语义机器出口通过。
 - 这次真实运行确认代码缺陷已修复且预算问题已消除，但冻结样本的页面类型覆盖、上游 TopicIndex 映射和语义内容质量仍不足以满足原始 `>=6` 且三类各至少 1 个的出口；不通过修改 Task1 冻结产物、临时换样本、猜 page type 或放宽门槛解决。
 
@@ -729,7 +729,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 - 冻结样本 manifest 已回读：`quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json`，content hash=`fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f`；sample=`20`，source=`89`，sampling seed=`4026961625`。原始来源和隔离 KB 只用于本次 T013，不写入正式知识库。
 - 修复正文编译的实际缺陷：同一条事实可被多个 Reader section 引用，但语义 part ledger 必须只有一个 owner；现在按 section 顺序确定唯一 part owner，Reader 正文支持关系不丢，完整 Claim/Evidence ledger 仍保留。新增 `test_shared_section_claim_gets_one_semantic_part_owner`。
 - focused 回归：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py tests/acceptance/test_task2_publication.py -q`，exit `0`，`82 passed`；全仓回归：`uv run --frozen pytest -q`，exit `0`，`500 passed, 3 skipped`；`git diff --check`，exit `0`。
-- 修复后真实 T013：普通 `digest` 在隔离输入/KB 上完成，run_id=`run-87cdb14fc528422d9544587c80b2721b`，run_status=`completed`，execution=`real_semantic`，provider calls=`15/15`，delivery=`not_released`；证据=`apply/evidence/T013.semantic-run-v16.json`，sha256=`78e310527db6e3608a1c1dccfb23b44d62d32a710a8e24336c64182f0066e883`。provider 凭据只通过环境变量使用，未写入材料或证据。
+- 修复后真实 T013：普通 `digest` 在隔离输入/KB 上完成，run_id=`run-87cdb14fc528422d9544587c80b2721b`，run_status=`completed`，execution=`real_semantic`，provider calls=`15/15`，delivery=`not_released`；证据=`docs/archive/apply/evidence/T013.semantic-run-v16.json`，sha256=`78e310527db6e3608a1c1dccfb23b44d62d32a710a8e24336c64182f0066e883`。provider 凭据只通过环境变量使用，未写入材料或证据。
 - v16 真实证据出现 `6` 个 machine-passing concepts：`5` 个 `module_or_capability`、`1` 个 `product_overview`；evidence backtrace=`617`，section completeness=`6`，answerability=`13/20`。因此重复 claim 的代码问题已解决，`>=6` 和 product 覆盖已获得真实证据；但 `procedure_or_rule` 仍没有 machine-passing page。
 - `procedure_or_rule` 的真实探针来源是“17 智能搭建”设计比较文档；provider 返回 `section exceptions claim mapping is missing`，所以页面保持 degraded/Audit，不补空话、不猜异常规则、不改 page type/必需 section。其他真实失败（截断 JSON、缺 section claim mapping、版本/归因门）也保留在 `failure_reasons`，不能把部分通过写成整体通过。
 - 当前结论仍是 `T013=incomplete`、`AC-09/AC-10/AC-11=unknown/incomplete`、delivery=`not_released`。这是修复后最新真实证据，替代此前 v13/v15 的运行结论；不得使用旧 WorkflowHub receipt 代替本次结果。
@@ -771,14 +771,14 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 - 完成一次完成性审计后发现：typed body 流程把 `typed_claim_ids` 当成充分证明，可能让带合法 Claim ID 的无来源正文绕过 token/faithfulness 门。现已在 `publication.py` 增加保守的改写校验：typed mapping 仍可允许正文改写，但必须保留足够 Claim 词项，并保留数字和大写标识符；无 typed mapping 继续要求归一化后的事实原文命中。
 - 新增回归：无来源正文即使带 `typed_claim_ids` 也降级；数字从 `99%` 改成 `100%` 也降级；保留数字的合理改写继续通过。相关测试在 `tests/acceptance/test_task2b_body_compiler.py`。
 - 受影响代码/测试没有改变 page type、section 集合、字段合同或失败状态；全仓回归：`uv run --frozen pytest -q`，exit `0`，`502 passed, 3 skipped`；Task 2-B focused 回归为 `84 passed`；`git diff --check` 通过。
-- 修复后冻结 20-example 真实语义重跑使用 300 秒边界，exit `124`，没有生成新的 semantic evidence；事实记录在 `apply/evidence/T013.semantic-run-v17.timeout.txt`，按 `unknown/incomplete` 处理，T013 v16 仍是最近一次完成的真实运行，不把超时当通过。
+- 修复后冻结 20-example 真实语义重跑使用 300 秒边界，exit `124`，没有生成新的 semantic evidence；事实记录在 `docs/archive/apply/evidence/T013.semantic-run-v17.timeout.txt`，按 `unknown/incomplete` 处理，T013 v16 仍是最近一次完成的真实运行，不把超时当通过。
 - 该同任务修复未重复 build-code/verify-code 异源审查；当前 verify-code 仍保持 close 前，真实语义出口、独立审查、exceptions 和 human confirmation 不伪造通过。
 
 ### Verify-code 后续重复 Claim 投影修复与 T013 重跑（2026-08-11）
 
 - 完成真实运行后的代码审计发现：同一来源中重复出现的相同句子会保留多个不同 `fragment_locator` 的完整 Claim 记录，但正文门按 `claim_fingerprint` 作为脚注身份，错误地把这些合法重复来源判定为 `claim attribution is not unique`。现已修复 `pipeline._typed_body_gate_payload`：完整 `evidence_claims` 不去重；Reader body gate 只对每个被引用 fingerprint 取首个确定性代表，避免丢失来源位置，也不放宽正文事实门。
 - 新增回归 `test_typed_body_gate_projects_repeated_source_claim_once_but_keeps_evidence_occurrences`；focused `uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q`，exit `0`，`65 passed`；全仓 `uv run --frozen pytest -q`，exit `0`，`503 passed, 3 skipped`；`git diff --check`，exit `0`。
-- 使用同一冻结 manifest（sample=`20`、source=`89`、hash=`fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f`）和隔离输入/KB，以真实 qwen3.6 provider 重新执行普通 `digest`；embedding 探针使用受控短超时后明确回退 Jaccard，未把回退伪装成 embedding 通过。run_id=`run-377d583f065b4e8b90742d48d6be62e6`，`run_status=completed`，provider calls=`15/15`，证据=`apply/evidence/T013.semantic-run-v19.json`，sha256=`bfca47726c6a1721117e44440538e5f1fb36acd7d422977dcb20bea08f44e736`，delivery=`not_released`。
+- 使用同一冻结 manifest（sample=`20`、source=`89`、hash=`fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f`）和隔离输入/KB，以真实 qwen3.6 provider 重新执行普通 `digest`；embedding 探针使用受控短超时后明确回退 Jaccard，未把回退伪装成 embedding 通过。run_id=`run-377d583f065b4e8b90742d48d6be62e6`，`run_status=completed`，provider calls=`15/15`，证据=`docs/archive/apply/evidence/T013.semantic-run-v19.json`，sha256=`bfca47726c6a1721117e44440538e5f1fb36acd7d422977dcb20bea08f44e736`，delivery=`not_released`。
 - v19 真实证据得到 `2` 个 machine-passing concepts，均为 `module_or_capability`；`evidence_backtrace=291`、完整 section=`2`、answerable=`11/20`。相较 v18 的 `1` 个 machine-passing concept，重复 Claim 误判已实际减少；但仍缺 `product_overview` 与 `procedure_or_rule`，validator=`valid=false`、`machine_exit_passed=false`。其余失败保留为真实 provider 截断 JSON、section claim mapping 缺失、保真不匹配、near duplicate、degraded TopicIndex 和非法版本等，不以放宽门槛解决。
 - `procedure_or_rule` 仍来自“17 智能搭建”设计比较来源；原始材料没有可回查的 `exceptions` 规则，不能把“缺点”改写成异常处理，也不能填“暂无异常”占位。因此该页继续 `degraded/Audit`，不改变 page type 或必需 section 合同。
 - v19 semantic evidence validator 结果：`valid=false`、`machine_exit_passed=false`、`delivery_status=not_released`，原因是 machine-passing concept 少于 `6`，且缺 `product_overview`、`procedure_or_rule` 两类。该事实替代 v18 的最新真实运行结果；v17 超时记录仍保留为历史诊断，不把任何一次超时或部分通过写成语义通过。
@@ -795,7 +795,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 
 - 完成一次实现审计后确认：typed body provider 请求原来同时携带重复的 `initial_body`/`source_text`，并可能携带旧 `existing_target_body`；这会增加请求体和旧说法残留风险。现已让 typed prompt 只携带当前 `source_text`、完整 Claim 和固定 typed page contract，并明确要求只为同一 section 实际陈述的事实返回 `claim_ids`；legacy prompt 不变。
 - 新增回归 `test_typed_prompt_does_not_repeat_source_or_send_stale_reader_body`；focused 回归为 `158 passed`，全仓回归为 `504 passed, 3 skipped`，`git diff --check` 通过。
-- 使用同一冻结 manifest、同一隔离真实来源、同一 qwen3.6 provider、同一 8192 token budget 和原门槛执行 T013 v20：run_id=`run-1be80b3959ff4a15bc22ea5c3d8c7c5a`，run_status=`completed`，provider calls=`15/15`，execution=`real_semantic`，evidence=`apply/evidence/T013.semantic-run-v20.json`，sha256=`32b5a11c8414c500f01195f5251768f7d6e51e67b86a980946e94e11f6bab331`，delivery=`not_released`。
+- 使用同一冻结 manifest、同一隔离真实来源、同一 qwen3.6 provider、同一 8192 token budget 和原门槛执行 T013 v20：run_id=`run-1be80b3959ff4a15bc22ea5c3d8c7c5a`，run_status=`completed`，provider calls=`15/15`，execution=`real_semantic`，evidence=`docs/archive/apply/evidence/T013.semantic-run-v20.json`，sha256=`32b5a11c8414c500f01195f5251768f7d6e51e67b86a980946e94e11f6bab331`，delivery=`not_released`。
 - v20 只有 `1` 个 machine-passing concept，类型仍只有 `module_or_capability`；`evidence_backtrace=212`、完整 section=`1`、answerable=`11/20`。仍缺 `product_overview`、`procedure_or_rule` 和 `>=6` machine-passing concepts；provider 的 section claim mapping、保真门和输入映射失败继续真实保留，不能改成通过。
 - prompt 修复没有把真实语义出口变成通过；独立只读审查也未发现新的明确代码缺陷。当前结论仍是 T013=`incomplete`、AC-09/AC-10/AC-11=`unknown/incomplete`、delivery=`not_released`。本条追加后必须重新 capture 当前测试并执行一次官方 verify-code；不重复异源审查，不调用 `close`。
 
@@ -811,9 +811,9 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 - 修复 `llm.py` typed prompt：补充三类 section 的原始合同语义；要求 claim_id 只绑定同一 section 实际陈述的事实；URL、路径、命令、标识符、数字、版本、表格值和链接没有原样保留时不得挂该 claim；sources 不得把修订表当正文证据；没有证据不得填占位内容。新增 prompt 回归覆盖 section 说明和保守 claim 绑定。
 - 修复 `validate_section_response` 对 Markdown 表格分隔线的误伤：格式分隔线保留在完整 Claim/Evidence ledger，但不再要求进入 Reader 正文语义 claim；新增回归证明它不会被当成读者事实，同时缺少其他真实 claim 仍然 `degraded`。
 - focused 回归：`uv run --frozen pytest -q tests/acceptance/test_task2b_body_compiler.py tests/acceptance/test_phase25_llm.py tests/acceptance/test_task2_publication.py`，exit `0`，`160 passed`；`git diff --check`，exit `0`。随后全仓 `uv run --frozen pytest -q`，exit `0`，`505 passed, 3 skipped`。
-- T013 v21 使用同一冻结 manifest、同一隔离真实来源、同一 qwen3.6、8192 token、15 planned calls；run_id=`run-6a23c822cacc487b92c2face77741fb8`，evidence=`apply/evidence/T013.semantic-run-v21.json`，sha256=`4cd79e08b7c4efbfb7fc75236997bf641f6b85463e5b4f86c30ff5325a9fea2f`，`run_status=completed`，`delivery=not_released`。提示词使 `procedure_or_rule` 生成了完整 section，但仍被事实保真门拒绝；不能记为 machine-passing。
-- T013 v22 在提示词补强后完成：run_id=`run-a2acfc2d6e034515b2aa8b9d1abfee4f`，evidence=`apply/evidence/T013.semantic-run-v22.json`，sha256=`5b4f01b2b926eedbcbdd316500c409d5902b6559392460d6732154ed782e7392`，`run_status=completed`，`delivery=not_released`；得到 `2` 个 machine-passing concept，均为 `module_or_capability`，`evidence_backtrace=393`、完整 section=`2`，仍缺 `product_overview`、`procedure_or_rule` 和 `>=6`。
-- T013 v23 在表格格式 Claim 修复后完成：run_id=`run-1e2741e45fc24947ae654fd17da09feb`，evidence=`apply/evidence/T013.semantic-run-v23.json`，sha256=`e7f05c40b3b16253fc1733cee4fe76784ba6d34f17a2b50ed0f1df543a66882a`，`run_status=completed`，`delivery=not_released`；结果仍为 `2` 个 `module_or_capability` machine-passing concept，未达到语义出口。procedure 仍因来源没有可回查 `exceptions` 规则而不能通过；不把“缺点”改写成异常，也不填占位句。
+- T013 v21 使用同一冻结 manifest、同一隔离真实来源、同一 qwen3.6、8192 token、15 planned calls；run_id=`run-6a23c822cacc487b92c2face77741fb8`，evidence=`docs/archive/apply/evidence/T013.semantic-run-v21.json`，sha256=`4cd79e08b7c4efbfb7fc75236997bf641f6b85463e5b4f86c30ff5325a9fea2f`，`run_status=completed`，`delivery=not_released`。提示词使 `procedure_or_rule` 生成了完整 section，但仍被事实保真门拒绝；不能记为 machine-passing。
+- T013 v22 在提示词补强后完成：run_id=`run-a2acfc2d6e034515b2aa8b9d1abfee4f`，evidence=`docs/archive/apply/evidence/T013.semantic-run-v22.json`，sha256=`5b4f01b2b926eedbcbdd316500c409d5902b6559392460d6732154ed782e7392`，`run_status=completed`，`delivery=not_released`；得到 `2` 个 machine-passing concept，均为 `module_or_capability`，`evidence_backtrace=393`、完整 section=`2`，仍缺 `product_overview`、`procedure_or_rule` 和 `>=6`。
+- T013 v23 在表格格式 Claim 修复后完成：run_id=`run-1e2741e45fc24947ae654fd17da09feb`，evidence=`docs/archive/apply/evidence/T013.semantic-run-v23.json`，sha256=`e7f05c40b3b16253fc1733cee4fe76784ba6d34f17a2b50ed0f1df543a66882a`，`run_status=completed`，`delivery=not_released`；结果仍为 `2` 个 `module_or_capability` machine-passing concept，未达到语义出口。procedure 仍因来源没有可回查 `exceptions` 规则而不能通过；不把“缺点”改写成异常，也不填占位句。
 - 当前真实结论：T013=`incomplete`；AC-09/AC-10/AC-11=`unknown/incomplete`；独立审查、exceptions、human confirmation 继续按 `missing` 记录；旧 Reader 保护和 fail-closed 边界保持有效。由于本条更新了当前材料，下一步必须重新 capture 当前全仓测试并执行一次官方 verify-code；不重复异源审查，不调用 `close`。
 
 ### Verify-code embedding fallback 与 v42 官方绑定（2026-08-11）
@@ -837,7 +837,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 ### T014 最终聚合回归追加事实（2026-08-11）
 
 - 按 T014 原始聚合命令，在当前 worktree、当前 T013 证据路径和无 provider 网络依赖环境下重新执行：`semantic_evidence_file` focused test=`1 passed, 67 deselected`；Task 2-B、Task 2 publication、batch recovery、corpus regression、Task 2-A Reader Bundle/frontmatter/OKF smoke aggregate=`150 passed, 2 skipped`，exit `0`。
-- 直接验证最新完成的 `apply/evidence/T013.semantic-run-v23.json`：`valid=false`、`machine_exit_passed=false`、`reader_eligible=false`、`delivery_status=not_released`；原因是 machine-passing concept 少于 6，缺 `product_overview` 和 `procedure_or_rule`。因此 T014 的回归证据完成，但 T013 语义出口仍保持 `incomplete`，不把聚合绿灯解释成 Task 2-B 通过。
+- 直接验证最新完成的 `docs/archive/apply/evidence/T013.semantic-run-v23.json`：`valid=false`、`machine_exit_passed=false`、`reader_eligible=false`、`delivery_status=not_released`；原因是 machine-passing concept 少于 6，缺 `product_overview` 和 `procedure_or_rule`。因此 T014 的回归证据完成，但 T013 语义出口仍保持 `incomplete`，不把聚合绿灯解释成 Task 2-B 通过。
 
 ### T013 procedure 来源审计追加事实（2026-08-11）
 
@@ -862,7 +862,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 - **需求/规格**：`PFACT-007`、`FR-DRAFT-004`、`FR-PUBLISH-006`、`FR-SEM-003`、`AC-13`，以及消费该 section 的 `FR-DRAFT-001`、`FR-PUBLISH-002`、`AC-02`、`AC-07`、`AC-09`、`AC-11`。
 - **计划/任务**：`DEC-005`、`T009`、`T010`、`T015`、`T016`、`ORACLE-T2B-SOURCE-GAP-SECTION`、`ORACLE-T2B-SEMANTIC-RUN`。
 - **实现/测试**：仅评估并按实际 seam 修改 `src/knowledge_digest/draft.py`、`src/knowledge_digest/publication.py`、`src/knowledge_digest/pipeline.py`、`src/knowledge_digest/llm.py` 及 `tests/acceptance/test_task2b_body_compiler.py`、`tests/fixtures/task2b_publication_body/cases.json`。若发现 page layout/navigation 也消费该状态，必须补兼容断言；不能凭猜测扩大改动。
-- **交付/证据**：更新 `apply/evidence/` 中本 SR 的 focused 行为证据和后续真实语义/聚合证据；旧 Reader 正式页不覆盖，缺失 provider 或样本证据记 `incomplete/not_released`。
+- **交付/证据**：更新 `docs/archive/apply/evidence/` 中本 SR 的 focused 行为证据和后续真实语义/聚合证据；旧 Reader 正式页不覆盖，缺失 provider 或样本证据记 `incomplete/not_released`。
 
 ### T015 — RED/GREEN：来源缺口 section 状态与旧说法失效
 
@@ -872,7 +872,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 - **status**：`pending`
 - **RED/GREEN**：先写可区分目标行为的正例和负例；RED 不能只是 fixture/setup 失败。GREEN 只实现本 SR 规则，不降低既有正文、保真、版本、归因、重复和发布门。
 - **required cases**：冻结 `17 智能搭建` 单来源缺口正例；有明确异常规则的 `documented` 正例；来源含糊/审计不完整/缺 fingerprint/跨主题命中/旧 dependency 不一致负例；异常题 `not_answerable`；其他 section 可用且机器门通过时页级 eligible/published 的组合断言。
-- **evidence**：focused test exit、oracle、输入 fingerprint、audit version、source URI/locator、section status、claim mapping、旧 section bytes/失效理由，写入 task-relative `apply/evidence/`。
+- **evidence**：focused test exit、oracle、输入 fingerprint、audit version、source URI/locator、section status、claim mapping、旧 section bytes/失效理由，写入 task-relative `docs/archive/apply/evidence/`。
 - **STOP**：若实现必须改固定 section、page type、页级/交付状态、机器阈值、CLI、Reader Bundle 或需要新增产品决策，停止并回报，不在 T015 内补需求。
 
 ### T016 — 证据重跑与回归交接
@@ -883,7 +883,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 - **status**：`pending`
 - **preconditions**：T015 GREEN；当前测试 capture；冻结样本 manifest、provider/model/detector/budget/threshold、answerability 和 section dependency v1 事实可回读。缺任一项时记录 `incomplete/not_released`，不换 provider、不降阈值、不编造证据。
 - **required assertions**：`procedure_or_rule` 的异常题仍 `not_answerable`；同页其他 section 不被误伤；旧受影响 section 无过期正文残留；既有 `>=6`、三类 page type、inventory、provenance/faithfulness/version/duplicate 和交付边界不变；真实语义结果按真实值记录。
-- **evidence**：`apply/evidence/SR-20260811...` 下 focused test、semantic evidence/validator、aggregate regression、provider identity 和失败原因；如需官方 verify-code，只执行一次当前材料绑定的普通阶段验证，不重复异源审查，不调用 `close`。
+- **evidence**：`docs/archive/apply/evidence/SR-20260811...` 下 focused test、semantic evidence/validator、aggregate regression、provider identity 和失败原因；如需官方 verify-code，只执行一次当前材料绑定的普通阶段验证，不重复异源审查，不调用 `close`。
 - **handoff**：T016 完成后回到 `verify-code`；独立 SR review 仍 `missing/incomplete`，人工确认仍单独记录，不以测试绿灯或 section 通过替代。
 
 ### SR 执行顺序
@@ -894,7 +894,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 
 - **status**：`completed`。
 - **实现**：`publication.py` 增加 `procedure-exceptions-audit.v1` 的确定性来源审计；`draft.py` 把可信审计绑定到 `exceptions` section dependency；`llm.py` 只允许可信 `source_not_documented` section 为空且无 Claim；`pipeline.py` 把 section 状态送入 body gate、机器概念和 answerability；语义 evidence 的 contract revision/AC binding 已更新为 `1/1`、`AC-13`。
-- **focused evidence**：`apply/evidence/SR-20260811-source-gap-section-focused.txt`；Task 2-B focused=`72 passed`，consumer regression=`164 passed`，full regression=`511 passed, 3 skipped`，`git diff --check`=`0`。
+- **focused evidence**：`docs/archive/apply/evidence/SR-20260811-source-gap-section-focused.txt`；Task 2-B focused=`72 passed`，consumer regression=`164 passed`，full regression=`511 passed, 3 skipped`，`git diff --check`=`0`。
 - **正例**：冻结来源只有错误/信息不足描述，没有明确异常触发、处理、分支或恢复规则时，`exceptions` 保留但状态为 `source_not_documented`，绑定 source URI/content hash/locator/audit version，异常题为 `not_answerable`，其他 section 可继续进入页级机器门。
 - **负例**：有明确异常处理规则、来源绑定不完整、provider 在特殊 section 写正文或 Claim 时均不使用特殊状态并保持 fail-closed。
 - **旧说法保护**：特殊 section 不携带 Reader body/Claim；来源审计依赖进入 section dependency，来源变化或无法证明时不能安全复用旧 section。
@@ -905,7 +905,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 - **next**：回到 `verify-code` 前，先基于当前四份材料重新 capture T013/T014 相关证据；真实 provider、样本、detector、budget、threshold 缺失时记录 `incomplete/not_released`，不以 focused/full tests 冒充语义出口。
 - **review boundary**：不重复既有异源审查；当前主分支没有独立 `scope_revision` review 路由，该缺失保持 `missing/incomplete`；不调用 `close`。
 - **preflight fact**：当前进程缺少冻结 T013 所需的 provider、sample input/KB、semantic config、LLM format 和新 evidence path 环境变量；没有生成新的语义 evidence。旧 v23 evidence 重新校验为 `valid=false`、`machine_exit_passed=false`、`delivery_status=not_released`，且缺 `AC-13` binding。
-- **evidence**：`apply/evidence/SR-20260811-T016-preflight.txt`；T016 保持 `incomplete/not_released`，等待冻结输入，不替换样本/provider/阈值。
+- **evidence**：`docs/archive/apply/evidence/SR-20260811-T016-preflight.txt`；T016 保持 `incomplete/not_released`，等待冻结输入，不替换样本/provider/阈值。
 
 ### T016 执行事实追加（2026-08-11）
 
@@ -921,26 +921,26 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 - 已按该路由执行 Phase 1 功能回归：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py tests/acceptance/test_task2_publication.py tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_corpus_regression.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task2a_reader_frontmatter.py tests/acceptance/test_task2a_okf_smoke.py tests/acceptance/test_phase25_llm.py tests/acceptance/test_phase4_embedding_runtime.py -q`，exit `0`，`259 passed, 2 skipped`；receipt=`quality/tests/build-code-phase1-feature-20260811.json`，receipt_hash=`bca6966ee98e2ead1293a7dbcc8b4ad2bad4a83fdfaab8f4f16a3c844bdcb4b9`，snapshot=`f33d0fe8911978bc7840b91f9d3922d3a3579258`；`git diff --check` exit `0`。
 - 浏览器 QA 不适用；本 Phase 没有 UI、外部服务或浏览器流程。真实 T013 语义运行仍是 `unknown/incomplete`，不能用本次结构/功能回归替代。
 - 已对当前 `phase-1` 执行一次正式异源 `build-code` 审查，attempt=`quality/reviews/attempts/ba26ee80-1ce8-4bc9-8973-881c34a5960b/attempt.json`，report=`quality/reviews/reports/ba26ee80-1ce8-4bc9-8973-881c34a5960b.md`，material=`0d6fff9f18580f51bc52357543e4049146bb50af52a8547a3f5bbaf879add39b`；审查材料已经通过 330 KiB 传输限制并绑定当前 snapshot，但最终 `unavailable`：`opencode/v4flash` 超时、`kimi/coding` 进程无进度后终止、`codex/luna` 同源排除。
-- 因审查没有有效 reviewer JSON，finding 状态必须记为 `unknown`；不把“没有 adjudicated findings”说成“没有严重 findings”。按 WorkflowHub 规则，审查不可用不阻塞同一任务继续修复，但 Phase 质量仍是 `incomplete`，不能宣称已通过或 released。完整事实见 `apply/evidence/build-code-phase1-routing-and-review-20260811.json`。
+- 因审查没有有效 reviewer JSON，finding 状态必须记为 `unknown`；不把“没有 adjudicated findings”说成“没有严重 findings”。按 WorkflowHub 规则，审查不可用不阻塞同一任务继续修复，但 Phase 质量仍是 `incomplete`，不能宣称已通过或 released。完整事实见 `docs/archive/apply/evidence/build-code-phase1-routing-and-review-20260811.json`。
 - Phase 1 的实现和测试动作已完成；T013/T014/T016 的语义证据、独立审查和人类确认仍未闭合。下一步进入一次 `verify-code`，反向检查原始需求、Design、完整用户流程、成功/失败/恢复边界、非目标和延期项；所有缺证据继续标 `unknown`，close 前停下，不调用 `close`。
 
 ### Verify-code 当前验收事实（2026-08-11）
 
-- 已完成一次架构师反向检查：原始需求 → 当前 decision-log → `spec.md` → `plan.md`/`tasks.md` → 入口、成功、失败、恢复和 `source_not_documented` 特殊分支 → AC → 当前测试/证据。没有新增产品需求或代码修复；架构结论写入 `apply/evidence/verify-code-architect-assessment-20260811.json`。
+- 已完成一次架构师反向检查：原始需求 → 当前 decision-log → `spec.md` → `plan.md`/`tasks.md` → 入口、成功、失败、恢复和 `source_not_documented` 特殊分支 → AC → 当前测试/证据。没有新增产品需求或代码修复；架构结论写入 `docs/archive/apply/evidence/verify-code-architect-assessment-20260811.json`。
 - 当前适用 AC 结论：AC-02、AC-06、AC-08 为自动化行为测试范围内的 `pass`；AC-01、AC-03、AC-04、AC-05、AC-07、AC-09、AC-10、AC-11、AC-12、AC-13 均因 evidence、测量记录或真实语义运行缺失保持 `unknown/incomplete`；AC-04 明确没有把缺少分母/检测器版本/seed/失败样本的摘要当成通过。
-- 当前最终测试曾执行 `uv run --frozen pytest -q -rs`，exit `0`，`511 passed, 3 skipped`。三个 skip 已记录具体测试和原因：Task 1 外部 89-source corpus 未设置；两个可选 Task1/Task2/CompanyBrain corpus fixture 不在 checkout。`git diff --check` exit `0`。详细摘要见 `apply/evidence/verify-code-final-test-summary-20260811.json`。
+- 当前最终测试曾执行 `uv run --frozen pytest -q -rs`，exit `0`，`511 passed, 3 skipped`。三个 skip 已记录具体测试和原因：Task 1 外部 89-source corpus 未设置；两个可选 Task1/Task2/CompanyBrain corpus fixture 不在 checkout。`git diff --check` exit `0`。详细摘要见 `docs/archive/apply/evidence/verify-code-final-test-summary-20260811.json`。
 - 已执行 verify-code 唯一一次异源架构复核：attempt=`quality/reviews/attempts/bbfbfaa4-d85c-445e-b514-0eacfaf53778/attempt.json`，result=`quality/reviews/results/verify-code-default-77c051128229589f50cae0da72191ad920c6f806-bbfbfaa4-d85c-445e-b514-0eacfaf53778.json`，report=`quality/reviews/reports/bbfbfaa4-d85c-445e-b514-0eacfaf53778.md`；`opencode/v4flash` 返回 1 个 major、2 个 minor，`antigravity/opus` authentication failure，`codex/luna` same-source 排除。
 - finding 处置：major `F-a3484cf00ad5` 已修复为 AC-04 `unknown`，不伪造规格要求的门控测量；minor `F-887d33bac044` 已将 evidence 型 AC 从 pass 收紧为 unknown；minor `F-9cb127a17ac0` 已补写三个 skip 的身份和原因。没有代码变化，因此不重跑 provider review；按 verify-code 规则只做最终测试和收尾。
 - 当前 verify-code 质量结论必须是 `incomplete`：测试绿灯，但独立 build-code review unavailable、AC-04 等证据不闭合、T013/T014/T016 真实语义出口和 human confirmation 缺失，交付保持 `not_released`。close 前停止，不调用 `close`、不提交、不合并。
 
 ### SR-20260811 T013/T014/T016 当前执行事实追加（2026-08-11）
 
-- 发现 `apply/evidence/T013.semantic-run.json` 原有一份未绑定本次 scope revision 的旧结果：`contract_revision=0`、缺 `AC-13`；已保留原始内容并移动为 `apply/evidence/T013.semantic-run-pre-scope-revision-20260811.json`，没有覆盖历史证据。
+- 发现 `docs/archive/apply/evidence/T013.semantic-run.json` 原有一份未绑定本次 scope revision 的旧结果：`contract_revision=0`、缺 `AC-13`；已保留原始内容并移动为 `docs/archive/apply/evidence/T013.semantic-run-pre-scope-revision-20260811.json`，没有覆盖历史证据。
 - 按冻结 sample manifest 重建隔离输入：20 个 frozen examples 对应 30 条 source notes；来源正文来自本机外部 Task 0 source-snapshot bundle，未写入正式知识库。普通 `digest` 运行使用 qwen3.6、环境变量凭据、同一 sample manifest 和当前 scope revision；embedding 探针使用 3 秒边界，失败后明确回退 Jaccard，不把回退算作语义通过。
-- 新 T013 运行：run_id=`run-37095bf59935497985137ca79722f7e6`，`run_status=completed`、`execution_mode=real_semantic`、`delivery_status=not_released`；证据=`apply/evidence/T013.semantic-run.json`，sha256=`b05d2aa0d7e965b7046a751e00ceec4e94df0dd83392e5653aae28b358edd36c`。
+- 新 T013 运行：run_id=`run-37095bf59935497985137ca79722f7e6`，`run_status=completed`、`execution_mode=real_semantic`、`delivery_status=not_released`；证据=`docs/archive/apply/evidence/T013.semantic-run.json`，sha256=`b05d2aa0d7e965b7046a751e00ceec4e94df0dd83392e5653aae28b358edd36c`。
 - 新证据已绑定 `contract_revision=1/1`、scope revision ledger、`AC-01/03/05/07/09/10/11/12/13`，并记录 20 个问题的逐题 answerability/first-hit。provider 每次请求 5 秒硬超时；真实结果为 `machine-passing concepts=0`、`evidence_backtrace=0`、`section_completeness=0`，全部问题没有 first hit，失败原因保留为 provider timeout、semantic backtrace unavailable、TopicIndex mapping degraded 和非法版本；不把它解释成语义通过。
 - T013 evidence-file gate：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k semantic_evidence_file`，exit `0`，`1 passed, 71 deselected`。这证明证据身份/字段合同成立，不证明语义出口通过。
-- T014 当前聚合：Task 2-B、Task 2 publication、batch recovery、corpus regression、Task 2-A Reader Bundle/frontmatter/OKF smoke 共 `154 passed, 2 skipped`，exit `0`；完整事实见 `apply/evidence/SR-20260811-T016-final-regression-v2.txt`。
+- T014 当前聚合：Task 2-B、Task 2 publication、batch recovery、corpus regression、Task 2-A Reader Bundle/frontmatter/OKF smoke 共 `154 passed, 2 skipped`，exit `0`；完整事实见 `docs/archive/apply/evidence/SR-20260811-T016-final-regression-v2.txt`。
 - 当前全仓回归：`uv run --frozen pytest -q`，exit `0`，`511 passed, 3 skipped`；`git diff --check` exit `0`。测试通过只说明代码和兼容回归通过，不能替代真实语义出口、独立审查或人工确认。
 - **T016 执行状态**：`completed`（当前 scope revision 的 focused/semantic/aggregate evidence 已完成并回交 verify-code）；Task 2-B 仍为 `incomplete/not_released`。后续只执行一次当前材料绑定的普通 `verify-code` 收敛，不重复异源审查、不调用 `close`。
 
@@ -956,7 +956,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 ### T013 provider 连通性诊断追加事实（2026-08-11）
 
 - 对用户指定的 qwen3.6 endpoint 做了最小 OpenAI-compatible JSON 请求诊断；请求字段与 `src/knowledge_digest/llm.py` 当前合同一致，未更换 provider、模型或门槛。
-- 默认网络路径和显式直连均在 20 秒内连接超时：`curl exit=28`、HTTP status=`000`、response body=`0 bytes`。证据见 `apply/evidence/T013.provider-connectivity-20260811.txt`。
+- 默认网络路径和显式直连均在 20 秒内连接超时：`curl exit=28`、HTTP status=`000`、response body=`0 bytes`。证据见 `docs/archive/apply/evidence/T013.provider-connectivity-20260811.txt`。
 - 结论：T013 当前首先被外部 provider 连通性阻塞；这不是可通过放宽正文/语义门修复的代码问题。继续保持 `unknown/incomplete`、`not_released`，不把超时伪装成 provider 失败后的语义通过，也不调用 `close`。
 
 ### Verify-code provider 诊断后的最终收敛（2026-08-11）
@@ -979,7 +979,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 - 实现范围严格限于 Phase Card：`llm.py` 将重复的完整 `source_text` 收敛为结构性 `source_outline`，保留完整 trusted Claim/lineage；没有修改 provider、model、`max_tokens=8192`、阈值、page type、section 合同或失败状态。
 - RED/GREEN：新增的长提示词回归先因仍存在 `source_text` 而失败，修复后 focused typed prompt=`2 passed, 71 deselected`；Task 2-B 全套=`73 passed`；相邻 publication/batch/corpus/Task 2-A/LLM/embedding 回归=`187 passed, 2 skipped`。`git diff --check` 待本条材料落盘后重新执行。
 - 官方测试 capture：receipt=`quality/tests/build-code-phase2-feature-20260812.json`，receipt_hash=`61becab4b56df3d36798badfec0404c14369ee6920c11d83a96c88591aac3c7f`，output_hash=`5327c77c9b1025559f2c56c40a6ab881c5202fb0090813f9fc6a8a753ed4d328`，snapshot_tree=`b4994052ecade0823fe4f1f421d782a257b16e5a`，exit=`0`。直接 provider smoke 使用同一 qwen3.6 请求合同返回 HTTP 200、合法 JSON、`finish_reason=stop`，说明提示词长度/截断问题有实测改善，但不等于完整语义出口通过。
-- T013 正确冻结重跑：同一 manifest（sample=`20`、source=`89`、hash=`fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f`）、qwen3.6、15/15 provider calls、`max_tokens=8192`；run_id=`run-768346c90c5f4717beeb1bab7877a031`，evidence=`apply/evidence/T013.semantic-run-20260812-compact.json`，sha256=`7e6d2a2947bd3a3460811b8318389c1e12ea5fbdf516d8d6af297c8baad89d65`，`run_status=completed`、`delivery_status=not_released`。结果为 `0` machine-passing concepts、`0` evidence backtrace、所有问题 `answerable=false`；失败事实保留：2 个 provider claim id 不在 trusted input、2 个输出为非法/截断 JSON、空 `entry_prerequisites`、多项 token/faithfulness mismatch、TopicIndex degraded、版本不符合规则。
+- T013 正确冻结重跑：同一 manifest（sample=`20`、source=`89`、hash=`fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f`）、qwen3.6、15/15 provider calls、`max_tokens=8192`；run_id=`run-768346c90c5f4717beeb1bab7877a031`，evidence=`docs/archive/apply/evidence/T013.semantic-run-20260812-compact.json`，sha256=`7e6d2a2947bd3a3460811b8318389c1e12ea5fbdf516d8d6af297c8baad89d65`，`run_status=completed`、`delivery_status=not_released`。结果为 `0` machine-passing concepts、`0` evidence backtrace、所有问题 `answerable=false`；失败事实保留：2 个 provider claim id 不在 trusted input、2 个输出为非法/截断 JSON、空 `entry_prerequisites`、多项 token/faithfulness mismatch、TopicIndex degraded、版本不符合规则。
 - embedding 端点单独直连可返回 HTTP 200 和 1024 维向量；但本次 T013 使用明确的 `KD_EMBEDDING_TIMEOUT_SECONDS=3`，探针失败后整次按既有合同回退 Jaccard，记录为 degraded，不把它伪装成 embedding 通过。第一次未设短超时的尝试因客户端默认 180 秒等待而停止，未作为成功证据。
 - 本 Phase 只执行一次官方异源审查：attempt=`quality/reviews/attempts/9887ef3f-ee23-48eb-889c-8da9b230445a/attempt.json`，report=`quality/reviews/reports/9887ef3f-ee23-48eb-889c-8da9b230445a.md`；结果 `unavailable`，原因是 review packet 超过 330 KiB（`MATERIAL_INCOMPLETE`），provider 没有被调度，不能写成“无严重发现”。按既定规则不循环重审；Phase 2 质量保持 `incomplete`，但不阻塞同任务继续。
 - 当前交接：prompt compaction 的代码和回归动作完成；T013 仍 `incomplete/not_released`。下一步只基于本条更新后的当前材料重新 capture 测试并进入一次 `verify-code` 反向检查；不降低门槛、不换 provider、不调用 `close`。
@@ -994,7 +994,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 ### Verify-code 当前官方收敛事实：Phase 2 bounded review 后（2026-08-12）
 
 - 已重新 capture 当前树并执行最终命令：`uv run --frozen pytest -q && git diff --check`，exit=`0`，`512 passed, 3 skipped`。receipt=`quality/tests/verify-code-final-full-20260812-phase2-v7.json`，receipt_hash=`a7e8fe0616529f4847344a4b58e972af0d01945525c6a3eee7906c5bdf83d1cf`，snapshot_tree=`b33e6a0995453dd75286d58c0aaae4638b3ec43a`，output_hash=`b117f0d3c5b12d2389ae53ee07f40638134f33ea25727c91d1c584d7b251a400`。
-- 已执行一次官方 `verify-code`，输入=`apply/evidence/verify-code-run-input-20260812-phase2-v5.json`；结果为 `stage=in_progress`、`work_status=ready`、`quality_status=incomplete`。官方 predicates：`full_tests_fresh=satisfied`、`finding_dispositions=satisfied`；`independent_review=missing`、`acceptance_criteria=missing`、`exceptions=missing`、`human_confirmation=missing`。
+- 已执行一次官方 `verify-code`，输入=`docs/archive/apply/evidence/verify-code-run-input-20260812-phase2-v5.json`；结果为 `stage=in_progress`、`work_status=ready`、`quality_status=incomplete`。官方 predicates：`full_tests_fresh=satisfied`、`finding_dispositions=satisfied`；`independent_review=missing`、`acceptance_criteria=missing`、`exceptions=missing`、`human_confirmation=missing`。
 - 当前 quality facts：tests=`quality/facts/65bc724a42ae08a2068e734890ffa551f225b584315378f87d68c02e89283066.json`；finding dispositions=`quality/facts/826c21e62480f732ca1c829ef5f9d931c45aff03d44f87cc6b480ed2120a6c01.json`；官方结果还记录 build-code/verify-code 两次 review 的 `OUTPUT_INVALID`、AC-09/10/11 failed、当前 spec 与 acceptance evidence criterion set 不一致、T013 语义出口未闭合。
 - 当前 verification receipt=`quality/evidence/verification-v9.json`，已按最终 capture 的 `snapshot_tree` 绑定；它明确把独立审查、AC、核心缺口和人类交接保留为 `unknown/incomplete`，没有把 512 条测试通过改写成产品通过。
 - 本轮没有 provider 重试、没有改 provider/model/预算/阈值、没有新增代码修复，也没有调用 `close`。Task 2-B 仍保持 `incomplete/not_released`；下一步等待补齐真实语义出口、有效异源审查证据和用户确认。
@@ -1003,7 +1003,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 
 - 真实失败根因已做最小修复：typed provider 之前必须回写 64 字符的 `claim_fingerprint`，当前真实 T013 compact 结果已记录 2 个不在 trusted input 的 claim id；现在 prompt 给 provider 稳定短引用 `c001`、`c002`，validator 在进入依赖、保真和发布门前确定性映射回 trusted `claim_id`/`claim_fingerprint`。不改变固定 page type、section、来源/Evidence、机器阈值、失败状态或 legacy prompt。
 - 按实际 changed files 重新判定测试路由为 `feature` + 一次 `backend-testing`；浏览器 QA 不适用。RED 命令先真实失败 1 个目标断言（缺 `provider_claim_ref`，不是 setup error），GREEN focused/consumer=`166 passed`；全量 `uv run --frozen pytest -q && git diff --check`=`513 passed, 3 skipped`，exit=`0`。
-- 当前 canonical receipt=`quality/tests/build-code-phase2-claim-ref-20260812.json`，receipt_hash=`0180a3d984e8b8ed4e41e448de6fda7f5d599df2c9de5da68ad860b670220fda`，snapshot_tree=`c56f6885302541d39dfb83676b69e98eb62d5061`，output_hash=`ddb11d6dc3356fd063e67729c4da9e97716691e9e60f39dc243e72168d1b8e98`；详细事实=`apply/evidence/T016.provider-claim-ref-repair-20260812.txt`。
+- 当前 canonical receipt=`quality/tests/build-code-phase2-claim-ref-20260812.json`，receipt_hash=`0180a3d984e8b8ed4e41e448de6fda7f5d599df2c9de5da68ad860b670220fda`，snapshot_tree=`c56f6885302541d39dfb83676b69e98eb62d5061`，output_hash=`ddb11d6dc3356fd063e67729c4da9e97716691e9e60f39dc243e72168d1b8e98`；详细事实=`docs/archive/apply/evidence/T016.provider-claim-ref-repair-20260812.txt`。
 - Phase 2 异源审查已经按用户约定只执行一次；既有 attempt=`quality/reviews/attempts/46a34cd0-c5e6-4e65-ae06-575310644579/attempt.json` 在本修复前因 `opencode/v4flash=OUTPUT_INVALID`、`pi/coding=PROCESS_EXIT_NONZERO`、`codex/luna=SAME_SOURCE` 不可用。本修复不重复审查；因此独立审查质量继续为 `incomplete/unknown`，不能说“没有严重 findings”。
 - 这次只完成 provider 引用映射的确定性修复和回归；当前进程没有 provider 凭据环境，未声称 fresh T013 语义运行。最新可用真实语义 evidence 仍是修复前的 `T013.semantic-run-20260812-compact.json`，`0` machine-passing concepts、`0` backtrace、`not_released`，不能替代修复后的语义结果。T016 继续 `incomplete/not_released`，下一步是基于当前材料重新捕获并执行一次普通 `verify-code`，close 前停下。
 
@@ -1019,7 +1019,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 
 ### T016 fresh semantic rerun after claim reference repair（2026-08-12）
 
-- 使用未改变的冻结 manifest/sample（sample=`20`、source=`89`、manifest hash=`fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f`、input fingerprint=`28f547447f97500977b17fb849e612826b8c1bbce461a6c6eb46c4386ff2ac5c`）、qwen3.6、环境变量凭据、`max_tokens=8192` 和 `15/15` provider calls 完成真实语义重跑。证据=`apply/evidence/T013.semantic-run-20260812-claim-ref-v3.json`，run_id=`run-98428571e91c47228e1cc9d9fb841327`，`run_status=completed`、`delivery_status=not_released`。
+- 使用未改变的冻结 manifest/sample（sample=`20`、source=`89`、manifest hash=`fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f`、input fingerprint=`28f547447f97500977b17fb849e612826b8c1bbce461a6c6eb46c4386ff2ac5c`）、qwen3.6、环境变量凭据、`max_tokens=8192` 和 `15/15` provider calls 完成真实语义重跑。证据=`docs/archive/apply/evidence/T013.semantic-run-20260812-claim-ref-v3.json`，run_id=`run-98428571e91c47228e1cc9d9fb841327`，`run_status=completed`、`delivery_status=not_released`。
 - Claim reference 修复在真实运行中生效：本次 failure list 不再出现 provider claim id 不在 trusted input，也不再出现非法/截断 provider JSON；至少一个 mapped typed round 达到 `coverage=1.0`、`faithfulness_status=passed`。这证明修复了原来的 provider 引用协议问题，但不等于整次语义发布通过。
 - 真实出口仍未通过：`concepts=0`、`evidence_backtrace=0`、`section_completeness=0`；失败保留为 TopicIndex degraded 映射、必需 section 为空、backtrace 缺失、部分 faithfulness mismatch 和非法版本。冻结 TopicIndex 中 23 个样本行本来就是 degraded，代码按合同跳过，不猜 page type、不改 Task 1 产物、不放宽门槛；embedding 在固定短超时下回退 Jaccard，交付保持 `not_released`。
 - 本条只补充真实证据，不重复 Phase 2 异源审查，不把 provider transport 成功或测试通过写成语义通过；下一步重新 capture 当前材料并执行一次普通 `verify-code`，close 前停下。
@@ -1043,7 +1043,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 
 - 针对上次真实运行暴露的结构化证据误引用，增加最小实现：typed prompt 从同一 `PageDraft.source_fragments` 给 claim 附加 `source_kind`（如 `table`、`bilingual`、`image`、`code`、`version`），并明确这是处理提示而不是证据；固定 page type、section 合同、trusted claim、门槛、provider/model、预算和失败状态均未改变。
 - RED：`uv run --frozen pytest tests/acceptance/test_task2b_body_compiler.py -q -k 'structured_claim_kind or typed_prompt_compacts_source_context or provider_claim_refs_are_short'`，1 个目标断言失败（缺 `source_kind`，不是 setup error），2 个既有断言通过。GREEN：同命令 `3 passed`；focused/consumer=`167 passed`；全量 `uv run --frozen pytest -q && git diff --check`=`514 passed, 3 skipped`，exit=`0`。
-- 使用同一冻结 manifest/sample/config/provider 做真实语义重跑；sample=`20`、source=`89`、manifest hash=`fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f`、input fingerprint=`28f547447f97500977b17fb849e612826b8c1bbce461a6c6eb46c4386ff2ac5c`、qwen3.6、环境变量凭据、`max_tokens=8192`、`14/14` planned/observed provider calls。证据=`apply/evidence/T013.semantic-run-20260812-source-kind-v1.json`，run_id=`run-84c8857251da4746a392308d4f4b8d61`，`run_status=completed`、`delivery_status=not_released`。
+- 使用同一冻结 manifest/sample/config/provider 做真实语义重跑；sample=`20`、source=`89`、manifest hash=`fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f`、input fingerprint=`28f547447f97500977b17fb849e612826b8c1bbce461a6c6eb46c4386ff2ac5c`、qwen3.6、环境变量凭据、`max_tokens=8192`、`14/14` planned/observed provider calls。证据=`docs/archive/apply/evidence/T013.semantic-run-20260812-source-kind-v1.json`，run_id=`run-84c8857251da4746a392308d4f4b8d61`，`run_status=completed`、`delivery_status=not_released`。
 - 这次提示有效但没有达到语义出口：`concepts=2`、`evidence_backtrace=234`、`section_completeness=2`，比上次 claim-ref 运行的 `0/0/0` 有改善；但仍有 1 次 provider 非法/截断 JSON、必需 section 为空、保真 mismatch、TopicIndex degraded，且 embedding 运行失败后按合同回退 Jaccard。故不能写成 provider 已通过或产品已发布。
 - 大白话结论：qwen3.6 不是完全跑不通，14 次请求中大部分能返回并产生有效 typed 结果；现在主要问题是模型偶尔截断 JSON，并且仍会把“相关证据”当成“正文已明确说出的证据”，所以严格门禁拒绝发布。opencode 也不是主语义运行 provider；本阶段唯一一次异源审查中 `opencode/v4flash=OUTPUT_INVALID`，因此审查不可用，不能解释成“没有严重问题”，也不重复审查。
 - 当前 T016 保持 `incomplete/not_released`；本条材料追加后必须重新 capture 当前测试并再执行一次当前材料绑定的普通 `verify-code`。不换 provider、不降阈值、不调用 `close`。
@@ -1052,7 +1052,7 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 
 - 已重新 capture 当前材料快照：`uv run --frozen pytest -q && git diff --check`，exit=`0`，`514 passed, 3 skipped`；receipt=`quality/tests/build-code-phase2-source-kind-20260812-v3.json`，receipt_hash=`f18ee6553170b36ce1bd49c0a1105f4432fcd1556bdf33ba7a17930fadfab7b1`，snapshot_tree=`7173d033694c0b25315fc8c055fd529cd7796d06`，output_hash=`259b4f9b96b1bac8c08004d506cd322d0f72006f1298a491b71cb457ac971f23`。
 - 使用当前四份材料、最新测试 receipt、T013 source_kind 真实语义 evidence、既有一次性 Phase 2 review 和 finding dispositions 执行一次官方 `verify-code`；结果 `stage=in_progress`、`work_status=ready`、`quality_status=incomplete`。官方 predicates：`full_tests_fresh=satisfied`、`finding_dispositions=satisfied`；`independent_review=missing`、`acceptance_criteria=missing`、`exceptions=missing`、`human_confirmation=missing`。
-- 最新 verification=`quality/evidence/verification-v16.json`；语义 evidence 通过 canonical wrapper=`quality/evidence/verify-evidence-v7.json` 绑定，原始运行证据仍保留在 `apply/evidence/T013.semantic-run-20260812-source-kind-v1.json`。官方 warnings 如实保留：acceptance criterion set 与当前 spec 不一致、AC-09/10/11 失败证据、一次 review `OUTPUT_INVALID`、真实语义内容和人类确认缺失。
+- 最新 verification=`quality/evidence/verification-v16.json`；语义 evidence 通过 canonical wrapper=`quality/evidence/verify-evidence-v7.json` 绑定，原始运行证据仍保留在 `docs/archive/apply/evidence/T013.semantic-run-20260812-source-kind-v1.json`。官方 warnings 如实保留：acceptance criterion set 与当前 spec 不一致、AC-09/10/11 失败证据、一次 review `OUTPUT_INVALID`、真实语义内容和人类确认缺失。
 - 本次没有重复异源审查，没有改 provider/model/预算/阈值，没有调用 `close`。T016 和 Task 2-B 继续 `incomplete/not_released`，停在 verify-code 的 close 前边界。
 
 ### T016 结构化 Claim 逐条提示修复（2026-08-12）
@@ -1073,16 +1073,16 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 ### 2026-08-12 当前用户授权后的同任务执行事实
 
 - T013 当前尝试先完成了命令面和输入绑定回读：`uv run --frozen digest --help` exit `0`；冻结 sample manifest hash=`fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f`；冻结题集 hash=`8f5cb5e82c66d26f9b92c122ab5ab2c70f1ac9`；隔离输入为 20-example/30-source 的现有本机样本目录。
-- T013 当前尝试在真实 provider 启动前停止：`KD_LLM_API_KEY`、`KD_LLM_MODEL`、`KD_LLM_BASE_URL` 当前均为空/缺失；同时冻结要求的新输出路径 `apply/evidence/T013.semantic-run.json` 已是历史受控文件。历史文件被保留，没有覆盖、重标记或拼接为本次运行证据。
-- 当前 preflight 证据：`apply/evidence/T013.preflight-current-20260812.txt`；当前 T013 结论仍为 `incomplete/not_released`。
-- T014 当前非 provider 回归：Task 2-B focused（排除 semantic evidence file）`74 passed, 1 deselected`；Task 2/Task 2-A 兼容集合 `82 passed, 2 skipped`；全仓 `514 passed, 3 skipped`；均 exit `0`。详细证据：`apply/evidence/T014.final-regression-current-20260812.txt`。
+- T013 当前尝试在真实 provider 启动前停止：`KD_LLM_API_KEY`、`KD_LLM_MODEL`、`KD_LLM_BASE_URL` 当前均为空/缺失；同时冻结要求的新输出路径 `docs/archive/apply/evidence/T013.semantic-run.json` 已是历史受控文件。历史文件被保留，没有覆盖、重标记或拼接为本次运行证据。
+- 当前 preflight 证据：`docs/archive/apply/evidence/T013.preflight-current-20260812.txt`；当前 T013 结论仍为 `incomplete/not_released`。
+- T014 当前非 provider 回归：Task 2-B focused（排除 semantic evidence file）`74 passed, 1 deselected`；Task 2/Task 2-A 兼容集合 `82 passed, 2 skipped`；全仓 `514 passed, 3 skipped`；均 exit `0`。详细证据：`docs/archive/apply/evidence/T014.final-regression-current-20260812.txt`。
 - WorkflowHub 当前测试收据：`quality/tests/build-code-task2b-20260812-v1.json`，由 canonical build-code test capture 生成；当前树绑定为 `7cf8c40e6703c8284527d74b2cec8bf2d60119d8`。
 - 本次没有生产代码变更；确定性测试绿灯不替代 T013 真实语义出口，Task 2-B 仍不能标记完成，Task 2-C 不得继续。
 
 ### 2026-08-12 当前用户授权后的真实语义重跑事实
 
 - 按用户提供的 provider 配置，仅在本次进程环境使用凭据，未写入代码、证据或日志；使用冻结 manifest（sample=`20`、source=`89`、hash=`fb9fad748137827a4814f40b28c945df6e1bf15d4b964185219629894be6370f`）、隔离输入/KB、qwen3.6、`max_tokens=8192`、`14/14` provider calls 和原门槛执行绑定重跑。
-- 运行完成：run_id=`run-9076fc7b8e8440bb96c03f801bf636d8`、`run_status=completed`、`execution_mode=real_semantic`、provider=`https://dashscope.in.whatspos.cn/v1` / `qwen3.6`、credential=`environment-only`；证据=`apply/evidence/T013.semantic-run-current-20260812.json`，sha256=`a47f51cc653f82f1a023683993e480f8cd11d083ca1adf787c3e9f16fc0ea05b`。
+- 运行完成：run_id=`run-9076fc7b8e8440bb96c03f801bf636d8`、`run_status=completed`、`execution_mode=real_semantic`、provider=`https://dashscope.in.whatspos.cn/v1` / `qwen3.6`、credential=`environment-only`；证据=`docs/archive/apply/evidence/T013.semantic-run-current-20260812.json`，sha256=`a47f51cc653f82f1a023683993e480f8cd11d083ca1adf787c3e9f16fc0ea05b`。
 - 真实结果仍未达到语义出口：`concepts=1` 个 machine-passing concept，page type 只有 `module_or_capability`；缺 `product_overview`、`procedure_or_rule`，`evidence_backtrace=168`，`section_completeness=1`，交付=`not_released`。provider 运行成功不等于页面可发布。
 - 当前 validator：`valid=false`、`machine_exit_passed=false`、`reader_eligible=false`；唯一门禁原因是 machine-passing concept `<6` 及两类 page type 缺失。其余 AC 绑定字段与 revision ledger 均存在；不把完整字段伪装成语义出口通过。
 - 本次未改生产代码、未换 provider、未降阈值、未覆盖旧证据；Task 2-B 仍为 `incomplete/not_released`，Task 2-C 继续停在 `make-decision` 前的延期交接。下一步仍需修复真实语义出口并重新执行完整 T013/T014/verify-code 闭环。
@@ -1099,9 +1099,9 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 ### T013/T014 快捷路径实际结果（2026-08-12）
 
 - Task 1 current snapshot completed from the real 89-source corpus: 54 topics, 31 `published`, 23 `degraded`; explicit `page_type` values are source-declared and bound to URI, content fingerprint, locator and topic identity. Old snapshot remains the audit baseline.
-- T013 rerun consumed the current snapshot: run_id=`run-6827d359b90d467c87d3d955d4a6673d`; evidence=`apply/evidence/T013.semantic-run-task1-repair-20260812.json`; sha256=`dd3e746c44edab76500259a61abbca3f97f8a2dcec83ebbbf5356e01d5afd1ce`; `completed` / `real_semantic`; qwen3.6 approved endpoint; environment-only credential; `15/15` provider calls.
+- T013 rerun consumed the current snapshot: run_id=`run-6827d359b90d467c87d3d955d4a6673d`; evidence=`docs/archive/apply/evidence/T013.semantic-run-task1-repair-20260812.json`; sha256=`dd3e746c44edab76500259a61abbca3f97f8a2dcec83ebbbf5356e01d5afd1ce`; `completed` / `real_semantic`; qwen3.6 approved endpoint; environment-only credential; `15/15` provider calls.
 - T013 result: `1` machine-passing concept, page type only `module_or_capability`, `evidence_backtrace=168`, complete sections=`1`; validator `valid=false`, `machine_exit_passed=false`, `reader_eligible=false`; missing `product_overview` and `procedure_or_rule`; delivery=`not_released`.
-- T014 result: Task 1 focused `49 passed`; consumer regression `262 passed, 2 skipped`; full regression `516 passed, 3 skipped`; `git diff --check` passed. Evidence: `apply/evidence/T014.final-regression-task1-repair-20260812.txt` and `apply/evidence/T014.test-routing-task1-repair-20260812.json`.
+- T014 result: Task 1 focused `49 passed`; consumer regression `262 passed, 2 skipped`; full regression `516 passed, 3 skipped`; `git diff --check` passed. Evidence: `docs/archive/apply/evidence/T014.final-regression-task1-repair-20260812.txt` and `docs/archive/apply/evidence/T014.test-routing-task1-repair-20260812.json`.
 - Closure: upstream projection repair is retained, but the semantic exit is still incomplete. No commit/merge/push/cleanup as a completed Task 2-B delivery; Task 2-C remains deferred. Do not retry by lowering gates, guessing page types, or using fixtures/overlays.
 
 ### T013/T014 continuation root-cause audit (2026-08-12)
@@ -1115,8 +1115,8 @@ Phase 1 NEW/MODIFY 与全局 File Boundary 一致；所有生产文件至少由�
 ### T016 当前真实语义与回归结果（2026-08-12）
 
 - 状态：`completed`（Task 2-B 机器出口与 T014 当前回归已完成）；不等于人工读者质量或正式 released。
-- T013 evidence=`apply/evidence/T013.semantic-run-task2b-provider-repair-v9-20260812.json`; run_id=`run-519d5c93591e45faab8e3ef56601a3f1`; evidence sha256=`c38aad3185bd534ee988766d55fc26ee68d5f8b2688f8e00ddb72d23dbbd17e4`; validator=`machine_exit_passed=true`。
+- T013 evidence=`docs/archive/apply/evidence/T013.semantic-run-task2b-provider-repair-v9-20260812.json`; run_id=`run-519d5c93591e45faab8e3ef56601a3f1`; evidence sha256=`c38aad3185bd534ee988766d55fc26ee68d5f8b2688f8e00ddb72d23dbbd17e4`; validator=`machine_exit_passed=true`。
 - 机器结果：12 个通过 concept，三类 page type 均覆盖；delivery=`not_released`。
-- T014 evidence=`apply/evidence/T014.final-regression-task2b-provider-repair-v9-20260812.txt`; Task 1=`49 passed`；消费者=`264 passed, 2 skipped`；全量=`518 passed, 3 skipped`；`git diff --check` 通过。
+- T014 evidence=`docs/archive/apply/evidence/T014.final-regression-task2b-provider-repair-v9-20260812.txt`; Task 1=`49 passed`；消费者=`264 passed, 2 skipped`；全量=`518 passed, 3 skipped`；`git diff --check` 通过。
 - 代码边界：未降低 `>=6`、三类覆盖、连续来源块、归因/保真、版本和 `not_released` 门；只增加 bounded provider repair、列表编号格式归一和确认型 Evidence-dump 安全前缀修复。
 - 延期交接：Task 2-C 必须从 `make-decision` 开始，负责人工读者可用性、正/负题和人类确认；不得把 T013 机器通过当成人工通过。Task 2-B 的 Git 提交、合并、推送、清理另行完成，当前记录不声称已完成。

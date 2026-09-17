@@ -185,7 +185,7 @@ Task 2-B 要在已有 Reader Bundle 上补齐“小语料、类型化、可回�
 
 - **PFACT-007**：真实 T013 v23 来源审计确认 `17 智能搭建` 的唯一冻结来源没有明确异常触发、处理、分支或恢复规则；该事实支持来源缺口状态，不支持任何异常领域 Claim。
   - **status**：`verified`
-  - **证据或来源**：`apply/evidence/T013.semantic-run-v23.json` 及 `tasks.md` 的 T013 来源审计追加事实；来源 URI、content hash 和主题唯一来源关系已核对。
+  - **证据或来源**：`docs/archive/apply/evidence/T013.semantic-run-v23.json` 及 `tasks.md` 的 T013 来源审计追加事实；来源 URI、content hash 和主题唯一来源关系已核对。
   - **关联**：FR-DRAFT-004、FR-PUBLISH-006、FR-SEM-003、AC-13、RISK-005。
 
 ## 5. 功能需求

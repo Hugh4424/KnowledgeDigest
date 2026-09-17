@@ -18,7 +18,7 @@
 - **DO NOT TOUCH**：`src/knowledge_digest/reader_frontmatter.py`、`src/knowledge_digest/llm.py`、`src/knowledge_digest/lock.py`：已有窄接口足够，避免无必要 schema/provider/锁改动。
 - **DO NOT TOUCH**：`config/task0-question-set.v1.json`：冻结输入只读，不临时改题。
 - **DO NOT TOUCH**：`tests/acceptance/test_task2a_reader_bundle.py` 及 `tests/fixtures/task2a_reader_bundle/`：保留 Task2A 回归基线。
-- **DO NOT TOUCH**：`apply/evidence/`、Task2B commit/evidence：只读交接事实，不重新生成或篡改。
+- **DO NOT TOUCH**：`docs/archive/apply/evidence/`、Task2B commit/evidence：只读交接事实，不重新生成或篡改。
 
 ### Tasks
 

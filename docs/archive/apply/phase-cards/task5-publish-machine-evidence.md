@@ -60,7 +60,7 @@
 - `tests/acceptance/test_task5_full_run.py`（仅在已有测试需要补断言时）
 - `tests/test_simple_digest.py`（同一回归测试）
 - `apply/phase-cards/task5-publish-machine-evidence.md`
-- 经用户明确批准的同一 Task5 当前合同文件：`spec.md`、`plan.md`、`tasks.md`、`decision-log.md`、`config/task5-source-not-documented-contract-v2.json`
+- 经用户明确批准的同一 Task5 当前合同文件：`spec.md`、`plan.md`、`tasks.md`、`decision-log.md`、`config/archive/task5/task5-source-not-documented-contract-v2.json`
 
 ## 验收条件
 

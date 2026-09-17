@@ -185,7 +185,7 @@ Task 2-B 要在已有 Reader Bundle 上补齐“小语料、类型化、可回�
 
 - **PFACT-007**：真实 T013 v23 来源审计确认 `17 智能搭建` 的唯一冻结来源没有明确异常触发、处理、分支或恢复规则；该事实支持来源缺口状态，不支持任何异常领域 Claim。
   - **status**：`verified`
-  - **证据或来源**：`apply/evidence/T013.semantic-run-v23.json` 及 `tasks.md` 的 T013 来源审计追加事实；来源 URI、content hash 和主题唯一来源关系已核对。
+  - **证据或来源**：`docs/archive/apply/evidence/T013.semantic-run-v23.json` 及 `tasks.md` 的 T013 来源审计追加事实；来源 URI、content hash 和主题唯一来源关系已核对。
   - **关联**：FR-DRAFT-004、FR-PUBLISH-006、FR-SEM-003、AC-13、RISK-005。
 
 ## 5. 功能需求
@@ -596,8 +596,8 @@ N/A — 本期交付是本地 Markdown/Reader Bundle 的产品行为和机器门
 
 ## 16. 机器出口闭合结果（2026-08-12）
 
-- T013 real evidence=`apply/evidence/T013.semantic-run-task2b-provider-repair-v9-20260812.json`; run_id=`run-519d5c93591e45faab8e3ef56601a3f1`; evidence sha256=`c38aad3185bd534ee988766d55fc26ee68d5f8b2688f8e00ddb72d23dbbd17e4`; canonical validator=`valid=true`、`machine_exit_passed=true`。
+- T013 real evidence=`docs/archive/apply/evidence/T013.semantic-run-task2b-provider-repair-v9-20260812.json`; run_id=`run-519d5c93591e45faab8e3ef56601a3f1`; evidence sha256=`c38aad3185bd534ee988766d55fc26ee68d5f8b2688f8e00ddb72d23dbbd17e4`; canonical validator=`valid=true`、`machine_exit_passed=true`。
 - Result: 12 machine-passing concepts; `module_or_capability=10`、`product_overview=1`、`procedure_or_rule=1`; sample count=20; delivery remains `not_released`。
-- T014 evidence=`apply/evidence/T014.final-regression-task2b-provider-repair-v9-20260812.txt`; Task 1 focused=`49 passed`; consumers=`264 passed, 2 skipped`; full=`518 passed, 3 skipped`; `git diff --check` passed。
+- T014 evidence=`docs/archive/apply/evidence/T014.final-regression-task2b-provider-repair-v9-20260812.txt`; Task 1 focused=`49 passed`; consumers=`264 passed, 2 skipped`; full=`518 passed, 3 skipped`; `git diff --check` passed。
 - The implementation stays inside the accepted contract: no new page type, no threshold reduction, no provider replacement, no global copy-rate gate, and no inferred page type. Deterministic body repair only shortens a confirmed raw source stack in Reader and preserves omitted source Claims in Evidence; ambiguous provider output remains degraded。
 - This closes the Task 2-B machine boundary only. It does not close Task 2-C human reader review, formal release, or Git delivery。

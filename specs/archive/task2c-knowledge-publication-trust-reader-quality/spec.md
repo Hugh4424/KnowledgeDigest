@@ -123,7 +123,7 @@ Task 2-A/2-B 已固定 Reader Bundle、Concept 页面和正文编译边界。Tas
 
 - **PFACT-001**：Task 2-C 依赖 Task 2-B 的小语料正文出口，Task 2-B 已完成本任务所需机器出口。
   - **status**：`verified`
-  - **证据或来源**：Task 2-B commit `2369a853adb4bc70709036c563233cae361222be`；`apply/evidence/T013.semantic-run-task2b-provider-repair-v9-20260812.json` sha256 `c38aad3185bd534ee988766d55fc26ee68d5f8b2688f8e00ddb72d23dbbd17e4`，run `run-519d5c93591e45faab8e3ef56601a3f1`，12 concepts machine-passing，delivery `not_released`；`apply/evidence/T014.final-regression-task2b-provider-repair-v9-20260812.txt` sha256 `c202e04f2a2e208fd2e3b7cb3ad6372e57b38459ab69c9c423180e2cd59a852c`，49/264/518 regression facts verified. 原 detail review 包外限制已通过本次 build-spec handoff recheck 关闭。
+  - **证据或来源**：Task 2-B commit `2369a853adb4bc70709036c563233cae361222be`；`docs/archive/apply/evidence/T013.semantic-run-task2b-provider-repair-v9-20260812.json` sha256 `c38aad3185bd534ee988766d55fc26ee68d5f8b2688f8e00ddb72d23dbbd17e4`，run `run-519d5c93591e45faab8e3ef56601a3f1`，12 concepts machine-passing，delivery `not_released`；`docs/archive/apply/evidence/T014.final-regression-task2b-provider-repair-v9-20260812.txt` sha256 `c202e04f2a2e208fd2e3b7cb3ad6372e57b38459ab69c9c423180e2cd59a852c`，49/264/518 regression facts verified. 原 detail review 包外限制已通过本次 build-spec handoff recheck 关闭。
   - **关联**：FR-READER-001、FR-GATE-001、AC-01、AC-04
 
 - **PFACT-002**：Reader Package 和 Audit/Archive Package 是两个职责不同的包，Reader 是默认阅读入口。

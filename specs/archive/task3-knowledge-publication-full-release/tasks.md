@@ -19,7 +19,7 @@
 - **expected exit**：0
 - **oracle**：ORACLE-TASK3-AGGREGATE
 - **fixtures_services**：仓库 fixtures；真实语料/provider/人工确认由 verify-code 另行运行。
-- **evidence_path**：`apply/evidence/T013.task3-final-aggregate.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T013.task3-final-aggregate.txt`
 - **coverage limits**：不替代真实 89 条、实际 17+3、人工汇总确认和正式 readback。
 - **STOP**：失败、skip 被误写通过或缺真实证据却拟宣称 released 时停止。
 
@@ -68,7 +68,7 @@
 - **gate_cmd**：`bash -lc "uv run --frozen pytest tests/acceptance/test_task3_projection.py -q"`
 - **expected_exit**：1
 - **oracle**：ORACLE-PROJECTION — 目标 assertion 因 semantic 投影、关系或旧路径未实现而失败。
-- **evidence_path**：`apply/evidence/T001.task3-projection.red.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T001.task3-projection.red.txt`
 - **STOP**：命令/fixture/setup 失败、需弱化 AC、扩大 DO NOT TOUCH 或引入新产品决定时停止；RED 必须是目标断言失败。
 - **recovery**：build-code 保留失败证据，只回退本卡实现/fixture；旧正式包和四材料不动。
 - **task risk**：fixture 可能掩盖真实 provider/语料问题；本卡不得越界宣称真实发布完成。
@@ -82,10 +82,10 @@
 - [x] **任务完成**
 - **status**：`completed`
 - **actual_changes**：新增 `tests/acceptance/test_task3_projection.py` 与 `tests/fixtures/task3_full_release/projection-cases.json`，覆盖 semantic 候选、导航、失败隔离、Related 和 old-path 目标 RED。
-- **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task3_projection.py -q`（RED exit 1；目标断言失败）；RED 证据见 `apply/evidence/T001.task3-projection.red.txt`。
-- **evidence_refs**：`apply/evidence/T001.task3-projection.red.txt`；当前聚合回执 `quality/tests/task3-final-aggregate-current.json`。
+- **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task3_projection.py -q`（RED exit 1；目标断言失败）；RED 证据见 `docs/archive/apply/evidence/T001.task3-projection.red.txt`。
+- **evidence_refs**：`docs/archive/apply/evidence/T001.task3-projection.red.txt`；当前聚合回执 `quality/tests/task3-final-aggregate-current.json`。
 - **covered_ac**：AC-02、AC-03、AC-04、AC-11（RED 合同）。
-- **review_fact**：`apply/evidence/phase-review-status.md`（WorkflowHub provider review 仍为真实 `unavailable`，不得视为通过）。
+- **review_fact**：`docs/archive/apply/evidence/phase-review-status.md`（WorkflowHub provider review 仍为真实 `unavailable`，不得视为通过）。
 - **completed_at**：`2026-08-13T03:20:04Z`
 - **执行事实**：本卡只固定目标失败合同；第一次收集阶段 exit 2 暴露缺少 semantic import seam，随后补最小可导入 seam，再用同一 gate 得到目标 RED exit 1。真实 provider review 后续重新补齐材料但未返回终态，保留 unavailable，不伪造 clean。
 
@@ -112,7 +112,7 @@
 - **gate_cmd**：`bash -lc "uv run --frozen pytest tests/acceptance/test_task3_projection.py -q"`
 - **expected_exit**：0
 - **oracle**：ORACLE-PROJECTION — 所有正式页可达、无第二导航、关系有依据且旧路径逐项有结果。
-- **evidence_path**：`apply/evidence/T002.task3-projection.green.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T002.task3-projection.green.txt`
 - **STOP**：命令/fixture/setup 失败、需弱化 AC、扩大 DO NOT TOUCH 或引入新产品决定时停止；RED 必须是目标断言失败。
 - **recovery**：build-code 保留失败证据，只回退本卡实现/fixture；旧正式包和四材料不动。
 - **task risk**：fixture 可能掩盖真实 provider/语料问题；本卡不得越界宣称真实发布完成。
@@ -127,9 +127,9 @@
 - **status**：`completed`
 - **actual_changes**：扩展 `reader_bundle.py`：新增 semantic snapshot 输入分支；候选包固定 `not_released`；生成 canonical Reader/Audit 分流、双向证据 Related、old-path alias/deprecated 结果，并保持 Task2A 接口。
 - **executed_commands**：原始 GREEN gate 3 passed；当前修复后 `uv run --frozen pytest tests/acceptance/test_task3_projection.py -q`（8 passed）；`uv run --frozen pytest tests/acceptance/test_task2a_reader_bundle.py -q`（34 passed）。
-- **evidence_refs**：`apply/evidence/T002.task3-projection.green.txt`；`apply/evidence/task3-p1-routing.json`；`quality/tests/task3-p1-projection-current.json`。
+- **evidence_refs**：`docs/archive/apply/evidence/T002.task3-projection.green.txt`；`docs/archive/apply/evidence/task3-p1-routing.json`；`quality/tests/task3-p1-projection-current.json`。
 - **covered_ac**：AC-02、AC-03、AC-04、AC-11。
-- **review_fact**：`apply/evidence/phase-review-status.md`（修复后 provider review 无可信终态；独立复核提出的遗漏已修复并补负向测试，但不等于 WorkflowHub review 通过）。
+- **review_fact**：`docs/archive/apply/evidence/phase-review-status.md`（修复后 provider review 无可信终态；独立复核提出的遗漏已修复并补负向测试，但不等于 WorkflowHub review 通过）。
 - **completed_at**：`2026-08-13T03:20:04Z`
 - **执行事实**：同一 RED/GREEN gate 已完成；Task2A 回归 34 项通过。候选页面级 `published/degraded` 与包级 `not_released` 保持分层；真实 89 条、provider 语义结果和最终 released 仍未证明。
 
@@ -199,7 +199,7 @@
 - **gate_cmd**：`bash -lc "uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k 'snapshot or quality'"`
 - **expected_exit**：1
 - **oracle**：ORACLE-QUALITY — 因完整 policy/snapshot 或来源、Claim、结构、120/300 行、导航、失败隔离、可重放交付硬门未实现而目标断言失败。
-- **evidence_path**：`apply/evidence/T003.task3-quality.red.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T003.task3-quality.red.txt`
 - **STOP**：命令/fixture/setup 失败、需弱化 AC、扩大 DO NOT TOUCH 或引入新产品决定时停止；RED 必须是目标断言失败。
 - **recovery**：build-code 保留失败证据，只回退本卡实现/fixture；旧正式包和四材料不动。
 - **task risk**：fixture 可能掩盖真实 provider/语料问题；本卡不得越界宣称真实发布完成。
@@ -214,7 +214,7 @@
 - **status**：`completed`
 - **actual_changes**：新增 Task3 snapshot/quality fixtures and acceptance cases；记录完整自动质量门的目标 RED。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k 'snapshot or quality'`（RED exit 1；目标断言失败）。
-- **evidence_refs**：`apply/evidence/T003.task3-quality.red.txt`；`quality/tests/task3-p2-quality-release-current.json`。
+- **evidence_refs**：`docs/archive/apply/evidence/T003.task3-quality.red.txt`；`quality/tests/task3-p2-quality-release-current.json`。
 - **covered_ac**：AC-01、AC-05、AC-06（RED 合同）。
 - **review_fact**：P2 material-completed provider review 运行超过 6 分钟无终态，已停止；不视为通过。
 - **completed_at**：`2026-08-13T03:33:27Z`
@@ -243,7 +243,7 @@
 - **gate_cmd**：`bash -lc "uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k 'snapshot or quality'"`
 - **expected_exit**：0
 - **oracle**：ORACLE-QUALITY — 完整计数/字段及来源、Claim、结构、长度、导航、失败隔离、可重放交付通过；所有阈值/缺失负例 fail-closed。
-- **evidence_path**：`apply/evidence/T004.task3-quality.green.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T004.task3-quality.green.txt`
 - **STOP**：命令/fixture/setup 失败、需弱化 AC、扩大 DO NOT TOUCH 或引入新产品决定时停止；RED 必须是目标断言失败。
 - **recovery**：build-code 保留失败证据，只回退本卡实现/fixture；旧正式包和四材料不动。
 - **task risk**：fixture 可能掩盖真实 provider/语料问题；本卡不得越界宣称真实发布完成。
@@ -258,9 +258,9 @@
 - **status**：`completed`
 - **actual_changes**：新增 `ReaderQualityPolicy`/Task3 assessment；在 `full_release.py` 增加交付硬门；保留 Task2C wrapper/schema。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k 'snapshot or quality'`（GREEN exit 0，22 passed，1 deselected）。
-- **evidence_refs**：`apply/evidence/T004.task3-quality.green.txt`；`quality/tests/task3-p2-quality-release-current.json`。
+- **evidence_refs**：`docs/archive/apply/evidence/T004.task3-quality.green.txt`；`quality/tests/task3-p2-quality-release-current.json`。
 - **covered_ac**：AC-01、AC-05、AC-06。
-- **review_fact**：`apply/evidence/phase-review-status.md`；机器测试回执是 `quality/tests/task3-p2-quality-release-current.json`，不等于独立 review 通过。
+- **review_fact**：`docs/archive/apply/evidence/phase-review-status.md`；机器测试回执是 `quality/tests/task3-p2-quality-release-current.json`，不等于独立 review 通过。
 - **completed_at**：`2026-08-13T03:33:27Z`
 - **执行事实**：自动门覆盖 89 条快照、17+3、15/17、0/3、两个 90%、结构/导航/Claim/来源链/失败隔离/回放材料；真实 89 条仍未验收。
 
@@ -287,7 +287,7 @@
 - **gate_cmd**：`bash -lc "uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k 'summary or release'"`
 - **expected_exit**：1
 - **oracle**：ORACLE-RELEASE — 因包级汇总/确认 seam 或运行模式/旧包保护等必显字段未实现而目标断言失败。
-- **evidence_path**：`apply/evidence/T005.task3-release.red.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T005.task3-release.red.txt`
 - **STOP**：命令/fixture/setup 失败、需弱化 AC、扩大 DO NOT TOUCH 或引入新产品决定时停止；RED 必须是目标断言失败。
 - **recovery**：build-code 保留失败证据，只回退本卡实现/fixture；旧正式包和四材料不动。
 - **task risk**：fixture 可能掩盖真实 provider/语料问题；本卡不得越界宣称真实发布完成。
@@ -302,7 +302,7 @@
 - **status**：`completed`
 - **actual_changes**：新增 summary/release 目标测试；记录汇总与确认发布合同的目标 RED。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k 'summary or release'`（RED exit 1；目标断言失败）。
-- **evidence_refs**：`apply/evidence/T005.task3-release.red.txt`；`quality/tests/task3-p2-quality-release-current.json`。
+- **evidence_refs**：`docs/archive/apply/evidence/T005.task3-release.red.txt`；`quality/tests/task3-p2-quality-release-current.json`。
 - **covered_ac**：AC-07、AC-08、AC-09（RED 合同）。
 - **review_fact**：P2 material-completed provider review 运行超过 6 分钟无终态，已停止；不视为通过。
 - **completed_at**：`2026-08-13T03:33:27Z`
@@ -331,7 +331,7 @@
 - **gate_cmd**：`bash -lc "uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k 'summary or release'"`
 - **expected_exit**：0
 - **oracle**：ORACLE-RELEASE — 汇总必显字段齐全；仅全通过+当前确认可 released；warning 留痕，hard/unknown/缺确认均 not_released。
-- **evidence_path**：`apply/evidence/T006.task3-release.green.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T006.task3-release.green.txt`
 - **STOP**：命令/fixture/setup 失败、需弱化 AC、扩大 DO NOT TOUCH 或引入新产品决定时停止；RED 必须是目标断言失败。
 - **recovery**：build-code 保留失败证据，只回退本卡实现/fixture；旧正式包和四材料不动。
 - **task risk**：fixture 可能掩盖真实 provider/语料问题；本卡不得越界宣称真实发布完成。
@@ -346,7 +346,7 @@
 - **status**：`completed`
 - **actual_changes**：新增 `full_release.py` 的 evidence readback、summary hash、confirmation validation、release decision 与正式根切换入口。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k 'summary or release'`（GREEN exit 0，22 passed，1 deselected）。
-- **evidence_refs**：`apply/evidence/T006.task3-release.green.txt`；`quality/tests/task3-p2-quality-release-current.json`。
+- **evidence_refs**：`docs/archive/apply/evidence/T006.task3-release.green.txt`；`quality/tests/task3-p2-quality-release-current.json`。
 - **covered_ac**：AC-07、AC-08、AC-09。
 - **review_fact**：机器测试通过；P2 provider review 无终态并已停止，不能写成独立 review 通过。
 - **completed_at**：`2026-08-13T03:33:27Z`
@@ -375,7 +375,7 @@
 - **gate_cmd**：`bash -lc "uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k recovery"`
 - **expected_exit**：1
 - **oracle**：ORACLE-RECOVERY — 因锁内 CAS/单根切换和恢复未实现而目标断言失败。
-- **evidence_path**：`apply/evidence/T007.task3-recovery.red.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T007.task3-recovery.red.txt`
 - **STOP**：命令/fixture/setup 失败、需弱化 AC、扩大 DO NOT TOUCH 或引入新产品决定时停止；RED 必须是目标断言失败。
 - **recovery**：build-code 保留失败证据，只回退本卡实现/fixture；旧正式包和四材料不动。
 - **task risk**：fixture 可能掩盖真实 provider/语料问题；本卡不得越界宣称真实发布完成。
@@ -390,7 +390,7 @@
 - **status**：`completed`
 - **actual_changes**：新增 recovery 目标测试；记录锁竞争、stale candidate 与替换失败的目标 RED。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k recovery`（RED exit 1；目标断言失败）。
-- **evidence_refs**：`apply/evidence/T007.task3-recovery.red.txt`；`quality/tests/task3-p2-quality-release-current.json`。
+- **evidence_refs**：`docs/archive/apply/evidence/T007.task3-recovery.red.txt`；`quality/tests/task3-p2-quality-release-current.json`。
 - **covered_ac**：AC-10（RED 合同）。
 - **review_fact**：P2 material-completed provider review 运行超过 6 分钟无终态，已停止；不视为通过。
 - **completed_at**：`2026-08-13T03:33:27Z`
@@ -419,7 +419,7 @@
 - **gate_cmd**：`bash -lc "uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k recovery"`
 - **expected_exit**：0
 - **oracle**：ORACLE-RECOVERY — 并发仅一人提交，失败/离线/fallback 不覆盖旧根且 affected replay 精确。
-- **evidence_path**：`apply/evidence/T008.task3-recovery.green.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T008.task3-recovery.green.txt`
 - **STOP**：命令/fixture/setup 失败、需弱化 AC、扩大 DO NOT TOUCH 或引入新产品决定时停止；RED 必须是目标断言失败。
 - **recovery**：build-code 保留失败证据，只回退本卡实现/fixture；旧正式包和四材料不动。
 - **task risk**：fixture 可能掩盖真实 provider/语料问题；本卡不得越界宣称真实发布完成。
@@ -434,7 +434,7 @@
 - **status**：`completed`
 - **actual_changes**：在 `full_release.py` 实现同设备 staging、`kb_lock`、锁内 candidate hash readback、单一正式根替换和失败回滚。
 - **executed_commands**：原始 GREEN gate 3 passed、20 deselected；当前修复后 `uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k recovery`（5 passed，26 deselected）。
-- **evidence_refs**：`apply/evidence/T008.task3-recovery.green.txt`；`quality/tests/task3-p2-quality-release-current.json`。
+- **evidence_refs**：`docs/archive/apply/evidence/T008.task3-recovery.green.txt`；`quality/tests/task3-p2-quality-release-current.json`。
 - **covered_ac**：AC-10。
 - **review_fact**：机器测试通过；P2 provider review 无终态并已停止，不能写成独立 review 通过。
 - **completed_at**：`2026-08-13T03:33:27Z`
@@ -497,7 +497,7 @@
 - **gate_cmd**：`bash -lc "uv run --frozen pytest tests/acceptance/test_task3_closeout.py -q -k comparison"`
 - **expected_exit**：1
 - **oracle**：ORACLE-COMPARE — 因 Task3 三方 schema/renderer 未实现而目标断言失败。
-- **evidence_path**：`apply/evidence/T009.task3-comparison.red.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T009.task3-comparison.red.txt`
 - **STOP**：命令/fixture/setup 失败、需弱化 AC、扩大 DO NOT TOUCH 或引入新产品决定时停止；RED 必须是目标断言失败。
 - **recovery**：build-code 保留失败证据，只回退本卡实现/fixture；旧正式包和四材料不动。
 - **task risk**：fixture 可能掩盖真实 provider/语料问题；本卡不得越界宣称真实发布完成。
@@ -512,9 +512,9 @@
 - **status**：`completed`
 - **actual_changes**：新增 Task3 closeout fixture/test；固定三方对比目标 RED。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task3_closeout.py -q -k comparison`（RED exit 1；目标断言失败）。
-- **evidence_refs**：`apply/evidence/T009.task3-comparison.red.txt`；`quality/tests/task3-p3-closeout-current.json`。
+- **evidence_refs**：`docs/archive/apply/evidence/T009.task3-comparison.red.txt`；`quality/tests/task3-p3-closeout-current.json`。
 - **covered_ac**：AC-12（RED 合同）。
-- **review_fact**：`apply/evidence/phase-review-status.md`（P3 provider review 真实 `unavailable`，不视为通过）。
+- **review_fact**：`docs/archive/apply/evidence/phase-review-status.md`（P3 provider review 真实 `unavailable`，不视为通过）。
 - **completed_at**：`2026-08-13T03:33:27Z`
 - **执行事实**：失败点是缺少 Task3 三方 comparison seam，不是 fixture/setup 失败，也没有伪造总分。
 
@@ -541,7 +541,7 @@
 - **gate_cmd**：`bash -lc "uv run --frozen pytest tests/acceptance/test_task3_closeout.py -q -k comparison"`
 - **expected_exit**：0
 - **oracle**：ORACLE-COMPARE — 三方与全部固定维度齐全，不可比项明确 N/A。
-- **evidence_path**：`apply/evidence/T010.task3-comparison.green.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T010.task3-comparison.green.txt`
 - **STOP**：命令/fixture/setup 失败、需弱化 AC、扩大 DO NOT TOUCH 或引入新产品决定时停止；RED 必须是目标断言失败。
 - **recovery**：build-code 保留失败证据，只回退本卡实现/fixture；旧正式包和四材料不动。
 - **task risk**：fixture 可能掩盖真实 provider/语料问题；本卡不得越界宣称真实发布完成。
@@ -556,9 +556,9 @@
 - **status**：`completed`
 - **actual_changes**：在 `scripts/task2_publication_comparison.py` 增加 `build_task3_comparison_report()`；复用既有 machine evidence adapter，输出八个固定维度和显式 `N/A`。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task3_closeout.py -q -k comparison`（GREEN exit 0，2 passed，1 deselected）。
-- **evidence_refs**：`apply/evidence/T010.task3-comparison.green.txt`；`apply/evidence/task3-p3-routing.json`；`quality/tests/task3-p3-closeout-current.json`。
+- **evidence_refs**：`docs/archive/apply/evidence/T010.task3-comparison.green.txt`；`docs/archive/apply/evidence/task3-p3-routing.json`；`quality/tests/task3-p3-closeout-current.json`。
 - **covered_ac**：AC-12。
-- **review_fact**：`apply/evidence/phase-review-status.md`；机器测试通过不等于独立 review 通过。
+- **review_fact**：`docs/archive/apply/evidence/phase-review-status.md`；机器测试通过不等于独立 review 通过。
 - **completed_at**：`2026-08-13T03:33:27Z`
 - **执行事实**：每个来源/维度都有 `comparable` 或 `N/A` 与 basis；报告明确 `not_a_release_decision`。
 
@@ -585,7 +585,7 @@
 - **gate_cmd**：`bash -lc "uv run --frozen pytest tests/acceptance/test_task3_closeout.py -q -k entrypoint"`
 - **expected_exit**：1
 - **oracle**：ORACLE-HANDOFF — 因薄入口/交接 seam 未实现而目标断言失败。
-- **evidence_path**：`apply/evidence/T011.task3-entrypoint.red.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T011.task3-entrypoint.red.txt`
 - **STOP**：命令/fixture/setup 失败、需弱化 AC、扩大 DO NOT TOUCH 或引入新产品决定时停止；RED 必须是目标断言失败。
 - **recovery**：build-code 保留失败证据，只回退本卡实现/fixture；旧正式包和四材料不动。
 - **task risk**：fixture 可能掩盖真实 provider/语料问题；本卡不得越界宣称真实发布完成。
@@ -600,9 +600,9 @@
 - **status**：`completed`
 - **actual_changes**：新增薄入口目标测试；固定冻结→候选→质量→对比→汇总→确认→readback 的交接 RED。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task3_closeout.py -q -k entrypoint`（RED exit 1；目标断言失败）。
-- **evidence_refs**：`apply/evidence/T011.task3-entrypoint.red.txt`；`quality/tests/task3-p3-closeout-current.json`。
+- **evidence_refs**：`docs/archive/apply/evidence/T011.task3-entrypoint.red.txt`；`quality/tests/task3-p3-closeout-current.json`。
 - **covered_ac**：AC-13（RED 合同）。
-- **review_fact**：`apply/evidence/phase-review-status.md`（P3 provider review 真实 `unavailable`，不视为通过）。
+- **review_fact**：`docs/archive/apply/evidence/phase-review-status.md`（P3 provider review 真实 `unavailable`，不视为通过）。
 - **completed_at**：`2026-08-13T03:33:27Z`
 - **执行事实**：失败点是薄入口文件/runner 缺失；没有修改 `digest` CLI、正式根或产品范围。
 
@@ -629,7 +629,7 @@
 - **gate_cmd**：`bash -lc "uv run --frozen pytest tests/acceptance/test_task3_closeout.py -q -k entrypoint"`
 - **expected_exit**：0
 - **oracle**：ORACLE-HANDOFF — 交接保持真实状态，只含同步/清理/归档/恢复演练延期。
-- **evidence_path**：`apply/evidence/T012.task3-entrypoint.green.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T012.task3-entrypoint.green.txt`
 - **STOP**：命令/fixture/setup 失败、需弱化 AC、扩大 DO NOT TOUCH 或引入新产品决定时停止；RED 必须是目标断言失败。
 - **recovery**：build-code 保留失败证据，只回退本卡实现/fixture；旧正式包和四材料不动。
 - **task risk**：fixture 可能掩盖真实 provider/语料问题；本卡不得越界宣称真实发布完成。
@@ -644,9 +644,9 @@
 - **status**：`completed`
 - **actual_changes**：新增 `scripts/task3_full_release.py`；只编排既有 seam，readback 决定真实 `released/not_released`，并写 Closeout handoff。
 - **executed_commands**：`uv run --frozen pytest tests/acceptance/test_task3_closeout.py -q -k entrypoint`（GREEN exit 0，1 passed，2 deselected）。
-- **evidence_refs**：`apply/evidence/T012.task3-entrypoint.green.txt`；`apply/evidence/task3-p3-routing.json`；`quality/tests/task3-p3-closeout-current.json`。
+- **evidence_refs**：`docs/archive/apply/evidence/T012.task3-entrypoint.green.txt`；`docs/archive/apply/evidence/task3-p3-routing.json`；`quality/tests/task3-p3-closeout-current.json`。
 - **covered_ac**：AC-13。
-- **review_fact**：`apply/evidence/phase-review-status.md`；真实 89 条、正式 readback 和 verify-code review 仍未完成。
+- **review_fact**：`docs/archive/apply/evidence/phase-review-status.md`；真实 89 条、正式 readback 和 verify-code review 仍未完成。
 - **completed_at**：`2026-08-13T03:33:27Z`
 - **执行事实**：交接只包含实际结果、状态、风险和延期 owner；Closeout scope 固定为文档同步/归档/清理/恢复演练，不得改写业务状态。
 
@@ -673,7 +673,7 @@
 - **gate_cmd**：`bash -lc "uv run --frozen pytest -q tests/acceptance/test_task3_projection.py tests/acceptance/test_task3_quality_release.py tests/acceptance/test_task3_closeout.py tests/acceptance/test_task2c_reader_quality.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task1_topic_axis.py tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_corpus_regression.py && uv run --frozen pytest -q"`
 - **expected_exit**：0
 - **oracle**：ORACLE-TASK3-AGGREGATE — 专项、相关回归和全仓均 exit 0；任何 skip/unavailable 单独保留，不能被当通过。
-- **evidence_path**：`apply/evidence/T013.task3-final-aggregate.txt`
+- **evidence_path**：`docs/archive/apply/evidence/T013.task3-final-aggregate.txt`
 - **STOP**：任一命令失败、测试 skip 被误写通过、真实证据缺失却拟宣称 released，或 changed files 超出 plan boundary。
 - **recovery**：build-code/verify-code 保留失败输出，修复对应 owning task 后重跑；不修改阈值或覆盖旧正式包。
 - **task risk**：长聚合可能掩盖单项失败；evidence 必须保留逐命令 exit、skip 和覆盖限制。
@@ -688,15 +688,15 @@
 - **status**：`in_progress`
 - **actual_changes**：新增 P3 phase card、T013 聚合证据，并执行相关集成与全仓测试。
 - **executed_commands（初次无外部语料快照）**：相关集成 exit 0（186 passed，3 skipped）；全仓 `uv run --frozen pytest -q` exit 0（609 passed，3 skipped）；`git diff --check` exit 0；`python -m compileall -q` exit 0。后续真实语料补跑见本卡追加事实。
-- **evidence_refs**：`apply/evidence/T013.task3-final-aggregate.txt`；`quality/tests/task3-final-aggregate-current.json`；`quality/tests/output/task3-final-aggregate-current.output`。
+- **evidence_refs**：`docs/archive/apply/evidence/T013.task3-final-aggregate.txt`；`quality/tests/task3-final-aggregate-current.json`；`quality/tests/output/task3-final-aggregate-current.output`。
 - **covered_ac**：AC-01～AC-13 的技术测试聚合；真实验收仍是 unavailable/deferred。
-- **review_fact**：`apply/evidence/phase-review-status.md`；final integration review 当前没有可信 provider 终态，不能写成 clean review 或完成 build-code。
+- **review_fact**：`docs/archive/apply/evidence/phase-review-status.md`；final integration review 当前没有可信 provider 终态，不能写成 clean review 或完成 build-code。
 - **completed_at**：N/A — final review and verify-code not completed
 - **执行事实**：测试通过不等于 released。3 个 skip 的原因已逐项记录；真实 89 条、真实 provider、summary confirmation 和 locked readback 交给 verify-code。最新独立只读复核为 clean，但 WorkflowHub provider review 仍 unavailable，不把本地复核写成 WorkflowHub 通过，也不把它写成 released。
 - **历史执行事实（真实语料首次补跑）**：设置 `KNOWLEDGEDIGEST_TASK1_RAW_CORPUS='/Users/Hugh/Downloads/confluence 原始数据'` 后，Task1 真实 89 条检查 exit 0（49 passed）；相关集成 `198 passed, 3 skipped`；全仓 `621 passed, 3 skipped`。3 个 skip 是固定 Task1/Task2 基线目录缺失，不是测试通过。该结果只证明当时的真实 89 条控制面回归。
 - **历史执行事实（真实 provider 首次语义运行）**：使用 `qwen3.6` 对冻结的 89 条输入运行；20/20 调用完成，正题 13/17、负题误命中 0/3；因正题低于 15/17，质量状态为 `failed`。该结果保留为根因复现证据，不能覆盖当前结果。
 - **执行事实（verify-code 当前验收）**：已按 R-001～R-005 → decision-log → spec → 完整入口/成功/失败/恢复流程 → plan/tasks → AC → 测试/证据反向核对；AC-01～08、AC-11～13 中已证明项按当前证据更新，AC-09 因没有 summary confirmation 保持 unknown，AC-10 因没有真实 affected replay 保持 unknown。`quality/verify.json` 明确为 `incomplete`；WorkflowHub provider review `unavailable` 不算 pass；整包保持 `not_released`，不进入 close。
-- **执行事实（真实 provider 语义修复后重跑，2026-08-13）**：先用真实页面和来源链复核 4 个失败题，确认失败根因是宽泛问题缺少结构化页面契约，Qwen 保守返回 `no_match`，不是导航断链或来源缺失。新增 `task3-reader-question-contract-v1`：对范围/边界、当前/历史版本、异常/来源排查、独立阅读完整性做 fail-closed 判定；保留原始 provider 响应，只有有明确页面证据时才使用确定性结果。随后按独立审查发现再收紧 provider contract、页面 section 实质内容、目标页绑定和权威 assessor 接入。最终重跑 run `run-a21c831619c44834`：20/20 provider 调用完成，正题 17/17，负题误命中 0/3，标题和归属 30/31，交付硬门通过，质量门通过；4 个 provider 分歧均有 `provider_response`、`question_oracle` 和 `answer_source` 记录。相关集成 `211 passed, 3 skipped`，全仓 `634 passed, 3 skipped`，`compileall` 和 `git diff --check` 通过。正式根保护/readback 仍不可用，summary 为 `incomplete`，包级仍为 `not_released`；没有执行 confirmation、close 或正式根切换。证据：`apply/evidence/task3-quality-root-cause-20260813.md`、`apply/evidence/task3-real-semantic-run-20260813.md`、`quality/tests/task3-final-aggregate-current.json`。
+- **执行事实（真实 provider 语义修复后重跑，2026-08-13）**：先用真实页面和来源链复核 4 个失败题，确认失败根因是宽泛问题缺少结构化页面契约，Qwen 保守返回 `no_match`，不是导航断链或来源缺失。新增 `task3-reader-question-contract-v1`：对范围/边界、当前/历史版本、异常/来源排查、独立阅读完整性做 fail-closed 判定；保留原始 provider 响应，只有有明确页面证据时才使用确定性结果。随后按独立审查发现再收紧 provider contract、页面 section 实质内容、目标页绑定和权威 assessor 接入。最终重跑 run `run-a21c831619c44834`：20/20 provider 调用完成，正题 17/17，负题误命中 0/3，标题和归属 30/31，交付硬门通过，质量门通过；4 个 provider 分歧均有 `provider_response`、`question_oracle` 和 `answer_source` 记录。相关集成 `211 passed, 3 skipped`，全仓 `634 passed, 3 skipped`，`compileall` 和 `git diff --check` 通过。正式根保护/readback 仍不可用，summary 为 `incomplete`，包级仍为 `not_released`；没有执行 confirmation、close 或正式根切换。证据：`docs/archive/apply/evidence/task3-quality-root-cause-20260813.md`、`docs/archive/apply/evidence/task3-real-semantic-run-20260813.md`、`quality/tests/task3-final-aggregate-current.json`。
 
 - **执行事实（正式交付边界复审，2026-08-13）**：首次空目标补了真实安装后的 locked readback；批次拆分场景中“父失败、子成功”按已完成处理，不再重复重放；非法旧 formal tree hash 会直接停止 replay。对应 acceptance 负例已加入；修复后专项 P1/P2/P3 为 `9/57/9 passed`，相关聚合 `216 passed, 3 skipped`，全仓 `639 passed, 3 skipped`；`28e20517ef4f7b8fbfef2de9a7af0dbf958089f90cb57556ff8053e0de6ff0e9` 是当前回执声明文件集的快照 hash。
 

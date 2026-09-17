@@ -160,7 +160,7 @@ RED/GREEN 使用同一命令和 oracle；build-plan 不执行测试。
 
 | Target | Task | Role | gate_cmd / expected_exit | Oracle / evidence_path |
 | --- | --- | --- | --- | --- |
-| AC-02/03/04/11 | T001/T002 | RED/GREEN | `uv run --frozen pytest tests/acceptance/test_task3_projection.py -q` / nonzero→0 | ORACLE-PROJECTION / `apply/evidence/T001...`, `T002...` |
+| AC-02/03/04/11 | T001/T002 | RED/GREEN | `uv run --frozen pytest tests/acceptance/test_task3_projection.py -q` / nonzero→0 | ORACLE-PROJECTION / `docs/archive/apply/evidence/T001...`, `T002...` |
 | AC-01/05/06 | T003/T004 | RED/GREEN | `uv run --frozen pytest tests/acceptance/test_task3_quality_release.py -q -k 'snapshot or quality'` / nonzero→0 | ORACLE-QUALITY / T003,T004 evidence |
 | AC-07/08/09 | T005/T006 | RED/GREEN | same file `-k 'summary or release'` / nonzero→0 | ORACLE-RELEASE / T005,T006 evidence |
 | AC-10 | T007/T008 | RED/GREEN | same file `-k recovery` / nonzero→0 | ORACLE-RECOVERY / T007,T008 evidence |
@@ -296,7 +296,7 @@ P1 先补候选投影和导航；P2 才能在冻结候选上执行完整质量�
 
 ### Verify
 
-ORACLE-PROJECTION — `uv run --frozen pytest tests/acceptance/test_task3_projection.py -q`；RED 非零，GREEN 0；证据 `apply/evidence/T001...`、`T002...`。
+ORACLE-PROJECTION — `uv run --frozen pytest tests/acceptance/test_task3_projection.py -q`；RED 非零，GREEN 0；证据 `docs/archive/apply/evidence/T001...`、`T002...`。
 
 ### Knowledge
 

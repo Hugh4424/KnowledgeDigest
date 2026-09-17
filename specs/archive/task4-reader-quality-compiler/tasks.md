@@ -11,9 +11,9 @@
 
 ### Files
 
-- **NEW**：`config/task4-source-coverage-89-input.v1.json`；`config/task4-reader-case-matrix-89-input.v1.json`；`config/task4-semantic-baseline.v1.json`；`config/task4-page-type-registry.v1.json`；`config/task4-reader-evaluator.v1.json`
-- **MODIFY**：`config/task4-reader-quality.v1.json`；`src/knowledge_digest/task4_reader_quality.py`；`scripts/task4_reader_quality.py`；`tests/acceptance/test_task4_full_compiler.py`；`tests/acceptance/test_task4_full_quality.py`
-- **DO NOT TOUCH**：`decision-log.md`、`spec.md`、原始 89 条、CompanyBrain、`config/task4-question-oracle.v1.json`、正式 Task1–Task3 模块。
+- **NEW**：`config/task4-source-coverage-89-input.v1.json`；`config/archive/task4/task4-reader-case-matrix-89-input.v1.json`；`config/archive/task4/task4-semantic-baseline.v1.json`；`config/archive/task4/task4-page-type-registry.v1.json`；`config/archive/task4/task4-reader-evaluator.v1.json`
+- **MODIFY**：`config/archive/task4/task4-reader-quality.v1.json`；`src/knowledge_digest/task4_reader_quality.py`；`scripts/task4_reader_quality.py`；`tests/acceptance/test_task4_full_compiler.py`；`tests/acceptance/test_task4_full_quality.py`
+- **DO NOT TOUCH**：`decision-log.md`、`spec.md`、原始 89 条、CompanyBrain、`config/archive/task4/task4-question-oracle.v1.json`、正式 Task1–Task3 模块。
 
 ### Tasks
 
@@ -31,7 +31,7 @@
 - **FR**：FR-SOURCE-001、FR-SOURCE-002、FR-STATE-002
 - **AC**：AC-001、AC-SOURCE-001、AC-SOURCE-002、AC-STATE-001、AC-STATE-002
 - **动作**：只增加失败断言和冻结 fixture，不修改生产实现。测试必须同时覆盖真实 89 manifest 绑定、一个配置变体、损坏/缺失来源、取消和 manifest drift。
-- **精确文件**：`config/task4-source-coverage-89-input.v1.json`；`config/task4-reader-quality.v1.json`；`tests/acceptance/test_task4_full_compiler.py`
+- **精确文件**：`config/task4-source-coverage-89-input.v1.json`；`config/archive/task4/task4-reader-quality.v1.json`；`tests/acceptance/test_task4_full_compiler.py`
 - **boundary**：files: 上述三项; symbols/regions: `_config`/fixture helpers、source manifest assertions、failure/cancel tests；不得改正式 Task1–Task3 模块。
 - **输出**：RED 回执目标，至少包含 expected 89、observed count、source id/content hash、失败 reason code 和 `bundle/Home.md` 不存在。
 - **Knowledge**：当前 `compile_full_reader` 以默认 89 和 `core_source_patterns` 判断候选；正式 `ingest`/`batch_run` 可提供稳定 manifest 和 replay 事实。
@@ -75,7 +75,7 @@
 - **FR**：FR-SOURCE-001、FR-SOURCE-002、FR-STATE-002
 - **AC**：AC-001、AC-SOURCE-001、AC-SOURCE-002、AC-STATE-001、AC-STATE-002
 - **动作**：最小修改 Task4 adapter/config，复用正式快照、身份和 batch manifest；把样本 89 放入 fixture 校验，不放入默认编译逻辑；staging 只有全量硬门通过才切换。
-- **精确文件**：`config/task4-source-coverage-89-input.v1.json`；`config/task4-reader-quality.v1.json`；`src/knowledge_digest/task4_reader_quality.py`；`tests/acceptance/test_task4_full_compiler.py`
+- **精确文件**：`config/task4-source-coverage-89-input.v1.json`；`config/archive/task4/task4-reader-quality.v1.json`；`src/knowledge_digest/task4_reader_quality.py`；`tests/acceptance/test_task4_full_compiler.py`
 - **boundary**：files: 上述四项; symbols/regions: `_load_config`、`_collect_sources`/source adapter、`compile_full_reader` preflight/status/publish；不得修改正式模块。
 - **输出**：GREEN 回执、89 条 source manifest、稳定 id/hash、失败/取消/drift Audit、候选包状态和旧 Reader 保护事实。
 - **Knowledge**：T001 的失败 oracle 和 fixture 绑定方式；source denominator 只来自 manifest/config fixture，不来自默认常量。
@@ -119,7 +119,7 @@
 - **FR**：FR-SEMANTIC-001、FR-SEMANTIC-002、FR-SEMANTIC-003、FR-SEMANTIC-004、FR-SEMANTIC-005、FR-READER-001、FR-READER-002、FR-READER-003、FR-READER-004、FR-AUDIT-001、FR-AUDIT-002、FR-AUDIT-003、FR-STATE-002
 - **AC**：AC-COMPILER-001、AC-COMPILER-002、AC-COMPILER-003、AC-COMPILER-004、AC-COMPILER-005、AC-READER-001、AC-READER-002、AC-READER-003、AC-READER-004、AC-STATE-002、AC-AUDIT-001、AC-AUDIT-002
 - **动作**：只增加正例/负例断言和 fixture，不改生产实现。覆盖：真实来源可读标题/路径；至少两个 evidence fragment 的新节点；单证据 pending；冲突；关系 target；页面类型必需 section；Reader link 只到 Reader projection；`source_uri/provider/claim_id/fingerprint` 不出现。
-- **精确文件**：`config/task4-semantic-baseline.v1.json`；`config/task4-page-type-registry.v1.json`；`config/task4-reader-quality.v1.json`；`tests/acceptance/test_task4_full_compiler.py`
+- **精确文件**：`config/archive/task4/task4-semantic-baseline.v1.json`；`config/archive/task4/task4-page-type-registry.v1.json`；`config/archive/task4/task4-reader-quality.v1.json`；`tests/acceptance/test_task4_full_compiler.py`
 - **boundary**：files: 上述四项; symbols/regions: taxonomy/semantic/page/body/navigation/provenance assertions；不改 formal module。
 - **输出**：RED 证据必须能指出至少一个 `ae`/通用/错分类/单证据放行/正文缺失/内部泄漏/关系坏链断言失败。
 - **Knowledge**：CompanyBrain 的优势是编辑后的语义产品→模块→对象/场景→任务结构；不能把其固定路径直接复制为 KD 分类。
@@ -163,7 +163,7 @@
 - **FR**：FR-SEMANTIC-001、FR-SEMANTIC-002、FR-SEMANTIC-003、FR-SEMANTIC-004、FR-SEMANTIC-005、FR-READER-001、FR-READER-002、FR-READER-003、FR-READER-004、FR-AUDIT-001、FR-AUDIT-002、FR-AUDIT-003、FR-STATE-002
 - **AC**：AC-COMPILER-001、AC-COMPILER-002、AC-COMPILER-003、AC-COMPILER-004、AC-COMPILER-005、AC-READER-001、AC-READER-002、AC-READER-003、AC-READER-004、AC-STATE-002、AC-AUDIT-001、AC-AUDIT-002
 - **动作**：把当前平行 keyword compiler 改为薄适配层；移除默认 89、`ae-`/旧文件名规则和 `通用` 伪分类；实现 semantic node admission、relation ledger、page-type body；用正式模块做身份、Claim、分页、Reader projection、导航、溯源和 staging；更新 root-cause 链。
-- **精确文件**：`config/task4-reader-quality.v1.json`；`config/task4-semantic-baseline.v1.json`；`config/task4-page-type-registry.v1.json`；`src/knowledge_digest/task4_reader_quality.py`；`tests/acceptance/test_task4_full_compiler.py`
+- **精确文件**：`config/archive/task4/task4-reader-quality.v1.json`；`config/archive/task4/task4-semantic-baseline.v1.json`；`config/archive/task4/task4-page-type-registry.v1.json`；`src/knowledge_digest/task4_reader_quality.py`；`tests/acceptance/test_task4_full_compiler.py`
 - **boundary**：files: 上述五项; symbols/regions: `_load_config`、taxonomy/semantic helpers、`_extract_content`、`_render_topic_page`、`compile_full_reader` 和对应 tests；不得改 formal module API/正式发布链。
 - **输出**：GREEN Reader bundle、Home→产品→模块→主题可达；每页有 page-type sections、可读文件名、关系、来源简表；Audit 记录 pending/conflict/degraded；claim/source lineage 可回查。
 - **Knowledge**：T003 真实失败事实；新节点 admission 不是目录猜测；Reader projection 与 Audit projection 分离。
@@ -187,7 +187,7 @@
 - **status**：`completed`
 - **actual_changes**：把分类、命名、正文、关系、来源投影和 staging 发布收敛到同一 topic/semantic node；CLI 保持 Task4 独立，不碰 formal pipeline。
 - **executed_commands**：`env PYTHONDONTWRITEBYTECODE=1 uv run --frozen pytest -q -p no:cacheprovider tests/acceptance/test_task4_full_compiler.py`；exit `0`，`8 passed`。
-- **evidence_refs**：`src/knowledge_digest/task4_reader_quality.py`；`scripts/task4_reader_quality.py`；`config/task4-semantic-baseline.v1.json`；`config/task4-page-type-registry.v1.json`。
+- **evidence_refs**：`src/knowledge_digest/task4_reader_quality.py`；`scripts/task4_reader_quality.py`；`config/archive/task4/task4-semantic-baseline.v1.json`；`config/archive/task4/task4-page-type-registry.v1.json`。
 - **covered_ac**：同 T003；真实 89 运行和最终三轴结果仍交 verify-code。
 - **review_fact**：P1 review unavailable，质量声明 incomplete。
 - **completed_at**：`2026-08-19T01:18:00Z`
@@ -207,7 +207,7 @@
 - **FR**：FR-READER-003、FR-READER-004、FR-AUDIT-001、FR-AUDIT-002、FR-AUDIT-003、FR-QUALITY-001、FR-QUALITY-002、FR-QUALITY-003
 - **AC**：AC-READER-003、AC-READER-004、AC-STATE-001、AC-STATE-002、AC-AUDIT-001、AC-AUDIT-002、AC-QUALITY-001、AC-QUALITY-002、AC-QUALITY-003、AC-QUALITY-004、AC-QUALITY-005
 - **动作**：只补 case/evaluator fixture、对比结果和负例断言，不改生产评估器。覆盖路径首命中/跳数、答案 completeness、boundary/source clarity、N/A/unknown/critical、负向 false hit、baseline hash/session isolation。
-- **精确文件**：`config/task4-source-coverage-89-input.v1.json`；`config/task4-reader-case-matrix-89-input.v1.json`；`config/task4-reader-evaluator.v1.json`；`tests/acceptance/test_task4_full_quality.py`
+- **精确文件**：`config/task4-source-coverage-89-input.v1.json`；`config/archive/task4/task4-reader-case-matrix-89-input.v1.json`；`config/archive/task4/task4-reader-evaluator.v1.json`；`tests/acceptance/test_task4_full_quality.py`
 - **boundary**：files: 上述四项; symbols/regions: case/evaluator loaders、comparison assertions、receipt assertions；不改旧历史 oracle。
 - **输出**：RED 证据应指出当前 17+3、human table、固定 89、关键词/首页面扫描等缺口至少一项。
 - **Knowledge**：quality denominator=M；`N/A` 表示 CompanyBrain 真无主题，delta=0；unknown/critical evidence missing=undecidable。
@@ -251,7 +251,7 @@
 - **FR**：FR-READER-003、FR-READER-004、FR-AUDIT-001、FR-AUDIT-002、FR-AUDIT-003、FR-QUALITY-001、FR-QUALITY-002、FR-QUALITY-003
 - **AC**：AC-READER-003、AC-READER-004、AC-STATE-001、AC-STATE-002、AC-AUDIT-001、AC-AUDIT-002、AC-QUALITY-001、AC-QUALITY-002、AC-QUALITY-003、AC-QUALITY-004、AC-QUALITY-005
 - **动作**：重写 `_machine_quality`/`assess_reader_quality` 的入口和聚合：从 fixture 读取 source denominator/case denominator；使用唯一 comparison key 和真实 Home route；实现 N/A/unknown/critical 分支、axis delta、严格聚合、根因链；移除 `_load_human_table` consumer 和旧 17+3 硬编码；CLI 改为 `--quality-config`。
-- **精确文件**：`config/task4-reader-case-matrix-89-input.v1.json`；`config/task4-reader-evaluator.v1.json`；`config/task4-reader-quality.v1.json`；`src/knowledge_digest/task4_reader_quality.py`；`scripts/task4_reader_quality.py`；`tests/acceptance/test_task4_full_quality.py`
+- **精确文件**：`config/archive/task4/task4-reader-case-matrix-89-input.v1.json`；`config/archive/task4/task4-reader-evaluator.v1.json`；`config/archive/task4/task4-reader-quality.v1.json`；`src/knowledge_digest/task4_reader_quality.py`；`scripts/task4_reader_quality.py`；`tests/acceptance/test_task4_full_quality.py`
 - **boundary**：files: 上述六项; symbols/regions: evaluator loaders、`_machine_quality`、`assess_reader_quality`、CLI assess parser、quality tests；不改变 formal Reader release chain。
 - **输出**：质量 JSON/Markdown、evaluator receipt、root cause、release summary；明确 source_count=89、case_count=M、unknown/N/A/critical 计数和严格结论。
 - **Knowledge**：T005 目标失败事实；没有人工表也能运行；CompanyBrain 只读、baseline-first、session isolated、network disabled。
@@ -275,7 +275,7 @@
 - **status**：`completed`
 - **actual_changes**：重写 `_machine_quality`/`assess_reader_quality` 为 quality-config/case-matrix 入口；输出逐 case 三轴、receipt、根因和 release summary；CLI 改为 `--quality-config`。
 - **executed_commands**：`env PYTHONDONTWRITEBYTECODE=1 uv run --frozen pytest -q -p no:cacheprovider tests/acceptance/test_task4_full_quality.py`；exit `0`，`4 passed`。
-- **evidence_refs**：`src/knowledge_digest/task4_reader_quality.py`；`scripts/task4_reader_quality.py`；`config/task4-reader-case-matrix-89-input.v1.json`；`config/task4-reader-evaluator.v1.json`。
+- **evidence_refs**：`src/knowledge_digest/task4_reader_quality.py`；`scripts/task4_reader_quality.py`；`config/archive/task4/task4-reader-case-matrix-89-input.v1.json`；`config/archive/task4/task4-reader-evaluator.v1.json`。
 - **covered_ac**：同 T005；业务结论仅在机器证据完整时报告，仍不代表 formal released。
 - **review_fact**：P1 review unavailable，未声称 provider clean。
 - **completed_at**：`2026-08-19T01:20:00Z`
@@ -329,7 +329,7 @@
 
 - **最新回归**：聚焦 `test_task4_full_compiler.py`、`test_task4_full_quality.py`、`test_task4_companybrain_mapping.py` 为 `34 passed`；仓库全量为 `731 passed, 3 skipped in 28.73s`。
 - **最新真实产物**：v38 89 条为 `source_count=89 / reader_source_count=88 / failure_count=1 / package_status=not_released`，失败源仍是 `emm for android /AE - AirViewer厂商管理.md` 的 `empty_body`。
-- **最新映射**：`config/task4-companybrain-mapping-20260819-v13-89.json` 使用完整 1,406 文件 manifest、716 页 Reader scope 和 typed `ck1` key；89 行为 `5 unique / 83 not_applicable / 1 undecidable`，不可证明身份不再被 fuzzy 猜测。
+- **最新映射**：`config/archive/task4/task4-companybrain-mapping-20260819-v13-89.json` 使用完整 1,406 文件 manifest、716 页 Reader scope 和 typed `ck1` key；89 行为 `5 unique / 83 not_applicable / 1 undecidable`，不可证明身份不再被 fuzzy 猜测。
 - **最新对照**：v37 88 条可读诊断状态为 `better_than_companybrain`；路径和边界/来源清晰度更好，答案完整度不差；正式 89 仍不计为通过。
 - **当前 verify-code 结论**：没有新的严重代码 finding；正式 89 条被原始空文件阻断，`quality/verify.json` 保持 `incomplete`、`close_authorized=false`。
 - **交接结论**：自动化实现回归通过；空源、CompanyBrain 基线身份漂移和未证明映射仍未闭环，verify-code 只能如实反向报告，当前不得 close。

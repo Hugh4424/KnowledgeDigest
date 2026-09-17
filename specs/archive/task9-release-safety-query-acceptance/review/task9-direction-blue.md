@@ -1,7 +1,7 @@
 # task9 / K3 方向审查 · 蓝队（构建性：可实施性 + 完整性）
 
 范围：审查已收敛方向（packet 第 9-18 行）对母任务 K3 的 5 条 FR/AC、S2/S5/S8 与 K1/K2 交接接口的覆盖。只读取证，未改仓库。
-取证基线：`full_release.py`、`publisher.py`、`semantic_audit.py`、`semantic_nav_check.py`、`semantic_cli.py`、`semantic_navigation.py`、`semantic_compiler.py`、`config/task0-question-set.v1.json`、`config/task4-question-oracle.v1.json`、K1/K2 spec 与母任务 PRD/decision-log、磁盘事实。
+取证基线：`full_release.py`、`publisher.py`、`semantic_audit.py`、`semantic_nav_check.py`、`semantic_cli.py`、`semantic_navigation.py`、`semantic_compiler.py`、`config/task0-question-set.v1.json`、`config/archive/task4/task4-question-oracle.v1.json`、K1/K2 spec 与母任务 PRD/decision-log、磁盘事实。
 
 ## 逐条核对（FR/AC 覆盖结论）
 
@@ -24,7 +24,7 @@ M1 | `publisher.py:96-132`（111-113 硬编码 null）；`full_release.py:1247-1
 
 M2 | packet 第 13 行；`full_release.py:296`；`semantic_compiler.py:341-342` | 判据只冻结了「输入 89 份 + 改造前产物 + 对照库」三样，没有冻结被验收的**新产物**侧。反例：第一次验收判定 12/20 命中，然后把发布根重新发布（或回滚 LKG）再重放，三份冻结物一字未变、逐题结果却变了——AC-K3-3 的「同一问题集+三份冻结物下重放一致」无法复现 | 判定记录里把新产物侧也钉死：被验收根的 tree hash（或逐文件 sha256 清单）、问题集文件 sha256、判定器版本/口径 hash；重放时先按 hash 校验，不一致就明确报「被测对象已变，不可复跑」，而不是静默给出新结论。
 
-M3 | packet 第 18 行；`docs/adr/0014`（Consequences：human-authored question set）；母任务 PRD OPEN-002；对照 `config/task0-question-set.v1.json`、`config/task4-question-oracle.v1.json` | 「从资料自动生成题目」不只是流程争议，它会直接打穿 FR-K3-4：题目来源与被测内容同源，自动生成天然偏向「照原文能答」的问题，最可能的结果就是 AC-K3-4 要防的「全过」；在已知坏产物上做双向验证只能证明「题库能查坏产物」，不能证明题目代表真实读者需求。反例：自动生成的 20 题全部是「X 是什么/怎么用」，坏产物只需保留标题与首段即全过，好产物与坏产物不可区分 | 维持 ADR-0014 口径：题目由人出（或模型起草、人逐题确认后冻结），冻结时记录出题人与冻结 hash；自动生成只能作为候选池。机制可复用已有资产，省一半工作：沿用 `task0-question-set.v1.json` 的 schema/hash 规则与 `task4-question-oracle.v1.json` 的「每题期望页 + answer_terms」oracle 行，只丢掉五维比较/证书那一层。
+M3 | packet 第 18 行；`docs/adr/0014`（Consequences：human-authored question set）；母任务 PRD OPEN-002；对照 `config/task0-question-set.v1.json`、`config/archive/task4/task4-question-oracle.v1.json` | 「从资料自动生成题目」不只是流程争议，它会直接打穿 FR-K3-4：题目来源与被测内容同源，自动生成天然偏向「照原文能答」的问题，最可能的结果就是 AC-K3-4 要防的「全过」；在已知坏产物上做双向验证只能证明「题库能查坏产物」，不能证明题目代表真实读者需求。反例：自动生成的 20 题全部是「X 是什么/怎么用」，坏产物只需保留标题与首段即全过，好产物与坏产物不可区分 | 维持 ADR-0014 口径：题目由人出（或模型起草、人逐题确认后冻结），冻结时记录出题人与冻结 hash；自动生成只能作为候选池。机制可复用已有资产，省一半工作：沿用 `task0-question-set.v1.json` 的 schema/hash 规则与 `task4-question-oracle.v1.json` 的「每题期望页 + answer_terms」oracle 行，只丢掉五维比较/证书那一层。
 
 M4 | packet 第 5 行；母任务 S2③（「记录其 ID」）；磁盘事实：CompanyBrain 1347 md，`/Users/Hugh/Hugh/Knowledge/CompanyBrain` 无任何快照/ID 记录 | 方向对三份冻结物都只说「内容快照 + 逐文件 sha256」，没有说冷冻副本放哪、清单与冻结 ID 写进哪份文件、验收记录如何引用它；S2 明确要求的 CompanyBrain「snapshot ID」在方向里没有对应物。反例：出题时读的是今天的 CompanyBrain A，判定时用户手改了几页变成 B，对照侧内容悄悄变了，而「对照未覆盖不计我方优势」这句话无法被审计 | 冻结脚本产出 `freeze/<frozen_id>/manifest.json`（三份冻结物各自的根路径、文件数、逐文件 sha256、汇总 tree hash、frozen_id=清单内容推导）并与快照内容一起放在不可变目录；验收命令把 frozen_id + 三份 tree hash 写进 `verdict.json`；齐备检查做成验收的前置门（缺一即 blocked，不产出任何逐题结论）。
 

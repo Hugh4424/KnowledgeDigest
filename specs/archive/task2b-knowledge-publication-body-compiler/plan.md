@@ -1,6 +1,6 @@
 # Task 2-B 知识发布正文编译实施计划
 
-- **Input**：当前 root `decision-log.md`、`specs/task2b-knowledge-publication-body-compiler/spec.md`；同目录 `decision-log.md` 是只读旧 receipt，不是执行依据。
+- **Input**：当前 root `decision-log.md`、`specs/archive/task2b-knowledge-publication-body-compiler-current-draft/spec.md`；同目录 `decision-log.md` 是只读旧 receipt，不是执行依据。
 - **Template version**：`plan-task.v3`
 
 ## 1. 速读卡
@@ -107,7 +107,7 @@
 
 - T013 只使用权威文件 `quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json` 指定的 12–20 篇上游冻结样本和 Task 0 17+3 题集派生的确定性 answerability 可答子集；preflight 必须记录该文件存在性和 content hash，不在实现阶段临时换题、删题或重抽样。
 - T013 开始前写入 manifest，包含样本逐项 source/topic/page-type、`sample_count`、`sampling_seed`、inventory 类别、provider/model、budget、seed、threshold、detector version、归因和失败项；运行 record 还必须绑定 `answerability_source`、由 Task 0 17+3 题集确定性派生的 answerability subset id/hash、逐题 answerability 与 `first_hit`、`evidence_backtrace`（至少含 `claim_id` 和 `fragment_locator`）、逐 section `section_completeness`、失败原因、`ac_bindings`（至少显式覆盖 AC-01、AC-03、AC-05、AC-07、AC-09、AC-10、AC-11、AC-12、AC-13，其中 AC-12/AC-13 由 revision ledger 和来源缺口 section 状态绑定）以及 `contract_revision`/revision ledger；其中未冻结的 PFACT-004/005 值必须先补事实，缺失时 T013 直接记 `incomplete/not_released`。
-- T013 的 semantic evidence 必须由同一次 `digest` 运行产生：运行前把 `apply/evidence/T013.semantic-run.json` 解析为绝对路径，通过 `KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE` 传给该进程；路径在运行前不得已存在，digest/pipeline 必须写入包含 `run_id`、sample/KB/input 指纹和 `output_path` 的新文件，随后 validator 只读取同一路径并核对本次运行身份。路径不存在、不是本次运行产物或仍是旧文件时，gate 非零并记录 incomplete。
+- T013 的 semantic evidence 必须由同一次 `digest` 运行产生：运行前把 `docs/archive/apply/evidence/T013.semantic-run.json` 解析为绝对路径，通过 `KNOWLEDGEDIGEST_TASK2B_SEMANTIC_EVIDENCE` 传给该进程；路径在运行前不得已存在，digest/pipeline 必须写入包含 `run_id`、sample/KB/input 指纹和 `output_path` 的新文件，随后 validator 只读取同一路径并核对本次运行身份。路径不存在、不是本次运行产物或仍是旧文件时，gate 非零并记录 incomplete。
 - 只有至少 6 个 `machine-passing concept` 且三类 page type 各至少 1 个、实际 inventory 类别均有覆盖、真实语义运行完整时，机器出口才可记为满足；否则仍为 `not_released`。
 
 ## 5. File Boundary
@@ -131,8 +131,8 @@ semantic_evidence_file 的正负 fixture 只放在上述 cases.json 的固定键
 
 ### DO NOT TOUCH
 
-- `specs/task2b-knowledge-publication-body-compiler/decision-log.md`
-- `specs/task2b-knowledge-publication-body-compiler/spec.md`
+- `specs/archive/task2b-knowledge-publication-body-compiler-current-draft/decision-log.md`
+- `specs/archive/task2b-knowledge-publication-body-compiler-current-draft/spec.md`
 - `docs/plans/knowledge-digest-knowledge-publication-prd.md`
 - `src/knowledge_digest/reader_bundle.py`
 - `src/knowledge_digest/reader_frontmatter.py`
@@ -192,7 +192,7 @@ semantic_evidence_file 的正负 fixture 只放在上述 cases.json 的固定键
 
 ### 证据约定
 
-每个 RED/GREEN 使用同一命令和同一 `ORACLE-*` 身份；RED 必须因目标断言失败而非环境损坏退出非零，GREEN 退出 0 且保留负例；证据路径都是 task-relative `apply/evidence/...`。T013/T014 是非行为验证，使用 `N/A — ...`，不绕过行为配对。
+每个 RED/GREEN 使用同一命令和同一 `ORACLE-*` 身份；RED 必须因目标断言失败而非环境损坏退出非零，GREEN 退出 0 且保留负例；证据路径都是 task-relative `docs/archive/apply/evidence/...`。T013/T014 是非行为验证，使用 `N/A — ...`，不绕过行为配对。
 
 ## 8. Rollback and Recovery
 
@@ -313,7 +313,7 @@ T001–T012 允许在没有真实样本逐项清单和 provider 运行值时完�
 ## 14. Current execution status (2026-08-11)
 
 - T001–T012 的行为实现与回归已完成；最近一次完整回归为 `500 passed, 3 skipped`，`git diff --check` 通过。
-- T013 已使用冻结 sample manifest 恢复的真实本地原始来源完成一次普通 `digest` 运行；证据为 `apply/evidence/T013.semantic-run-v16.json`，状态为 `completed` 但交付仍为 `not_released`。
+- T013 已使用冻结 sample manifest 恢复的真实本地原始来源完成一次普通 `digest` 运行；证据为 `docs/archive/apply/evidence/T013.semantic-run-v16.json`，状态为 `completed` 但交付仍为 `not_released`。
 - 该运行得到 `6` 个 machine-passing concepts，其中 `5` 个 `module_or_capability`、`1` 个 `product_overview`；`procedure_or_rule` 因真实来源缺少可回查的 `exceptions` section claim mapping 而保持 degraded。不得通过猜测 page type、填空正文或降低机器门解决。
 - 当前只继续到 verify-code；verify-code 之后必须停在 close 前。未取得的独立审查、人工确认和 procedure 语义出口证据均记录为 `missing/unknown/incomplete`，不把测试绿灯当作 Task 2-B 完成。
 
@@ -327,5 +327,5 @@ T001–T012 允许在没有真实样本逐项清单和 provider 运行值时完�
 ### SR build-code result（2026-08-11）
 
 - `T015` 已完成：确定性 `procedure-exceptions-audit.v1`、可信 section 状态、正文/Claim 禁写、answerability `not_answerable` 和依赖闭包已落到实现与 acceptance tests。
-- 当前证据：`apply/evidence/SR-20260811-source-gap-section-focused.txt`；focused=`72 passed`，consumer=`164 passed`，full=`511 passed, 3 skipped`，`git diff --check`=`0`。
+- 当前证据：`docs/archive/apply/evidence/SR-20260811-source-gap-section-focused.txt`；focused=`72 passed`，consumer=`164 passed`，full=`511 passed, 3 skipped`，`git diff --check`=`0`。
 - `T016` 仍 pending：需要用当前材料重跑/验证 T013/T014 真实语义证据；不把 focused/full tests 当语义出口，不替换 provider/阈值，不重复异源审查，不调用 `close`。

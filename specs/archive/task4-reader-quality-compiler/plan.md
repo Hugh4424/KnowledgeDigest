@@ -83,14 +83,14 @@
 ### NEW
 
 - `config/task4-source-coverage-89-input.v1.json` — 当前 89 条真实来源的只读覆盖 fixture、manifest id/hash；不作为生产路径规则。
-- `config/task4-reader-case-matrix-89-input.v1.json` — 89→M 的 canonical case 和 source map。
-- `config/task4-semantic-baseline.v1.json` — 当前既有 Product/Module/Object/Relation 基线的版本化摘要；未来新域以配置版本替换。
-- `config/task4-page-type-registry.v1.json` — page type 与必需 section/body oracle。
-- `config/task4-reader-evaluator.v1.json` — reader evaluator、reader compare、三轴公式、N/A/unknown/criticality。
+- `config/archive/task4/task4-reader-case-matrix-89-input.v1.json` — 89→M 的 canonical case 和 source map。
+- `config/archive/task4/task4-semantic-baseline.v1.json` — 当前既有 Product/Module/Object/Relation 基线的版本化摘要；未来新域以配置版本替换。
+- `config/archive/task4/task4-page-type-registry.v1.json` — page type 与必需 section/body oracle。
+- `config/archive/task4/task4-reader-evaluator.v1.json` — reader evaluator、reader compare、三轴公式、N/A/unknown/criticality。
 
 ### MODIFY
 
-- `config/task4-reader-quality.v1.json` — 通用 source/domain/semantic 配置，并引用上述 fixture；删除生产默认 expected_source_count=89。
+- `config/archive/task4/task4-reader-quality.v1.json` — 通用 source/domain/semantic 配置，并引用上述 fixture；删除生产默认 expected_source_count=89。
 - `src/knowledge_digest/task4_reader_quality.py` — Task4 薄适配层、semantic node 状态、Reader/Audit 分离、机器评估。
 - `scripts/task4_reader_quality.py` — 新配置/评估参数，移除人工表入口。
 - `tests/acceptance/test_task4_full_compiler.py` — 全量来源、命名、分类、节点状态、正文、关系、导航、溯源、失败边界。
@@ -100,7 +100,7 @@
 
 - `specs/task4-reader-quality-compiler/decision-log.md`、`spec.md` — 当前方向已确认，本阶段只写计划。
 - `/Users/Hugh/Hugh/Knowledge/CompanyBrain`、`/Users/Hugh/Downloads/confluence 原始数据`、既有真实产物 — 只读。
-- `config/task4-question-oracle.v1.json` — 17+3 历史 pilot fixture，保留但新评估不消费。
+- `config/archive/task4/task4-question-oracle.v1.json` — 17+3 历史 pilot fixture，保留但新评估不消费。
 - `pipeline.py`、`reader_bundle.py`、`reader_quality.py`、`topic_axis.py`、`publication.py`、`writeback.py` — 作为既有能力复用，不改正式边界。
 
 ## Technical Decisions
@@ -250,9 +250,9 @@ T001/T002 先固定来源和基础节点；T003/T004 再生成 Reader；T005/T00
 
 ### Files
 
-- **NEW**：`config/task4-source-coverage-89-input.v1.json`；`config/task4-reader-case-matrix-89-input.v1.json`；`config/task4-semantic-baseline.v1.json`；`config/task4-page-type-registry.v1.json`；`config/task4-reader-evaluator.v1.json`
-- **MODIFY**：`config/task4-reader-quality.v1.json`；`src/knowledge_digest/task4_reader_quality.py`；`scripts/task4_reader_quality.py`；`tests/acceptance/test_task4_full_compiler.py`；`tests/acceptance/test_task4_full_quality.py`
-- **DO NOT TOUCH**：`decision-log.md`、`spec.md`、原始 89 条、CompanyBrain、`config/task4-question-oracle.v1.json`、正式 Task1–Task3 模块。
+- **NEW**：`config/task4-source-coverage-89-input.v1.json`；`config/archive/task4/task4-reader-case-matrix-89-input.v1.json`；`config/archive/task4/task4-semantic-baseline.v1.json`；`config/archive/task4/task4-page-type-registry.v1.json`；`config/archive/task4/task4-reader-evaluator.v1.json`
+- **MODIFY**：`config/archive/task4/task4-reader-quality.v1.json`；`src/knowledge_digest/task4_reader_quality.py`；`scripts/task4_reader_quality.py`；`tests/acceptance/test_task4_full_compiler.py`；`tests/acceptance/test_task4_full_quality.py`
+- **DO NOT TOUCH**：`decision-log.md`、`spec.md`、原始 89 条、CompanyBrain、`config/archive/task4/task4-question-oracle.v1.json`、正式 Task1–Task3 模块。
 
 ### Tasks
 

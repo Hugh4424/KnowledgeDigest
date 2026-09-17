@@ -50,7 +50,7 @@ AC-001 的固定输入断言通过；T001/T002 只建立 AC-002 的来源关系�
 - **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：1
 - **oracle**：ORACLE-TASK0-MANIFEST — same contract oracle: RED must show the expected missing closure behavior with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
-- **evidence_path**：`apply/evidence/T001.stdout`
+- **evidence_path**：`docs/archive/apply/evidence/T001.stdout`
 - **STOP**：测试因环境或无关 import 失败，而不是目标合同失败时停止。
 - **recovery**：删除当前测试 bytes，保留历史 acceptance 和审计证据。
 - **task risk**：RED 可能误报环境错误为产品失败。
@@ -86,7 +86,7 @@ AC-001 的固定输入断言通过；T001/T002 只建立 AC-002 的来源关系�
 - **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：0
 - **oracle**：ORACLE-TASK0-MANIFEST — same contract oracle: RED must show the expected missing closure behavior with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
-- **evidence_path**：`apply/evidence/T002.stdout`
+- **evidence_path**：`docs/archive/apply/evidence/T002.stdout`
 - **STOP**：发现业务结果或 archive 随同快照重跑重复增长时停止交付。
 - **recovery**：撤销当前四个源文件的修改，不删除历史运行记录。
 - **task risk**：幂等修复可能误删运行审计追加，必须保持两者分离。
@@ -144,7 +144,7 @@ AC-001 的写回前无 formal 页面子项、AC-002 的 archive 不增长断言�
 - **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：1
 - **oracle**：ORACLE-TASK0-WRITEBACK — same contract oracle: RED must show the expected late or incomplete gate behavior with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
-- **evidence_path**：`apply/evidence/T003.stdout`
+- **evidence_path**：`docs/archive/apply/evidence/T003.stdout`
 - **STOP**：失败不是 writeback 合同，而是测试夹具或环境时停止。
 - **recovery**：删除当前测试 bytes，保留旧页面和 audit 记录。
 - **task risk**：故障注入可能误把 unrelated provider 失败当作门禁失败。
@@ -180,7 +180,7 @@ AC-001 的写回前无 formal 页面子项、AC-002 的 archive 不增长断言�
 - **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：0
 - **oracle**：ORACLE-TASK0-WRITEBACK — same contract oracle: RED must show the expected late or incomplete gate behavior with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
-- **evidence_path**：`apply/evidence/T004.stdout`
+- **evidence_path**：`docs/archive/apply/evidence/T004.stdout`
 - **STOP**：任一门禁失败后仍出现新 formal 页面或旧页面变化时停止。
 - **recovery**：撤销当前四个源文件的修改，恢复旧页和 audit。
 - **task risk**：门禁顺序变更可能影响现有 pipeline 的原子写入边界。
@@ -241,7 +241,7 @@ AC-005、AC-006、AC-007 的 allowlist、真实 pending、空页、断链、来�
 - **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_reader_package.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：1
 - **oracle**：ORACLE-TASK0-READER — same contract oracle: RED must show the expected Reader/Audit or navigation boundary failure with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
-- **evidence_path**：`apply/evidence/T005.stdout`
+- **evidence_path**：`docs/archive/apply/evidence/T005.stdout`
 - **STOP**：断链由测试 fixture 产生而不是导航规则时停止。
 - **recovery**：删除当前测试 bytes，保留旧导航历史。
 - **task risk**：allowlist 测试可能漏掉 `_queues` 或 provider 原始响应，需保持正向清单。
@@ -277,7 +277,7 @@ AC-005、AC-006、AC-007 的 allowlist、真实 pending、空页、断链、来�
 - **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_reader_package.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：0
 - **oracle**：ORACLE-TASK0-READER — same contract oracle: RED must show the expected Reader/Audit or navigation boundary failure with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
-- **evidence_path**：`apply/evidence/T006.stdout`
+- **evidence_path**：`docs/archive/apply/evidence/T006.stdout`
 - **STOP**：任何审计现场进入 Reader 或导航失败晚于 writeback 时停止。
 - **recovery**：撤销当前导航源文件修改，保留旧入口和历史结果。
 - **task risk**：把 Reader 投影误当第二事实源会引起增量分叉。
@@ -337,7 +337,7 @@ AC-004、AC-008、AC-009、AC-010 的运行字段、题集 hash、fallback 和�
 - **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_task0_reader_package.py tests/acceptance/test_task0_runtime_audit.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：1
 - **oracle**：ORACLE-TASK0-RUNTIME — same contract oracle: RED must show the expected runtime audit, offline, fallback or question-set boundary failure with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
-- **evidence_path**：`apply/evidence/T007.stdout`
+- **evidence_path**：`docs/archive/apply/evidence/T007.stdout`
 - **STOP**：测试触发网络、凭据或 provider 进程而非受控 fixture 时停止。
 - **recovery**：删除当前测试 bytes，保留历史 provider 和运行记录。
 - **task risk**：真实 provider 误调用会破坏离线合同，必须使用受控计数 fixture。
@@ -373,7 +373,7 @@ AC-004、AC-008、AC-009、AC-010 的运行字段、题集 hash、fallback 和�
 - **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_task0_reader_package.py tests/acceptance/test_task0_runtime_audit.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：0
 - **oracle**：ORACLE-TASK0-RUNTIME — same contract oracle: RED must show the expected runtime audit, offline, fallback or question-set boundary failure with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
-- **evidence_path**：`apply/evidence/T008.stdout`
+- **evidence_path**：`docs/archive/apply/evidence/T008.stdout`
 - **STOP**：任何语义 fallback 被写成 released、预算超限被写成成功或离线产生网络调用时停止。
 - **recovery**：撤销当前四个源文件的修改；若本任务已创建 `config/task0-question-set.v1.json`，一并删除该 NEW 文件；不删除历史 run 记录或只读证据。
 - **task risk**：运行审计字段过多会增加维护成本，只保留规格要求的可重放事实。

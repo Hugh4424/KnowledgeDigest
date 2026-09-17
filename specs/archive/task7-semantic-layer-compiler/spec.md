@@ -77,7 +77,7 @@ KnowledgeDigest 现有管线产出的是「文档的场景化摘要索引」：�
 ### 背景
 
 - 冻结语料：`/Users/Hugh/Downloads/confluence 原始数据` 下 4 个顶层目录（`GoInsight` 22 份、`emm for android ` 27 份（目录名有尾随空格）、`emm for ios` 20 份、`merchant system` 20 份）共 89 份 `.md`，无 Confluence 宏 XML。
-- 冻结清单：`config/task4-source-coverage-89-input.v1.json`（`input_manifest_id = confluence-raw-89-20260818-v1`；条目字段 `source_uri / source_id / content_hash / byte_count`）；task5 侧 `config/task5-source-page-manifest-v2.json` 的 `source_snapshot` 台账含 `line_count / expected_status`。磁盘 89/89 与清单一致（已核实，RISK-001 已降级）。
+- 冻结清单：`config/task4-source-coverage-89-input.v1.json`（`input_manifest_id = confluence-raw-89-20260818-v1`；条目字段 `source_uri / source_id / content_hash / byte_count`）；task5 侧 `config/archive/task5/task5-source-page-manifest-v2.json` 的 `source_snapshot` 台账含 `line_count / expected_status`。磁盘 89/89 与清单一致（已核实，RISK-001 已降级）。
 - gbrain slug 规则删除全部非 ASCII 字符，且同 slug 按导入覆盖——中文文件名必然碰撞，这是命名契约的硬约束。
 - CompanyBrain 正式页契约 = 15 字段 frontmatter 块 + `[[wikilink]]` 双链 + `products/<产品>/<模块>/<页面>.md` 目录；正式块 555 页（口径基准，方言页不作基准也不作反例）。
 
