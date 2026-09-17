@@ -1,11 +1,31 @@
 .DS_Store
-AGENTS.md
+
+# Local agent/tool state
 .agent_context/
 .multica/
 .omc/
+.opencode/
 .worker-mode/
+
+# Local Python environment and generated caches
+.venv/
 __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyre/
+.coverage
+.coverage.*
+htmlcov/
+build/
+dist/
+pip-wheel-metadata/
+.cache/
 cache/
+
+# Local credentials and environment overrides
+.env
+.env.*
+!.env.example
