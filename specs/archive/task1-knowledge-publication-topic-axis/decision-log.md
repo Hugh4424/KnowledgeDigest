@@ -367,7 +367,7 @@ Grill 四项退出检查：
 - 项目约束：`AGENTS.md`、`CONTEXT.md`。
 - 现有设计决策：`docs/adr/0004-reader-publication-separate-from-audit.md`。
 - 代码事实：`src/knowledge_digest/identity.py`、`kb_structure.py`、`batch_run.py`、`pipeline.py`、`page_layout.py`、`navigation.py`、`writeback.py`。
-- 测试事实：`tests/acceptance/test_task0_reader_package.py`、`test_task2_publication.py`、`test_task2_batch_recovery.py`。
+- 测试事实：`tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py`、`test_task2_publication.py`、`test_task2_batch_recovery.py`。
 - 当前候选基线：KnowledgeDigest `d3ebc236...`；候选工作区 `/Users/Hugh/Hugh/Project/KnowledgeDigest-task1-knowledge-publication-topic-axis`。
 
 ## 16. Scope revision：知识类型优先，产品只是其中一类

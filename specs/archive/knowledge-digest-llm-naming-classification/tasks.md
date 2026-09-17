@@ -26,12 +26,12 @@
 ### Files
 
 - **NEW**：`tests/acceptance/test_task2_publication.py`
-- **MODIFY**：`src/knowledge_digest/kb_structure.py`、`tests/acceptance/test_publication_contract.py`
+- **MODIFY**：`src/knowledge_digest/kb_structure.py`、`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 - **DO NOT TOUCH**：`src/knowledge_digest/ingest.py`、`src/knowledge_digest/cluster.py`、`src/knowledge_digest/retrieve.py`
 
 ### Verify
 
-`uv run --frozen pytest -q tests/acceptance/test_task2_publication.py tests/acceptance/test_publication_contract.py`；oracle：`KD-T2-TAXONOMY`。
+`uv run --frozen pytest -q tests/acceptance/test_task2_publication.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`；oracle：`KD-T2-TAXONOMY`。
 
 ### Knowledge
 
@@ -77,7 +77,7 @@
 - [x] **任务完成**
 - **status**：completed
 - **actual_changes**：新增 taxonomy/旧结构负向断言，并补充 legacy source-index fail-closed 断言。
-- **executed_commands**：`uv run --frozen pytest -q tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py -k 'taxonomy or schema or source_index or structure'`（RED exit 1；GREEN exit 0）。
+- **executed_commands**：`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py -k 'taxonomy or schema or source_index or structure'`（RED exit 1；GREEN exit 0）。
 - **evidence_refs**：`receipts/tests/phase1-r2-red.json`；`receipts/tests/phase1-r2-green.json`；`evidence/phases/phase-1-r3/379f5f487b73a229f06925bc619447c81af2342f/phase-map-trace-4856d5a8606fbe2a37a87f5ca422ff22f6a16cba2de2ced720f397bb27fb2e27.json`。
 - **covered_ac**：AC-001、AC-003、AC-006。
 - **review_fact**：Phase `phase-1-r3` 使用配置路由 `kimi/coding + cursor/grok`，semantic `pass`；前一轮发现的问题已修复。
@@ -95,7 +95,7 @@
 - **dependencies / paired_task**：T001 / T001
 - **FR / AC**：SCOPE-002 / AC-001、AC-006
 - **action**：扩展 `kb_structure.py` parser/validator/initializer，并保留旧结构安全门。
-- **exact_files**：`src/knowledge_digest/kb_structure.py`、`tests/acceptance/test_publication_contract.py`
+- **exact_files**：`src/knowledge_digest/kb_structure.py`、`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 - **boundary**：只改 PublicationContract parser/init 和对应兼容测试。
 - **gate_cmd / expected_exit**：`uv run --frozen pytest -q tests/acceptance/test_task2_publication.py -k taxonomy` / `0`
 - **oracle**：`KD-T2-TAXONOMY` 合法结构通过，缺 version/overlap/重复项失败。
@@ -179,7 +179,7 @@
 - [x] **任务完成**
 - **status**：completed
 - **actual_changes**：实现 topic-index/source-index validator、固定 Markdown serializer/parser、内容 fingerprint/status/path fail-closed 校验；legacy link list 明确拒绝。
-- **executed_commands**：`uv run --frozen pytest -q tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py -k 'taxonomy or schema or source_index or structure'`（4 个目标测试通过）。
+- **executed_commands**：`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py -k 'taxonomy or schema or source_index or structure'`（4 个目标测试通过）。
 - **evidence_refs**：`receipts/tests/phase1-r2-green.json`；`reviews/reports/d5667f40-be9b-4026-85bf-c65e5d68b710.md`；`evidence/phases/phase-1-r3/379f5f487b73a229f06925bc619447c81af2342f/phase-map-trace-4856d5a8606fbe2a37a87f5ca422ff22f6a16cba2de2ced720f397bb27fb2e27.json`。
 - **covered_ac**：AC-003、AC-004。
 - **review_fact**：Phase `phase-1-r3` semantic `pass`；没有 DeepSeek 或产品运行时 LLM 调用。

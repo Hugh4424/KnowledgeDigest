@@ -425,9 +425,9 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 
 ### Files
 
-- **NEW**：`scripts/phase4_embedding_acceptance.py`、`tests/acceptance/test_phase4_embedding_runner.py`
+- **NEW**：`scripts/archive/phase4-embedding-calibration/phase4_embedding_acceptance.py`、`tests/archive/phase4-embedding-calibration/phase4_embedding_runner_legacy.py`
 - **MODIFY**：N/A — runner 是独立脚本，不需要新增 console entry。
-- **DO NOT TOUCH**：公司 Confluence 源目录、正式 KB 正文、`scripts/phase3_agentmemory_acceptance.py`
+- **DO NOT TOUCH**：公司 Confluence 源目录、正式 KB 正文、`scripts/archive/phase3-agentmemory/phase3_agentmemory_acceptance.py`
 
 ### Tasks
 
@@ -444,13 +444,13 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 - **FR**：FR-EMBED-001、FR-CORPUS-001、FR-GOLD-001、FR-ADOPT-001、FR-REPORT-001、FR-COMPAT-001
 - **AC**：AC-03、AC-07、AC-08、AC-11、AC-12
 - **动作**：新增 runner 合同测试，覆盖临时 HOME/state、进程 ownership、manifest、敏感扫描、replay 和 cleanup。
-- **精确文件**：`tests/acceptance/test_phase4_embedding_runner.py`
-- **boundary**：files: `tests/acceptance/test_phase4_embedding_runner.py`; symbols/regions: Phase 4 isolated runner contract tests
+- **精确文件**：`tests/archive/phase4-embedding-calibration/phase4_embedding_runner_legacy.py`
+- **boundary**：files: `tests/archive/phase4-embedding-calibration/phase4_embedding_runner_legacy.py`; symbols/regions: Phase 4 isolated runner contract tests
 - **输出**：runner 不存在导致的 RED。
 - **Knowledge**：mock 只验证 runner 机制；正式价值结论必须记录真实服务身份。
 - **verification_role**：RED
 - **paired_task**：T012
-- **gate_cmd**：`uv run pytest -q tests/acceptance/test_phase4_embedding_runner.py && uv run pytest -q`
+- **gate_cmd**：`uv run pytest -q tests/archive/phase4-embedding-calibration/phase4_embedding_runner_legacy.py && uv run pytest -q`
 - **expected_exit**：2
 - **oracle**：KD-P4-RUNNER 证明源/正式 KB 不变、89/2 边界、服务不可用无 artifact、cleanup 完整。
 - **evidence_path**：`evidence/phase4/t011-red.txt`
@@ -471,16 +471,16 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 - **FR**：FR-EMBED-001、FR-CORPUS-001、FR-GOLD-001、FR-ADOPT-001、FR-REPORT-001、FR-COMPAT-001
 - **AC**：AC-03、AC-07、AC-08、AC-11、AC-12
 - **动作**：实现隔离复制、manifest、真实服务身份、敏感扫描、replay、finally cleanup 和 regression orchestration。
-- **精确文件**：`scripts/phase4_embedding_acceptance.py`
-- **boundary**：files: `scripts/phase4_embedding_acceptance.py`; symbols/regions: Phase 4 acceptance entry only
+- **精确文件**：`scripts/archive/phase4-embedding-calibration/phase4_embedding_acceptance.py`
+- **boundary**：files: `scripts/archive/phase4-embedding-calibration/phase4_embedding_acceptance.py`; symbols/regions: Phase 4 acceptance entry only
 - **输出**：隔离验收 evidence、可选 artifact、cleanup 证明和 regression 结果。
 - **Knowledge**：公司源/正式 KB 只读；所有临时路径绝对化；父子进程和动态端口均需证明。
 - **verification_role**：GREEN
 - **paired_task**：T011
-- **gate_cmd**：`uv run pytest -q tests/acceptance/test_phase4_embedding_runner.py && uv run pytest -q`
+- **gate_cmd**：`uv run pytest -q tests/archive/phase4-embedding-calibration/phase4_embedding_runner_legacy.py && uv run pytest -q`
 - **expected_exit**：0
 - **oracle**：KD-P4-RUNNER 全绿；此门只证明 runner 机制和回归。
-- **formal_gate_cmd**：`uv run python scripts/phase4_embedding_acceptance.py --corpus "$KD_CONFLUENCE_CORPUS" --kb "$KD_FORMAL_KB" --temp-root "$KD_PHASE4_TEMP_ROOT" --config "$KD_CONFIG" --evidence-dir "$KD_PHASE4_EVIDENCE_DIR" --cases "$KD_PHASE4_CASES"`
+- **formal_gate_cmd**：`uv run python scripts/archive/phase4-embedding-calibration/phase4_embedding_acceptance.py --corpus "$KD_CONFLUENCE_CORPUS" --kb "$KD_FORMAL_KB" --temp-root "$KD_PHASE4_TEMP_ROOT" --config "$KD_CONFIG" --evidence-dir "$KD_PHASE4_EVIDENCE_DIR" --cases "$KD_PHASE4_CASES"`
 - **formal_expected_exit**：0
 - **formal_oracle**：KD-P4-REAL-SERVICE 证明真实受控服务的端点/模型/维度/探针身份、89/2 边界、源与正式 KB before/after 不变、replay 与敏感扫描。
 - **formal_evidence_path**：`evidence/phase4/real-service-acceptance.json`
@@ -492,12 +492,12 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 ### Verify
 
 - **Target**：FR-CORPUS-001、FR-REPORT-001、FR-COMPAT-001
-- **gate_cmd**：`uv run pytest -q tests/acceptance/test_phase4_embedding_runner.py && uv run pytest -q`
+- **gate_cmd**：`uv run pytest -q tests/archive/phase4-embedding-calibration/phase4_embedding_runner_legacy.py && uv run pytest -q`
 - **expected_exit**：0
 - **evidence_path**：`evidence/phase4/runner-and-regression.txt`
 - **display_cmd**：N/A — pytest 输出已足够。
 - **Oracle**：KD-P4-RUNNER 同时覆盖 runner 合同与全量 pytest 回归；真实 corpus 结论另有正式 evidence。
-- **Target**：AC-03、AC-11 正式真实服务；**gate_cmd**：`uv run python scripts/phase4_embedding_acceptance.py --corpus "$KD_CONFLUENCE_CORPUS" --kb "$KD_FORMAL_KB" --temp-root "$KD_PHASE4_TEMP_ROOT" --config "$KD_CONFIG" --evidence-dir "$KD_PHASE4_EVIDENCE_DIR" --cases "$KD_PHASE4_CASES"`；**expected_exit**：0；**evidence_path**：`$KD_PHASE4_EVIDENCE_DIR/real-service-acceptance.json`；**Oracle**：KD-P4-REAL-SERVICE 证明真实受控服务的端点/模型/维度/探针身份、89/2 边界、源与正式 KB before/after 不变、真实批量评分、replay 与敏感扫描；服务不可用只写 BLOCKED，不能满足 AC-03/AC-11。
+- **Target**：AC-03、AC-11 正式真实服务；**gate_cmd**：`uv run python scripts/archive/phase4-embedding-calibration/phase4_embedding_acceptance.py --corpus "$KD_CONFLUENCE_CORPUS" --kb "$KD_FORMAL_KB" --temp-root "$KD_PHASE4_TEMP_ROOT" --config "$KD_CONFIG" --evidence-dir "$KD_PHASE4_EVIDENCE_DIR" --cases "$KD_PHASE4_CASES"`；**expected_exit**：0；**evidence_path**：`$KD_PHASE4_EVIDENCE_DIR/real-service-acceptance.json`；**Oracle**：KD-P4-REAL-SERVICE 证明真实受控服务的端点/模型/维度/探针身份、89/2 边界、源与正式 KB before/after 不变、真实批量评分、replay 与敏感扫描；服务不可用只写 BLOCKED，不能满足 AC-03/AC-11。
 
 ### Knowledge
 

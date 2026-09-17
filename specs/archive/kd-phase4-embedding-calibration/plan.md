@@ -204,11 +204,11 @@ pipeline 先收集 S2 原文和 S3 候选页需要的唯一文本，批量获取
 - `src/knowledge_digest/gold.py`
 - `src/knowledge_digest/calibration.py`
 - `src/knowledge_digest/calibration_cli.py`
-- `scripts/phase4_embedding_acceptance.py`
+- `scripts/archive/phase4-embedding-calibration/phase4_embedding_acceptance.py`
 - `tests/acceptance/test_phase4_embedding_runtime.py`
 - `tests/acceptance/test_phase4_gold.py`
 - `tests/acceptance/test_phase4_calibration.py`
-- `tests/acceptance/test_phase4_embedding_runner.py`
+- `tests/archive/phase4-embedding-calibration/phase4_embedding_runner_legacy.py`
 
 ### MODIFY
 
@@ -259,7 +259,7 @@ embedding failure → invalidate S2/S3 decisions → Jaccard scorer → rerun S2
 | A-003 | `cluster.py:cluster` | complete-linkage S2 | extend | 算法语义不变 |
 | A-004 | `retrieve.py:retrieve` | top-k/action S3 | extend | action 规则不变 |
 | A-005 | `pipeline.py:audit_run` | S1-S6 编排 | extend | S4-S6 合同不变 |
-| A-006 | `scripts/phase3_agentmemory_acceptance.py` | 隔离验收模式 | reference | 不耦合 agentmemory |
+| A-006 | `scripts/archive/phase3-agentmemory/phase3_agentmemory_acceptance.py` | 隔离验收模式 | reference | 不耦合 agentmemory |
 
 ### Reuse → Extend → New
 
@@ -304,8 +304,8 @@ embedding failure → invalidate S2/S3 decisions → Jaccard scorer → rerun S2
 - **Target**：FR-CORPUS-001；`gate_cmd`：`uv run pytest -q tests/acceptance/test_phase4_gold.py`; RED=2（corpus producer 尚不存在时 pytest collection error），GREEN=0；Phase evidence `evidence/phase4/corpus-prep.txt`；Oracle `KD-P4-CORPUS-PREP` 验证 Markdown-only 副本、manifest、只读边界和 cleanup。
 - **Target**：FR-GOLD；`gate_cmd`：`uv run pytest -q tests/acceptance/test_phase4_gold.py`; RED=2（gold producer 尚不存在时 pytest collection error），GREEN=0；Phase evidence `evidence/phase4/gold.txt`；Oracle `KD-P4-GOLD` 验证 AI draft exchange、逐项确认和 identity。
 - **Target**：FR-CONFIG/SCORE/CAL/ADOPT/REPORT；feature-separation 与阈值候选来源必须从 cases 独立重算；`gate_cmd`：`uv run pytest -q tests/acceptance/test_phase4_calibration.py`; RED=2（calibration domain 尚不存在时 pytest collection error），GREEN=0；`evidence_path`：`evidence/phase4/calibration.txt`；Oracle `KD-P4-CAL` 验证严格 split、feature-separation、阈值候选来源、指标重算、安全门和 replay。
-- **Target**：runner 合同与全回归；`gate_cmd`：`uv run pytest -q tests/acceptance/test_phase4_embedding_runner.py && uv run pytest -q`; RED=2（runner 尚不存在时 pytest collection error），GREEN=0；Phase evidence `evidence/phase4/runner-and-regression.txt`；Oracle `KD-P4-RUNNER` 同时证明 runner 合同与全量 pytest 回归。
-- **Target**：AC-03/AC-11 正式真实服务；`gate_cmd`：`uv run python scripts/phase4_embedding_acceptance.py --corpus "$KD_CONFLUENCE_CORPUS" --kb "$KD_FORMAL_KB" --temp-root "$KD_PHASE4_TEMP_ROOT" --config "$KD_CONFIG" --evidence-dir "$KD_PHASE4_EVIDENCE_DIR" --cases "$KD_PHASE4_CASES"`; expected_exit=0；evidence `$KD_PHASE4_EVIDENCE_DIR/real-service-acceptance.json`；Oracle `KD-P4-REAL-SERVICE` 证明真实受控服务的端点/模型/维度/探针身份、89 Markdown/排除 2 非 Markdown、源与正式 KB before/after 不变、真实批量评分、replay 和敏感扫描；服务不可用只能 BLOCKED 且不得满足 AC-03/AC-11。
+- **Target**：runner 合同与全回归；`gate_cmd`：`uv run pytest -q tests/archive/phase4-embedding-calibration/phase4_embedding_runner_legacy.py && uv run pytest -q`; RED=2（runner 尚不存在时 pytest collection error），GREEN=0；Phase evidence `evidence/phase4/runner-and-regression.txt`；Oracle `KD-P4-RUNNER` 同时证明 runner 合同与全量 pytest 回归。
+- **Target**：AC-03/AC-11 正式真实服务；`gate_cmd`：`uv run python scripts/archive/phase4-embedding-calibration/phase4_embedding_acceptance.py --corpus "$KD_CONFLUENCE_CORPUS" --kb "$KD_FORMAL_KB" --temp-root "$KD_PHASE4_TEMP_ROOT" --config "$KD_CONFIG" --evidence-dir "$KD_PHASE4_EVIDENCE_DIR" --cases "$KD_PHASE4_CASES"`; expected_exit=0；evidence `$KD_PHASE4_EVIDENCE_DIR/real-service-acceptance.json`；Oracle `KD-P4-REAL-SERVICE` 证明真实受控服务的端点/模型/维度/探针身份、89 Markdown/排除 2 非 Markdown、源与正式 KB before/after 不变、真实批量评分、replay 和敏感扫描；服务不可用只能 BLOCKED 且不得满足 AC-03/AC-11。
 - **Target**：AC-07 manual；检查 `gold-confirmation-audit.json` 的 unconfirmed_count=0 与逐项 identity/decision，再检查 calibration-owned `split-coverage-audit.json` 的 lineage intersection 为空、两集合 strict-cell decidability 完整；证据 `evidence/phase4/gold-manual-audit.json`。
 
 ## 14. Implementation Order
@@ -447,9 +447,9 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 
 ### Files
 
-- **NEW**：`scripts/phase4_embedding_acceptance.py`、`tests/acceptance/test_phase4_embedding_runner.py`
+- **NEW**：`scripts/archive/phase4-embedding-calibration/phase4_embedding_acceptance.py`、`tests/archive/phase4-embedding-calibration/phase4_embedding_runner_legacy.py`
 - **MODIFY**：N/A — runner 是独立脚本，不需要新增 console entry。
-- **DO NOT TOUCH**：公司 Confluence 源目录、正式 KB 正文、`scripts/phase3_agentmemory_acceptance.py`
+- **DO NOT TOUCH**：公司 Confluence 源目录、正式 KB 正文、`scripts/archive/phase3-agentmemory/phase3_agentmemory_acceptance.py`
 
 ### Tasks
 
@@ -458,7 +458,7 @@ S2/S3 共用一个 scorer；任一 embedding 失败作废本轮决策并从 S2 �
 
 ### Verify
 
-- `uv run pytest -q tests/acceptance/test_phase4_embedding_runner.py && uv run pytest -q`；证据 `evidence/phase4/runner-and-regression.txt`。
+- `uv run pytest -q tests/archive/phase4-embedding-calibration/phase4_embedding_runner_legacy.py && uv run pytest -q`；证据 `evidence/phase4/runner-and-regression.txt`。
 
 ### Knowledge
 

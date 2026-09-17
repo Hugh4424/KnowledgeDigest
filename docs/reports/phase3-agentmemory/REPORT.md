@@ -5,7 +5,7 @@
 复跑命令：
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 uv run --frozen python scripts/phase3_agentmemory_acceptance.py \
+PYTHONDONTWRITEBYTECODE=1 uv run --frozen python scripts/archive/phase3-agentmemory/phase3_agentmemory_acceptance.py \
   --source-dir '/Users/Hugh/Downloads/confluence 原始数据'
 ```
 

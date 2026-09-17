@@ -84,7 +84,7 @@
 | Schemas and events | N/A | no change | N/A | 无服务协议 |
 | Runtime configuration | N/A | no change | N/A | 不新增依赖或配置 |
 | Knowledge and docs | `AGENTS.md`、`CONTEXT.md` | change | T007 | 维护入口同步 |
-| Automation gates | `tests/acceptance/test_publication_contract.py` | change | T001–T006 | 真实发布回归 |
+| Automation gates | `tests/archive/legacy-reader-pipeline/publication_contract_legacy.py` | change | T001–T006 | 真实发布回归 |
 
 ## 5. Technical Decisions
 
@@ -167,7 +167,7 @@
 
 ### NEW
 
-- `tests/acceptance/test_publication_contract.py`
+- `tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 
 ### MODIFY
 
@@ -268,28 +268,28 @@ KB 目录容器准备 → 单写者锁内 PublicationContract 预检/初始化 �
 ## 12. Test Strategy
 
 - **Target**：新库初始化、旧库范围、空输入和声明错误。
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py -k "initialization or structure or empty_input"'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py -k "initialization or structure or empty_input"'`
 - **expected_exit**：RED=1，GREEN=0。
 - **evidence_path**：`evidence/publication-contract/phase-1-structure.txt`
 - **display_cmd**：N/A — pytest 输出是直接证据。
 - **Oracle ID and result**：KD-PUB-STRUCTURE；只在允许的初始化条件生成声明和导航，旧库错误零正式变更。
 
 - **Target**：可读标题、锁定路径和离线零外部调用。
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py -k "title or published_path or navigation or offline"'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py -k "title or published_path or navigation or offline"'`
 - **expected_exit**：RED=1，GREEN=0。
 - **evidence_path**：`evidence/publication-contract/phase-2-reader-output.txt`
 - **display_cmd**：N/A — pytest 输出是直接证据。
 - **Oracle ID and result**：KD-PUB-READER；读者导航不入审计目录，标题可读、路径稳定、零外部调用。
 
 - **Target**：托管边界、分页收缩和发布事务。
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py -k "managed or handwritten or shrink or transaction or provenance"'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py -k "managed or handwritten or shrink or transaction or provenance"'`
 - **expected_exit**：RED=1，GREEN=0。
 - **evidence_path**：`evidence/publication-contract/phase-3-safe-write.txt`
 - **display_cmd**：N/A — pytest 输出是直接证据。
 - **Oracle ID and result**：KD-PUB-SAFE-WRITE；未托管页不变、旧分页留存、失败无部分写、质量段落完整。
 
 - **Target**：最终契约回归与维护文档。
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py tests/acceptance/test_architecture_optimization.py && uv run --frozen pytest -q'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_architecture_optimization.py && uv run --frozen pytest -q'`
 - **expected_exit**：0。
 - **evidence_path**：`evidence/publication-contract/final-regression.txt`
 - **display_cmd**：N/A — pytest 输出是直接证据。
@@ -342,7 +342,7 @@ Phase 4: T006 → T007
 
 ### Files
 
-- **NEW**：`tests/acceptance/test_publication_contract.py`
+- **NEW**：`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 - **MODIFY**：`src/knowledge_digest/kb_structure.py`、`src/knowledge_digest/paths.py`、`src/knowledge_digest/lock.py`、`src/knowledge_digest/cli.py`、`src/knowledge_digest/pipeline.py`
 - **DO NOT TOUCH**：`src/knowledge_digest/llm.py`、`src/knowledge_digest/embedding.py`、`src/knowledge_digest/batch_run.py`
 
@@ -382,7 +382,7 @@ KD-PUB-STRUCTURE，Phase 1 gate；RED 退出非零，GREEN 退出 0。
 ### Files
 
 - **NEW**：N/A — no new production file
-- **MODIFY**：`src/knowledge_digest/identity.py`、`src/knowledge_digest/draft.py`、`src/knowledge_digest/page_layout.py`、`src/knowledge_digest/pipeline.py`、`tests/acceptance/test_publication_contract.py`
+- **MODIFY**：`src/knowledge_digest/identity.py`、`src/knowledge_digest/draft.py`、`src/knowledge_digest/page_layout.py`、`src/knowledge_digest/pipeline.py`、`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 - **DO NOT TOUCH**：`src/knowledge_digest/llm.py`、`src/knowledge_digest/embedding.py`、`src/knowledge_digest/retrieve.py`
 
 ### Tasks
@@ -421,7 +421,7 @@ KD-PUB-READER，Phase 2 gate；RED 退出非零，GREEN 退出 0。
 ### Files
 
 - **NEW**：N/A — no new production file
-- **MODIFY**：`src/knowledge_digest/retrieve.py`、`src/knowledge_digest/writeback.py`、`src/knowledge_digest/page_layout.py`、`src/knowledge_digest/pipeline.py`、`tests/acceptance/test_publication_contract.py`
+- **MODIFY**：`src/knowledge_digest/retrieve.py`、`src/knowledge_digest/writeback.py`、`src/knowledge_digest/page_layout.py`、`src/knowledge_digest/pipeline.py`、`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 - **DO NOT TOUCH**：`src/knowledge_digest/provenance.py`、`src/knowledge_digest/jsonl.py`、`src/knowledge_digest/batch_run.py`
 
 ### Tasks

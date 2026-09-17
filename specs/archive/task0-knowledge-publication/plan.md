@@ -49,12 +49,12 @@ KnowledgeDigest 是本地、人工触发、可恢复的知识消化工具。实�
 - **MODIFY**：`src/knowledge_digest/page_layout.py`
 - **MODIFY**：`src/knowledge_digest/kb_structure.py`
 - **MODIFY**：`src/knowledge_digest/draft.py`
-- **MODIFY**：`tests/acceptance/test_publication_contract.py`
+- **MODIFY**：`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 - **MODIFY**：`tests/acceptance/test_task2_publication.py`
 ### NEW
-- **NEW**：`tests/acceptance/test_task0_manifest_contract.py`
+- **NEW**：`tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py`
 - **NEW**：`tests/acceptance/test_task0_writeback_gate.py`
-- **NEW**：`tests/acceptance/test_task0_reader_package.py`
+- **NEW**：`tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py`
 - **NEW**：`tests/acceptance/test_task0_runtime_audit.py`
 - **NEW**：`config/task0-question-set.v1.json`
 ### DO NOT TOUCH
@@ -105,7 +105,7 @@ KnowledgeDigest 是本地、人工触发、可恢复的知识消化工具。实�
 - RED 先验证失败原因是目标合同而不是测试装置；GREEN 使用同一 gate command 和同一 oracle identity。oracle 同时写明 RED 的预期失败和 GREEN 的同一断言以 exit 0 通过，避免把失败文字误当成 GREEN 成功标准。
 - 每个阶段必须列出本阶段的精确文件；同一模块允许按依赖在后续阶段被串行复触，但必须在对应任务卡重新声明边界并重跑受影响门禁，禁止并行碰同一文件。
 - 重点测试来源集合变化、写前失败、单来源降级、Reader allowlist、真实 pending、重跑幂等、旧页恢复、离线零调用、fallback/预算和 17+3 manifest；T007/T008 必须断言 DEC-004 的具体值。
-- 完成阶段后运行 `uv run --frozen pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_task0_reader_package.py tests/acceptance/test_task0_runtime_audit.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`，再运行 `uv run --frozen pytest -q`。
+- 完成阶段后运行 `uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/acceptance/test_task0_writeback_gate.py tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py tests/acceptance/test_task0_runtime_audit.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`，再运行 `uv run --frozen pytest -q`。
 
 ## 8. Rollback and Recovery
 失败时只撤销当前 Task0 代码和测试变更；不删除历史输出、旧审计记录或 WorkflowHub 证据。若归档或原子写回失败，保留旧 formal 页面并让本次 run 明确失败；若发现历史迁移、语义产品索引或 provider 凭据写入范围，立即 STOP，回到 make-decision。
@@ -145,11 +145,11 @@ Phase 1 → Phase 2 → Phase 3 → Phase 4；每个 Phase 内 RED → GREEN。P
 - **MODIFY**：`src/knowledge_digest/batch_run.py`
 - **MODIFY**：`src/knowledge_digest/provenance.py`
 - **MODIFY**：`src/knowledge_digest/pipeline.py`
-- **NEW**：`tests/acceptance/test_task0_manifest_contract.py`
+- **NEW**：`tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py`
 ### Tasks
 T001 RED → T002 GREEN。
 ### Verify
-`uv run --frozen pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 ### Knowledge
 现有 S1 ingest、S6 provenance 和 batch_run 已提供快照、指纹和运行报告边界。
 ### STOP
@@ -171,7 +171,7 @@ AC-001 的固定输入断言通过；T001/T002 只建立 AC-002 的来源关系�
 ### Tasks
 T003 RED → T004 GREEN。
 ### Verify
-`uv run --frozen pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/acceptance/test_task0_writeback_gate.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 ### Knowledge
 现有 writeback 已有归档和单写者边界；本 Phase 在 `provenance.py` 新增 `source_audit_ledger` 对账与 `validate_prewrite_provenance`，由 pipeline 在任何 source snapshot/duplicate/ledger 持久化、`write_queues`、归档和 `writeback(...)` 之前调用；`audit_provenance` 仍在成功写回后记录 claim lineage。相同稳定页路径、写前内容 SHA、snapshot/config 身份已存在时，writeback 不追加重复 archive 内容或 archive 记录；运行审计记录仍可追加。本 Phase 只调整门禁顺序和事实分层。
 ### STOP
@@ -189,13 +189,13 @@ AC-001 的写回前无 formal 页面子项、AC-002 的 archive 不增长断言�
 - **MODIFY**：`src/knowledge_digest/page_layout.py`
 - **MODIFY**：`src/knowledge_digest/kb_structure.py`
 - **MODIFY**：`src/knowledge_digest/pipeline.py`
-- **MODIFY**：`tests/acceptance/test_publication_contract.py`
+- **MODIFY**：`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 - **MODIFY**：`tests/acceptance/test_task2_publication.py`
-- **NEW**：`tests/acceptance/test_task0_reader_package.py`
+- **NEW**：`tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py`
 ### Tasks
 T005 RED → T006 GREEN。
 ### Verify
-`uv run --frozen pytest -q tests/acceptance/test_task0_reader_package.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 ### Knowledge
 现有导航入口是 Home、分类页和主题页；新运行只增加 `indexes/sources.md` 投影。`pipeline._write_source_index` 不再生成新的 `_digest/source-index.md` 或 `_digest/source-index.jsonl`；两者历史文件不迁移、不重写，只保留只读兼容路径；`source-manifest.json` 是唯一 Audit 事实源。
 ### STOP
@@ -218,7 +218,7 @@ AC-005、AC-006、AC-007 的 allowlist、真实 pending、空页、断链、来�
 ### Tasks
 T007 RED → T008 GREEN。
 ### Verify
-`uv run --frozen pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_task0_reader_package.py tests/acceptance/test_task0_runtime_audit.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/acceptance/test_task0_writeback_gate.py tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py tests/acceptance/test_task0_runtime_audit.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 ### Knowledge
 现有 provider allowlist、Jaccard 和 qwen3.6/jina-embeddings 约定可复用；本 Phase 不引入 provider。
 DEC-004 已冻结题集 manifest 路径、字段、canonical SHA-256、状态字段、provider/model/endpoint、1024 维 embedding、probe/calibration hash、180 秒 timeout、1 次 replay、4×来源数调用预算、180 次 planned generator hard cap、1800/3600 秒 wall-clock；T007 RED 先从只读 config/phase4 evidence 核对既有参数和 hash，T008 再把核对后的值写入 manifest/status/audit 并逐项映射 AC-008/AC-010。

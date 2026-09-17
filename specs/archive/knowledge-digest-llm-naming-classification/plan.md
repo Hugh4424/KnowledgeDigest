@@ -201,7 +201,7 @@ S1–S3 继续产生来源、Claim 和候选主题。S4 的现有 generator 响�
 - `src/knowledge_digest/writeback.py`
 - `src/knowledge_digest/batch_run.py`
 - `src/knowledge_digest/provenance.py`
-- `tests/acceptance/test_publication_contract.py`
+- `tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 - `AGENTS.md`
 
 ### DO NOT TOUCH
@@ -309,7 +309,7 @@ S1-S3 source/claims → existing draft generator + publication object
 ## 13. Test Strategy
 
 - **Focused gates**：`uv run --frozen pytest -q tests/acceptance/test_task2_publication.py tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_corpus_regression.py`。
-- **Compatibility gates**：`uv run --frozen pytest -q tests/acceptance/test_publication_contract.py tests/acceptance/test_architecture_optimization.py tests/acceptance/test_phase25_llm.py`。
+- **Compatibility gates**：`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_architecture_optimization.py tests/acceptance/test_phase25_llm.py`。
 - **Final gate**：`uv run --frozen pytest -q`；只在 build-code/verify-code 最终阶段执行。
 - **RED/GREEN**：每个行为 task 使用相同 focused command 和 oracle；RED 非零，GREEN 为 0。
 - **Evidence**：`evidence/build-code/task2/<task-id>-<red|green>.txt`；语料报告/样本 manifest 另存 TaskHandle evidence，不把真实正文写进 Git。
@@ -337,7 +337,7 @@ Phase 1 必须先确定 parent/leaf/pending、topic-index/source-index schema；
 ### Files
 
 - **NEW**：`tests/acceptance/test_task2_publication.py`
-- **MODIFY**：`src/knowledge_digest/kb_structure.py`、`tests/acceptance/test_publication_contract.py`
+- **MODIFY**：`src/knowledge_digest/kb_structure.py`、`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 - **DO NOT TOUCH**：`src/knowledge_digest/ingest.py`、`src/knowledge_digest/cluster.py`、`src/knowledge_digest/retrieve.py`
 
 ### Tasks

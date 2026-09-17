@@ -30,7 +30,7 @@
 
 ### Files
 
-- **NEW**：`tests/acceptance/test_publication_contract.py`
+- **NEW**：`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 - **MODIFY**：`src/knowledge_digest/kb_structure.py`、`src/knowledge_digest/paths.py`、`src/knowledge_digest/lock.py`、`src/knowledge_digest/cli.py`、`src/knowledge_digest/pipeline.py`
 - **DO NOT TOUCH**：`src/knowledge_digest/llm.py`、`src/knowledge_digest/embedding.py`、`src/knowledge_digest/batch_run.py`
 
@@ -49,13 +49,13 @@
 - **FR**：FR-PUB-001、FR-PUB-002、FR-PUB-007
 - **AC**：AC-01、AC-02、AC-04、AC-08
 - **动作**：新增新库、非空旧库、结构冲突和旧库空输入的离线 acceptance 反例。
-- **精确文件**：`tests/acceptance/test_publication_contract.py`
-- **boundary**：files: `tests/acceptance/test_publication_contract.py`; symbols/regions: publication structure fixtures and filesystem assertions
+- **精确文件**：`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
+- **boundary**：files: `tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`; symbols/regions: publication structure fixtures and filesystem assertions
 - **输出**：当前实现下可重复的 RED 失败，且失败原因是目标发布合同缺失。
 - **Knowledge**：当前 paths/lock 都要求目标 KB 与 `kb.structure.md` 已存在；空输入管线仍会触发审计写入。
 - **verification_role**：RED
 - **paired_task**：T002
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py -k "initialization or structure or empty_input"'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py -k "initialization or structure or empty_input"'`
 - **expected_exit**：1
 - **oracle**：KD-PUB-STRUCTURE：只有新空库可创建声明/导航；非空无声明或冲突旧库零正式写入；旧库空输入零变化。
 - **evidence_path**：`evidence/publication-contract/t001-red.txt`
@@ -93,7 +93,7 @@
 - **Knowledge**：默认声明必须有 `Home.md`、`indexes` 和唯一 pending；Why/version 门继续存在。目录容器不是正式输出；锁内若发现 lock 之外任意字节则失败。
 - **verification_role**：GREEN
 - **paired_task**：T001
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py -k "initialization or structure or empty_input"'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py -k "initialization or structure or empty_input"'`
 - **expected_exit**：0
 - **oracle**：KD-PUB-STRUCTURE：只有新空库可创建声明/导航；非空无声明或冲突旧库零正式写入；旧库空输入零变化。
 - **evidence_path**：`evidence/publication-contract/t002-green.txt`
@@ -106,7 +106,7 @@
 - [x] **任务完成**
 - **status**：`completed`
 - **actual_changes**：实现发布声明解析与安全路径验证；仅不存在或真正空目录可锁内初始化默认 `kb.structure.md`、Home 和 pending 分类；任何已有无效声明、冲突路径或额外旧文件写前失败；参数冲突不遗留新目录。
-- **executed_commands**：`uv run --frozen pytest -q tests/acceptance/test_publication_contract.py -k "initialization or structure or empty_input"` → 9 passed / exit 0；`py_compile` 与 `git diff --check` → exit 0。
+- **executed_commands**：`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py -k "initialization or structure or empty_input"` → 9 passed / exit 0；`py_compile` 与 `git diff --check` → exit 0。
 - **evidence_refs**：`[{"ref":"receipts/revisions/implementation/4b3a2ba6360c633196a984a9ddbeca6f4df6b0f31d945293e715d171d58d3406.json","sha256":"9fb044e8eb47791fd7e3eb0ed97e3631c258c0b784ae6f5584f14481a09baec2"},{"ref":"receipts/phase-1-green-repair-tests.json","sha256":"8dca92d86b76be2213c6539eb032007229612e157669de77278d72a3780394c9"},{"ref":"reviews/results/build-code-default-05153529f94778da90504c5530bc62e165ac9a01-efcda754-affe-4c5a-9066-9df33afb37b7.json","sha256":"018860c89ab34f3fc45bd5465a9033c3aa145879a95dca506fdc8033152f1fed"}]`
 - **covered_ac**：AC-04、AC-08；AC-01/AC-02 的主题发布部分保持未关闭。
 - **review_fact**：`reviews/results/build-code-default-05153529f94778da90504c5530bc62e165ac9a01-efcda754-affe-4c5a-9066-9df33afb37b7.json`
@@ -115,7 +115,7 @@
 ### Verify
 
 - **Target**：FR-PUB-001、FR-PUB-002、FR-PUB-007；AC-01、AC-02、AC-04、AC-08。
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py -k "initialization or structure or empty_input"'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py -k "initialization or structure or empty_input"'`
 - **expected_exit**：0
 - **evidence_path**：`evidence/publication-contract/phase-1-structure.txt`
 - **display_cmd**：N/A — pytest 输出足够。
@@ -149,7 +149,7 @@
 ### Files
 
 - **NEW**：N/A — no new production file
-- **MODIFY**：`src/knowledge_digest/identity.py`、`src/knowledge_digest/draft.py`、`src/knowledge_digest/page_layout.py`、`src/knowledge_digest/pipeline.py`、`tests/acceptance/test_publication_contract.py`
+- **MODIFY**：`src/knowledge_digest/identity.py`、`src/knowledge_digest/draft.py`、`src/knowledge_digest/page_layout.py`、`src/knowledge_digest/pipeline.py`、`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 - **DO NOT TOUCH**：`src/knowledge_digest/llm.py`、`src/knowledge_digest/embedding.py`、`src/knowledge_digest/retrieve.py`
 
 ### Tasks
@@ -167,13 +167,13 @@
 - **FR**：FR-PUB-003、FR-PUB-004、FR-PUB-006
 - **AC**：AC-03、AC-06
 - **动作**：补充标题优先级、同名短 ID、锁定路径、Home/category 链接与禁服务 spy 的离线反例。
-- **精确文件**：`tests/acceptance/test_publication_contract.py`
-- **boundary**：files: `tests/acceptance/test_publication_contract.py`; symbols/regions: title/path/navigation/offline scenarios
+- **精确文件**：`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
+- **boundary**：files: `tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`; symbols/regions: title/path/navigation/offline scenarios
 - **输出**：当前 hash 标题、路径漂移或审计入口会触发的 RED 失败。
 - **Knowledge**：`ingest._source_for/_snapshot` 已传递 `source_meta`/`input_path`；`draft()` 的 `publication_title_candidates` 固定为 source metadata `title` → 首个 Markdown H1 → 文件名，layout 再以前序已托管 H1 优先；无法分类固定进入 pending。
 - **verification_role**：RED
 - **paired_task**：T004
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py -k "title or published_path or navigation or offline"'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py -k "title or published_path or navigation or offline"'`
 - **expected_exit**：1
 - **oracle**：KD-PUB-READER：Home→category→topic 不入 `_digest`；标题可读、锁定路径稳定，零外部调用。
 - **evidence_path**：`evidence/publication-contract/t003-red.txt`
@@ -186,7 +186,7 @@
 - [x] **任务完成**
 - **status**：`completed`
 - **actual_changes**：新增标题优先级、可读路径、路径锁定、同名消歧和导航候选的离线反例；RED 为 3 failed。
-- **executed_commands**：`uv run --frozen pytest -q tests/acceptance/test_publication_contract.py -k "title or published_path or navigation or offline"` → RED 3 failed；GREEN 4 passed / exit 0。
+- **executed_commands**：`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py -k "title or published_path or navigation or offline"` → RED 3 failed；GREEN 4 passed / exit 0。
 - **evidence_refs**：`[{"ref":"receipts/revisions/implementation/ed4196d88dbff5368df50ee60cad09b19e6fd275888a573a81fdae1edaad4a84.json","sha256":"df564323e325d3ff063908fcc0b24ad420b6270df831191a6b7341dd2cbdde36"},{"ref":"receipts/phase-2-green-final-tests.json","sha256":"2d61dd33dfce7159b157158032f6fe1e693d22bcd2cd676786a4a966fdadd028"},{"ref":"reviews/results/build-code-default-0e91298df89500dfea0a2f10565a81b1f7f56b04-16079632-d149-4924-b74c-16eb89140cc3.json","sha256":"a76d34673b104e93e65b6c5661d51fabc1b091358380a28ab9c253ab5831e6ad"}]`
 - **covered_ac**：AC-03、AC-06。
 - **review_fact**：`reviews/results/build-code-default-0e91298df89500dfea0a2f10565a81b1f7f56b04-16079632-d149-4924-b74c-16eb89140cc3.json`
@@ -211,7 +211,7 @@
 - **Knowledge**：topic ID 语义不变；每页继续限制 300 行，Summary/Evidence/Provenance 完整。
 - **verification_role**：GREEN
 - **paired_task**：T003
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py -k "title or published_path or navigation or offline"'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py -k "title or published_path or navigation or offline"'`
 - **expected_exit**：0
 - **oracle**：KD-PUB-READER：Home→category→topic 不入 `_digest`；标题可读、锁定路径稳定，零外部调用。
 - **evidence_path**：`evidence/publication-contract/t004-green.txt`
@@ -224,7 +224,7 @@
 - [x] **任务完成**
 - **status**：`completed`
 - **actual_changes**：实现本地标题候选、Unicode 可读 slug、同名稳定消歧、托管页头和首次路径锁定；生成 Home 与分类导航 run artifact，留给 Phase 3 统一写回。
-- **executed_commands**：聚焦 gate 4 passed；`tests/acceptance/test_publication_contract.py` 13 passed；`git diff --check` exit 0。
+- **executed_commands**：聚焦 gate 4 passed；`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py` 13 passed；`git diff --check` exit 0。
 - **evidence_refs**：`[{"ref":"receipts/revisions/implementation/ed4196d88dbff5368df50ee60cad09b19e6fd275888a573a81fdae1edaad4a84.json","sha256":"df564323e325d3ff063908fcc0b24ad420b6270df831191a6b7341dd2cbdde36"},{"ref":"receipts/phase-2-green-final-tests.json","sha256":"2d61dd33dfce7159b157158032f6fe1e693d22bcd2cd676786a4a966fdadd028"},{"ref":"reviews/results/build-code-default-0e91298df89500dfea0a2f10565a81b1f7f56b04-16079632-d149-4924-b74c-16eb89140cc3.json","sha256":"a76d34673b104e93e65b6c5661d51fabc1b091358380a28ab9c253ab5831e6ad"}]`
 - **covered_ac**：AC-03、AC-06；Home/index 正式原子写入与旧主题导航保留由 Phase 3 关闭。
 - **review_fact**：`reviews/results/build-code-default-0e91298df89500dfea0a2f10565a81b1f7f56b04-16079632-d149-4924-b74c-16eb89140cc3.json`
@@ -233,7 +233,7 @@
 ### Verify
 
 - **Target**：FR-PUB-003、FR-PUB-004、FR-PUB-006；AC-03、AC-06。
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py -k "title or published_path or navigation or offline"'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py -k "title or published_path or navigation or offline"'`
 - **expected_exit**：0
 - **evidence_path**：`evidence/publication-contract/phase-2-reader-output.txt`
 - **display_cmd**：N/A — pytest 输出足够。
@@ -266,7 +266,7 @@
 ### Files
 
 - **NEW**：N/A — no new production file
-- **MODIFY**：`src/knowledge_digest/retrieve.py`、`src/knowledge_digest/writeback.py`、`src/knowledge_digest/page_layout.py`、`src/knowledge_digest/pipeline.py`、`tests/acceptance/test_publication_contract.py`
+- **MODIFY**：`src/knowledge_digest/retrieve.py`、`src/knowledge_digest/writeback.py`、`src/knowledge_digest/page_layout.py`、`src/knowledge_digest/pipeline.py`、`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 - **DO NOT TOUCH**：`src/knowledge_digest/provenance.py`、`src/knowledge_digest/jsonl.py`、`src/knowledge_digest/batch_run.py`
 
 ### Tasks
@@ -284,13 +284,13 @@
 - **FR**：FR-PUB-002、FR-PUB-004、FR-PUB-005
 - **AC**：AC-02、AC-04、AC-05、AC-07
 - **动作**：增加手写页/声明外页 byte 不变、伪造页头失败、写入失败回滚、分页收缩旧 part 留存，以及 Home/category 不复制正文/Claim/Evidence/Provenance、无 Claim history 的反例。
-- **精确文件**：`tests/acceptance/test_publication_contract.py`
-- **boundary**：files: `tests/acceptance/test_publication_contract.py`; symbols/regions: managed ownership, shrink, transaction and provenance scenarios
+- **精确文件**：`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
+- **boundary**：files: `tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`; symbols/regions: managed ownership, shrink, transaction and provenance scenarios
 - **输出**：当前扫描/删除行为触发的 RED 失败和精确 byte 比较。
 - **Knowledge**：`retrieve._page_records()` 扫描所有 Markdown；`writeback()` 的 `obsolete_target_paths` 会进入 remove path。
 - **verification_role**：RED
 - **paired_task**：T006
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py -k "managed or handwritten or shrink or transaction or provenance"'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py -k "managed or handwritten or shrink or transaction or provenance"'`
 - **expected_exit**：1
 - **oracle**：KD-PUB-SAFE-WRITE：未托管页零变更；旧 part 原字节保留；失败无部分正式页；topic 保留质量段落和溯源；Home/category 只有链接且无 Provenance/Claim history。
 - **evidence_path**：`evidence/publication-contract/t005-red.txt`
@@ -329,7 +329,7 @@
 - **Knowledge**：复用 `_archive` 和 `_digest/source-index.md`；后者继续审计，不替代读者导航。
 - **verification_role**：GREEN
 - **paired_task**：T005
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py -k "managed or handwritten or shrink or transaction or provenance"'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py -k "managed or handwritten or shrink or transaction or provenance"'`
 - **expected_exit**：0
 - **oracle**：KD-PUB-SAFE-WRITE：未托管页零变更；旧 part 原字节保留；失败无部分正式页；现行页保留质量段落和溯源。
 - **evidence_path**：`evidence/publication-contract/t006-green.txt`
@@ -351,7 +351,7 @@
 ### Verify
 
 - **Target**：FR-PUB-002、FR-PUB-004、FR-PUB-005；AC-02、AC-04、AC-05、AC-07。
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py -k "managed or handwritten or shrink or transaction or provenance"'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py -k "managed or handwritten or shrink or transaction or provenance"'`
 - **expected_exit**：0
 - **evidence_path**：`evidence/publication-contract/phase-3-safe-write.txt`
 - **display_cmd**：N/A — pytest 输出足够。
@@ -409,7 +409,7 @@
 - **Knowledge**：原始设计文件保留不改；`AGENTS.md` 要求输出/CLI/质量门改变时同步维护说明。
 - **verification_role**：N/A — non-behavior change: documentation and historical regression alignment after behavior pairs are green
 - **paired_task**：N/A — non-behavior change: no reciprocal implementation task
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py tests/acceptance/test_architecture_optimization.py && uv run --frozen pytest -q'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_architecture_optimization.py && uv run --frozen pytest -q'`
 - **expected_exit**：0
 - **oracle**：KD-PUB-REGRESSION：发布合同与既有质量回归全绿，维护文档准确描述实际入口和边界。
 - **evidence_path**：`evidence/publication-contract/t007-regression.txt`
@@ -431,7 +431,7 @@
 ### Verify
 
 - **Target**：FR-PUB-004、AC-07 的回归确认；主行为证据仍在 KD-PUB-READER / KD-PUB-SAFE-WRITE。
-- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/acceptance/test_publication_contract.py tests/acceptance/test_architecture_optimization.py && uv run --frozen pytest -q'`
+- **gate_cmd**：`bash -lc 'uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_architecture_optimization.py && uv run --frozen pytest -q'`
 - **expected_exit**：0
 - **evidence_path**：`evidence/publication-contract/final-regression.txt`
 - **display_cmd**：N/A — pytest 输出足够。

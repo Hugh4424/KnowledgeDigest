@@ -15,11 +15,11 @@ T001 → T002 → T003 → T004 → T005 → T006 → T007 → T008；先 RED �
 - **MODIFY**：`src/knowledge_digest/batch_run.py`
 - **MODIFY**：`src/knowledge_digest/provenance.py`
 - **MODIFY**：`src/knowledge_digest/pipeline.py`
-- **NEW**：`tests/acceptance/test_task0_manifest_contract.py`
+- **NEW**：`tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py`
 ### Tasks
 T001 RED → T002 GREEN。
 ### Verify
-`uv run --frozen pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 ### Knowledge
 现有 S1 ingest、S6 provenance 和 batch_run 已提供快照、指纹和运行报告边界。
 ### STOP
@@ -40,14 +40,14 @@ AC-001 的固定输入断言通过；T001/T002 只建立 AC-002 的来源关系�
 - **并行**：否 — ordered RED/GREEN
 - **FR**：FR-KD-001、FR-KD-002、FR-KD-009
 - **AC**：AC-001（写回前无 formal 页面子项由 T003/T004 关闭）、AC-002（来源关系幂等子项；archive 子项由 T003/T004 关闭）
-- **动作**：在 `tests/acceptance/test_task0_manifest_contract.py` 写入成功、缺失、额外、重复、清单变化、每个 snapshot 的 `validated_at` 和同快照重跑不增长的失败测试。
-- **精确文件**：`tests/acceptance/test_task0_manifest_contract.py`
-- **boundary**：files: `tests/acceptance/test_task0_manifest_contract.py`; symbols/regions: Task0 manifest, ledger and idempotency acceptance cases only.
+- **动作**：在 `tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py` 写入成功、缺失、额外、重复、清单变化、每个 snapshot 的 `validated_at` 和同快照重跑不增长的失败测试。
+- **精确文件**：`tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py`
+- **boundary**：files: `tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py`; symbols/regions: Task0 manifest, ledger and idempotency acceptance cases only.
 - **输出**：可复现的 RED 测试输出和失败原因。
 - **Knowledge**：来源集合必须由 manifest、snapshot、ledger 三方闭合；每个来源的运行时间使用 snapshot 的 `validated_at`，必须是可解析的 UTC 时间并进入对账断言。
 - **verification_role**：RED
 - **paired_task**：T002
-- **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+- **gate_cmd**：`python -m pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：1
 - **oracle**：ORACLE-TASK0-MANIFEST — same contract oracle: RED must show the expected missing closure behavior with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
 - **evidence_path**：`docs/archive/apply/evidence/T001.stdout`
@@ -59,7 +59,7 @@ AC-001 的固定输入断言通过；T001/T002 只建立 AC-002 的来源关系�
 - [x] **任务完成**
 - **status**：`completed`
 - **actual_changes**：新增 manifest/snapshot/ledger 闭环、缺失/额外声明失败和同 snapshot 关系幂等 RED 测试；RED 首次按预期暴露 3 个产品失败。
-- **executed_commands**：`uv run --frozen pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`（RED：exit 1，3 个新增断言失败；后续同命令 GREEN：exit 0）。
+- **executed_commands**：`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`（RED：exit 1，3 个新增断言失败；后续同命令 GREEN：exit 0）。
 - **evidence_refs**：`[{"ref":"quality/tests/phase-1-manifest-final.json","sha256":"a887e5040348784ce998bb81b5fa29858eb6d0d14c1dc77e48d55425367f01d7","kind":"test"}]`
 - **covered_ac**：`AC-001`（来源闭环测试输入）、`AC-002`（来源关系幂等测试输入；archive 子项仍由 T003/T004 关闭）。
 - **review_fact**：`{"ref":"quality/reviews/results/build-code-default-196c071da2623da7b218e9b89f67e1fae5b8b0cc-4007b2f6-2ed1-4280-9415-6051b6feedc4.json","sha256":"f42bbcead751733bd55ab6ad1bf49e22af8a5366363b520e3e5d5f496e804157"}`
@@ -83,7 +83,7 @@ AC-001 的固定输入断言通过；T001/T002 只建立 AC-002 的来源关系�
 - **Knowledge**：`_digest/source-manifest.json` 是唯一 Audit 来源事实源，snapshot 的 `validated_at` 与 manifest/ledger 逐项关联，`indexes/sources.md` 不在本 Phase 生成。
 - **verification_role**：GREEN
 - **paired_task**：T001
-- **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+- **gate_cmd**：`python -m pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：0
 - **oracle**：ORACLE-TASK0-MANIFEST — same contract oracle: RED must show the expected missing closure behavior with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
 - **evidence_path**：`docs/archive/apply/evidence/T002.stdout`
@@ -95,7 +95,7 @@ AC-001 的固定输入断言通过；T001/T002 只建立 AC-002 的来源关系�
 - [x] **任务完成**
 - **status**：`completed`
 - **actual_changes**：在 `batch_run.py`、`pipeline.py`、`provenance.py` 中实现唯一 manifest、持久化 source-audit-ledger、snapshot/duplicate/ledger 幂等合并、统一 Claim 提取、来源声明闭合检查和空写回时的 audit-only 持久化；补齐 ledger 集合/ID/指纹断言。
-- **executed_commands**：`uv run --frozen pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`，exit 0，`44 passed`。
+- **executed_commands**：`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`，exit 0，`44 passed`。
 - **evidence_refs**：`[{"ref":"quality/tests/phase-1-manifest-final.json","sha256":"a887e5040348784ce998bb81b5fa29858eb6d0d14c1dc77e48d55425367f01d7","kind":"test"}]`
 - **covered_ac**：`AC-001`（manifest/snapshot/ledger 集合、稳定 ID、指纹闭合；写回前无 formal 页面由 T003/T004 关闭）、`AC-002`（source/duplicate/ledger 同 snapshot 不增长；archive 子项由 T003/T004 关闭）。
 - **review_fact**：`{"ref":"quality/reviews/results/build-code-default-196c071da2623da7b218e9b89f67e1fae5b8b0cc-4007b2f6-2ed1-4280-9415-6051b6feedc4.json","sha256":"f42bbcead751733bd55ab6ad1bf49e22af8a5366363b520e3e5d5f496e804157"}`
@@ -113,7 +113,7 @@ AC-001 的固定输入断言通过；T001/T002 只建立 AC-002 的来源关系�
 ### Tasks
 T003 RED → T004 GREEN。
 ### Verify
-`uv run --frozen pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/acceptance/test_task0_writeback_gate.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 ### Knowledge
 现有 writeback 已有归档和单写者边界；本 Phase 只调整门禁顺序和事实分层。
 ### STOP
@@ -141,7 +141,7 @@ AC-001 的写回前无 formal 页面子项、AC-002 的 archive 不增长断言�
 - **Knowledge**：`written`、`published` 和 `released` 必须由独立事实断言。
 - **verification_role**：RED
 - **paired_task**：T004
-- **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+- **gate_cmd**：`python -m pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/acceptance/test_task0_writeback_gate.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：1
 - **oracle**：ORACLE-TASK0-WRITEBACK — same contract oracle: RED must show the expected late or incomplete gate behavior with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
 - **evidence_path**：`docs/archive/apply/evidence/T003.stdout`
@@ -153,7 +153,7 @@ AC-001 的写回前无 formal 页面子项、AC-002 的 archive 不增长断言�
 - [x] **任务完成**
 - **status**：`completed`
 - **actual_changes**：新增写回幂等、状态/allowlist、来源级 degraded 和旧页/队列保护 RED 测试；RED 在修正测试夹具后只保留同 snapshot archive/history 增长这一目标失败。
-- **executed_commands**：`uv run --frozen pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`（RED：exit 1，目标幂等断言失败；后续 GREEN：exit 0）。
+- **executed_commands**：`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/acceptance/test_task0_writeback_gate.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`（RED：exit 1，目标幂等断言失败；后续 GREEN：exit 0）。
 - **evidence_refs**：`[{"ref":"quality/tests/phase-2-writeback-final.json","sha256":"aabdec18da62a30aa7ab951ddae9648d667fd420ab5ed0d266ca2ca3aa777116","kind":"test"}]`
 - **covered_ac**：`AC-001`（写前失败不改变已有 formal/queue）、`AC-002`（archive/claim-history 幂等）、`AC-003`、`AC-004`、`AC-007` 的 Phase 2 故障与状态子项。
 - **review_fact**：`{"ref":"quality/reviews/results/build-code-default-e242c318c63cc71c0bc1606a721fbabfe283930d-eff338ff-e628-4f1d-bbfc-30a9ffea52b2.json","sha256":"f034f693747fb65fddb718f07dfb201e99c6213db0e3e0d38446a4169d52f975"}`
@@ -177,7 +177,7 @@ AC-001 的写回前无 formal 页面子项、AC-002 的 archive 不增长断言�
 - **Knowledge**：单来源失败不整库回滚；语义 fallback 不等于 released。
 - **verification_role**：GREEN
 - **paired_task**：T003
-- **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+- **gate_cmd**：`python -m pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/acceptance/test_task0_writeback_gate.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：0
 - **oracle**：ORACLE-TASK0-WRITEBACK — same contract oracle: RED must show the expected late or incomplete gate behavior with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
 - **evidence_path**：`docs/archive/apply/evidence/T004.stdout`
@@ -204,13 +204,13 @@ AC-001 的写回前无 formal 页面子项、AC-002 的 archive 不增长断言�
 - **MODIFY**：`src/knowledge_digest/page_layout.py`
 - **MODIFY**：`src/knowledge_digest/kb_structure.py`
 - **MODIFY**：`src/knowledge_digest/pipeline.py`
-- **MODIFY**：`tests/acceptance/test_publication_contract.py`
+- **MODIFY**：`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 - **MODIFY**：`tests/acceptance/test_task2_publication.py`
-- **NEW**：`tests/acceptance/test_task0_reader_package.py`
+- **NEW**：`tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py`
 ### Tasks
 T005 RED → T006 GREEN。
 ### Verify
-`uv run --frozen pytest -q tests/acceptance/test_task0_reader_package.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 ### Knowledge
 现有导航入口是 Home、分类页和主题页；新运行只增加 `indexes/sources.md` 投影。`pipeline._write_source_index` 不再生成新的 `_digest/source-index.md` 或 `_digest/source-index.jsonl`；两者历史文件不迁移、不重写，只保留只读兼容路径；`source-manifest.json` 是唯一 Audit 事实源。
 ### STOP
@@ -231,14 +231,14 @@ AC-005、AC-006、AC-007 的 allowlist、真实 pending、空页、断链、来�
 - **并行**：否 — ordered RED/GREEN
 - **FR**：FR-KD-002、FR-KD-005、FR-KD-007、FR-KD-008、FR-KD-010
 - **AC**：AC-005、AC-006、AC-007
-- **动作**：在 `tests/acceptance/test_task0_reader_package.py` 写入 Reader 正向 allowlist、Audit 来源可定位、真实 pending、链接完整性以及不再生成 `_digest/source-index.md`/`_digest/source-index.jsonl` 的 RED 测试；为 `kb_structure.py` 的新运行入口、既有调用方迁移、旧 source-index 历史只读路径和旧路径到 `indexes/sources.md` 的真实映射书写预期断言；`kb_structure.py` 及调用方的实现迁移只在 T006 发生。
-- **精确文件**：`tests/acceptance/test_task0_reader_package.py`、`tests/acceptance/test_publication_contract.py`、`tests/acceptance/test_task2_publication.py`
-- **boundary**：files: `tests/acceptance/test_task0_reader_package.py`, `tests/acceptance/test_publication_contract.py`, `tests/acceptance/test_task2_publication.py`; symbols/regions: Reader/Audit package, navigation assertions, current generated-path expectations and historical source-index compatibility only.
+- **动作**：在 `tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py` 写入 Reader 正向 allowlist、Audit 来源可定位、真实 pending、链接完整性以及不再生成 `_digest/source-index.md`/`_digest/source-index.jsonl` 的 RED 测试；为 `kb_structure.py` 的新运行入口、既有调用方迁移、旧 source-index 历史只读路径和旧路径到 `indexes/sources.md` 的真实映射书写预期断言；`kb_structure.py` 及调用方的实现迁移只在 T006 发生。
+- **精确文件**：`tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py`、`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`、`tests/acceptance/test_task2_publication.py`
+- **boundary**：files: `tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py`, `tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`, `tests/acceptance/test_task2_publication.py`; symbols/regions: Reader/Audit package, navigation assertions, current generated-path expectations and historical source-index compatibility only.
 - **输出**：可复现的 Reader 污染、空入口或断链失败证据。
 - **Knowledge**：Reader 只含 README/Home/现有结构导航/主题页/`indexes/sources.md`。
 - **verification_role**：RED
 - **paired_task**：T006
-- **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_reader_package.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+- **gate_cmd**：`python -m pytest -q tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：1
 - **oracle**：ORACLE-TASK0-READER — same contract oracle: RED must show the expected Reader/Audit or navigation boundary failure with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
 - **evidence_path**：`docs/archive/apply/evidence/T005.stdout`
@@ -249,8 +249,8 @@ AC-005、AC-006、AC-007 的 allowlist、真实 pending、空页、断链、来�
 ##### 执行状态填写区（唯一完成权威）
 - [x] **任务完成**
 - **status**：`completed`
-- **actual_changes**：新增 `tests/acceptance/test_task0_reader_package.py` 的 Reader/Audit、真实 pending、空入口、断链和旧 source-index 停止写入 RED 断言；同步迁移 `test_publication_contract.py` 与 `test_task2_publication.py` 的来源入口断言。
-- **executed_commands**：RED：`uv run --frozen pytest -q tests/acceptance/test_task0_reader_package.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`（exit 1，预期 Reader/Audit 边界失败）；GREEN：同命令（exit 0，44 passed）。
+- **actual_changes**：新增 `tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py` 的 Reader/Audit、真实 pending、空入口、断链和旧 source-index 停止写入 RED 断言；同步迁移 `test_publication_contract.py` 与 `test_task2_publication.py` 的来源入口断言。
+- **executed_commands**：RED：`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`（exit 1，预期 Reader/Audit 边界失败）；GREEN：同命令（exit 0，44 passed）。
 - **evidence_refs**：`[{"ref":"quality/tests/phase-3-reader-final-fixed.json","sha256":"0c7110630d79599205fc3ea4142dc29a3cca0d0c00c73abfe6f9030e15950257","kind":"test"}]`
 - **covered_ac**：AC-005、AC-006、AC-007
 - **review_fact**：`{"ref":"quality/reviews/results/build-code-default-5a54d4a8dab712c489643c45624b08230ba2fab2-8cc5cec3-dd5e-47b5-aa11-8af73a90fa98.json","sha256":"05a054b3180bacd5e3095d9331c8cf76ffc72635678bdaf835ecd307da9f1a6a"}`
@@ -268,13 +268,13 @@ AC-005、AC-006、AC-007 的 allowlist、真实 pending、空页、断链、来�
 - **FR**：FR-KD-002、FR-KD-005、FR-KD-007、FR-KD-008、FR-KD-010
 - **AC**：AC-005、AC-006、AC-007
 - **动作**：在 `src/knowledge_digest/navigation.py`、`page_layout.py`、`kb_structure.py` 实现 Reader/Audit allowlist、`indexes/sources.md` 投影、真实 pending 和链接阻断；在 `pipeline.py` 的 `_write_source_index` 调用边界停止新运行生成 `_digest/source-index.md` 与 `_digest/source-index.jsonl`，只读保留历史文件并记录旧路径→`indexes/sources.md` 映射；逐项迁移现有调用方和测试。
-- **精确文件**：`src/knowledge_digest/navigation.py`、`src/knowledge_digest/page_layout.py`、`src/knowledge_digest/kb_structure.py`、`src/knowledge_digest/pipeline.py`、`tests/acceptance/test_publication_contract.py`、`tests/acceptance/test_task2_publication.py`
-- **boundary**：files: `src/knowledge_digest/navigation.py`, `src/knowledge_digest/page_layout.py`, `src/knowledge_digest/kb_structure.py`, `src/knowledge_digest/pipeline.py`, `tests/acceptance/test_publication_contract.py`, `tests/acceptance/test_task2_publication.py`; symbols/regions: existing navigation, page layout, `_write_source_index` and its `.md`/`.jsonl` call sites, publication defaults and current generated-path expectations only.
+- **精确文件**：`src/knowledge_digest/navigation.py`、`src/knowledge_digest/page_layout.py`、`src/knowledge_digest/kb_structure.py`、`src/knowledge_digest/pipeline.py`、`tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`、`tests/acceptance/test_task2_publication.py`
+- **boundary**：files: `src/knowledge_digest/navigation.py`, `src/knowledge_digest/page_layout.py`, `src/knowledge_digest/kb_structure.py`, `src/knowledge_digest/pipeline.py`, `tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`, `tests/acceptance/test_task2_publication.py`; symbols/regions: existing navigation, page layout, `_write_source_index` and its `.md`/`.jsonl` call sites, publication defaults and current generated-path expectations only.
 - **输出**：GREEN 测试、无空入口/断链的 Reader Package 和可定位 Audit 事实。
 - **Knowledge**：新运行不生成新的 `_digest/source-index.md` 或 `_digest/source-index.jsonl`；`_digest/source-manifest.json` 是唯一 Audit 事实源，历史 source-index 文件不迁移、不重写。
 - **verification_role**：GREEN
 - **paired_task**：T005
-- **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_reader_package.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+- **gate_cmd**：`python -m pytest -q tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：0
 - **oracle**：ORACLE-TASK0-READER — same contract oracle: RED must show the expected Reader/Audit or navigation boundary failure with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
 - **evidence_path**：`docs/archive/apply/evidence/T006.stdout`
@@ -306,7 +306,7 @@ AC-005、AC-006、AC-007 的 allowlist、真实 pending、空页、断链、来�
 ### Tasks
 T007 RED → T008 GREEN。
 ### Verify
-`uv run --frozen pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_task0_reader_package.py tests/acceptance/test_task0_runtime_audit.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/acceptance/test_task0_writeback_gate.py tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py tests/acceptance/test_task0_runtime_audit.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 ### Knowledge
 现有 provider allowlist、Jaccard 和 qwen3.6/jina-embeddings 约定可复用；本 Phase 不引入 provider。
 ### STOP
@@ -334,7 +334,7 @@ AC-004、AC-008、AC-009、AC-010 的运行字段、题集 hash、fallback 和�
 - **Knowledge**：fallback 成功不等于语义 released；题集是后续读者门的固定输入；题目从 PRD Task 2/Task 3 读者验收要求和 decision-log 决定 9 派生，原文整理必须服从 `derivation_rules`。
 - **verification_role**：RED
 - **paired_task**：T008
-- **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_task0_reader_package.py tests/acceptance/test_task0_runtime_audit.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+- **gate_cmd**：`python -m pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/acceptance/test_task0_writeback_gate.py tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py tests/acceptance/test_task0_runtime_audit.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：1
 - **oracle**：ORACLE-TASK0-RUNTIME — same contract oracle: RED must show the expected runtime audit, offline, fallback or question-set boundary failure with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
 - **evidence_path**：`docs/archive/apply/evidence/T007.stdout`
@@ -346,7 +346,7 @@ AC-004、AC-008、AC-009、AC-010 的运行字段、题集 hash、fallback 和�
 - [x] **任务完成**
 - **status**：`completed`
 - **actual_changes**：新增 `test_task0_runtime_audit.py` 的离线零调用、语义 fallback、预算、凭据排除、17+3 题集和异常增长 RED 断言。
-- **executed_commands**：RED：同 Phase 4 gate 命令（exit 1，预期运行审计合同失败）；GREEN：`uv run --frozen pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_reader_package.py tests/acceptance/test_task0_runtime_audit.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_architecture_optimization.py tests/acceptance/test_phase1_loss_prevention.py tests/acceptance/test_phase25_llm.py tests/acceptance/test_phase2_5_append_only_durability.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_corpus_regression.py tests/acceptance/test_task2_publication.py`（exit 0，193 passed，2 skipped）。
+- **executed_commands**：RED：同 Phase 4 gate 命令（exit 1，预期运行审计合同失败）；GREEN：`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py tests/acceptance/test_task0_runtime_audit.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_architecture_optimization.py tests/acceptance/test_phase1_loss_prevention.py tests/acceptance/test_phase25_llm.py tests/acceptance/test_phase2_5_append_only_durability.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_corpus_regression.py tests/acceptance/test_task2_publication.py`（exit 0，193 passed，2 skipped）。
 - **evidence_refs**：`[{"ref":"quality/tests/build-code-full-final-v3.json","sha256":"bd39b8a7b65f0f57128c4de91fd72cb82ac984fdf3887548aeec744714242971","kind":"test"}]`
 - **covered_ac**：AC-004、AC-008、AC-009、AC-010
 - **review_fact**：`{"ref":"quality/reviews/results/build-code-default-7e943c5245520d8c0cb9d7355b8b6e7bb89ba3cb-3739ddd8-876a-4980-a69c-ea1566d33b93.json","sha256":"03c295e59ba3489847374bdc2cc3e2eb93cd2af90911a758eddeea0b6019e99a"}`
@@ -370,7 +370,7 @@ AC-004、AC-008、AC-009、AC-010 的运行字段、题集 hash、fallback 和�
 - **Knowledge**：provider 凭据只来自环境变量，不能写入日志、报告或知识库；题集 manifest 只保存 DEC-004 冻结的 17+3 题集字段和 hash，`sample_seed` 固定为 `knowledge-digest-task0-v1`，`reviewer` 固定为 `task3-independent-human-reviewer` 预注册角色，实际姓名/日期延期到 Task 3；运行审计的状态/provider/budget 参数按计划冻结并进入既有 manifest/status/audit 断言；embedding 配置原始 endpoint `https://llm.paxszapp.com/v1` 与历史 evidence 的 `https://llm.paxszapp.com:443/v1` 比较前按 scheme/host 小写、去 HTTPS 默认端口、保留 `/v1` 归一化，T007 断言归一化相等，T008 的 `embedding_endpoint` 只写 canonical `https://llm.paxszapp.com/v1`；`written` 必须与 `writeback`、`published`、`released` 独立；1024 维、probe `cc7ae744e79a19a32ca64d3274e11b3e2ea0611cf4c0f58cebc49e950fc6ed2c`、calibration `c31b1f8c78a889dff4cdbbab0fb695871c513844b5c8392d52dbbd8ad33e4c06`、180 秒 timeout、1 次 replay、4×来源数 call、180 次 planned generator、1800/3600 秒 wall-clock 都必须断言；provider identity 和 hash 先与只读 config/phase4 evidence 对齐，题目原文按 PRD/decision-log 派生并记录 derivation_rules。
 - **verification_role**：GREEN
 - **paired_task**：T007
-- **gate_cmd**：`python -m pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_task0_reader_package.py tests/acceptance/test_task0_runtime_audit.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_publication.py`
+- **gate_cmd**：`python -m pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/acceptance/test_task0_writeback_gate.py tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py tests/acceptance/test_task0_runtime_audit.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_publication.py`
 - **expected_exit**：0
 - **oracle**：ORACLE-TASK0-RUNTIME — same contract oracle: RED must show the expected runtime audit, offline, fallback or question-set boundary failure with exit 1; GREEN must show the same targeted assertions passing with exit 0; unrelated setup failure is invalid.
 - **evidence_path**：`docs/archive/apply/evidence/T008.stdout`
@@ -382,7 +382,7 @@ AC-004、AC-008、AC-009、AC-010 的运行字段、题集 hash、fallback 和�
 - [x] **任务完成**
 - **status**：`completed`
 - **actual_changes**：在 `batch_run.py`、`pipeline.py`、`config/task0-question-set.v1.json` 和 `test_task0_runtime_audit.py` 实现运行 manifest/status/audit、provider/fallback/预算边界、离线零调用和内容级增长审计；按职责复核了 T008 声明的 `draft.py`、`publication.py`，两者无需改动，相关运行审计落在现有 `pipeline.py`/`batch_run.py` 边界内。
-- **executed_commands**：`uv run --frozen pytest -q tests/acceptance/test_task0_manifest_contract.py tests/acceptance/test_task0_reader_package.py tests/acceptance/test_task0_runtime_audit.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_architecture_optimization.py tests/acceptance/test_phase1_loss_prevention.py tests/acceptance/test_phase25_llm.py tests/acceptance/test_phase2_5_append_only_durability.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_corpus_regression.py tests/acceptance/test_task2_publication.py`（exit 0，193 passed，2 skipped）；`git diff --check`（exit 0）。
+- **executed_commands**：`uv run --frozen pytest -q tests/archive/legacy-reader-pipeline/task0_manifest_contract_legacy.py tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py tests/acceptance/test_task0_runtime_audit.py tests/acceptance/test_task0_writeback_gate.py tests/acceptance/test_architecture_optimization.py tests/acceptance/test_phase1_loss_prevention.py tests/acceptance/test_phase25_llm.py tests/acceptance/test_phase2_5_append_only_durability.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task2_batch_recovery.py tests/acceptance/test_task2_corpus_regression.py tests/acceptance/test_task2_publication.py`（exit 0，193 passed，2 skipped）；`git diff --check`（exit 0）。
 - **evidence_refs**：`[{"ref":"quality/tests/build-code-full-final-v3.json","sha256":"bd39b8a7b65f0f57128c4de91fd72cb82ac984fdf3887548aeec744714242971","kind":"test"}]`
 - **covered_ac**：AC-004、AC-008、AC-009、AC-010
 - **review_fact**：`{"ref":"quality/reviews/results/build-code-default-7e943c5245520d8c0cb9d7355b8b6e7bb89ba3cb-3739ddd8-876a-4980-a69c-ea1566d33b93.json","sha256":"03c295e59ba3489847374bdc2cc3e2eb93cd2af90911a758eddeea0b6019e99a"}`

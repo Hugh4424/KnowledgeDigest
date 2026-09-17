@@ -323,8 +323,8 @@ Backfill 行为的唯一 acceptance gate 是 `pytest tests/acceptance/test_task2
 - `src/knowledge_digest/identity.py`
 - `src/knowledge_digest/kb_structure.py`
 - `src/knowledge_digest/publication.py`（仅作 `PublicationContract` 类型引用，不修改）
-- `tests/acceptance/test_task0_reader_package.py`
-- `tests/acceptance/test_publication_contract.py`
+- `tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py`
+- `tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`
 - `tests/acceptance/test_task1_topic_axis.py`
 - `quality/evidence/task2-entry/knowledge-publication-task2-entry-backfill.v1.json`
 - `quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json`
@@ -592,7 +592,7 @@ acceptance 边界的 deny-only socket guard 由 `tests/acceptance/test_task2a_re
 - **AC-08 aggregate rule**：compatibility gate 与 downgrade gate 都单独执行并各自写 evidence；最终 AC-08 只有 `compatibility_passed OR honest_downgrade_passed` 为真才通过，且两者都排除 `blocked`。若 compatibility 失败但 downgrade 通过，aggregate 选择 `smoke-downgrade-green.txt` 与对应 exit manifest；若 compatibility 通过，优先选择 compatibility evidence；若两者均失败、任一合法路径缺 provenance、或只有 blocked 结果，aggregate 非零并保留 STOP。该 OR 只用于 AC-08，不改变包级 `not_released`。
 
 - **Target**：全部 AC-01–AC-08、既有 Reader 不回归。
-- **gate_cmd**：`pytest tests/acceptance/test_task2a_reader_frontmatter.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task2a_okf_smoke.py tests/acceptance/test_task0_reader_package.py tests/acceptance/test_publication_contract.py tests/acceptance/test_task1_topic_axis.py -q`。
+- **gate_cmd**：`pytest tests/acceptance/test_task2a_reader_frontmatter.py tests/acceptance/test_task2a_reader_bundle.py tests/acceptance/test_task2a_okf_smoke.py tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py tests/archive/legacy-reader-pipeline/publication_contract_legacy.py tests/acceptance/test_task1_topic_axis.py -q`。
 - **expected_exit**：0。
 - **evidence_path**：`quality/evidence/task2a-reader-bundle/final-aggregate.txt`。
 - **display_cmd**：`uv run --frozen pytest tests/ -q`。
@@ -616,7 +616,7 @@ acceptance 边界的 deny-only socket guard 由 `tests/acceptance/test_task2a_re
 
 - **NEW**：`src/knowledge_digest/reader_frontmatter.py`; `tests/acceptance/test_task2a_reader_frontmatter.py`
 - **MODIFY**：`pyproject.toml`; `uv.lock`
-- **DO NOT TOUCH**：`src/knowledge_digest/navigation.py`; `src/knowledge_digest/page_layout.py`; `src/knowledge_digest/provenance.py`; `src/knowledge_digest/pipeline.py`; `src/knowledge_digest/cli.py`; `tests/acceptance/test_task0_reader_package.py`; `tests/acceptance/test_publication_contract.py`; `tests/acceptance/test_task1_topic_axis.py`
+- **DO NOT TOUCH**：`src/knowledge_digest/navigation.py`; `src/knowledge_digest/page_layout.py`; `src/knowledge_digest/provenance.py`; `src/knowledge_digest/pipeline.py`; `src/knowledge_digest/cli.py`; `tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py`; `tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`; `tests/acceptance/test_task1_topic_axis.py`
 
 ### Tasks
 
@@ -659,7 +659,7 @@ PyYAML 不能锁定、测试失败来自环境/命令而非目标断言、serial
 
 - **NEW**：`src/knowledge_digest/reader_bundle.py`; `tests/acceptance/test_task2a_reader_bundle.py`; `tests/fixtures/task2a_reader_bundle/topic-index.json`; `tests/fixtures/task2a_reader_bundle/source-inventory.jsonl`; `tests/fixtures/task2a_reader_bundle/claim-history.jsonl`; `tests/fixtures/task2a_reader_bundle/fixture-selection.json`; `tests/fixtures/task2a_reader_bundle/product-overview.md`; `tests/fixtures/task2a_reader_bundle/module-capability.md`; `tests/fixtures/task2a_reader_bundle/procedure-rule.md`
 - **MODIFY**：N/A — reader bundle is created in this Phase and only integrated with parser result in Phase 3；report/manifest 的 product output 只存在于运行时 artifact root，不直接写固定 evidence 目录
-- **DO NOT TOUCH**：`src/knowledge_digest/navigation.py`; `src/knowledge_digest/page_layout.py`; `src/knowledge_digest/provenance.py`; `src/knowledge_digest/pipeline.py`; `src/knowledge_digest/cli.py`; `src/knowledge_digest/kb_structure.py`; `src/knowledge_digest/identity.py`; `tests/acceptance/test_task0_reader_package.py`; `tests/acceptance/test_publication_contract.py`; `tests/acceptance/test_task1_topic_axis.py`; `quality/evidence/task2-entry/knowledge-publication-task2-entry-backfill.v1.json`; `quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json`; `quality/evidence/task2-entry/task1-receipt-reconciliation.v1.json`; `quality/evidence/task2-entry/task1-real-corpus-20260806/source-inventory.jsonl`; `quality/evidence/task2-entry/task1-real-corpus-20260806/topic-index.json`; `quality/evidence/task2-entry/task1-real-corpus-20260806/topic-plan.json`; `quality/evidence/task2-entry/task1-real-corpus-20260806/run-report.json`; `quality/evidence/task2-entry/task1-real-corpus-20260806/verification-receipt.json`
+- **DO NOT TOUCH**：`src/knowledge_digest/navigation.py`; `src/knowledge_digest/page_layout.py`; `src/knowledge_digest/provenance.py`; `src/knowledge_digest/pipeline.py`; `src/knowledge_digest/cli.py`; `src/knowledge_digest/kb_structure.py`; `src/knowledge_digest/identity.py`; `tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py`; `tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`; `tests/acceptance/test_task1_topic_axis.py`; `quality/evidence/task2-entry/knowledge-publication-task2-entry-backfill.v1.json`; `quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json`; `quality/evidence/task2-entry/task1-receipt-reconciliation.v1.json`; `quality/evidence/task2-entry/task1-real-corpus-20260806/source-inventory.jsonl`; `quality/evidence/task2-entry/task1-real-corpus-20260806/topic-index.json`; `quality/evidence/task2-entry/task1-real-corpus-20260806/topic-plan.json`; `quality/evidence/task2-entry/task1-real-corpus-20260806/run-report.json`; `quality/evidence/task2-entry/task1-real-corpus-20260806/verification-receipt.json`
 
 ### Tasks
 
@@ -704,7 +704,7 @@ vendor 固定 commit 的官方最小 parser 读取 Bundle；smoke pass 才声明
 
 - **NEW**：`src/knowledge_digest/okf_smoke.py`; `tests/acceptance/test_task2a_okf_smoke.py`; `tests/vendor/okf_reference_agent/__init__.py`; `tests/vendor/okf_reference_agent/bundle/__init__.py`; `tests/vendor/okf_reference_agent/bundle/document.py`; `tests/vendor/okf_reference_agent/bundle/index.py`; `tests/vendor/okf_reference_agent/bundle/paths.py`; `tests/vendor/okf_reference_agent/LICENSE`; `tests/vendor/okf_reference_agent/NOTICE.md`; `tests/vendor/okf_reference_agent/README.md`
 - **MODIFY**：`src/knowledge_digest/reader_bundle.py`（仅 profile/smoke integration region）
-- **DO NOT TOUCH**：`src/knowledge_digest/pipeline.py`; `src/knowledge_digest/cli.py`; `src/knowledge_digest/navigation.py`; `src/knowledge_digest/page_layout.py`; `src/knowledge_digest/provenance.py`; `src/knowledge_digest/identity.py`; `src/knowledge_digest/kb_structure.py`; `tests/acceptance/test_task0_reader_package.py`; `tests/acceptance/test_publication_contract.py`; `tests/acceptance/test_task1_topic_axis.py`; `quality/evidence/task2-entry/knowledge-publication-task2-entry-backfill.v1.json`; `quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json`; `quality/evidence/task2-entry/task1-receipt-reconciliation.v1.json`
+- **DO NOT TOUCH**：`src/knowledge_digest/pipeline.py`; `src/knowledge_digest/cli.py`; `src/knowledge_digest/navigation.py`; `src/knowledge_digest/page_layout.py`; `src/knowledge_digest/provenance.py`; `src/knowledge_digest/identity.py`; `src/knowledge_digest/kb_structure.py`; `tests/archive/legacy-reader-pipeline/task0_reader_package_legacy.py`; `tests/archive/legacy-reader-pipeline/publication_contract_legacy.py`; `tests/acceptance/test_task1_topic_axis.py`; `quality/evidence/task2-entry/knowledge-publication-task2-entry-backfill.v1.json`; `quality/evidence/task2-entry/task2-entry-sample-coverage.v1.json`; `quality/evidence/task2-entry/task1-receipt-reconciliation.v1.json`
 
 ### Tasks
 
